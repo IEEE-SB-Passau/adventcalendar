@@ -1,0 +1,140 @@
+@import org.ieee_passau.models.User
+@(title: String, isProblemTitle: Boolean = false)(content: Html)(implicit flash: Flash, sessionUser: Option[User])
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>@title</title>
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/highlight/idea.css")">
+        <link rel="shortcut icon" type="image/x-icon" href="@routes.Assets.at("images/favicon.ico")">
+    </head>
+    <body>
+        <div class='container @if(title == "Adventskalender") { fullbody }'>
+            <div class="page-header">
+                <h1>IEEE SB Passau Adventskalender 2016</h1>
+                <nav class="navbar navbar-default" role="navigation">
+                        <!-- Brand and toggle get grouped for better mobile display -->
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                    </div>
+
+                    <!-- Collect the nav links, forms, and other content for toggling -->
+                    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                        <ul class="nav navbar-nav">
+                            <li @if(title == "Adventskalender") { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.calendar#doors">Adventskalender</a></li>
+                            <li @if(title == "Aufgaben") { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.problems">Aufgaben</a></li>
+                            <li @if(title == "Rangliste") { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.ranking">Rangliste</a></li>
+                            <li @if(title == "Meldungen") { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.status">Meldungen</a></li>
+                            @if(sessionUser.isEmpty) {
+                                <li @if(title == "Registrieren") { class="active" }><a href="@org.ieee_passau.controllers.routes.UserController.register">Registrieren</a></li>
+                                <li @if(title == "Login") { class="active" }><a href="@org.ieee_passau.controllers.routes.UserController.login">Login</a></li>
+                            } else { @if(sessionUser.get.admin) {
+                                <li class="dropdown @if(List("Benutzerliste", "Problemliste", "Fragenliste", "Abgabenliste").contains(title)) { active }" >
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Admin <b class="caret"></b></a>
+                                    <ul class="dropdown-menu">
+                                        <li @if(title == "Benutzerliste") { class="active" }><a href="@org.ieee_passau.controllers.routes.UserController.index">Benutzer</a></li>
+                                        <li @if(title == "Problemliste") { class="active" }><a href="@org.ieee_passau.controllers.routes.ProblemController.index">Probleme</a></li>
+                                        <li @if(title == "Fragenliste") { class="active" }><a href="@org.ieee_passau.controllers.routes.TicketController.index">Fragen</a></li>
+                                        <li @if(title == "Abgabenliste") { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.index(1)">Abgabenübersicht</a></li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown @if(List("Queued", "Statistik", "Evaluation VMs", "Wartung").contains(title)) { active }" >
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Monitoring <b class="caret"></b></a>
+                                    <ul class="dropdown-menu">
+                                        <li @if(title == "Wartung") { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.maintenance">Wartung</a></li>
+                                        <li @if(title == "Statistik") { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.stats    ">Statisitk</a></li>
+                                        <li @if(title == "Queued") { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.indexQueued">Queued</a></li>
+                                        <li @if(title == "Evaluation VMs") { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.vms">VMs</a></li>
+                                    </ul>
+                                </li>
+                            }}
+                            <li @if(title == "FAQ") { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.faq">FAQ</a></li>
+                            <li @if(title == "Regeln") { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.rules">Regeln</a></li>
+                            <li @if(title == "Kontakt") { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.contact">Kontakt</a></li>
+                            @*<li @if(title == "Feedback") { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.feedback">Feedback</a></li>*@
+                            @if(sessionUser.isDefined) {
+                                <li @if(title == "Logout") { class="active" }><a href="@org.ieee_passau.controllers.routes.UserController.logout">Logout</a></li>
+                            }
+                        </ul>
+                        @if(sessionUser.isDefined) {
+                            <p class="navbar-text navbar-right">
+                                Hallo, @if(sessionUser.get.admin) { Admin }
+                                @{sessionUser.get.username}!
+                            </p>
+                        }
+                    </div>
+                    <!-- /.navbar-collapse -->
+                </nav>
+            </div>
+
+            @* Flash messages *@
+            @if(flash.get("success").isDefined) {
+                <div class="alert alert-success">@Html(flash.get("success").get)</div>
+            }
+            @if(flash.get("info").isDefined) {
+                <div class="alert alert-info">@Html(flash.get("info").get)</div>
+            }
+            @if(flash.get("warning").isDefined) {
+                <div class="alert alert-warning">@Html(flash.get("warning").get)</div>
+            }
+            @if(flash.get("danger").isDefined) {
+                <div class="alert alert-danger">@Html(flash.get("danger").get)</div>
+            }
+
+            @if(isProblemTitle) {
+                <h3>@title</h3>
+            }
+            <div class="row box-round">
+                <div id="content" class="col-sm-12">@content</div>
+            </div>
+
+            <div class="row footer box-round">
+                <div class="col-sm-12" id="footer">
+                    <small>&copy; 2016 IEEE Student Branch Passau - <a href="https://ieee.uni-passau.de/pages/contact/">Impressum</a></small>
+                </div>
+            </div>
+        </div>
+        <script src="@routes.Assets.at("javascripts/jquery-1.11.0.min.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("javascripts/jquery.timeago.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("javascripts/jquery.timeago.de.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("javascripts/bootstrap.min.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("javascripts/moment.min.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("javascripts/bootstrap-datetimepicker.min.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("javascripts/highlight.pack.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("javascripts/diff.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("javascripts/tinymce/tinymce.min.js")" type="text/javascript"></script>
+        <script type="text/javascript">
+            // activate source highlighting
+            hljs.initHighlightingOnLoad();
+
+            $(document).ready(function () {
+                // activate the datetimepickers
+                $('.datetimepicker').datetimepicker();
+                $('abbr.timeago').timeago();
+
+                // activate diff
+                applyDiff();
+            });
+
+            // activate pretty file input
+            $(document).on('change', '.btn-file :file', function() {
+                $(this).trigger('fileselect', $(this).val().replace(/\\/g, '/').replace(/.*\//, ''));
+            });
+
+            $(document).ready(function() {
+                $('.btn-file :file').on('fileselect', function(event, label) {
+                    $(this).parents('.input-group').find(':text').val(label);
+                });
+            });
+
+            //Enable TinyMCE on all textareas with class 'wysiwyg'
+            tinymce.init({ selector:'textarea.wysiwyg', plugins: 'code link', browser_spellcheck: true});
+        </script>
+    </body>
+</html>

@@ -1,0 +1,27 @@
+@import org.ieee_passau.models.{Testcase, User, Visibility}
+@import org.ieee_passau.views.html.bootstrap3.{buttonSave, text, textareaBs}
+@(pid: Int, testcase: Form[Testcase], visibilities: List[Visibility])(implicit flash: Flash, sessionUser: Option[User])
+
+<fieldset>
+    <input type="hidden" name="problemId" value="@pid" />
+    @text(testcase("position"), label = "Position", placeholder = "Position")
+
+    <div class="form-group">
+        <label for="visibility" class="col-sm-2 control-label">Sichtbarkeit</label>
+        <div class="col-sm-10">
+            <select id="visibility" size="1" name="visibility" class="col-sm-10 form-control">
+            @visibilities.map { vis =>
+                <option value="@vis.scope"
+                    @{if(testcase.value.isDefined && vis.scope == testcase.get.visibility.toString) "selected" else if (vis.scope == "PRIVATE") "selectet"}
+                >@vis.scope.toLowerCase.capitalize </option>
+            }
+            </select>
+        </div>
+    </div>
+
+    @textareaBs(testcase("input"), label = "Eingabe", placeholder = "Eingabe", rows = 3)
+    @textareaBs(testcase("output"), label = "Erwartete Ausgabe", placeholder = "Ausgabe", rows = 3)
+    @text(testcase("points"), label = "Punkte", placeholder = "Punkte")
+
+    @buttonSave()
+</fieldset>

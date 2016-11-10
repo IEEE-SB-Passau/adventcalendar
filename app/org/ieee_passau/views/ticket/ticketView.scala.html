@@ -1,0 +1,50 @@
+@import org.ieee_passau.models.Ticket
+@(tickets: List[(Ticket, String)], expanded: Boolean = false, admin: Boolean = false)(implicit requestHeader: RequestHeader)
+
+@import views.html.helper.CSRF
+
+@tickets.filter(t => t._1.responseTo.isEmpty).map { case (t: Ticket, un) =>
+    <div class="panel panel-default">
+        @* Panel Header *@
+        <div class="panel-heading">
+            <h3 class="panel-title">
+                <a data-toggle="collapse" data-target="#question@t.id" href="#question@t.id">
+                    @un am @t.created.format("dd.MM.yyyy 'um' HH:mm")
+                    @defining(tickets.count(x => x._1.responseTo == t.id)) { responses: Int =>
+                        <span class="pull-right">@responses @if(responses == 1) { Antwort } else { Antworten } </span>
+                    }
+                </a>
+            </h3>
+        </div>
+
+        <div id="question@t.id" class="panel-collapse collapse @if(expanded) { in }">
+            <div class="panel-body">
+                <p>@t.text</p>
+
+                @tickets.filter(x => x._1.responseTo == t.id).map { case (r, run) =>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">
+                            @run am @r.created.format("dd.MM.yyyy 'um' HH:mm")
+                            @if(admin) {
+                            <span class="pull-right">
+                                <form style="display : inline" method="POST" action="@org.ieee_passau.controllers.routes.TicketController.delete(r.id.get)">
+                                    @CSRF.formField
+                                    <button type="submit" onclick="return(window.confirm('Wirklich löschen?'))" class="btn btn-xs btn-danger">
+                                        <span class="glyphicon glyphicon-remove"></span>
+                                    </button>
+                                </form>
+                            </span>
+                            }
+                        </h3>
+                    </div>
+
+                    <div class="panel-body">
+                        <p>@r.text</p>
+                    </div>
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+}

@@ -1,0 +1,43 @@
+@import org.ieee_passau.models.Language
+@(languages: List[Language], lastLanguage: String)(implicit requestHeader: RequestHeader)
+
+@import views.html.helper.CSRF
+
+<form action="#" method="post" enctype="multipart/form-data" class="form-horizontal">
+    @CSRF.formField
+    <fieldset>
+        <div class="form-group" >
+            <label for="lang" class="col-sm-2 control-label">Programmier&shy;sprache</label>
+            <div class="col-sm-10">
+                <select id="lang" size="1" name="lang" class="col-sm-10 form-control">
+                @languages.map { lang =>
+                    <option value="@lang.id" @{if(lang.id == lastLanguage) "selected" }>@lang.name</option>
+                }
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group" >
+            <label class="col-sm-2 control-label">Quelltext</label>
+            <div class="col-sm-10">
+                <div class="input-group">
+                    <span class="input-group-btn">
+                        <span class="btn btn-default btn-file">
+                            Datei  <input id="solution" type="file" name="solution"/>
+                        </span>
+                    </span>
+                    <input type="text" class="col-sm-10 form-control" readonly title="">
+                </div>
+
+                <p><small>*Bei Java und Scala bitte die Main-Methode in der Klasse bzw. dem Objekt "Solution" einreichen und kein Package verwenden.</small></p>
+                <p><small>Falls dir dein Programm Probleme bereitet, werfe doch einen Blick in die <a href="@org.ieee_passau.controllers.routes.MainController.faq">FAQ</a> oder seh dir unsere <a href="@org.ieee_passau.controllers.routes.MainController.examples">Beispielprogramme</a> an.</small></p>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input type="submit" value="Einreichen" class="btn btn-primary"/>
+            </div>
+        </div>
+    </fieldset>
+</form>

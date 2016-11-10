@@ -1,0 +1,43 @@
+@import helper._
+@import org.ieee_passau.models.{Problem, Ticket, User}
+@import org.ieee_passau.utils.ViewHelper._
+@import org.ieee_passau.views.html.main
+@(tickets: List[(Ticket, User, Problem)])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader)
+
+@main("Fragen") {
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Problem</th>
+                <th>User</th>
+                <th>Erstellt</th>
+                <th>Öffentlich</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @tickets.map { case (t: Ticket, u: User, p: Problem) =>
+            <tr>
+                <td>@t.id</td>
+                <td>@p.door @p.title</td>
+                <td>@u.username</td>
+                <td>@t.created.format("dd.MM.yyyy HH:mm")</td>
+                <td>@showCheckmark(t.public)</td>
+                <td>
+                    <a href="@org.ieee_passau.controllers.routes.TicketController.view(t.id.get)" class="btn btn-default">
+                        <span class="glyphicon glyphicon-pencil"></span>
+                    </a>
+
+                    <form style="display : inline" method="POST" action="@org.ieee_passau.controllers.routes.TicketController.delete(t.id.get)">
+                    @CSRF.formField
+                        <button type="submit" onclick="return(window.confirm('Wirklich löschen?'))" class="btn btn-danger">
+                            <span class="glyphicon glyphicon-remove"></span>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

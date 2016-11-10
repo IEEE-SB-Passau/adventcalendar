@@ -1,0 +1,83 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET         /                                          org.ieee_passau.controllers.MainController.calendar
+
+GET         /problems                                  org.ieee_passau.controllers.MainController.problems
+GET         /problem/:door                             org.ieee_passau.controllers.MainController.problemDetails(door: Int)
+POST        /problem/:door                             org.ieee_passau.controllers.MainController.solve(door: Int)
+GET         /problem/:door/solutions                   org.ieee_passau.controllers.MainController.getUserProblemSolutions(door: Int)
+POST        /problem/:door/question                    org.ieee_passau.controllers.TicketController.submitTicket(door: Int)
+
+GET         /ranking                                   org.ieee_passau.controllers.MainController.ranking
+#GET        /calendar                                  org.ieee_passau.controllers.MainController.calendar
+GET         /contact                                   org.ieee_passau.controllers.MainController.contact
+GET         /faq                                       org.ieee_passau.controllers.MainController.faq
+GET         /examples                                  org.ieee_passau.controllers.MainController.examples
+GET         /rules                                     org.ieee_passau.controllers.MainController.rules
+GET         /feedback                                  org.ieee_passau.controllers.MainController.feedback
+POST        /feedback                                  org.ieee_passau.controllers.MainController.submitFeedback
+GET         /status                                    org.ieee_passau.controllers.MainController.status
+
+GET         /logout                                    org.ieee_passau.controllers.UserController.logout
+GET         /login                                     org.ieee_passau.controllers.UserController.login
+POST        /login                                     org.ieee_passau.controllers.UserController.authenticate
+
+GET         /register                                  org.ieee_passau.controllers.UserController.register
+POST        /register                                  org.ieee_passau.controllers.UserController.create
+GET         /register/:token                           org.ieee_passau.controllers.UserController.activate(token: String)
+GET         /requestPassword                           org.ieee_passau.controllers.UserController.resetPassword
+POST        /requestPassword                           org.ieee_passau.controllers.UserController.requestPassword
+GET         /resetPassword/:token                      org.ieee_passau.controllers.UserController.editPassword(token: String)
+POST        /resetPassword/:token                      org.ieee_passau.controllers.UserController.updatePassword(token: String)
+
+GET         /admin/users                               org.ieee_passau.controllers.UserController.index
+GET         /admin/users/:id                           org.ieee_passau.controllers.UserController.edit(id: Int)
+POST        /admin/users/:id                           org.ieee_passau.controllers.UserController.update(id: Int)
+POST        /admin/users/:id/delete                    org.ieee_passau.controllers.UserController.delete(id: Int)
+GET         /admin/users/impersonate/:id               org.ieee_passau.controllers.UserController.impersonate(id: Int)
+
+GET         /admin/problems                            org.ieee_passau.controllers.ProblemController.index
+GET         /admin/problems/insert                     org.ieee_passau.controllers.ProblemController.insert
+POST        /admin/problems/insert                     org.ieee_passau.controllers.ProblemController.save
+GET         /admin/problem/:id                         org.ieee_passau.controllers.ProblemController.edit(id: Int)
+POST        /admin/problem/:id                         org.ieee_passau.controllers.ProblemController.update(id: Int)
+POST        /admin/problem/:id/delete                  org.ieee_passau.controllers.ProblemController.delete(id: Int)
+
+GET         /admin/problem/:pid/test/insert            org.ieee_passau.controllers.TestcaseController.insert(pid: Int)
+POST        /admin/problem/:pid/test/insert            org.ieee_passau.controllers.TestcaseController.save(pid: Int)
+GET         /admin/problem/:pid/test/:id               org.ieee_passau.controllers.TestcaseController.edit(pid: Int, id: Int)
+POST        /admin/problem/:pid/test/:id               org.ieee_passau.controllers.TestcaseController.update(pid: Int, id: Int)
+POST        /admin/problem/:pid/test/:id/delete        org.ieee_passau.controllers.TestcaseController.delete(pid: Int, id: Int)
+
+GET         /admin/problem/:pid/task/insert            org.ieee_passau.controllers.EvalTaskController.insert(pid: Int)
+POST        /admin/problem/:pid/task/insert            org.ieee_passau.controllers.EvalTaskController.save(pid: Int)
+GET         /admin/problem/:pid/task/:id               org.ieee_passau.controllers.EvalTaskController.edit(pid: Int, id: Int)
+POST        /admin/problem/:pid/task/:id               org.ieee_passau.controllers.EvalTaskController.update(pid: Int, id: Int)
+POST        /admin/problem/:pid/task/:id/delete        org.ieee_passau.controllers.EvalTaskController.delete(pid: Int, id: Int)
+
+GET         /admin/submission                          org.ieee_passau.controllers.EvaluationController.index(page: Int ?= 1, order: String ?="date")
+GET         /admin/submission/:id                      org.ieee_passau.controllers.EvaluationController.details(id: Int)
+GET         /admin/submission/:id/rerun                org.ieee_passau.controllers.EvaluationController.reEval(id: Int)
+
+GET         /admin/monitoring/queued                   org.ieee_passau.controllers.EvaluationController.indexQueued
+GET         /admin/monitoring/vms                      org.ieee_passau.controllers.EvaluationController.vms
+GET         /admin/monitoring/stat                     org.ieee_passau.controllers.EvaluationController.stats
+POST        /admin/monitoring/:id/delete               org.ieee_passau.controllers.EvaluationController.cancel(id: Int)
+GET         /admin/monitoring/maintenance              org.ieee_passau.controllers.EvaluationController.maintenance
+POST        /admin/monitoring/maintenance              org.ieee_passau.controllers.EvaluationController.playPause
+POST        /admin/status/:id                          org.ieee_passau.controllers.EvaluationController.changeStatus(id: Int)
+
+GET         /admin/ticktes                             org.ieee_passau.controllers.TicketController.index
+GET         /admin/ticket/:id                          org.ieee_passau.controllers.TicketController.view(id: Int)
+POST        /admin/ticket/:id                          org.ieee_passau.controllers.TicketController.answerTicket(id: Int)
+POST        /admin/ticket/:id/delete                   org.ieee_passau.controllers.TicketController.delete(id: Int)
+
+POST        /admin/vms/register                        org.ieee_passau.controllers.EvaluationController.registerVM
+POST        /admin/vms/registerv2                      org.ieee_passau.controllers.EvaluationController.registerVM
+POST        /admin/vms/remove                          org.ieee_passau.controllers.EvaluationController.removeVM
+
+# Map static resources from the /public folder to the /assets URL path
+GET         /assets/*file                              controllers.Assets.at(path="/public", file)

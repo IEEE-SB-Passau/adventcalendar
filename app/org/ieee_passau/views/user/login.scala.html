@@ -1,0 +1,34 @@
+@import helper._
+@import org.ieee_passau.models.{User, UserLogin}
+@import org.ieee_passau.views.html.bootstrap3.{password, text}
+@import org.ieee_passau.views.html.main
+@(loginForm: Form[UserLogin])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader)
+
+@main("Login") {
+    <div class="well col-md-6 col-md-offset-3">
+        @if(loginForm.hasGlobalErrors) {
+            <div class="alert alert-danger">
+            @for(err <- loginForm.globalErrors) {
+                @err.message
+            }
+            </div>
+        }
+
+        @form(org.ieee_passau.controllers.routes.UserController.authenticate, 'class -> "form-horizontal") {
+            @CSRF.formField
+            <fieldset>
+                @text(loginForm("username"), label = "Username")
+                @password(loginForm("password"), label = "Passwort")
+
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button id="submit" type="submit" value="Submit" class="btn btn-primary">Login</button>
+                    </div>
+                </div>
+
+                <small>Falls du dein Passwort vergessen hast, kannst du es <a href="@org.ieee_passau.controllers.routes.UserController.resetPassword">hier</a> zurücksetzen.</small>
+
+            </fieldset>
+        }
+    </div>
+}

@@ -1,0 +1,21 @@
+@import org.ieee_passau.models.{Posting, Problem, User}
+@import org.ieee_passau.views.html.main
+@(posting: Posting, problems: List[Problem])(implicit flash: Flash, sessionUser: Option[User])
+
+@main("Adventskalender") {
+    @Html(posting.content)
+
+    <h3>Viel Spaß beim Knobeln!</h3>
+    <hr>
+
+    <a name="doors"></a>
+    <div id="calendar">
+        <div class="aspect-ratio"></div>
+        <div class="content">
+        @problems.map { problem =>
+            <a href="@org.ieee_passau.controllers.routes.MainController.problemDetails(problem.door)" title="@problem.title" id="door@problem.door" class="active">@problem.door</a>
+        }
+        </div>
+    </div>
+    <small>Bildquelle: "Christmas Tux 2012" von Mark Riedesel, Creative Commons 3.0 (BY-NC-SA)</small>
+}

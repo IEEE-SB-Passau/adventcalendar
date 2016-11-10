@@ -1,0 +1,11 @@
+@import org.ieee_passau.models.User
+@import org.ieee_passau.views.html.main
+@()(implicit flash: Flash, sessionUser: Option[User])
+
+@main("Seite nicht gefunden") {
+    <p>
+        Hier scheint nichts zu sein.
+        Falls du hier trotzdem etwas erwartet hast,
+        lass es uns <a href="@org.ieee_passau.controllers.routes.MainController.contact">wissen</a>.
+    </p>
+}

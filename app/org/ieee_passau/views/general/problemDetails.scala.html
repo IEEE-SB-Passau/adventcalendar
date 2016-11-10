@@ -1,0 +1,49 @@
+@import org.ieee_passau.controllers.Beans.{SolutionListEntry, TicketText}
+@import org.ieee_passau.models.{Language, Problem, Ticket, User}
+@import org.ieee_passau.views.html.bootstrap3._
+@import org.ieee_passau.views.html.general._
+@import org.ieee_passau.views.html.main
+@import org.ieee_passau.views.html.ticket.ticketView
+@import play.twirl.api.Html
+@import views.html.helper.{CSRF, form}
+@(problem: Problem, languages: List[Language], lastLang: String, solutions: List[SolutionListEntry], tickets: List[(Ticket, String)], ticketForm: Form[TicketText], message: (String, String))(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader)
+
+@main("Aufgabe " + problem.door + ": " + problem.title, isProblemTitle = true) {
+    @Html(problem.description)
+
+    <h3>Fragen und Antworten</h3>
+    @ticketView(tickets)
+
+    @if(sessionUser.isDefined) {
+        @form(org.ieee_passau.controllers.routes.TicketController.submitTicket(problem.door), 'class -> "form-horizontal") {
+            @CSRF.formField
+            <div class="well">
+                @textareaBs(ticketForm("text"), label = "Frage")
+                @buttonSave()
+            </div>
+        }
+    } else {
+        <p>Bitte logge dich ein, um eine Frage zu stellen...</p>
+    }
+
+    <h3>Lösung einreichen</h3>
+    @if(problem.solvable) {
+        @if(sessionUser.isDefined) {
+            <div class="well">
+                @solutionForm(languages, lastLang)
+            </div>
+        } else {
+            <p>Bitte logge dich ein, um eine Lösung einzureichen...</p>
+        }
+    } else {
+        <p>Momentan können keine Lösungen eingereicht werden...</p>
+    }
+
+    @if(solutions.nonEmpty) {
+        <h3>Bisherige Lösungen</h3>
+        <p>Falls dir nicht ganz klar ist, was die ein oder andere Fehlermeldung jetzt genau bedeutet, schau doch einfach
+            in den <a href="@org.ieee_passau.controllers.routes.MainController.faq">FAQ</a> nach.</p>
+
+        @solutionListAutoReload(solutions, languages, problem.door)
+    }
+}(flash = (flash + message), sessionUser)

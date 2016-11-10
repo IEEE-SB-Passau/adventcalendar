@@ -1,0 +1,55 @@
+@import org.ieee_passau.models.User
+@import org.ieee_passau.views.html.main
+@()(implicit flash: Flash, sessionUser: Option[User])
+
+@main("Regeln") {
+    <ol>
+        <li>Teilnehmer:
+            <ul>
+                <li>Jeder darf an diesem Adventskalender teilnehmen. Es ist nicht nötig Student an der Uni Passau zu sein.</li>
+                <li>Gewinner, die einen Preis erhalten wollen, müssen diesen persönlich an der Siegerehrung abholen.</li>
+            </ul>
+        </li>
+        <br/>
+        <li>Aufgaben:
+            <ul>
+                <li>Im Zeitraum vom 01.12.2016 bis zum 24.12.2016 wird jeden Tag um 09:00 Uhr eine Aufgabe veröffentlicht.</li>
+                <li>Das Lösen der Aufgaben ist bis zum Ende des Jahres, also bis zum 31.12.2016 möglich.</li>
+                <li>Aufgaben bestehen aus öffentlichen und geheimen Testfällen.</li>
+                <li>Öffentliche Testfälle werden bei der jeweiligen Aufgabe mit angegeben. Bei den geheimen Testfällen wird lediglich angegeben ob der Testfall bestanden wurde, oder nicht.</li>
+            </ul>
+        </li>
+        <br/>
+        <li>Abgaben:
+            <ul>
+                <li>Eine Abgabe besteht aus der Datei mit dem Quelltext des eingereichten Programms. Wir kompilieren diese Programm, und führen es bei uns aus. Die Ausgabe des eingereichten Programms für einen bestimmten Testfall wird dann mit der Lösung verglichen. Stimmen diese überein, so gilt dieser Testfall als bestanden.</li>
+                <li>Ihr könnt pro Aufgabe so viele Abgaben einreichen wie ihr wollt. Es ist kein Problem wenn die erste Lösung nicht die Richtige ist.</li>
+                <li>Auch wenn es für den Ein oder Anderen verlockend ist, Programme, die den geregelten und fairen Betrieb des Adventskalenders stören hochzuladen, ist selbstverständlich nicht erlaubt. Wir behalten uns das Recht vor, Personen die das versuchen, von diesem Wettbewerb auszuschließen.</li>
+                <li>Mögliche Programmiersprachen sind C, Cobol, C++, C#, Fortran, Haskell, Java, JavaScript, Objective C, Perl, PHP, Python, Ruby, Scala und weitere, genauere Informationen finden sich in den <a href="@org.ieee_passau.controllers.routes.MainController.faq">FAQ</a>.</li>
+            </ul>
+        </li>
+        <br/>
+        <li>Punkteverteilung:
+        <ul>
+            <li>Pro gelöstem Testfall gibt es eine bestimmte Punktzahl. Diese Punkte werden separat verrechnet. Man kann also auch ohne die perfekte Lösung abzugeben schon Punkte sammeln!</li>
+            <li>Es ist für die Bewertung und Punktzahl der Aufgabe nicht relevant wann die Lösung eingereicht wird. Eine Lösung am Erscheinungstag der Aufgabe ist genauso gut wie eine Lösung die eine Woche später eingereicht wird.</li>
+            <li>Die erreichten Punkte für eine Aufgabe setzen sich immer nur aus <strong>einer</strong> Abgabe zusammen: Hierfür wird immer die beste Abgabe betrachtet.</li>
+            <li>Die Gesamtpunktzahl über alle Aufgaben setzt sich aus der Summe der besten erreichten Punktzahl jeder Aufgabe zusammen.</li>
+        </ul></li>
+        <br/>
+        <li>Preise:
+        <ul>
+            <li>Die Personen mit den meisten Punkten am Ende dieses Wettbewerbs werden zur Preisverleihung eingeladen.</li>
+            <li>Sollten am Ende dieses Wettbewerbs mehrere Personen auf dem ersten Platz liegen, werden die ersten drei Plätze durch eine Jury ermittelt.</li>
+            <li>Die 24 Tage &ndash; 24 Aufgaben &ndash; 24 Sprachen-Challenge: Die Person mit den meisten verwendeten Sprachen verteilt auf die meisten Probleme gewinnt die Challenge. Dabei werden pro Problem bis zu zwei unterschiedliche Sprachen gewertet, wenn die Aufgabe in beiden richtig gelöst wurde.</li>
+        </ul>
+        </li>
+        <br/>
+        <li>Sonstiges:
+            <ul>
+                <li>Der Rechtsweg ist ausgeschlossen.</li>
+                <li>Wir behalten uns vor, Änderungen an den Regeln durchzuführen, falls wir dies für notwendig erachten.</li>
+            </ul>
+        </li>
+    </ol>
+}

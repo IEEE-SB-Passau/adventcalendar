@@ -1,0 +1,332 @@
+@import org.ieee_passau.models.User
+@import org.ieee_passau.views.html.main
+@()(implicit flash: Flash, sessionUser: Option[User])
+
+@main("FAQ") {
+<h3>Allgemein</h3>
+
+<h4>Dürfen nur Studenten teilnehmen?</h4>
+<p>Nein, es darf jeder teilnehmen, ganz gleich ob Student oder nicht. Solltest du gewinnen, musst du deinen Preis
+	allerdings persönlich in Passau abholen.</p>
+
+<h4>Wann werden die Aufgaben veröffentlicht?</h4>
+<p>Jede Aufgabe wird um 9 Uhr morgens (Passauer Ortszeit) veröffentlicht. Die erste Aufgabe wird am 01.12.2016, die
+	letzte am 24.12.2016 veröffentlicht.</p>
+
+<h4>Muss ich eine Aufgabe innerhalb von 24 Stunden lösen?</h4>
+<p>Nein, alle Aufgaben können bis zum Ende des Jahres gelöst werden. Wann du eine Aufgabe löst hat keinen Einfluss auf
+	die Bewertung.</p>
+
+<h4>Wie wird der Gewinner ermittelt, wenn es am Ende ein Gleichstand gibt?</h4>
+<p>Sollte es nach Ende des Adventskalenders mehrere Teilnehmer mit gleicher Punktzahl geben, werden die ersten drei
+	Plätze durch eine Jury ermittelt.</p>
+
+<h4>Nach welchen Kriterien bewertet die Jury meine Abgaben?</h4>
+<p>Die Jury wird insbesondere auf folgende Kriterien achten:</p>
+<ul>
+	<li><strong>Code-Stil:</strong> Die Jury sollte deinen Code lesen und verstehen können. Aussagekräftige
+		Bezeichnungen und eine klare Strukturierung helfen viel!
+	</li>
+	<li><strong>Kommentare:</strong> Ein paar gut platzierte Kommentare helfen der Jury dein Programm zu verstehen.
+		Seitenweise Boilerplate-Dokumentation hingegen will keiner lesen. Falls du einen besonders cleveren Lösungsweg
+		oder Algorithmus entwickelt hast, darfst du diesen aber auch durchaus etwas genauer beschreiben.
+	</li>
+	<li><strong>Eleganz:</strong> Abgaben, welche eine Aufgabe besonders effizient oder mit besonders wenig Code lösen,
+		kommen bei der Jury gut an! Dein Code sollte natürlich trotzdem lesbar und verständlich sein.
+	</li>
+</ul>
+<p>Falls nötig, kann die Jury weitere Kriterien zur Bewertung heranziehen.</p>
+
+<h4>Wie werden Punkte vergeben?</h4>
+Je nach Aufgabentyp können Punkte entweder statisch oder dynamisch vergeben werden. Weiterhin gibt es Aufgaben bei denen
+für die Bewertung neben dem Bestehen der Testfälle noch weitere Kriterien erfüllt sein müssen.
+
+<h5>Statische Punktvergabe</h5>
+<p>Jede Aufgabe hat eine Reihe von Testfällen mit denen eingereichte Lösungen ausgewertet werden. Jeder Testfall ist
+	eine gewisse Anzahl an Punkten wert. Eine Aufgabe mit vier Testfällen mit jeweils 25 Punkten ist also insgesamt 100
+	Punkte wert. Besteht eine Abgabe drei dieser Testfälle, so wird die Abgabe mit 75 Punkten bewertet. Die
+	Gesamtpunktzahl eines Teilnehmers ergibt sich aus der Summe der besten Abgaben für jede Aufgabe.</p>
+
+<h5>Dynamische Punktvergabe</h5>
+<p>Jede Aufgabe hat eine Reihe von Testfällen mit denen eingereichte Lösungen ausgewertet werden. Insgesammt bringt eine
+    Aufgabe bis zu 100 Punkte, je nachdem aus wie vielen Testfälle sie besteht. Je mehr Teilnehmer die Aufgabe richtig
+    lösen, desto weniger Punkte sind maximal erreichbar.
+    <br/>
+    So wird die Bewertung berechnet:<br/>
+    <br/>
+    Gesamte Abgaben (eine pro Teilnehmer) für das Problem: <b>gesamt</b><br/>
+    Richtige Lösungen (eine pro Teilnehmer) für das Problem: <b>gelöst</b><br/>
+    Der Abgeabefaktor (liegt zwischen 1 und 0) basierend auf den gelösten Testfällen: <b>sf</b><br/>
+    Mindestpunkte für ein richtig gelöstes Problem: 50<br/>
+    Maximale Punkte für ein richtig gelöstes Problem: 100<br/>
+
+    Anteil richtiger Lösungen: <b>sr</b> = gelöst / gesamt<br/>
+    Problemfaktor: <b>cf</b> = 50 + (100 - 50) * (1 - sr)<br/>
+    <br/>
+    Damit ist die Bewertung: <b>Punkte</b>  = sf * cf </p><br/>
+
+<h4>Gibt es auch Punkte auf nur teilweise gelöste Aufgaben?</h4>
+<p>Ja, auch wenn deine Abgaben nicht alle Testfälle bestehen, bekommst du Punkte für eine Aufgabe. Dafür wird jeweils die
+	beste Abgabe herangezogen.</p>
+
+<h3>Programmausführung</h3>
+
+<h4>Was ist der "Compiler Status"?</h4>
+<p>Der Compiler Status ist eine Zahl, die vom Compiler an das System gegeben wird, wenn der Compiler mit seiner Arbeit
+	fertig ist. Ein Wert von 0 signalisiert, dass es keine Probleme gab. Andere Werte deuten auf Fehler beim Kompilieren
+	hin.</p>
+
+<h4>Was ist der "Programm Status"?</h4>
+<p>Der Programm Status ist eine Zahl, die vom deinem Programm an das System gegeben wird, wenn es mit seiner Arbeit
+	fertig ist. Ein Wert von 0 signalisiert, dass das Programm ordnungsgemäß beendet wurde. Andere Werte deuten auf
+	einen Programmabsturz oder Fehler hin.</p>
+
+<h4>Welche Einschränkungen hat mein Programm?</h4>
+<p>Dein Programm darf pro Testfall nicht mehr als 250 Megabyte Arbeitsspeicher belegen und nicht länger als 60
+	Sekunden rechnen. Aus Gründen der Fairness solltest du auf "kreative" Problemlösungen verzichten, denn ein Fehler im
+	Auswertungssystem hat einen negativen Einfluss auf alle Teilnehmenden.</p>
+
+<h4>Wie lange darf mein Programm laufen?</h4>
+<p>Dein Programm bekommt 60 Sekunden Laufzeit um einen Testfall zu bearbeiten.</p>
+
+<h4>Wie viel Arbeitsspeicher darf mein Programm verwenden?</h4>
+<p>Dein Programm darf maximal 250 Megabyte an Arbeitsspeicher verwenden um einen Testfall zu bearbeiten.</p>
+
+<h4>Wie werden die Daten in mein Programm eingegeben?</h4>
+<p>Wenn ein Testfall ausgeführt wird, erhält dein Programm Daten über die Standardeingabe (STDIN), also so ähnlich als
+	ob man die Daten über die Tastatur eingibt. Nachdem alle Daten an dein Programm geschickt wurden, wird die
+	Standardeingabe durch ein End Of File (EOF) geschlossen. Dein Programm muss diese Eingabe auswerten, ein Ergebnis
+	berechnen, und dieses ausgeben.</p>
+
+<h4>Wie muss ich mein Ergebnis ausgeben?</h4>
+<p>Dein Programm muss die Eingabe auswerten, ein Ergebnis berechnen, und dieses ausgeben. Die Ausgabe muss auf der
+	Standardausgabe (STDOUT) erfolgen. Als Zeilenumbruch können \n (Zeilenvorschub) oder \r\n (Wagenrücklauf &amp;
+	Zeilenvorschub) verwendet werden. Bitte beachte, dass oft auch nach dem letzten Ergebnis noch ein Zeilenumbruch
+	erwartet wird!</p>
+
+<h4>Wie kann ich in meiner Lieblingsprogrammiersprache Ein- und Ausgabe implementieren?</h4>
+<p>Wir haben einige <a href="@org.ieee_passau.controllers.routes.MainController.examples">Beispielprogramme</a> erstellt, welche Ein- und Ausgabe in
+	einigen häufig genuzten Programmiersprachen anhand eines kleinen Beispiels demonstrieren.</p>
+
+<h4>In welchen Programmiersprachen kann ich mein Programm einreichen?</h4>
+<p>Du kannst dein Programm in den Sprachen C, Cobol, C++, C#, Forth, Fortran, FreePascal, Go, Haskell, Intercal, Java,
+	Javascript, Lua, MMIX, OCaml, Objective-C, Perl, PHP, Python2, Python3, Scala, TCL, Vala, VisualBasic .NET, sowie
+	in extra für bestimmte Aufgaben konstruierten Sprachen abgeben.<br />
+	Deine Abgabe muss aus einer einzigen Datei bestehen. Sollten keine Besonderheiten angeben sein, so stehen dir nur die
+	Möglichkeiten der Standardbibliothek der jeweiligen Sprache zu
+	Verfügung.</p>
+
+<h4>Könnt ihr Bibliothek X für die Programmiersprache Y installieren?</h4>
+<p>Wir bieten für jede Programmiersprache grundsätzlich nur die Standardbibliotheken an, um zu gewährleisten, dass jede
+	Sprache in etwa gleich nützlich ist. Alle Sprachen durch das gezielte Installieren von Bibliotheken auf ein
+	vergleichbares Niveau an Funktionalität zu bringen wäre ziemlich aufwendig: Wie bringen wir die Fähigkeiten von
+	Numpy nach COBOL, Fortran und TCL? Daher belassen wir es bei den jeweiligen Standardbibliotheken. Außerdem wäre es
+	ja langweilig eine Lösung zu entwickeln bei der die ganze Arbeit von ein paar Bibliotheken erledigt wird.</p>
+
+<table class="table">
+	<thead>
+	<tr>
+		<th>Sprache</th>
+		<th>Compiler, Distribution / Version</th>
+		<th>Anmerkungen</th>
+	</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td>C</td>
+		<td><a href="https://gcc.gnu.org/">GCC 4.9.3</a></td>
+		<td>Standard: C11, wird gegen libm gelinkt</td>
+	</tr>
+	<tr>
+		<td>COBOL</td>
+		<td><a href="http://sourceforge.net/projects/open-cobol/">OpenCOBOL 1.1</a></td>
+		<td>Free Format</td>
+	</tr>
+	<tr>
+		<td>C++</td>
+		<td><a href="https://gcc.gnu.org">GCC 4.9.3</a></td>
+		<td>Standard: C++11, wird gegen libm gelinkt</td>
+	</tr>
+	<tr>
+		<td>C#</td>
+		<td><a href="http://www.mono-project.com/">msc 2.10.9-r2</a></td>
+		<td>Mono Project</td>
+	</tr>
+	<tr>
+		<td>Forth</td>
+		<td><a href="https://www.gnu.org/software/gforth/">Gforth 0.7.3</a></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>Fortran</td>
+		<td><a href="https://gcc.gnu.org/">GCC 4.9.3</a></td>
+		<td>Standard: Fortran 90</td>
+	</tr>
+	<tr>
+		<td>FreePascal</td>
+		<td><a href="http://www.freepascal.org/">fpc 2.4.6</a></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>Go</td>
+		<td><a href="https://golang.org/">Go 1.4.2</a></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>Haskell</td>
+		<td><a href="https://www.haskell.org/platform/">The Haskell Platform 2013.2.0.0-r2</a></td>
+		<td>Compiler ist ghc in der Version 7.8.4</td>
+	</tr>
+	<tr>
+		<td>Intercal</td>
+		<td><a href="http://c.intercal.org.uk/">C-INTERCAL 29.0</a></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>Java</td>
+		<td><a href="http://www.oracle.com/technetwork/java/index.html">Oracle's Java SE Development Kit 1.8.0.66</a>
+		</td>
+		<td>Bitte die Main-Methode in der Klasse "Solution" einreichen und kein Package verwenden.</td>
+	</tr>
+	<tr>
+		<td>JavaScript</td>
+		<td><a href="https://nodejs.org">Node.js v0.12.06</a></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>Lua</td>
+		<td><a href="http://www.lua.org/">Lua 5.1.5-r3</a></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>MMIX</td>
+		<td><a href="http://mmix.cs.hm.edu/">MMIX 20131017</a></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>OCaml</td>
+		<td><a href="http://ocaml.org/">OCaml 4.02.3</a></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>Objective C</td>
+		<td><a href="https://gcc.gnu.org/">GCC 4.9.3</a></td>
+		<td>Standard: C99, wird gegen libm gelinkt, mit <a href="http://www.gnustep.org/resources/documentation/Developer/Base/Reference/Base.html">GNUstep Base 1.24.6-r1</a> </td>
+	</tr>
+	<tr>
+		<td>Perl</td>
+		<td><a href="http://www.perl.org/">Perl 5.20.2</a></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>PHP</td>
+		<td><a href="http://php.net/">PHP 5.6.1</a></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>Python 2</td>
+		<td><a href="https://www.python.org/">Python 2.7.10</a></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>Python 3</td>
+		<td><a href="https://www.python.org/">Python 3.4.3</a></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>Ruby</td>
+		<td><a href="https://www.ruby-lang.org">Ruby 2.1.7p400</a></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>Rust</td>
+		<td><a href="https://www.rust-lang.org/">Rust 1.4.0</a></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>Scala</td>
+		<td><a href="http://scala-lang.org/">Scala 2.11.7-r1</a></td>
+		<td>Bitte die Main-Methode in dem Objekt "Solution" einreichen und kein Package verwenden.</td>
+	</tr>
+	<tr>
+		<td>Tool Command Language</td>
+		<td><a href="http://tcl.tk/">TCL 8.5.17</a></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>Vala</td>
+		<td><a href="https://wiki.gnome.org/Projects/Vala">Vala 0.28.1</a></td>
+		<td></td>
+	</tr>
+	<tr>
+		<td>Visual Basic .Net</td>
+		<td><a href="http://www.mono-project.com/">vbnc 2.10</a></td>
+		<td>Mono Project</td>
+	</tr>
+	</tbody>
+</table>
+
+<h3>Programmauswertung</h3>
+
+<h4>Warum sind manche Testfälle als "geheim" gekennzeichnet?</h4>
+<p>Dass nicht alle Testfälle komplett einsehbar sind hat mehrere Gründe: Einerseits wollen wir vermeiden, dass die
+	Testfälle einfach von Hand gelöst werden und dann in die Lösung "hartcodiert" werden. Andererseits werden in
+	geheimen Testfällen gewisse Rand- und Sonderfälle getestet, welche in den öffentlichen Tests nicht auftauchen.</p>
+
+<h4>Warum dauert es so lange meine Abgabe auszuwerten?</h4>
+<p>Falls viele Teilnehmer den Kalender gleichzeitig benutzen, kann es durchaus vorkommen, dass die Auswertung etwas
+	länger dauert. Bitte hab in diesem Fall einfach etwas Geduld. Sollte deine Abgabe nach 15 Minuten immer noch nicht
+	ausgewertet sein, kontaktiere uns bitte.</p>
+
+<h3>Auswertungsstatus</h3>
+
+<h4>Was bedeutet der Status "Lösung enthält Fehler"?</h4>
+<p>Deine Lösung hat einen oder mehrere Testfälle nicht bestanden. Schau dir die Liste der Testfälle noch einmal genau
+	an, und überarbeite deine Lösung.</p>
+
+<h4>Was bedeutet der Status "Lösung wird noch ausgewertet..."?</h4>
+<p>Deine eingereichte Lösung wird gerade noch vom System verarbeitet. Daher steht das endgültige Ergebnis noch nicht
+	fest. Eventuell sind aber einige Testfälle schon fertig ausgewertet.</p>
+
+<h4>Was bedeutet der Status "Falsche Ausgabe"?</h4>
+<p>Die Ausgabe von deinem Programm entspricht nicht dem erwarteten Ergebnis. Bitte prüfe vor dem Debuggen, ob du nicht
+	eventuell einen Zeilenumbruch vergessen hast, denn dies ist erfahrungsgemäß einer der häufigsten Fehler.</p>
+
+<h4>Was bedeutet der Status "Testfall in Bearbeitung"?</h4>
+<p>Um eine Aufgabe vollständig zu lösen, müssen alle Testfälle erfolgreich durchlaufen werden. Testfälle, die noch in
+	Bearbeitung sind, wurden noch nicht ausgewertet. Sollte ein Testfall auch nach 15 Minuten immer noch nicht
+	ausgewertet sein, kontaktiere uns bitte.</p>
+
+<h4>Was bedeutet der Status "Laufzeitfehler im Programm"?</h4>
+<p>Falls dein Programm abstürzt oder eine Fehlermeldung ausgibt, gilt der Testfall als nicht bestanden. Du solltest
+	anhand der Fehlermeldung herausfinden, was genau schiefgelaufen ist und dein Programm entsprechend anpassen.</p>
+
+<h4>Was bedeutet der Status "Zugelassene Speichergrenze überschritten"?</h4>
+<p>In diesem Fall hat dein Programm die zugelassen Höchstspeichergrenze überschritten. Sollte dies vorkommen wird dein
+	Programm umgehend beendet, da es keinen weiteren Speicher mehr allozieren darf.</p>
+
+<h4>Was bedeutet der Status "Zugelassene Laufzeit überschritten"?</h4>
+<p>Sollte ein Testfall diesen Status haben, so hat dein Programm die zugelassene Höchstlaufzeit überschritten und wurde
+	aus diesem Grund beendet. Sollte dieser Fehler auftreten, so kann er in der Regel durch die Wahl eines besseren bzw.
+	effizienteren Algorithmus behoben werden.</p>
+
+<h4>Was bedeutet der Status "Fehler beim Kompilieren"?</h4>
+<p>Das Programm ließ sich nicht kompilieren, d.h. der verwendete Compiler verweigerte die Arbeit. Bitte prüfe die
+	Ausgabe des Compilers auf Fehler. Sollte der Quelltext bei dir mit der Standarddistribution der Programmiersprache
+	kompilieren und du glaubst es sei ein Fehler, so kontaktiere uns bitte.</p>
+
+<h4>Warum werden Scriptsprachen kompiliert?</h4>
+<p>Jeder weiß, dass Scriptsprachen eigentlich nicht kompiliert werden, aber dennoch machen wir es - das Kompilieren
+	umfasst in diesem Fall einfach das Parsen der Datei. Sollten hierbei Fehler auftreten, werden diese nicht als
+	fehlerhaftes Programmergebnis gesehen, sondern als "Compiler"fehler.</p>
+
+
+<h3>Ich habe ein Problem! / Meine Frage wurde nicht beantwortet!</h3>
+<p>Solltest du eine Frage oder Anmerkung zu einer Aufgabe haben kannst du diese direkt über das Formular unterhalb der
+Aufgabe stellen. Bitte beachte aber, dass wir Fragen zu Aufgaben und deren Implementierung nicht immer beantworten könnnen.
+</p>
+<p>Alternativ kannst du uns einfach eine E-Mail schreiben:
+	<a href="mailto:adventskalender@@ieee.students.uni-passau.de">adventskalender@@ieee.students.uni-passau.de</a>. Wir
+	freuen uns immer über Anmerkungen und Bugreports. </p>
+
+}

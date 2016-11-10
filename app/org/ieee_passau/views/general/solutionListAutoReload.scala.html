@@ -1,0 +1,72 @@
+@import org.ieee_passau.controllers.Beans.SolutionListEntry
+@import org.ieee_passau.models.Language
+@(solutions: List[SolutionListEntry], languages: List[Language], door:Int, showAll: Boolean = false)
+
+<div id="solutionlist">
+    @solutionList(solutions, languages)
+</div>
+
+<script type="text/javascript">
+    (function () {
+        var door = @door, whileQueuedInterval = 1000, noneQueuedInterval =  10000;
+
+        var solutions = {};
+
+        window.addEventListener("load", function () {
+
+            $("#solutionlist").find(">div").each(function (i, element) {
+                element = $(element);
+                solutions[element.attr("id")] = {status: element.data("state"), element: element};
+            });
+
+            function checkSolutionUpdates () {
+                $.ajax({
+                    url: "/problem/" + door + "/solutions"
+                }).done(function (data) {
+                    var queuedSolutionPresent = false;
+
+                    $.each(data, function (i, solutionInfo) {
+                        var solution = solutions[solutionInfo.id];
+
+                        if (solution === undefined) {
+                            return;
+                        }
+
+                        if (solution.status === "QUEUED" || solution.status !== solutionInfo.result) {
+                            solution.status = solutionInfo.result;
+
+                            if (solution.element.html() !== solutionInfo.html) {
+                                solution.element.html(solutionInfo.html);
+                            }
+
+                            if (solution.status === "QUEUED") {
+                                queuedSolutionPresent = true;
+                            }
+                        }
+                    });
+
+                    setTimer(queuedSolutionPresent);
+                });
+            }
+
+            function setTimer(queuedSolutionPresent) {
+                window.setTimeout(checkSolutionUpdates, (queuedSolutionPresent) ? whileQueuedInterval : noneQueuedInterval);
+            }
+
+            (function () {
+                var queuedSolutionPresent = false;
+
+                $.each(solutions, function (solution) {
+                    if (solution.status === "QUEUED") {
+                        queuedSolutionPresent = true;
+                        return false;
+                    }
+                });
+
+                setTimer(queuedSolutionPresent);
+            })();
+
+        });
+
+    })();
+</script>

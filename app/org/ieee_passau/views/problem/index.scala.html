@@ -1,0 +1,41 @@
+@import helper._
+@import org.ieee_passau.models.{Problem, User}
+@import org.ieee_passau.views.html.main
+@(problems: List[Problem])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader)
+
+@main("Problemliste") {
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Titel</th>
+                <th>Türchen</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @problems.map { problem =>
+            <tr>
+                <td>@problem.id</td>
+                <td>@problem.title</td>
+                <td>@problem.door</td>
+                <td>
+                    <a href="@org.ieee_passau.controllers.routes.ProblemController.edit(problem.id.get)" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span></a>
+                    <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.ProblemController.delete(problem.id.get)">
+                        @CSRF.formField
+                        <button type="submit" onclick="return(window.confirm('Wirklich löschen?'))" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span></button>
+                    </form>
+                </td>
+            </tr>
+        }
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>
+                    <a href="@org.ieee_passau.controllers.routes.ProblemController.insert" class="btn btn-default"><span class="glyphicon glyphicon-plus"></span></a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+}

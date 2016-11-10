@@ -1,0 +1,112 @@
+@import org.ieee_passau.controllers.Beans.SolutionListEntry
+@import org.ieee_passau.models.{Canceled, CompileError, Language, MemoryExceeded, Passed, Private, ProgramError, Public, Queued, RuntimeExceeded, WrongAnswer}
+@(solutions: List[SolutionListEntry], languages: List[Language], showAll: Boolean = false)
+@* showPrivate shows also private testcases *@
+
+@solutions.map { s =>
+    <div id="@s.solution.id" data-state="@s.state">
+        <div class="panel @if(s.state == Passed) { panel-success } @if(s.state == Queued) { panel-info }
+            @if(s.state == WrongAnswer) { panel-danger } @if(s.state == Canceled) { panel-warning }">
+            @* Create an anchor for the first solution *@
+            @if(solutions.head == s) { <a name="latest"></a> }
+
+            @* Panel Header *@
+            <div class="panel-heading">
+                <h3 class="panel-title">
+                    <a data-toggle="collapse" data-target="#solution@s.position" href="#solution@s.position">
+                        @if(s.state == Queued) { <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>} Lösung @s.position
+                        <span class="pull-right">
+                            @s.testcases.filter(_.testrun.result == Passed).map(_.testcase.points).sum / @s.testcases.map(_.testcase.points).sum Punkte
+                        </span>
+                    </a>
+                </h3>
+            </div>
+
+            <div id="solution@s.position" class="panel-collapse collapse @if(solutions.head == s) { in }">
+                <div class="panel-body">
+                    <p>
+                        <Strong>Status:</Strong>
+                        @if(s.state == Passed) { Lösung akzeptiert }
+                        @if(s.state == Queued) { Lösung wird noch ausgewertet... }
+                        @if(s.state == WrongAnswer) { Lösung enthält Fehler }
+                        @if(s.state == Canceled) {
+                            Lösung wurde vom Adventskalender-Team abgebrochen, melde dich bei <a href="@org.ieee_passau.controllers.routes.MainController.contact">uns</a>, um zu erfahren was passiert ist }
+                    </p>
+
+                    <p>
+                        <button type="button" class="btn" data-toggle="collapse" data-target="#code@s.position">
+                            <span class="glyphicon glyphicon-eye-open"></span>
+                            Quelltext (@languages.filter(_.id == s.solution.language).map{l=>@l.name})
+                        </button>
+                    </p>
+
+                    <div id="code@s.position" class="collapse">
+                        <pre><code class="@languages.filter(_.id == s.solution.language).map{l=>@l.highlightClass}">@s.solution.program</code></pre>
+                    </div>
+
+                    @s.testcases.map { t =>
+                        <div class="panel @if(t.testrun.result == Passed) { panel-success } @if(t.testrun.stage.isDefined) { panel-info }
+                            @if(t.testrun.result != Passed && t.testrun.stage.isEmpty && t.testrun.result != Canceled) { panel-danger }
+                            @if(t.testrun.result == Canceled) { panel-warning }">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">
+                                    Testfall @t.position @if(t.testcase.visibility == Private) { (geheim) }
+                                        <span class="pull-right">@t.testcase.points Punkte</span>
+                                </h3>
+                            </div>
+
+                            <div class="panel-body">
+                                <p>
+                                    <strong>Status:</strong>
+                                    @if(t.testrun.stage.isDefined) { Testfall in Bearbeitung } else {
+                                    @if(t.testrun.result == Passed) { Testfall bestanden }
+                                    @if(t.testrun.result == WrongAnswer) { Falsche Ausgabe }
+                                    @if(t.testrun.result == ProgramError) { Laufzeitfehler im Programm }
+                                    @if(t.testrun.result == MemoryExceeded) { Zugelassene Speichergrenze überschritten }
+                                    @if(t.testrun.result == RuntimeExceeded) { Zugelassene Laufzeit überschritten }
+                                    @if(t.testrun.result == CompileError) { Fehler beim Kompilieren }
+                                    @if(t.testrun.result == Canceled) { Abgebrochen vom System }}
+                                </p>
+
+                                @if(t.testrun.stage.isEmpty && (t.testcase.visibility == Public || showAll)) {
+                                    <p><strong>Compiler Rückgabewert:</strong> @t.testrun.compExit</p>
+
+                                    Compiler Ausgabe:
+                                    <pre>@t.testrun.compOut</pre>
+
+                                    @if(t.testrun.compErr.isDefined && t.testrun.compErr.get.length > 0) {
+                                        Compiler Fehler:
+                                        <pre>@t.testrun.compErr</pre>
+                                    }
+
+                                    @if(t.testrun.result != CompileError) {
+                                        Programm Eingabe:
+                                        <pre>@t.testcase.input</pre>
+
+                                        <div class="row">
+                                            <div  class="col-sm-6">
+                                                Erwartete Ausgabe:
+                                                <pre class="expected-output">@t.testcase.expectedOutput</pre>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                Programm Ausgabe:
+                                                <pre class="actual-output">@t.testrun.progOut</pre>
+                                            </div>
+                                        </div>
+
+                                        @if(t.testrun.progErr.isDefined && t.testrun.progErr.get.length > 0) {
+                                            Programm Fehler:
+                                            <pre>@t.testrun.progErr</pre>
+                                        }
+
+                                        <p><strong>Programm Rückgabewert:</strong> @t.testrun.progExit</p>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}

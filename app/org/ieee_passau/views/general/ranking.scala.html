@@ -1,0 +1,30 @@
+@import org.ieee_passau.controllers.MainController.{Highlight, HighlightSpecial}
+@import org.ieee_passau.models.User
+@import org.ieee_passau.views.html.main
+@(users: List[(Int, String, Boolean, Int, Int, Int)])(implicit flash: Flash, sessionUser: Option[User])
+
+@main("Rangliste") {
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Platz</th>
+                <th>Name</th>
+                <th>Punkte</th>
+                <th>Gelöste Aufgaben</th>
+            </tr>
+        </thead>
+        <tbody>
+        @users.map { user =>
+            <tr class="@if(user._6 == Highlight) {success} @if(user._6 == HighlightSpecial) {warning} @if(user._3) {disabled}">
+                <td>@user._1</td>
+                <td>@user._2</td>
+                <td>@user._4</td>
+                <td>@user._5</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    <p>@if(users.isEmpty) {
+        Scheinbar hat noch keiner eine Aufgabe gelöst. Schau bei den <a href="@org.ieee_passau.controllers.routes.MainController.problems">Aufgaben</a> vorbei und sei der Erste.
+    }</p>
+}

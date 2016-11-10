@@ -1,0 +1,48 @@
+@import org.ieee_passau.models.Testcase
+@import views.html.helper.CSRF
+@(pid: Int, testcases: List[Testcase])(implicit requestHeader: RequestHeader)
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Position</th>
+            <th>Punkte</th>
+            <th>Sichtbarkeit</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @testcases.map { testcase =>
+            <tr>
+                <td>@testcase.id</td>
+                <td>@testcase.position</td>
+                <td>@testcase.points</td>
+                <td>@testcase.visibility.scope</td>
+                <td>
+                    <a href="@org.ieee_passau.controllers.routes.TestcaseController.edit(pid, testcase.id.get)" class="btn btn-default">
+                        <span class="glyphicon glyphicon-pencil"></span>
+                    </a>
+
+                    <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.TestcaseController.delete(pid, testcase.id.get)">
+                        @CSRF.formField
+                        <button type="submit" onclick="return(window.confirm('Wirklich löschen?'))" class="btn btn-danger">
+                            <span class="glyphicon glyphicon-remove"></span>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>
+                <a href="@org.ieee_passau.controllers.routes.TestcaseController.insert(pid)" class="btn btn-default">
+                    <span class="glyphicon glyphicon-plus"></span>
+                </a>
+            </td>
+    <tr>
+    </tbody>
+</table>

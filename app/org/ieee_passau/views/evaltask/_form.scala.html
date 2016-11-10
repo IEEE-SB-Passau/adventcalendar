@@ -1,0 +1,37 @@
+@import org.ieee_passau.models.{EvalTask, User}
+@import org.ieee_passau.views.html.bootstrap3.{buttonSave, checkboxBs, text}
+@(pid: Int, task: Form[EvalTask])(implicit flash: Flash, sessionUser: Option[User])
+
+<fieldset>
+    <input type="hidden" name="problemId" value="@pid" />
+    @text(task("position"), label = "Position", placeholder = "Position")
+    <div class="col-sm-10 col-sm-offset-2"><h4>Folgende Eingaben stehen zur Auswertung zur Verfügung (Reihenfolge durch Eingabemaske)</h4></div>
+        <div class="col-sm-10 col-sm-offset-2">
+            <p>Eingabe <strong>{stdIn}</strong>, erwartete Ausgabe <strong>{expOut}</strong>, berechnete Ausgabe <strong>{progOut}</strong>, Quelltext <strong>{program}</strong></p>
+        </div>
+    @text(task("command"), label = "Eingabemaske", placeholder = "{stdIn}{expOut}")
+
+    <div class="form-group" >
+        <label class="col-sm-2 control-label">Binärdatei</label>
+        <div class="col-sm-10">
+            <div class="input-group">
+                <span class="input-group-btn">
+                    <span class="btn btn-default btn-file">
+                        Datei  <input id="program" type="file" name="program"/>
+                    </span>
+                </span>
+                <input type="text" class="col-sm-10 form-control" readonly title="">
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-10 col-sm-offset-2"><h4>Folgende Ausgaben werden erzeugt</h4></div>
+    @checkboxBs(task("outputCheck"), label = "Wertet die Programmausgabe weiter aus (Ausgabe \"WRONG\" oder \"CORRECT\" in eine Datei \"check\")")
+    @checkboxBs(task("scoreCalc"), label = "Errechnet eine Bewertung (Ausgabe eines Integers in eine Datei \"score\")")
+
+    <div class="col-sm-10 col-sm-offset-2"><h4>Einstellungen zur Startbedinngung</h4></div>
+    @checkboxBs(task("runCorrect"), label = "Läuft, wenn bisheriges Ergebnis \"Bestanden\"")
+    @checkboxBs(task("runWrong"), label = "Läuft, wenn bisheriges Ergebnis \"Falsche Antwort\"")
+
+    @buttonSave()
+</fieldset>

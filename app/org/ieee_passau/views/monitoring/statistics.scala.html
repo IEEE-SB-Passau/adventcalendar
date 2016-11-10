@@ -1,0 +1,90 @@
+@import org.ieee_passau.models.User
+@import org.ieee_passau.views.html.main
+
+@(numJobs1H: Int, vms1H: List[(String, Int)], langs1H: List[(String, Int)], numJobsFull: Int, vmsFull: List[(String, Int)], langsFull: List[(String, Int)])(implicit flash: Flash, sessionUser: Option[User])
+
+@main("Statistik") {
+    <div class="row"><div class="col-sm-12"><h3>Letzte Stunde</h3></div></div>
+    <div class="row"><div class="col-sm-6">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>VM</th>
+                    <th>Anzahl</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Zusammen</td>
+                    <td>@numJobs1H</td>
+                </tr>
+            @vms1H.map { case (vm, num) =>
+                <tr>
+                    <td>@vm</td>
+                    <td>@num</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    <div class="col-sm-6">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Sprache</th>
+                    <th>Anzahl</th>
+                </tr>
+            </thead>
+            <tbody>
+            @langs1H.map { case (lang, num) =>
+                <tr>
+                    <td>@lang</td>
+                    <td>@num</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div></div>
+
+    <div class="row"><div class="col-sm-12"><h3>Gesamt</h3></div></div>
+    <div class="row"><div class="col-sm-6">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>VM</th>
+                    <th>Anzahl</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Zusammen</td>
+                    <td>@numJobsFull</td>
+                </tr>
+            @vmsFull.map { case (vm, num) =>
+                <tr>
+                    <td>@vm</td>
+                    <td>@num</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    <div class="col-sm-6">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Sprache</th>
+                    <th>Anzahl</th>
+                </tr>
+            </thead>
+            <tbody>
+            @langsFull.map { case (lang, num) =>
+                <tr>
+                    <td>@lang</td>
+                    <td>@num</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div></div>
+}

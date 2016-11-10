@@ -1,0 +1,29 @@
+@import helper._
+@import org.ieee_passau.models.User
+@import org.ieee_passau.views.html.bootstrap3._
+@import org.ieee_passau.views.html.main
+@(id: Int, user: Form[User])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader)
+
+@main("User bearbeiten") {
+    @form(org.ieee_passau.controllers.routes.UserController.update(id), 'class -> "form-horizontal") {
+        @CSRF.formField
+        <fieldset>
+            <div class="well">
+                @text(user("username"), label = "Username", placeholder = "Username")
+                @password(user("password"), label = "Passwort", placeholder = "Passwort")
+                @text(user("email"), label = "E-Mail", placeholder = "E-Mail")
+                @checkboxBs(user("active"), label = "Aktiv")
+                @checkboxBs(user("admin"), label = "Admin")
+                @checkboxBs(user("hidden"), label = "nicht gewertet")
+                @text(user("school"), label = "Universität oder Schule", placeholder = "Studiengang")
+                @text(user("semester"), label = "Semester oder Jahrgangstufe", placeholder = "Semester")
+                @text(user("studySubject"), label = "Studiengang", placeholder = "Studiengang")
+
+                @buttonSave()
+            </div>
+        </fieldset>
+    }
+    <p class="text-right">
+        <a class="btn btn-default" href="@org.ieee_passau.controllers.routes.UserController.impersonate(id)"><span class="glyphicon glyphicon-user"></span> Als dieser Benutzer anmelden</a>
+    </p>
+}

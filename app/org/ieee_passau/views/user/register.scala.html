@@ -1,0 +1,28 @@
+@import helper._
+@import org.ieee_passau.models.{User, UserRegistration}
+@import org.ieee_passau.views.html.bootstrap3._
+@import org.ieee_passau.views.html.main
+@(registrationForm: Form[UserRegistration])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader)
+
+@main("Registrieren") {
+    <div class="well col-md-8 col-md-offset-2">
+        @form(org.ieee_passau.controllers.routes.UserController.create, 'class -> "form-horizontal") {
+            @CSRF.formField
+            <fieldset>
+                @text(registrationForm("username"), label = "Benutzername*", placeholder = "Benutzername")
+                @password2(registrationForm("password"), registrationForm("password.main"), registrationForm("password.repeat"), label1 = "Passwort*", label2 = " Passwort wiederholen*", placeholder = "Passwort", help = "mindestens 6 Zeichen")
+                @text(registrationForm("email"), label = "E-Mail*", placeholder = "E-Mail")
+                @text(registrationForm("school"), label = "Universität oder Schule", placeholder = "Universität")
+                @text(registrationForm("semester"), label = "Semester oder Jahrgangstufe", placeholder = "Semester")
+                @text(registrationForm("studySubject"), label = "Studiengang", placeholder = "Studiengang")
+
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button id="submit" type="submit" value="Submit" class="btn btn-primary">Registrieren</button>
+                    </div>
+                </div>
+            </fieldset>
+        }
+        <small>Die mit <b>*</b> markierten Felder sind Pflichtangaben.</small>
+    </div>
+}

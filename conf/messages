@@ -1,0 +1,13 @@
+error.invalid=Eingabe ist ungültig
+error.required=Erforderlich
+error.number=Eingabe ist keine Zahl
+error.min=Eingegebener Wert ist zu klein
+error.max=Eingegebener Wert is zu groß
+error.minLength=Eingabe ist zu kurz
+error.maxLength=Eingabe ist zu lang
+error.email=Keine gültige E-Mail Adresse
+
+error.expected.date=Kein gültiges Datum
+error.expected.jodadate.format=Kein gültiges Datum
+
+error.path.empty=Leere Pfad

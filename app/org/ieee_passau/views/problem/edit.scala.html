@@ -1,0 +1,26 @@
+@import helper._
+@import org.ieee_passau.models.{EvalMode, EvalTask, Problem, Testcase, User}
+@import org.ieee_passau.views.html.{evaltask, main, testcase}
+@import org.ieee_passau.controllers.routes
+@(pid: Int, testcases: List[Testcase], evalTasks: List[EvalTask], problem: Form[Problem], evalModes: List[EvalMode])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader)
+
+@main("Edit problem") {
+
+    <ol class="breadcrumb">
+        <li><a href="@routes.ProblemController.index">Übersicht</a></li>
+        <li class="active">Problem</li>
+    </ol>
+
+    @form(routes.ProblemController.update(pid), 'class -> "form-horizontal") {
+        @CSRF.formField
+        <div class="well">
+            @_form(problem, evalModes)
+        </div>
+    }
+
+    <h3>Testfälle</h3>
+    @testcase.index(pid, testcases)
+
+    <h3>Auswertungsschritte</h3>
+    @evaltask.index(pid, evalTasks)
+}

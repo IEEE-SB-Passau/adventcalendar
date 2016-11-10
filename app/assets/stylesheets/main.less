@@ -1,0 +1,301 @@
+@import "bootstrap/bootstrap.less";
+
+@import "bootstrap-fileinput.less";
+@import "bootstrap-datetimepicker";
+
+.glyphicon-refresh-animate {
+  -animation: spin .7s infinite linear;
+  -webkit-animation: spin2 .7s infinite linear;
+}
+
+@-webkit-keyframes spin2 {
+  from { -webkit-transform: rotate(0deg);}
+  to { -webkit-transform: rotate(360deg);}
+}
+
+@keyframes spin {
+  from { transform: scale(1) rotate(0deg);}
+  to { transform: scale(1) rotate(360deg);}
+}
+
+body {
+  background: #c9d9e5 url("../images/page_bg.jpg");
+}
+
+tr.disabled {
+  color: grey;
+}
+
+#footer {
+  text-align: center;
+}
+
+.content {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.fullbody {
+  padding-left:22px;
+}
+
+.navbar {
+  margin-bottom: 0;
+}
+
+.box-round {
+  border-radius: 4px 4px 4px 4px;
+  border-color: #E7E7E7;
+  background-color: #F8F8F8;
+  margin:0;
+  padding: 15px;
+}
+
+.alert {
+  margin-bottom:10px !important;
+}
+
+.diff-mismatch {
+  color: #b94a48;
+  background-color: #f2dede;
+}
+
+.footer {
+  margin-top:10px;
+}
+
+/* Calendar css */
+
+#calendar {
+  position: relative;
+  width: 100%;
+  margin: auto;
+  border: 3px solid rgba(255,255,255,0.32);
+}
+#calendar .aspect-ratio { padding-bottom: 60.862% }
+
+#calendar .content {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-image: url("../images/bg_small.jpg");
+  background-size: 100% auto;
+  overflow: hidden;
+}
+
+.page-header {
+  margin: 40px 0 0;
+  border:none;
+}
+
+#calendar a {
+  position: absolute;
+  overflow: hidden;
+  display: block;
+  visibility: hidden;
+  padding: 0;
+  border: 3px solid rgba(255,255,255,0.32);
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.32);
+
+  text-decoration: none;
+  text-align: left;
+  font-size: 32px;
+  color: rgba(255,255,255,1);
+  font-family: 'Didact Gothic', 'Century Gothic', sans-serif;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.64);
+}
+
+#calendar a.active {
+  visibility: visible;
+}
+
+#calendar a.active:hover {
+  background: rgba(255,255,255,0.16);
+  border: 3px solid rgba(255,255,255,0.64);
+  color: rgba(255,255,255,1);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.64);
+}
+
+
+#door0 {
+  line-height: 0 !important;
+  font-size: 0 !important;
+  color: transparent !important;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#door1 {
+  top: 55.4%;
+  left: 72.8%;
+  width: 7.4%;
+  height: 15%;
+}
+
+#door2 {
+  top: 45%;
+  left: 53%;
+  width: 10%;
+  height: 13.5%;
+}
+
+#door3 {
+  top: 51.3%;
+  left: 23.8%;
+  width: 8.3%;
+  height: 19%;
+}
+
+#door4 {
+  top: 81.2%;
+  left: 61.1%;
+  width: 8.8%;
+  height: 14%;
+}
+
+#door5 {
+  top: 60%;
+  left: 81.5%;
+  width: 11.4%;
+  height: 23%;
+}
+
+#door6 {
+  top: 83%;
+  left: 50.6%;
+  width: 9.8%;
+  height: 10%;
+}
+
+#door7 {
+  top: 34.5%;
+  left: 35.5%;
+  width: 9%;
+  height: 9.5%;
+}
+
+#door8 {
+  top: 10%;
+  left: 75%;
+  width: 7%;
+  height: 11%;
+}
+
+#door9 {
+  top: 35%;
+  left: 25%;
+  width: 8%;
+  height: 10%;
+}
+
+#door10 {
+  top: 21%;
+  left: 59%;
+  width: 8%;
+  height: 13%;
+}
+
+#door11 {
+  top: 69%;
+  left: 52%;
+  width: 5%;
+  height: 10%;
+}
+
+#door12 {
+  top: 59%;
+  left: 32.5%;
+  width: 7%;
+  height: 12%;
+}
+
+#door13 {
+  top: 3.4%;
+  left: 4.8%;
+  width: 11.8%;
+  height: 22.1%;
+}
+
+#door14 {
+  top: 59%;
+  left: 61%;
+  width: 9%;
+  height: 18%;
+}
+
+#door15 {
+  top: 17%;
+  left: 92.5%;
+  width: 6.2%;
+  height: 19%;
+}
+
+#door16 {
+  top: 36%;
+  left: 4%;
+  width: 11%;
+  height: 10%;
+}
+
+#door17 {
+  top: 75%;
+  left: 70.4%;
+  width: 10.2%;
+  height: 24%;
+}
+
+#door18 {
+  top: 58%;
+  left: 43%;
+  width: 6%;
+  height: 12%;
+}
+
+#door19 {
+  top: 25%;
+  left: 21%;
+  width: 11%;
+  height: 9%;
+}
+
+#door20 {
+  top: 72%;
+  left: 39%;
+  width: 9%;
+  height: 17%;
+}
+
+#door21 {
+  top: 24%;
+  left: 37%;
+  width: 12%;
+  height: 9.8%;
+}
+
+#door22 {
+  top: 34.8%;
+  left: 15.6%;
+  width: 7.5%;
+  height: 19%;
+}
+
+#door23 {
+  top: 45%;
+  left: 39.4%;
+  width: 7.5%;
+  height: 12%;
+}
+
+#door24 {
+  top: 23%;
+  left: 69%;
+  width: 19%;
+  height: 24%;
+}

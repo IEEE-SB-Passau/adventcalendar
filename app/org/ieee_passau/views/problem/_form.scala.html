@@ -1,0 +1,62 @@
+@import org.ieee_passau.models.{EvalMode, Problem, User}
+@import org.ieee_passau.views.html.bootstrap3.{buttonSave, text, textareaBs}
+@(problem: Form[Problem], evalModes: List[EvalMode])(implicit flash: Flash, sessionUser: Option[User])
+
+<fieldset>
+    @if(problem.value.isDefined) {
+        <input type="hidden" name="id" value="@problem.value.get.id.get" />
+    }
+    @text(problem("title"), label = "Titel", placeholder = "Titel")
+    <div class="form-group @if(problem.errors.nonEmpty) {
+        @problem.errors.map { e => @if(e.message.contains("Tür")) { has-error } }
+    }">
+        <label class="col-sm-2 control-label">Türchen</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" id="door" name="door" value="@problem("door").value.getOrElse("")" placeholder="Türchen"/>
+            <span class="help-block">
+                @if(problem.errors.nonEmpty) {
+                    @problem.errors.map { e => @if(e.messages.head.contains("Tür")) { @e.messages.head }}
+                }
+            </span>
+        </div>
+    </div>
+    @textareaBs(problem("description"), label = "Beschreibung", placeholder = "Beschreibung", rows = 3, wysiwyg = true)
+
+    @dateManualError(problem("readableStart"), label = "Sichtbar ab", placeholder = "01.12.2013")
+    @{
+        var hasError = false
+        var errorMsg = ""
+        if(problem.errors.nonEmpty) {
+            problem.errors.foreach { e => if(e.messages.head.contains("Sichtbar")) {
+                hasError = true
+                errorMsg = e.messages.head
+            }}
+        }
+        dateManualError(problem("readableStop"), label = "Sichtbar bis", placeholder = "01.12.2013", hasError = hasError, errorMsg = errorMsg)
+    }
+    @dateManualError(problem("solvableStart"), label = "Lösbar ab", placeholder = "01.12.2013")
+    @{
+        var hasError = false
+        var errorMsg = ""
+        if(problem.errors.nonEmpty) {
+            problem.errors.foreach { e => if(e.messages.head.contains("Lösbar")) {
+                hasError = true
+                errorMsg = e.message
+            }}
+        }
+        dateManualError(problem("solvableStop"), label = "Lösbar bis", placeholder = "01.12.2013", hasError = hasError, errorMsg = errorMsg)
+    }
+
+    <div class="form-group">
+        <label for="evalMode" class="col-sm-2 control-label">Bewertungsmodus</label>
+        <div class="col-sm-10">
+            <select id="evalMode" size="1" name="evalMode" class="col-sm-10 form-control">
+            @evalModes.map { mode =>
+                <option value="@mode.mode" @{if(problem.value.isDefined && mode.mode == problem.get.evalMode.toString) "selected" }>@mode.mode</option>
+            }
+            </select>
+        </div>
+    </div>
+
+    @buttonSave()
+</fieldset>

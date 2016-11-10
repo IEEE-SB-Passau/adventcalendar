@@ -1,0 +1,22 @@
+@import helper._
+@import org.ieee_passau.models.{EvalTask, User}
+@import org.ieee_passau.views.html.main
+@(pid: Int, id: Int, task: Form[EvalTask])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader)
+
+@main("Auswertungsschritt bearbeiten") {
+
+    <ol class="breadcrumb">
+        <li><a href="@org.ieee_passau.controllers.routes.ProblemController.index">Übersicht</a></li>
+        <li><a href="@org.ieee_passau.controllers.routes.ProblemController.edit(pid)">Problem</a></li>
+        <li class="active">Auswertungsschritt</li>
+    </ol>
+
+    <form action="@org.ieee_passau.controllers.routes.EvalTaskController.update(pid, id)" method="post" enctype="multipart/form-data" class="form-horizontal">
+        @CSRF.formField
+        <fieldset>
+            <div class="well">
+                @_form(pid, task)
+            </div>
+        </fieldset>
+    </form>
+}

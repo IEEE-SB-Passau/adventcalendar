@@ -1,0 +1,19 @@
+@import helper._
+@import org.ieee_passau.models.{EvalMode, Problem, User}
+@import org.ieee_passau.views.html.main
+@(problem: Form[Problem], evalModes: List[EvalMode])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader)
+
+@main("Problem hinzufügen") {
+
+    <ol class="breadcrumb">
+        <li><a href="@org.ieee_passau.controllers.routes.ProblemController.index">Übersicht</a></li>
+        <li class="active">Problem</li>
+    </ol>
+
+    @form(org.ieee_passau.controllers.routes.ProblemController.save, 'class -> "form-horizontal") {
+        @CSRF.formField
+        <div class="well">
+            @_form(problem, evalModes)
+        </div>
+    }
+}

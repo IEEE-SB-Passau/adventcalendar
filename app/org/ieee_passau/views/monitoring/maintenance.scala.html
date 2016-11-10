@@ -1,0 +1,66 @@
+@import helper._
+@import org.ieee_passau.models.{Posting, User}
+@import org.ieee_passau.views.html.bootstrap3.{buttonSave, text, textareaBs}
+@import org.ieee_passau.views.html.main
+@(running: Boolean, statusMessage: Form[(Boolean, String)], statusPost: Form[Posting], frontpage: Form[Posting])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader)
+
+@main("Wartung") {
+    <h3>Statusmeldung</h3>
+    @if(running) {
+        <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.EvaluationController.playPause">
+            @CSRF.formField
+            <div class="well">
+                <fieldset>
+                    <input type="hidden" name="state" value="false"/>
+
+                    @textareaBs(statusMessage("msg"), label = "Nachricht", placeholder = "Nachricht", wysiwyg = true)
+
+                    <div class="form-group"><div class="col-sm-offset-2 col-sm-10">
+                        <button type="submit" class="btn btn-danger"><span class="glyphicon glyphicon-pause"></span> Evaluierung anhalten</button>
+                    </div></div>
+                </fieldset>
+            </div>
+        </form>
+    } else {
+        <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.EvaluationController.playPause">
+            @CSRF.formField
+            <div class="well alert-danger">
+                Aktuell ist das System angehalten
+                <fieldset>
+                    <input type="hidden" name="state" value="true"/>
+                    <input type="hidden" name="msg" value=""/>
+
+                    <div class="form-group"><div class="col-sm-offset-2 col-sm-10">
+                        <button type="submit" class="btn btn-success pull-right"><span class="glyphicon glyphicon-play"></span> Evaluierung starten</button>
+                    </div></div>
+                </fieldset>
+            </div>
+        </form>
+    }
+
+    <h3>Startseite</h3>
+    <div class="well">
+        <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.EvaluationController.changeStatus(2)">
+            @CSRF.formField
+            <fieldset>
+                @text(frontpage("title"), label = "Titel", placeholder = "Titel")
+                @textareaBs(frontpage("content"), rows = 3,  label = "Inhalt", placeholder = "Inhalt", wysiwyg = true)
+
+                @buttonSave()
+            </fieldset>
+        </form>
+    </div>
+
+    <h3>Meldungsübersicht</h3>
+    <div class="well">
+        <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.EvaluationController.changeStatus(1)">
+            @CSRF.formField
+            <fieldset>
+                @text(statusPost("title"), label = "Titel", placeholder = "Title")
+                @textareaBs(statusPost("content"), rows = 3,  label = "Inhalt", placeholder = "Inhalt", wysiwyg = true)
+
+                @buttonSave()
+            </fieldset>
+        </form>
+    </div>
+}
