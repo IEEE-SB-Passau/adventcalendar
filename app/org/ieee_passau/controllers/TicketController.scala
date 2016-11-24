@@ -53,7 +53,7 @@ object TicketController extends Controller with PermissionCheck {
           subject = "Adventskalender Frage zu Aufgabe " + problem.door + " " + problem.title,
           from = sessionUser.get.username + " @ Adventskalender <adventskalender@ieee.students.uni-passau.de>",
           to = List("adventskalender@ieee.students.uni-passau.de"),
-          bodyText = Some(ticket.text + "\n\n" + "Antworten: \n" + org.ieee_passau.controllers.routes.TicketController.view(id).absoluteURL())
+          bodyText = Some(ticket.text + "\n\n" + "Antworten: \n" + org.ieee_passau.controllers.routes.TicketController.view(id).absoluteURL(play.Configuration.root().getBoolean("application.https", false)))
         )
         MailerPlugin.send(email)
 
