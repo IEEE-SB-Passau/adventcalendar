@@ -113,7 +113,7 @@ class VMClient(host: String, port: Int)
               <program>
                 <filename>{programName}</filename>
                 <content>{base64Encode(program)}</content>
-                <language>{lang.name}</language>
+                <language>{lang.id}</language>
               </program>
               <inputs>
                 <streams>
@@ -203,7 +203,7 @@ class VMClient(host: String, port: Int)
               <program>
                 <filename>{filename}</filename>
                 <content>{Base64.getEncoder.encodeToString(file)}</content>
-                <language>{lang.name}</language>
+                <language>{lang.id}</language>
               </program>
               <inputs>
                 <streams>
