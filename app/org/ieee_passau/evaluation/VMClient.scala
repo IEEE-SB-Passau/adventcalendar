@@ -84,18 +84,12 @@ class VMClient(host: String, port: Int)
         <utilization>
           <compilation>
             <cpu>0.0</cpu>
-            <memory>
-              <virtual>0.0</virtual>
-              <swap>0.0</swap>
-            </memory>
+            <memory>0.0</memory>
             <runtime>0.0</runtime>
           </compilation>
           <evaluation>
             <cpu>0.0</cpu>
-            <memory>
-              <virtual>0.0</virtual>
-              <swap>0.0</swap>
-            </memory>
+            <memory>0.0</memory>
             <runtime>0.0</runtime>
           </evaluation>
         </utilization>
@@ -134,7 +128,7 @@ class VMClient(host: String, port: Int)
         compilerResult.stdout = Some(base64Decode((resultXml \\ "outputs" \ "compilation" \ "streams" \ "stdOut").text))
         compilerResult.stderr = Some(base64Decode((resultXml \\ "outputs" \ "compilation" \ "streams" \ "stdErr").text))
         compilerResult.duration = Duration((resultXml \\ "utilization" \ "compilation" \ "runtime").text.toFloat, MILLISECONDS)
-        compilerResult.memory = (resultXml \\ "utilization" \ "compilation" \ "memory" \ "virtual").text.toFloat
+        compilerResult.memory = (resultXml \\ "utilization" \ "compilation" \ "memory").text.toFloat
         compilerResult.terminationResult = Some((resultXml \\ "outputs" \ "compilation" \ "terminationReason").text)
 
         log.info("%s compiled sourcecode for %s with exit code %d in %d millis".format(this, job, compilerResult.exitCode.getOrElse(-1), compilerResult.duration.toMillis))
@@ -144,7 +138,7 @@ class VMClient(host: String, port: Int)
         evaluationResult.stdout = Some(base64Decode((resultXml \\ "outputs" \ "evaluation" \ "streams" \ "stdOut").text))
         evaluationResult.stderr = Some(base64Decode((resultXml \\ "outputs" \ "evaluation" \ "streams" \ "stdErr").text))
         evaluationResult.duration = Duration((resultXml \\ "utilization" \ "evaluation" \ "runtime").text.toFloat, MILLISECONDS)
-        evaluationResult.memory = (resultXml \\ "utilization" \ "evaluation" \ "memory" \ "virtual").text.toFloat
+        evaluationResult.memory = (resultXml \\ "utilization" \ "evaluation" \ "memory").text.toFloat
         evaluationResult.terminationResult = Some((resultXml \\ "outputs" \ "evaluation" \ "terminationReason").text)
 
         log.info("%s evaluated sourcecode for %s with exit code %d in %d millis".format(this, job, evaluationResult.exitCode.getOrElse(-1), evaluationResult.duration.toMillis))
