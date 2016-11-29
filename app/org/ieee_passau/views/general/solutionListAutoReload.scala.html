@@ -20,9 +20,9 @@
             });
 
             function checkSolutionUpdates () {
-                $.ajax(
-                    @org.ieee_passau.controllers.routes.MainController.getUserProblemSolutions(door)
-                ).done(function (data) {
+                $.ajax({
+                    url: "@org.ieee_passau.controllers.routes.MainController.getUserProblemSolutions(door)"
+                }).done(function (data) {
                     var queuedSolutionPresent = false;
 
                     $.each(data, function (i, solutionInfo) {
