@@ -143,9 +143,9 @@ class VMClient(host: String, port: Int)
 
         log.info("%s evaluated sourcecode for %s with exit code %d in %d millis".format(this, job, evaluationResult.exitCode.getOrElse(-1), evaluationResult.duration.toMillis))
 
-        val result = if (evaluationResult.terminationResult.contains("time")) {
+        val result = if (evaluationResult.terminationResult.getOrElse("").contains("time")) {
           RuntimeExceeded
-        } else if (evaluationResult.terminationResult.contains("memory"))  {
+        } else if (evaluationResult.terminationResult.getOrElse("").contains("memory"))  {
           MemoryExceeded
         } else if (!compilerResult.exitCode.contains(0)) {
           CompileError
