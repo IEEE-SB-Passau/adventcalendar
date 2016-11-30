@@ -4,7 +4,7 @@
 UPDATE e_prog_lang SET name = 'C, GCC 4.9.3, Standard: C11, gegen libm gelinkt' WHERE LANGUAGE = 'C';
 UPDATE e_prog_lang SET name = 'COBOL, OpenCOBOL 1.1, Free Format' WHERE LANGUAGE = 'COBOL';
 UPDATE e_prog_lang SET name = 'C++, GCC 4.9.3, Standard: C++11, gegen libm gelinkt' WHERE LANGUAGE = 'CPP';
-UPDATE e_prog_lang SET name = 'C#, Mono C# compiler version 4.9.0, Mono Project' WHERE LANGUAGE = 'CSHARP';
+UPDATE e_prog_lang SET name = 'C#, Mono C# compiler version 4.8.0.371, Mono Project' WHERE LANGUAGE = 'CSHARP';
 UPDATE e_prog_lang SET name = 'D, version 0.17.1-r1, LDC: DMD v2.068.2 and LLVM 3.8.1' WHERE LANGUAGE = 'D';
 UPDATE e_prog_lang SET name = 'Forth, Gforth 0.7.3' WHERE LANGUAGE = 'FORTH';
 UPDATE e_prog_lang SET name = 'Fortran, GCC 4.9.3, Standard: Fortran 90' WHERE LANGUAGE = 'FORTRAN';
@@ -27,6 +27,6 @@ UPDATE e_prog_lang SET name = 'Rust, Rust 1.13.0' WHERE LANGUAGE = 'RUST';
 UPDATE e_prog_lang SET name = 'Scala, Scala 2.11.8' WHERE LANGUAGE = 'SCALA';
 UPDATE e_prog_lang SET name = 'Tool Command Language, TCL 8.5.17' WHERE LANGUAGE = 'TCL';
 UPDATE e_prog_lang SET name = 'Vala, Vala 0.32.1' WHERE LANGUAGE = 'VALA';
-UPDATE e_prog_lang SET name = 'Visual Basic .Net, Mono-Basic 4.6, Mono Project' WHERE LANGUAGE = 'VISUALBASIC';
+UPDATE e_prog_lang SET name = 'Visual Basic .Net, Mono-Basic 4.8.0.371, Mono Project' WHERE LANGUAGE = 'VISUALBASIC';
 
 # --- !Downs
