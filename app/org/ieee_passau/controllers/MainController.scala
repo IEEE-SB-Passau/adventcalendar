@@ -178,7 +178,7 @@ object MainController extends Controller with PermissionCheck {
       case None => NotFound(org.ieee_passau.views.html.errors.e404())
       case Some(problem) =>
         if (!problem.readable) {
-          Unauthorized(org.ieee_passau.views.html.errors.e403())
+          Unauthorized(org.ieee_passau.views.html.errors.e404())
         } else {
           val userId = if (sessionUser.isDefined) sessionUser.get.id.get else -1
           val langs = Languages.sortBy(_.name).list
