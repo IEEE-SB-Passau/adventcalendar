@@ -19,7 +19,7 @@
             @s.solution.created.format("dd.MM.yyyy HH:mm")
         </p>
         <p><label class="col-sm-2 control-label">Problem</label>
-          <a href="/problem/@problem.door">@problem.title</a>
+          <a href=@org.ieee_passau.controllers.routes.MainController.problemDetails(problem.door)>@problem.title</a>
         </p>
     </div>
 
