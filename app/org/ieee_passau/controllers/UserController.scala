@@ -206,7 +206,8 @@ object UserController extends Controller with PermissionCheck {
       },
       user => {
         val pwh = if (user.password.isEmpty) Users.byId(id).firstOption.get.password else PasswordHasher.hashPassword(user.password)
-        Users.update(id, user.copy(password = pwh))
+        val tkn = Users.byId(id).firstOption.get.activationToken
+        Users.update(id, user.copy(password = pwh, activationToken = tkn))
         Redirect(org.ieee_passau.controllers.routes.UserController.edit(id)).flashing("success" -> "Benutzer %s wurde aktualisiert".format(user.username))
       }
     )
