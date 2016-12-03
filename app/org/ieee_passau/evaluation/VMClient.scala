@@ -21,11 +21,12 @@ import scala.xml.{Elem, Text}
 
 object VMClient {
   def props(host: String,
-            port: Int): Props =
-    Props(new VMClient(host, port))
+            port: Int,
+            name: String): Props =
+    Props(new VMClient(host, port, name))
 }
 
-class VMClient(host: String, port: Int)
+class VMClient(host: String, port: Int, name:String)
   extends EvaluationActor {
 
   private val timeout = Timeout(MathHelper.makeDuration(play.Configuration.root().getString("evaluator.inputregulator.joblifetime", "90 seconds")))
@@ -43,7 +44,7 @@ class VMClient(host: String, port: Int)
   private val connection = context.actorOf(TCPActor.props(host, port))
 
   override def toString: String = {
-    "VMClient@%s[host=%s]".format(Integer.toHexString(hashCode()), host)
+    "VMClient@%s[host=%s]".format(Integer.toHexString(hashCode()), name)
   }
 
   //noinspection RedundantBlock
@@ -263,7 +264,7 @@ class VMClient(host: String, port: Int)
         eJob = runJob(job)
       } catch {
         case e: Exception =>
-          log.error("%s encountered an exception while processing %s: %s".format(this, job, e), e)
+          log.error("%s encountered an exception while processing %s: %s".format(this.toString, job, e), e)
           context.system.eventStream.publish(JobFailure(job))
           throw e
       }
