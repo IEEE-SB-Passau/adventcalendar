@@ -82,6 +82,6 @@ class VMMaster extends EvaluationActor with AkkaScopingHelper {
   }
 
   override def supervisorStrategy: SupervisorStrategy = OneForOneStrategy() {
-    case e => Stop
+    case _ => Stop
   }
 }

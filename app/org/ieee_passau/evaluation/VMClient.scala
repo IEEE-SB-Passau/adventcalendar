@@ -4,7 +4,8 @@ import java.io.PrintStream
 import java.net.Socket
 import java.util.Base64
 
-import akka.actor.Props
+import akka.actor.SupervisorStrategy.Escalate
+import akka.actor.{OneForOneStrategy, PoisonPill, Props, SupervisorStrategy}
 import akka.pattern.ask
 import akka.util.Timeout
 import org.ieee_passau.evaluation.Messages._
@@ -43,6 +44,14 @@ class VMClient(host: String, port: Int, name:String)
 
   private val connection = context.actorOf(TCPActor.props(host, port))
 
+  override def supervisorStrategy: SupervisorStrategy = OneForOneStrategy() {
+    case _ => Escalate
+  }
+
+  override def postStop(): Unit = {
+    connection ! PoisonPill
+    super.postStop()
+  }
   override def toString: String = {
     "VMClient@%s[host=%s]".format(Integer.toHexString(hashCode()), name)
   }
@@ -123,6 +132,8 @@ class VMClient(host: String, port: Int, name:String)
 
         val resultXml = Await.result((connection ? data) (timeout).mapTo[Elem], timeout.duration)
         log.debug("%s successfully deployed sourcecode for %s".format(this, job))
+
+        if (!(resultXml \\ "successful").text.toBoolean) throw new RuntimeException("Received no valid result from eval.")
 
         // Compile result
         compilerResult.exitCode = if ((resultXml \\ "outputs" \ "compilation" \ "returnCode").text.isEmpty) None else Some((resultXml \\ "outputs" \ "compilation" \ "returnCode").text.toInt)
@@ -219,6 +230,8 @@ class VMClient(host: String, port: Int, name:String)
         val resultXml = Await.result((connection ? data) (timeout).mapTo[Elem], timeout.duration)
         log.debug("%s successfully deployed binary file for %s".format(this, job))
 
+        if ((resultXml \\ "successfull").text.toBoolean) throw new RuntimeException("Received no valid result from eval.")
+
         // Evaluation result
         evaluationResult.exitCode = if ((resultXml \\ "outputs" \ "evaluation" \ "returnCode").text.isEmpty) None else Some((resultXml \\ "outputs" \ "evaluation" \ "returnCode").text.toInt)
         evaluationResult.stdout = Some(base64Decode((resultXml \\ "outputs" \ "evaluation" \ "streams" \ "stdOut").text))
@@ -266,7 +279,7 @@ class VMClient(host: String, port: Int, name:String)
         case e: Exception =>
           log.error("%s encountered an exception while processing %s: %s".format(this.toString, job, e), e)
           context.system.eventStream.publish(JobFailure(job))
-          throw e
+          throw new RuntimeException("Timeout, shutting down actor", e)
       }
 
       log.info("%s finished %s".format(this, job))
@@ -280,16 +293,52 @@ object TCPActor {
 }
 
 class TCPActor(host: String, port: Int) extends EvaluationActor {
+  private val timeout = Timeout(MathHelper.makeDuration(play.Configuration.root().getString("evaluator.inputregulator.joblifetime", "90 seconds")) - new FiniteDuration(5, SECONDS)).duration.toSeconds.toInt
+
+  private var socket: Socket = _
+
+  override def postStop(): Unit = {
+    if (socket != null) {
+      socket.close()
+    }
+    super.postStop()
+  }
+
   override def receive: Receive = {
+    case PoisonPill =>
+      socket.close()
+
     case data: xml.Elem =>
-      val sock = new Socket(host, port)
-      val os = new PrintStream(sock.getOutputStream)
-      os.print(data)
-      val is = new BufferedSource(sock.getInputStream)
-      val result = xml.XML.loadString(is.iter.mkString)
-      if ((result \ "backendStatus" \ "successful").text == "False") {
-        log.info("Error in vm %s: %s", this, base64Decode((result \ "backendStatus" \ "message").text))
-      }
-      sender ! result
+      new Runnable {
+        override def run(): Unit = {
+          Thread.currentThread().setName("TCP-actor" + host + ":" + port)
+          try {
+            socket = new Socket(host, port)
+            socket.setSoTimeout(timeout)
+            val os = new PrintStream(socket.getOutputStream)
+            os.print(data)
+            os.flush()
+            val is = new BufferedSource(socket.getInputStream)
+            val result = xml.XML.loadString(is.mkString)
+            if (!(result \\ "successful").text.toBoolean) {
+              log.info("Error in vm %s: %s", this, base64Decode((result \\ "message").text))
+            }
+            sender ! result
+          } catch {
+            case e: Throwable =>
+              val error =
+                <ieee-advent-calendar>
+                  <run>
+                    <successful>False</successful>
+                  </run>
+                </ieee-advent-calendar>
+              sender ! error
+              throw e
+          } finally {
+            socket.close()
+            socket = null
+          }
+        }
+      }.run()
   }
 }
