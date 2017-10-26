@@ -6,6 +6,7 @@ import org.ieee_passau.utils.{PasswordHasher, PermissionCheck}
 import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
 import play.api.db.slick._
+import play.api.i18n.Messages
 import play.api.libs.mailer._
 import play.api.mvc._
 
@@ -36,7 +37,7 @@ object UserController extends Controller with PermissionCheck {
     if (maybeUser.isDefined) {
       val user = maybeUser.get
       Redirect(org.ieee_passau.controllers.routes.MainController.calendar())
-        .flashing("success" -> "Du bis nun als %s angemeldet.".format(user.username))
+        .flashing("success" -> Messages("user.impersonate.message", user.username))
         .withSession("user" -> user.id.get.toString)
 
     } else {
@@ -61,10 +62,9 @@ object UserController extends Controller with PermissionCheck {
 
       userLogin => {
         val user: User = userLogin.user.get
-        val msg = "Willkommen zurück " + user.username + "!"
         val uid = user.id.get.toString
         Redirect(org.ieee_passau.controllers.routes.MainController.calendar())
-          .flashing("success" -> msg)
+          .flashing("success" -> Messages("user.login.message", user.username))
           .withSession("user" -> uid)
       }
     )
@@ -73,7 +73,7 @@ object UserController extends Controller with PermissionCheck {
   def logout: Action[AnyContent] = requireLogin { user => Action { implicit rs =>
     implicit val sessionUser = Some(user)
     Redirect(org.ieee_passau.controllers.routes.MainController.calendar())
-      .flashing("success" -> "Bis bald %s!".format(user.username))
+      .flashing("success" -> Messages("user.logout.message", user.username))
       .withNewSession;
   }}
 
@@ -93,6 +93,7 @@ object UserController extends Controller with PermissionCheck {
       registration => {
         val createdUser: User = registration.makeUser
         val link = org.ieee_passau.controllers.routes.UserController.activate(createdUser.activationToken.get).absoluteURL(secure = play.Configuration.root().getBoolean("application.https", false))
+        // TODO i18n
         val regMail = Email(
           "IEEE Adventskalender Registrierung",
           "IEEE Adventskalender <adventskalender@ieee.students.uni-passau.de>",
@@ -104,7 +105,7 @@ object UserController extends Controller with PermissionCheck {
         MailerPlugin.send(regMail)
         Users += createdUser
         Redirect(org.ieee_passau.controllers.routes.UserController.login())
-          .flashing("success" -> "Benutzer %s wurde angelegt. Bitte verifiziere deine E-Mailadresse mit dem zugesandten Link.".format(createdUser.username))
+          .flashing("success" -> Messages("user.register.error.existing", createdUser.username))
       }
     )
   }}
@@ -114,15 +115,14 @@ object UserController extends Controller with PermissionCheck {
     implicit val sessionUser = maybeUser
     maybeUser match {
       case Some(user) =>
-        val msg = "Willkommen " + user.username + "!"
         Users.update(user.id.get, user.copy(active = true, activationToken = None))
         Redirect(org.ieee_passau.controllers.routes.MainController.calendar())
-          .flashing("success" -> msg)
+          .flashing("success" -> Messages("user.register.message", user.username))
           .addingToSession("user" -> user.id.get.toString)
 
       case None =>
         Redirect(org.ieee_passau.controllers.routes.MainController.calendar())
-          .flashing("warning" -> "Dieser Link ist nicht gültig!")
+          .flashing("warning" -> Messages("error.invalidlink"))
     }
   }}
 
@@ -140,6 +140,7 @@ object UserController extends Controller with PermissionCheck {
       },
 
       username => {
+        //TODO i18n
         val user = Users.byUsername(username).first
         val token = PasswordHasher.generateUrlString()
         val link = org.ieee_passau.controllers.routes.UserController.editPassword(token).absoluteURL(secure = play.Configuration.root().getBoolean("application.https", false))
@@ -155,7 +156,7 @@ object UserController extends Controller with PermissionCheck {
         Users.update(user.id.get, user.copy(activationToken = Some(token)))
 
         Redirect(org.ieee_passau.controllers.routes.UserController.login())
-          .flashing("success" -> "Es wurde eine E-Mail an die angegeben Adresse gesendet. Bitte benutze den Link um dein Passwort zurückzusetzen")
+          .flashing("success" -> Messages("user.register.verify.message"))
       }
     )
   }}
@@ -170,7 +171,7 @@ object UserController extends Controller with PermissionCheck {
 
       case None =>
         Redirect(org.ieee_passau.controllers.routes.MainController.calendar())
-          .flashing("danger" -> "Dieser Link ist nicht gültig!")
+          .flashing("danger" -> Messages("error.invalidlink"))
     }
   }}
 
@@ -190,9 +191,8 @@ object UserController extends Controller with PermissionCheck {
           val pwh = PasswordHasher.hashPassword(password)
           Users.update(user.id.get, user.copy(password = pwh, activationToken = None))
 
-          val msg = "Willkommen zurück " + user.username + "!"
           Redirect(org.ieee_passau.controllers.routes.MainController.calendar())
-            .flashing("success" -> msg)
+            .flashing("success" -> Messages("user.login.messeage"))
         }
       )
     }
@@ -208,7 +208,8 @@ object UserController extends Controller with PermissionCheck {
         val pwh = if (user.password.isEmpty) Users.byId(id).firstOption.get.password else PasswordHasher.hashPassword(user.password)
         val tkn = Users.byId(id).firstOption.get.activationToken
         Users.update(id, user.copy(password = pwh, activationToken = tkn))
-        Redirect(org.ieee_passau.controllers.routes.UserController.edit(id)).flashing("success" -> "Benutzer %s wurde aktualisiert".format(user.username))
+        Redirect(org.ieee_passau.controllers.routes.UserController.edit(id))
+          .flashing("success" -> Messages("user.update.message", user.username))
       }
     )
   }}

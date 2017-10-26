@@ -26,3 +26,6 @@ libraryDependencies ++= Seq(
 includeFilter in (Assets, LessKeys.less) := "main.less"
 
 excludeFilter in (Assets, LessKeys.less) := "_*.less"
+
+
+fork in run := true

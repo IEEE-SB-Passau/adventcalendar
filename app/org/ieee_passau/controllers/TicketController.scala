@@ -8,6 +8,7 @@ import org.ieee_passau.utils.PermissionCheck
 import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
 import play.api.db.slick._
+import play.api.i18n.Messages
 import play.api.libs.mailer.{Email, MailerPlugin}
 import play.api.mvc._
 
@@ -43,12 +44,14 @@ object TicketController extends Controller with PermissionCheck {
     val now = new Date()
     ProblemForms.ticketForm.bindFromRequest.fold(
       errorForm => {
-        Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door)).flashing("danger" -> "Beim Erstellen deiner Frage ist etwas schief gelaufen!")
+        Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
+          .flashing("danger" -> Messages("ticket.create.error"))
       },
       ticket => {
         val problem = Problems.byDoor(door).first
         val id = (Tickets returning Tickets.map(_.id)) += Ticket(None, problem.id, sessionUser.get.id, None, ticket.text, public = false, now)
 
+        //TODO i18n
         val email = Email(
           subject = "Adventskalender Frage zu Aufgabe " + problem.door + " " + problem.title,
           from = sessionUser.get.username + " @ Adventskalender <adventskalender@ieee.students.uni-passau.de>",
@@ -57,7 +60,8 @@ object TicketController extends Controller with PermissionCheck {
         )
         MailerPlugin.send(email)
 
-        Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door)).flashing("success" -> "Wir werden uns um deine Frage kümmern.")
+        Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
+          .flashing("success" -> Messages("ticket.create.message"))
       }
     )
   }}
@@ -67,7 +71,8 @@ object TicketController extends Controller with PermissionCheck {
     val now = new Date()
     ProblemForms.ticketForm.bindFromRequest.fold(
       errorForm => {
-        Redirect(org.ieee_passau.controllers.routes.TicketController.index()).flashing("danger" -> "Beim Beantworten der Frage ist etwas schief gelaufen!")
+        Redirect(org.ieee_passau.controllers.routes.TicketController.index())
+          .flashing("danger" -> Messages("ticket.answer.error"))
       },
       ticket => {
         val parent = Tickets.byId(id).firstOption
@@ -80,6 +85,7 @@ object TicketController extends Controller with PermissionCheck {
             val updated = parent.get.copy(public = ticket.public)
             Tickets.update(id, updated)
 
+            //TODO i18n
             val email = Email(
               subject = "Adventskalender Antwort auf die Frage zu Aufgabe " + problem.get.door + " " + problem.get.title,
               from = sessionUser.get.username + " @ Adventskalender <adventskalender@ieee.students.uni-passau.de>",
@@ -88,12 +94,15 @@ object TicketController extends Controller with PermissionCheck {
             )
             MailerPlugin.send(email)
 
-            Redirect(org.ieee_passau.controllers.routes.TicketController.index()).flashing("success" -> "Antwort wurde gespeichert!")
+            Redirect(org.ieee_passau.controllers.routes.TicketController.index())
+              .flashing("success" -> Messages("ticket.answer.message"))
           } else {
-            Redirect(org.ieee_passau.controllers.routes.TicketController.index()).flashing("danger" -> "Beim Beantworten der Frage ist etwas schief gelaufen!")
+            Redirect(org.ieee_passau.controllers.routes.TicketController.index())
+              .flashing("danger" -> Messages("ticket.answer.error"))
           }
         } else {
-          Redirect(org.ieee_passau.controllers.routes.TicketController.index()).flashing("danger" -> "Beim Beantworten der Frage ist etwas schief gelaufen!")
+          Redirect(org.ieee_passau.controllers.routes.TicketController.index())
+            .flashing("danger" -> Messages("ticket.answer.error"))
         }
       }
     )

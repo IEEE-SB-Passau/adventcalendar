@@ -1,0 +1,44 @@
+user.impersonate.message=Du bis nun als {0} angemeldet.
+user.login.message=Willkommen zurück {0}!
+user.logout.message=Bis bald {0}!
+user.register.error.existing=Benutzer {0} wurde angelegt. Bitte verifiziere deine E-Mailadresse mit dem zugesandten Link.
+user.register.message=Willkommen {0}!
+user.register.verify.message=Es wurde eine E-Mail an die angegeben Adresse gesendet. Bitte benutze den Link um dein Passwort zurückzusetzen
+user.update.message=Benutzer {0} wurde aktualisiert.
+
+ticket.create.error=Beim Erstellen deiner Frage ist etwas schief gelaufen!
+ticket.create.message=Wir werden uns um deine Frage kümmern.
+ticket.answer.error=Beim Beantworten der Frage ist etwas schief gelaufen!
+ticket.answer.message=Antwort wurde gespeichert!
+
+problem.create.message=Aufgabe{0} wurde angelegt.
+problem.update.message=Aufgabe{0} wurde aktualisiert.
+
+testcase.create.message=Testcase {0} wurde angelegt.
+testcase.update.message=Testcase {0} wurde aktualisiert.
+
+evaltask.create.message=Auswertungsschritt {0} wurde angelegt.
+evaltask.create.error.filemissing=Es muss eine Datei angegeben werden!
+evaltask.update.message=Auswertungsschritt {0} wurde angelegt.
+
+submit.success.message=Lösung wurde eingereicht.
+submit.error.message=Lösung konnte nicht eingereicht werden.
+submit.error.filesize=Die eingereichte Datei ist zu groß!
+submit.error.fileformat=Die Datei kann nicht als Programmtext gelesen werden!
+submit.error.invalidlang=Die angegebene Sprache wird nicht akzeptiert!
+submit.ratelimit.message=Du kannst momentan keine Lösung einreichen.
+submit.ratelimit.timer=Es kann nur eine Lösung pro Minute eingereicht werden!
+submit.ratelimit.queue=Solange deine letzte Lösung noch nicht ausgewertet wurde, kannst du nur alle 15 Minuten eine Lösung einreichen!
+
+status.update.message=Status wurde geändert.
+status.message.message=Die Auswertung ist im Moment angehalten, bitte habe etwas Geduld, das Team kümmert sich darum!<br>
+status.message.update.message=Meldung wurde geändert.
+
+jobs.error.invalidjob=Dieser Job existiert nicht!
+jobs.control.cancel.message=Dieser Job existiert nicht!
+jobs.control.revaluate.message=Testfall wird neu ausgewertet!
+
+error.invalidlink=Dieser Link ist nicht gültig!
+
+language.name=de
+language.icon=🇩🇪

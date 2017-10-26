@@ -25,6 +25,8 @@ GET         /logout                                    org.ieee_passau.controlle
 GET         /login                                     org.ieee_passau.controllers.UserController.login
 POST        /login                                     org.ieee_passau.controllers.UserController.authenticate
 
+GET         /language/:lang                            org.ieee_passau.controllers.UserController.updateLang(lang: String)
+
 GET         /register                                  org.ieee_passau.controllers.UserController.register
 POST        /register                                  org.ieee_passau.controllers.UserController.create
 GET         /register/:token                           org.ieee_passau.controllers.UserController.activate(token: String)

@@ -194,7 +194,8 @@ object EvaluationController extends Controller with PermissionCheck {
       },
       status => {
         monitoringActor ! StatusM(status._1, status._2)
-        Redirect(org.ieee_passau.controllers.routes.EvaluationController.maintenance()).flashing("success" -> "Status wurde geändert!")
+        Redirect(org.ieee_passau.controllers.routes.EvaluationController.maintenance())
+          .flashing("success" -> play.api.i18n.Messages("status.update.message"))
       }
     )
   }}
@@ -222,7 +223,8 @@ object EvaluationController extends Controller with PermissionCheck {
       },
       posting => {
         Postings.update(id, posting)
-        Redirect(org.ieee_passau.controllers.routes.EvaluationController.maintenance()).flashing("success" -> "Meldung wurde aktualisiert!")
+        Redirect(org.ieee_passau.controllers.routes.EvaluationController.maintenance())
+          .flashing("success" ->  play.api.i18n.Messages("status.message.update.message"))
       }
     )
   }}
@@ -234,11 +236,12 @@ object EvaluationController extends Controller with PermissionCheck {
     maybeJob match {
       case None =>
         Redirect(org.ieee_passau.controllers.routes.EvaluationController.indexQueued())
-          .flashing("warning" -> "Dieser Job existiert nicht!")
+          .flashing("warning" -> play.api.i18n.Messages("jobs.error.invalidjob"))
       case Some(job) =>
-        Testruns.update(id, job.copy(result = Canceled, vm = Some("Abgebrochen"), completed = new Date, stage = None))
+        Testruns.update(id, job.copy(result = Canceled, vm = Some("Canceled"), completed = new Date, stage = None))
         Akka.system.eventStream.publish(JobFinished(BaseJob(job.testcaseId, "", "", "", "", "")))
-        Redirect(org.ieee_passau.controllers.routes.EvaluationController.indexQueued()).flashing("success" -> "Job wurde abgebrochen.")
+        Redirect(org.ieee_passau.controllers.routes.EvaluationController.indexQueued())
+          .flashing("success" -> play.api.i18n.Messages("jobs.control.cancel.message"))
     }
   }}
 
@@ -299,6 +302,7 @@ object EvaluationController extends Controller with PermissionCheck {
     } yield r).list.map { testrun =>
       Testruns.update(testrun.id.get, testrun.copy(result = Queued, stage = Some(0), vm = None))
     }
-    Redirect(org.ieee_passau.controllers.routes.EvaluationController.index()).flashing("success" -> "Testfall wird neu ausgewertet!")
+    Redirect(org.ieee_passau.controllers.routes.EvaluationController.index())
+      .flashing("success" -> play.api.i18n.Messages("jobs.control.revaluate.message"))
   }}
 }

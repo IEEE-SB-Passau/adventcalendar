@@ -13,6 +13,7 @@ import org.ieee_passau.utils.{ListHelper, PermissionCheck}
 import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
 import play.api.db.slick._
+import play.api.i18n.{Lang, Messages}
 import play.api.libs.Files.TemporaryFile
 import play.api.libs.concurrent.Akka
 import play.api.libs.functional.syntax._
@@ -115,19 +116,20 @@ object MainController extends Controller with PermissionCheck {
       Unauthorized(org.ieee_passau.views.html.errors.e403())
     } else if (lastSolutions.firstOption.nonEmpty && lastSolutions.first.created.after(new Date(now.getTime - 60000)) && !sessionUser.get.admin) {
       Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door)).flashing("danger" ->
-        "Du kannst momentan keine Lösung einreichen. Es kann nur eine Lösung pro Minute eingereicht werden!")
+        (Messages("submit.ratelimit.message") + " " + Messages("submit.ratelimit.timer")))
     } else if (trs.list.nonEmpty && trs.sortBy(_.desc).list.head.after(new Date(now.getTime - 900000)) && !sessionUser.get.admin) {
       Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door)).flashing("danger" ->
-        "Du kannst momentan keine Lösung einreichen. Solange deine letzte Lösung noch nicht ausgewertet wurde, kannst du nur alle 15 Minuten eine Lösung einreichen!")
+        (Messages("submit.ratelimit.message") + " " + Messages("submit.ratelimit.queue")))
     } else if (Languages.byLang(lang).isEmpty) {
       Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door)).flashing("danger" ->
-        "Lösung konnte nicht eingereicht werden, die angegebene Sprache wird nicht akzeptiert!")
+        (Messages("submit.error.message") + " " + Messages("submit.error.invalidlang")))
     } else {
 
       rs.body.file("solution").map { submission =>
         val sourceFile = submission.ref.file
         if (sourceFile.length > 262144) {
-          Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door)).flashing("danger" -> "Die eingereichte Datei ist zu groß!")
+          Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
+            .flashing("danger" -> (Messages("submit.error.message") + " " + Messages("submit.error.filesize")))
         } else {
           // When using 2 proxys, the maximal possible remote-ip length with separators is 49 chars -> rounding up to 50
           val remoteAddress = Some(rs.remoteAddress.take(50))
@@ -157,11 +159,14 @@ object MainController extends Controller with PermissionCheck {
           } catch {
             case pokemon: Throwable => // ignore
           }
-          if (success) Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door).url + "#latest").flashing("success" -> "Lösung wurde eingereicht.")
-          else Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door)).flashing("danger" -> "Lösung konnte nicht eingereicht werden. Die Datei kann nicht als Programmtext gelesen werden!")
+          if (success) Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door).url + "#latest")
+            .flashing("success" -> Messages("submit.success.message"))
+          else Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
+            .flashing("danger" -> (Messages("submit.error.message") + " " + Messages("submit.error.fileformat")))
         }
       } getOrElse {
-        Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door)).flashing("danger" -> "Lösung konnte nicht eingereicht werden!")
+        Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
+          .flashing("danger" -> Messages("submit.error.message"))
       }
     }
   }
@@ -214,7 +219,8 @@ object MainController extends Controller with PermissionCheck {
             else "JAVA"
 
           val running = Await.result(EvaluationController.monitoringActor ? StatusQ, 100 milli).asInstanceOf[StatusM]
-          val flash = if (!running.run) "warning" -> ("Die Auswertung ist im Moment angehalten, bitte habe etwas Geduld, das Team kümmert sich darum!<br>" + running.message) else "" -> ""
+          //TODO i18n
+          val flash = if (!running.run) "warning" -> (Messages("status.message.message") + running.message) else "" -> ""
           Ok(org.ieee_passau.views.html.general.problemDetails(problem, langs, lastLang, solutions, tickets, ProblemForms.ticketForm, flash))
         }
     }
@@ -248,7 +254,8 @@ object MainController extends Controller with PermissionCheck {
       },
       fb => {
         Feedbacks += Feedback(None, sessionUser.get.id.get, fb.rating, fb.pro, fb.con, fb.freetext)
-        Redirect(org.ieee_passau.controllers.routes.MainController.calendar()).flashing("success" -> "Vielen Danke für deine Rückmeldung")
+        Redirect(org.ieee_passau.controllers.routes.MainController.calendar())
+          .flashing("success" -> "Vielen Danke für deine Rückmeldung")
       }
     )
   }}

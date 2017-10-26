@@ -6,6 +6,7 @@ import org.ieee_passau.utils.PermissionCheck
 import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
 import play.api.db.slick._
+import play.api.i18n.Messages
 import play.api.libs.Files.TemporaryFile
 import play.api.mvc._
 
@@ -42,9 +43,10 @@ object EvalTaskController extends Controller with PermissionCheck {
         rs.body.file("program").map { program =>
           val newTask: EvalTask = newTaskRaw.copy(filename = program.filename, file = new File(program.ref.file).toByteArray())
           val id = (EvalTasks returning EvalTasks.map(_.id)) += newTask
-          Redirect(org.ieee_passau.controllers.routes.EvalTaskController.edit(pid, id)).flashing("success" -> "Auswertungsschritt %s wurde angelegt".format(newTaskRaw.position))
+          Redirect(org.ieee_passau.controllers.routes.EvalTaskController.edit(pid, id))
+            .flashing("success" -> Messages("evaltask.create.message", newTaskRaw.position.toString))
         } getOrElse {
-          BadRequest(org.ieee_passau.views.html.evaltask.insert(pid, TestcaseForms.evalTaskForm.fill(newTaskRaw).withError("program", "Es muss eine Datei angegeben werden")))
+          BadRequest(org.ieee_passau.views.html.evaltask.insert(pid, TestcaseForms.evalTaskForm.fill(newTaskRaw).withError("program", Messages("evaltask.create.error.filemissing"))))
         }
       }
     )
@@ -61,12 +63,14 @@ object EvalTaskController extends Controller with PermissionCheck {
         rs.body.file("program").map { program =>
           val newTask = task.copy(filename = program.filename, file = new File(program.ref.file).toByteArray())
           EvalTasks.update(id, newTask)
-          Redirect(org.ieee_passau.controllers.routes.EvalTaskController.edit(pid, id)).flashing("success" -> "Auswertungsschritt %s wurde aktualisiert".format(task.position))
+          Redirect(org.ieee_passau.controllers.routes.EvalTaskController.edit(pid, id))
+            .flashing("success" -> Messages("evaltask.update.message", task.position.toString))
         } getOrElse {
           val oldTask = EvalTasks.byId(id).first
           val newTask = task.copy(filename = oldTask.filename, file = oldTask.file)
           EvalTasks.update(id, newTask)
-          Redirect(org.ieee_passau.controllers.routes.EvalTaskController.edit(pid, id)).flashing("success" -> "Auswertungsschritt %s wurde aktualisiert".format(task.position))
+          Redirect(org.ieee_passau.controllers.routes.EvalTaskController.edit(pid, id))
+            .flashing("success" -> Messages("evaltask.update.message", task.position.toString))
         }
       }
     )

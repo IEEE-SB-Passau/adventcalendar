@@ -7,6 +7,7 @@ import org.ieee_passau.utils.PermissionCheck
 import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
 import play.api.db.slick._
+import play.api.i18n.Messages
 import play.api.libs.concurrent.Akka
 import play.api.mvc._
 
@@ -50,7 +51,8 @@ object ProblemController extends Controller with PermissionCheck {
         Problems += newProblem
         val id = Problems.byDoor(newProblem.door).firstOption.get.id.get
         Akka.system.actorSelection("user/RankingActor") ! UpdateRankingM
-        Redirect(org.ieee_passau.controllers.routes.ProblemController.edit(id)).flashing("success" -> "Problem %s wurde angelegt".format(newProblem.title))
+        Redirect(org.ieee_passau.controllers.routes.ProblemController.edit(id))
+          .flashing("success" -> Messages("problem.create.message", newProblem.title))
       }
     )
   }}
@@ -67,7 +69,8 @@ object ProblemController extends Controller with PermissionCheck {
 
       problem => {
         Problems.update(id, problem)
-        Redirect(org.ieee_passau.controllers.routes.ProblemController.edit(id)).flashing("success" -> "Problem %s wurde aktualisiert".format(problem.title))
+        Redirect(org.ieee_passau.controllers.routes.ProblemController.edit(id))
+          .flashing("success" ->  Messages("problem.update.message", problem.title))
       }
     )
   }}

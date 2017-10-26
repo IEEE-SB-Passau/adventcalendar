@@ -8,6 +8,7 @@ import org.ieee_passau.utils.PermissionCheck
 import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
 import play.api.db.slick._
+import play.api.i18n.Messages
 import play.api.mvc._
 
 object TestcaseController extends Controller with PermissionCheck {
@@ -49,7 +50,8 @@ object TestcaseController extends Controller with PermissionCheck {
         solutions.foreach(s =>
           Testruns += Testrun(None, s, id, None, None, None, None, None, None, None, None, Queued, None, now, Some(0), None, now)
         )
-        Redirect(org.ieee_passau.controllers.routes.TestcaseController.edit(pid, id)).flashing("success" -> "Testcase %s wurde angelegt".format(newTestcase.position))
+        Redirect(org.ieee_passau.controllers.routes.TestcaseController.edit(pid, id))
+          .flashing("success" -> Messages("testcase.create.message", newTestcase.position.toString))
       }
     )
   }}
@@ -71,7 +73,8 @@ object TestcaseController extends Controller with PermissionCheck {
         solutions.foreach(s =>
           Testruns += Testrun(None, s, id, None, None, None, None, None, None, None, None, Queued, None, now, Some(0), None, now)
         )
-        Redirect(org.ieee_passau.controllers.routes.TestcaseController.edit(pid, id)).flashing("success" -> "Testcase %s wurde aktualisiert".format(testcase.position))
+        Redirect(org.ieee_passau.controllers.routes.TestcaseController.edit(pid, id))
+          .flashing("success" -> Messages("testcase.update.message", testcase.position.toString))
       }
     )
   }}
