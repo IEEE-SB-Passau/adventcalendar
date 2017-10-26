@@ -2,7 +2,7 @@
 @import org.ieee_passau.models.{User, UserLogin}
 @import org.ieee_passau.views.html.bootstrap3.{password, text}
 @import org.ieee_passau.views.html.main
-@(loginForm: Form[UserLogin])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader)
+@(loginForm: Form[UserLogin])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main("Login") {
     <div class="well col-md-6 col-md-offset-3">

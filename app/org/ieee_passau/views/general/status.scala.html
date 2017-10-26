@@ -1,7 +1,7 @@
 @import org.ieee_passau.models.{Posting, User}
 @import org.ieee_passau.views.html.main
 
-@(posting: Posting)(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader)
+@(posting: Posting)(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 
 @main("Meldungen") {
     <h3>@posting.title</h3>

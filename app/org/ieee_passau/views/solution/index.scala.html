@@ -1,7 +1,7 @@
 @import org.ieee_passau.controllers.Beans.SubmissionListEntry
 @import org.ieee_passau.models.{Canceled, Passed, Queued, User}
 @import org.ieee_passau.views.html.main
-@(list: List[SubmissionListEntry], pages: Int, page: Int, ordering: String)(implicit flash: Flash, sessionUser: Option[User])
+@(list: List[SubmissionListEntry], pages: Int, page: Int, ordering: String)(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 
 @main("Abgabenliste") {
     <table class="table table-striped">

@@ -1,6 +1,6 @@
 @import org.ieee_passau.models.{Posting, Problem, User}
 @import org.ieee_passau.views.html.main
-@(posting: Posting, problems: List[Problem])(implicit flash: Flash, sessionUser: Option[User])
+@(posting: Posting, problems: List[Problem])(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 
 @main("Adventskalender") {
     @Html(posting.content)

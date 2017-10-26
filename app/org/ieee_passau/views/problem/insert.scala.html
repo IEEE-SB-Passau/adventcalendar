@@ -1,7 +1,7 @@
 @import helper._
 @import org.ieee_passau.models.{EvalMode, Problem, User}
 @import org.ieee_passau.views.html.main
-@(problem: Form[Problem], evalModes: List[EvalMode])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader)
+@(problem: Form[Problem], evalModes: List[EvalMode])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main("Problem hinzufügen") {
 

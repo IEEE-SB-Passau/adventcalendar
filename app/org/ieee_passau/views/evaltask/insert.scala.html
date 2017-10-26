@@ -1,7 +1,7 @@
 @import helper._
 @import org.ieee_passau.models.{EvalTask, User}
 @import org.ieee_passau.views.html.main
-@(pid: Int, task: Form[EvalTask])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader)
+@(pid: Int, task: Form[EvalTask])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main("Auswertungsschritt hinzufügen") {
 

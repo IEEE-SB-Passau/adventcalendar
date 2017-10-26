@@ -2,7 +2,7 @@
 @import org.ieee_passau.models.{Posting, User}
 @import org.ieee_passau.views.html.bootstrap3.{buttonSave, text, textareaBs}
 @import org.ieee_passau.views.html.main
-@(running: Boolean, statusMessage: Form[(Boolean, String)], statusPost: Form[Posting], frontpage: Form[Posting])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader)
+@(running: Boolean, statusMessage: Form[(Boolean, String)], statusPost: Form[Posting], frontpage: Form[Posting])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main("Wartung") {
     <h3>Statusmeldung</h3>

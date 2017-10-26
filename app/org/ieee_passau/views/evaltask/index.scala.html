@@ -1,7 +1,7 @@
 @import org.ieee_passau.models.EvalTask
 @import org.ieee_passau.utils.ViewHelper._
 @import views.html.helper.CSRF
-@(pid: Int, tasks: List[EvalTask])(implicit requestHeader: RequestHeader)
+@(pid: Int, tasks: List[EvalTask])(implicit requestHeader: RequestHeader, lang: Lang)
 
 <table class="table table-striped">
     <thead>

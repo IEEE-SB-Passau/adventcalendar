@@ -2,7 +2,7 @@
 @import org.ieee_passau.models.{User, UserRegistration}
 @import org.ieee_passau.views.html.bootstrap3._
 @import org.ieee_passau.views.html.main
-@(registrationForm: Form[UserRegistration])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader)
+@(registrationForm: Form[UserRegistration])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main("Registrieren") {
     <div class="well col-md-8 col-md-offset-2">

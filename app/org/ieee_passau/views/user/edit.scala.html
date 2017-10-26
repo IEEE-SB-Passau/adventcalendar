@@ -2,7 +2,7 @@
 @import org.ieee_passau.models.User
 @import org.ieee_passau.views.html.bootstrap3._
 @import org.ieee_passau.views.html.main
-@(id: Int, user: Form[User])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader)
+@(id: Int, user: Form[User])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main("User bearbeiten") {
     @form(org.ieee_passau.controllers.routes.UserController.update(id), 'class -> "form-horizontal") {

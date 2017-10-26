@@ -1,7 +1,7 @@
 @import helper._
 @import org.ieee_passau.models.{Testcase, User, Visibility}
 @import org.ieee_passau.views.html.main
-@(pid: Int, visibilities: List[Visibility], testcase: Form[Testcase])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader)
+@(pid: Int, visibilities: List[Visibility], testcase: Form[Testcase])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main("Testfall hinzufügen") {
 
@@ -15,7 +15,7 @@
         @CSRF.formField
         <fieldset>
             <div class="well">
-                @_form(pid, testcase, visibilities)
+                @_form(pid, testcase, visibilities)(lang)
             </div>
         </fieldset>
     }

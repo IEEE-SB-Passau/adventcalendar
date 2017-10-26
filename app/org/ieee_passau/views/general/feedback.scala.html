@@ -2,7 +2,7 @@
 @import org.ieee_passau.models.{Feedback, User}
 @import org.ieee_passau.views.html.bootstrap3._
 @import org.ieee_passau.views.html.main
-@(feedback: Form[Feedback])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader)
+@(feedback: Form[Feedback])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main("Feedback") {
     @form(org.ieee_passau.controllers.routes.MainController.submitFeedback, 'class -> "form-horizontal") {

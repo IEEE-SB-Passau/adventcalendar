@@ -1,6 +1,6 @@
 @import org.ieee_passau.models.{EvalTask, User}
 @import org.ieee_passau.views.html.bootstrap3.{buttonSave, checkboxBs, text}
-@(pid: Int, task: Form[EvalTask])(implicit flash: Flash, sessionUser: Option[User])
+@(pid: Int, task: Form[EvalTask])(implicit lang: Lang)
 
 <fieldset>
     <input type="hidden" name="problemId" value="@pid" />

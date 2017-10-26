@@ -1,6 +1,6 @@
 @import org.ieee_passau.models.Testcase
 @import views.html.helper.CSRF
-@(pid: Int, testcases: List[Testcase])(implicit requestHeader: RequestHeader)
+@(pid: Int, testcases: List[Testcase])(implicit requestHeader: RequestHeader, lang: Lang)
 
 <table class="table table-striped">
     <thead>

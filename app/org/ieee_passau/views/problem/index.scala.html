@@ -1,7 +1,7 @@
 @import helper._
 @import org.ieee_passau.models.{Problem, User}
 @import org.ieee_passau.views.html.main
-@(problems: List[Problem])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader)
+@(problems: List[Problem])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main("Problemliste") {
     <table class="table table-striped">

@@ -66,6 +66,11 @@ object UserController extends Controller with PermissionCheck {
         Redirect(org.ieee_passau.controllers.routes.MainController.calendar())
           .flashing("success" -> Messages("user.login.message", user.username))
           .withSession("user" -> uid)
+          .withCookies(
+            Cookie(play.Play.langCookieName(),
+              user.lang.getOrElse(rs.acceptLanguages.headOption.getOrElse(play.api.i18n.Lang.defaultLang).language)
+            )
+          )
       }
     )
   }}
@@ -150,7 +155,7 @@ object UserController extends Controller with PermissionCheck {
           List(user.email),
           Some("Hallo " + user.username +
             ",\n\nKlicke bitte folgenden Link um deinen Passowort beim IEEE Adventskalender zu zurückzusetzen:\n" +
-             link + "\n\nWeiterhin viel Spaß beim Mitmachen,\nDas Adventskalender-Team")
+            link + "\n\nWeiterhin viel Spaß beim Mitmachen,\nDas Adventskalender-Team")
         )
         MailerPlugin.send(regMail)
         Users.update(user.id.get, user.copy(activationToken = Some(token)))
@@ -189,13 +194,24 @@ object UserController extends Controller with PermissionCheck {
 
         password => {
           val pwh = PasswordHasher.hashPassword(password)
-          Users.update(user.id.get, user.copy(password = pwh, activationToken = None))
+          val lng = Users.byId(user.id.get).firstOption.get.lang
+          Users.update(user.id.get, user.copy(password = pwh, activationToken = None, lang = lng))
 
           Redirect(org.ieee_passau.controllers.routes.MainController.calendar())
             .flashing("success" -> Messages("user.login.messeage"))
         }
       )
     }
+  }}
+
+  def updateLang(lang: String): Action[AnyContent] = requireLogin { user => DBAction { implicit rs =>
+    implicit val sessionUser = Some(user)
+
+    Users.update(user.id.get, user.copy(lang=Some(lang)))
+    //TODO get current page
+    Redirect(org.ieee_passau.controllers.routes.MainController.calendar()).withCookies(
+      Cookie(play.Play.langCookieName(), lang)
+    )
   }}
 
   def update(id: Int): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
@@ -207,7 +223,8 @@ object UserController extends Controller with PermissionCheck {
       user => {
         val pwh = if (user.password.isEmpty) Users.byId(id).firstOption.get.password else PasswordHasher.hashPassword(user.password)
         val tkn = Users.byId(id).firstOption.get.activationToken
-        Users.update(id, user.copy(password = pwh, activationToken = tkn))
+        val lng = Users.byId(id).firstOption.get.lang
+        Users.update(id, user.copy(password = pwh, activationToken = tkn, lang = lng))
         Redirect(org.ieee_passau.controllers.routes.UserController.edit(id))
           .flashing("success" -> Messages("user.update.message", user.username))
       }

@@ -1,7 +1,7 @@
 @import org.ieee_passau.controllers.Beans.VMStatus
 @import org.ieee_passau.models.User
 @import org.ieee_passau.views.html.main
-@(running: Boolean, vms: List[(String, Int, VMStatus)])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader)
+@(running: Boolean, vms: List[(String, Int, VMStatus)])(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 
 @main("Evaluation VMs") {
     @if(!running) {

@@ -1,6 +1,6 @@
 @import org.ieee_passau.models.User
 @import org.ieee_passau.views.html.main
-@()(implicit flash: Flash, sessionUser: Option[User])
+@()(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 
 @main("Keine Berechtigung") {
     <p>Du scheinst keine Berechtigung zu haben diese Seite aufzurufen.</p>

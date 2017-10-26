@@ -1,6 +1,6 @@
 @import org.ieee_passau.models.User
 @import org.ieee_passau.views.html.main
-@(string: String)(implicit flash: Flash, sessionUser: Option[User])
+@(string: String)(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 
 @main("Fehler") {
     <p>@string</p>

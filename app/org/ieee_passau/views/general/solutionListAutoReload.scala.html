@@ -1,6 +1,6 @@
 @import org.ieee_passau.controllers.Beans.SolutionListEntry
 @import org.ieee_passau.models.Language
-@(solutions: List[SolutionListEntry], languages: List[Language], door: Int, showAll: Boolean = false)
+@(solutions: List[SolutionListEntry], languages: List[Language], door: Int, showAll: Boolean = false)(implicit lang: Lang)
 
 <div id="solutionlist">
     @solutionList(solutions, languages)

@@ -1,5 +1,5 @@
 @import org.ieee_passau.models.Ticket
-@(tickets: List[(Ticket, String)], expanded: Boolean = false, admin: Boolean = false)(implicit requestHeader: RequestHeader)
+@(tickets: List[(Ticket, String)], expanded: Boolean = false, admin: Boolean = false)(implicit requestHeader: RequestHeader, lang: Lang)
 
 @import views.html.helper.CSRF
 

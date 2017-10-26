@@ -1,6 +1,6 @@
 @import org.ieee_passau.models.{EvalMode, Problem, User}
 @import org.ieee_passau.views.html.bootstrap3.{buttonSave, text, textareaBs}
-@(problem: Form[Problem], evalModes: List[EvalMode])(implicit flash: Flash, sessionUser: Option[User])
+@(problem: Form[Problem], evalModes: List[EvalMode])(implicit lang: Lang)
 
 <fieldset>
     @if(problem.value.isDefined) {

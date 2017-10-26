@@ -2,7 +2,7 @@
 @import org.ieee_passau.models.{EvalMode, EvalTask, Problem, Testcase, User}
 @import org.ieee_passau.views.html.{evaltask, main, testcase}
 @import org.ieee_passau.controllers.routes
-@(pid: Int, testcases: List[Testcase], evalTasks: List[EvalTask], problem: Form[Problem], evalModes: List[EvalMode])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader)
+@(pid: Int, testcases: List[Testcase], evalTasks: List[EvalTask], problem: Form[Problem], evalModes: List[EvalMode])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main("Edit problem") {
 

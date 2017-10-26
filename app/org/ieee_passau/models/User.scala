@@ -9,7 +9,7 @@ import scala.slick.lifted.{CompiledFunction, ProvenShape}
 
 case class User(id: Option[Int], username: String, password: String, email: String, active: Boolean, admin: Boolean,
                 hidden: Boolean, semester: Option[Int], studySubject: Option[String], school: Option[String],
-                activationToken: Option[String]) extends Entity[User] {
+                lang: Option[String], activationToken: Option[String]) extends Entity[User] {
   override def withId(id: Int): User = this.copy(id = Some(id))
 }
 
@@ -24,9 +24,10 @@ class Users(tag: Tag) extends TableWithId[User](tag, "users") {
   def school: Column[String] = column[String]("school")
   def studySubject: Column[String] = column[String]("study_subject")
   def activationToken: Column[String] = column[String]("token")
+  def lang: Column[String] = column[String]("language")
 
   override def * : ProvenShape[User] = (id.?, username, password, email, active, admin, hidden, semester.?,
-    studySubject.?, school.?, activationToken.?) <> (User.tupled, User.unapply)
+    studySubject.?, school.?, lang.?, activationToken.?) <> (User.tupled, User.unapply)
 }
 
 object Users extends TableQuery(new Users(_)) {
@@ -93,6 +94,7 @@ case class UserRegistration(username: String, password: (String, String), email:
       semester = this.semester,
       studySubject = this.studySubject,
       school = this.school,
+      lang = None,
       activationToken = Some(link)
     )
   }

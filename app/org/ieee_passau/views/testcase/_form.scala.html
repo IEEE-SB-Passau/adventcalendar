@@ -1,6 +1,6 @@
 @import org.ieee_passau.models.{Testcase, User, Visibility}
 @import org.ieee_passau.views.html.bootstrap3.{buttonSave, text, textareaBs}
-@(pid: Int, testcase: Form[Testcase], visibilities: List[Visibility])(implicit flash: Flash, sessionUser: Option[User])
+@(pid: Int, testcase: Form[Testcase], visibilities: List[Visibility])(lang: Lang)
 
 <fieldset>
     <input type="hidden" name="problemId" value="@pid" />

@@ -1,7 +1,7 @@
 @import org.ieee_passau.controllers.MainController.{Highlight, HighlightSpecial}
 @import org.ieee_passau.models.User
 @import org.ieee_passau.views.html.main
-@(users: List[(Int, String, Boolean, Int, Int, Int)])(implicit flash: Flash, sessionUser: Option[User])
+@(users: List[(Int, String, Boolean, Int, Int, Int)])(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 
 @main("Rangliste") {
     <table class="table table-striped">

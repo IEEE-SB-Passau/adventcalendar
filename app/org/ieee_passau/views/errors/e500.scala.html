@@ -1,6 +1,6 @@
 @import org.ieee_passau.models.User
 @import org.ieee_passau.views.html.main
-@(errorID: Option[String])(implicit flash: Flash, sessionUser: Option[User])
+@(errorID: Option[String])(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 
 @main("Interner Fehler") {
     <p>

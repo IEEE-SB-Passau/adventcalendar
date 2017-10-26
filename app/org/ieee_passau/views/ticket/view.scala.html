@@ -3,7 +3,7 @@
 @import org.ieee_passau.views.html.bootstrap3.{buttonSave, checkboxBs, textareaBs}
 @import org.ieee_passau.views.html.main
 @import views.html.helper.{CSRF, form}
-@(ticket: (Ticket, User, Problem), answers: List[(Ticket, String)], ticketForm: Form[TicketText])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader)
+@(ticket: (Ticket, User, Problem), answers: List[(Ticket, String)], ticketForm: Form[TicketText])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main("Fragen anzeigen") {
     @defining((ticket._1, ticket._2.username) +: answers) { list: List[(Ticket, String)] =>

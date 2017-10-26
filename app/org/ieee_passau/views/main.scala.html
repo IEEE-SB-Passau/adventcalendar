@@ -1,5 +1,6 @@
 @import org.ieee_passau.models.User
-@(title: String, isProblemTitle: Boolean = false)(content: Html)(implicit flash: Flash, sessionUser: Option[User])
+@import play.api.i18n.Messages
+@(title: String, isProblemTitle: Boolean = false)(content: Html)(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 <!DOCTYPE html>
 
 <html>
@@ -68,6 +69,13 @@
                                 @{sessionUser.get.username}!
                             </p>
                         }
+
+                        @* TODO *@
+                        <p class="navbar-text navbar-right">
+                            <a href="@org.ieee_passau.controllers.routes.UserController.updateLang(if(Messages("language.name") == "de") "en" else "de")">
+                                @Messages("language.icon")
+                            </a>
+                        </p>
                     </div>
                     <!-- /.navbar-collapse -->
                 </nav>
