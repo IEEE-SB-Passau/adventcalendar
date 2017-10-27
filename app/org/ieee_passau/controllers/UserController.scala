@@ -204,15 +204,18 @@ object UserController extends Controller with PermissionCheck {
     }
   }}
 
-  def updateLang(lang: String): Action[AnyContent] = requireLogin { user => DBAction { implicit rs =>
-    implicit val sessionUser = Some(user)
+  def updateLang(lang: String): Action[AnyContent] = DBAction { implicit rs =>
+    implicit val sessionUser = getUserFromSession(request2session)
 
-    Users.update(user.id.get, user.copy(lang=Some(lang)))
+    if (sessionUser.nonEmpty) {
+      val user = sessionUser.get
+      Users.update(user.id.get, user.copy(lang = Some(lang)))
+    }
     //TODO get current page
     Redirect(org.ieee_passau.controllers.routes.MainController.calendar()).withCookies(
       Cookie(play.Play.langCookieName(), lang)
     )
-  }}
+  }
 
   def update(id: Int): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
