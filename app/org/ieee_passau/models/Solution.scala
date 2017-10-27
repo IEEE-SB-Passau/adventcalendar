@@ -4,7 +4,7 @@ import java.util.Date
 
 import play.api.db.slick.Config.driver.simple._
 
-import scala.slick.lifted.{AppliedCompiledFunction, CompiledFunction, ForeignKeyQuery, ProvenShape}
+import scala.slick.lifted.{CompiledFunction, ForeignKeyQuery, ProvenShape}
 
 case class Solution (id: Option[Int], userId: Int, problemId: Int, language: String, program: String,
                      programName: String, ip: Option[String], userAgent: Option[String], browserId: Option[String],

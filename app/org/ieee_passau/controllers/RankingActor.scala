@@ -80,12 +80,12 @@ class RankingActor extends Actor {
   }}
 
   /**
-    * we suppose a problem has exactly 100 points, users get between 100 and 50 points for a correct solution.
+    * We suppose a problem has exactly 100 points, users get between 100 and 50 points for a correct solution.
     * (The actual score is calculated from the success rate and the correctness of the solution, but that's irrelevant here)
     * see also https://www.hackerrank.com/scoring#Algorithmic%20Challenges
     * @param correct number of correct solutions
     * @param total number of total submissions
-    * @return the challange factor
+    * @return the challenge factor
     */
   private def calcChallengeFactor(correct: Int, total: Int): Double = {
     val sr = Try(correct.toDouble / total.toDouble).getOrElse(0D)
@@ -170,7 +170,7 @@ class RankingActor extends Actor {
       val now = new Date()
       val list = if (displayAll) problemsAll else problemsNormal
       val problemList = list.filter(p => p._1._2.before(now) && p._1._3.after(now)).map {
-        case (problem, door, title, points, mode, tries, distinctTies, correctCount, correctList) =>
+        case (problem, door, title, points, mode, tries, distinctTries, correctCount, correctList) =>
           ProblemInfo(problem._1, door, title, points.floor.toInt, mode, tries, correctCount, correctList.contains(uid))
       }.sortBy(_.door)
       sender ! problemList

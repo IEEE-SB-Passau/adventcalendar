@@ -13,7 +13,7 @@ import org.ieee_passau.utils.{ListHelper, PermissionCheck}
 import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
 import play.api.db.slick._
-import play.api.i18n.{Lang, Messages}
+import play.api.i18n.Messages
 import play.api.libs.Files.TemporaryFile
 import play.api.libs.concurrent.Akka
 import play.api.libs.functional.syntax._
@@ -214,7 +214,7 @@ object MainController extends Controller with PermissionCheck {
           val lastAllSolution = Solutions.filter(_.userId === userId).sortBy(_.created.asc).firstOption
           // default language shown in the language selector
           val lastLang =
-            if (solutions.nonEmpty) solutions.sortBy(_.solution.created).last.solution.language
+            if (solutions.nonEmpty) solutions.maxBy(_.solution.created).solution.language
             else if (sessionUser.nonEmpty && lastAllSolution.nonEmpty) lastAllSolution.get.language
             else "JAVA"
 

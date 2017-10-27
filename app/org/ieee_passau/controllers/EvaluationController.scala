@@ -6,7 +6,6 @@ import akka.actor.{ActorRef, Props}
 import akka.pattern.ask
 import akka.util.Timeout
 import org.ieee_passau
-import org.ieee_passau.controllers
 import org.ieee_passau.controllers.Beans._
 import org.ieee_passau.evaluation.Messages
 import org.ieee_passau.evaluation.Messages._
@@ -298,7 +297,6 @@ object EvaluationController extends Controller with PermissionCheck {
     (for {
       r <- Testruns
       s <- r.solution if s.id === id
-      p <- s.problem
     } yield r).list.map { testrun =>
       Testruns.update(testrun.id.get, testrun.copy(result = Queued, stage = Some(0), vm = None))
     }
