@@ -221,7 +221,11 @@ object MainController extends Controller with PermissionCheck {
           val running = Await.result(EvaluationController.monitoringActor ? StatusQ, 100 milli).asInstanceOf[StatusM]
           //TODO i18n
           val flash = if (!running.run) "warning" -> (Messages("status.message.message") + running.message) else "" -> ""
-          Ok(org.ieee_passau.views.html.general.problemDetails(problem, langs, lastLang, solutions, tickets, ProblemForms.ticketForm, flash))
+
+          val displayLang = request2lang
+          val trans = ProblemTranslations.byProblemLang(problem.id.get, displayLang.code).firstOption
+          val transProblem = if (trans.nonEmpty) problem.copy(title=trans.get.title, description=trans.get.description) else problem
+          Ok(org.ieee_passau.views.html.general.problemDetails(transProblem, langs, lastLang, solutions, tickets, ProblemForms.ticketForm, flash))
         }
     }
   }

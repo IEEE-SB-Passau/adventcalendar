@@ -1,0 +1,42 @@
+@import views.html.helper.CSRF
+@import org.ieee_passau.models.ProblemTranslation
+@(pid: Int, translations: List[ProblemTranslation])(implicit requestHeader: RequestHeader, lang: Lang)
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Sprache</th>
+            <th>Titel</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @translations.map { trans =>
+            <tr>
+                <td>@trans.language.code</td>
+                <td>@trans.title</td>
+                <td>
+                    <a href="@org.ieee_passau.controllers.routes.ProblemController.editTranslation(pid, trans.language.code)" class="btn btn-default">
+                        <span class="glyphicon glyphicon-pencil"></span>
+                    </a>
+
+                    <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.ProblemController.deleteTranslation(pid, trans.language.code)">
+                        @CSRF.formField
+                        <button type="submit" onclick="return(window.confirm('Wirklich löschen?'))" class="btn btn-danger">
+                            <span class="glyphicon glyphicon-remove"></span>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+        <tr>
+            <td></td>
+            <td></td>
+            <td>
+                <a href="@org.ieee_passau.controllers.routes.ProblemController.addTranslation(pid)" class="btn btn-default">
+                    <span class="glyphicon glyphicon-plus"></span>
+                </a>
+            </td>
+    <tr>
+    </tbody>
+</table>

@@ -48,6 +48,12 @@ GET         /admin/problem/:id                         org.ieee_passau.controlle
 POST        /admin/problem/:id                         org.ieee_passau.controllers.ProblemController.update(id: Int)
 POST        /admin/problem/:id/delete                  org.ieee_passau.controllers.ProblemController.delete(id: Int)
 
+GET         /admin/problem/:pid/lang/insert            org.ieee_passau.controllers.ProblemController.addTranslation(pid: Int)
+POST        /admin/problem/:pid/lang/insert            org.ieee_passau.controllers.ProblemController.saveTranslation(pid: Int)
+GET         /admin/problem/:pid/lang/:lang             org.ieee_passau.controllers.ProblemController.editTranslation(pid: Int, lang: String)
+POST        /admin/problem/:pid/lang/:lang             org.ieee_passau.controllers.ProblemController.updateTranslation(pid: Int, lang: String)
+POST        /admin/problem/:pid/lang/:lang/delete      org.ieee_passau.controllers.ProblemController.deleteTranslation(pid: Int, lang: String)
+
 GET         /admin/problem/:pid/test/insert            org.ieee_passau.controllers.TestcaseController.insert(pid: Int)
 POST        /admin/problem/:pid/test/insert            org.ieee_passau.controllers.TestcaseController.save(pid: Int)
 GET         /admin/problem/:pid/test/:id               org.ieee_passau.controllers.TestcaseController.edit(pid: Int, id: Int)

@@ -2,7 +2,7 @@ package org.ieee_passau.controllers
 
 import org.ieee_passau.controllers.Beans.UpdateRankingM
 import org.ieee_passau.forms.ProblemForms
-import org.ieee_passau.models.{EvalModes, EvalTasks, Problems, Testcases}
+import org.ieee_passau.models._
 import org.ieee_passau.utils.PermissionCheck
 import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
@@ -24,6 +24,7 @@ object ProblemController extends Controller with PermissionCheck {
       Ok(org.ieee_passau.views.html.problem.edit(id,
         Testcases.filter(_.problemId === id).sortBy(_.position.asc).list,
         EvalTasks.filter(_.problemId === id).sortBy(_.position.asc).list,
+        ProblemTranslations.filter(_.problemId === id).sortBy(_.lang.asc).list,
         ProblemForms.problemForm.fill(problem), EvalModes.list))
     }.getOrElse(NotFound(org.ieee_passau.views.html.errors.e404()))
   }}
@@ -64,6 +65,7 @@ object ProblemController extends Controller with PermissionCheck {
         BadRequest(org.ieee_passau.views.html.problem.edit(id,
           Testcases.filter(_.problemId === id).sortBy(_.position.asc).list,
           EvalTasks.filter(_.problemId === id).sortBy(_.position.asc).list,
+          ProblemTranslations.filter(_.problemId === id).sortBy(_.lang.asc).list,
           errorForm, EvalModes.list))
       },
 
@@ -73,5 +75,54 @@ object ProblemController extends Controller with PermissionCheck {
           .flashing("success" ->  Messages("problem.update.message", problem.title))
       }
     )
+  }}
+
+  def addTranslation(problemId: Int): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+    implicit val sessionUser = Some(admin)
+    Ok(org.ieee_passau.views.html.problemTranslation.insert(problemId, ProblemForms.problemTranslationForm))
+  }}
+
+  def saveTranslation(problemId: Int): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+    implicit val sessionUser = Some(admin)
+    ProblemForms.problemTranslationForm.bindFromRequest.fold(
+      errorForm => {
+        BadRequest(org.ieee_passau.views.html.problemTranslation.insert(problemId, errorForm))
+      },
+
+      newTrans => {
+        ProblemTranslations += newTrans
+        Redirect(org.ieee_passau.controllers.routes.ProblemController.edit(newTrans.problemId))
+          .flashing("success" -> Messages("problem.translation.create.message", newTrans.title, newTrans.language.code))
+      }
+    )
+  }}
+
+  def editTranslation(problemId: Int, lang: String): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+    implicit val sessionUser = Some(admin)
+    ProblemTranslations.byProblemLang(problemId, lang).firstOption.map { trans =>
+      Ok(org.ieee_passau.views.html.problemTranslation.edit(problemId, ProblemForms.problemTranslationForm.fill(trans)))
+    }.getOrElse(NotFound(org.ieee_passau.views.html.errors.e404()))
+  }}
+
+
+  def updateTranslation(problemId: Int, lang: String): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+    implicit val sessionUser = Some(admin)
+    ProblemForms.problemTranslationForm.bindFromRequest.fold(
+      errorForm => {
+        BadRequest(org.ieee_passau.views.html.problemTranslation.edit(problemId, errorForm))
+      },
+
+      trans => {
+        ProblemTranslations.update(lang, trans)
+        Redirect(org.ieee_passau.controllers.routes.ProblemController.edit(problemId))
+          .flashing("success" ->  Messages("problem.translation.update.message", trans.title, trans.language.code))
+      }
+    )
+  }}
+
+  def deleteTranslation(problemId: Int, lang: String): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+    implicit val sessionUser = Some(admin)
+    ProblemTranslations.byProblemLang(problemId, lang).delete
+    Redirect(org.ieee_passau.controllers.routes.ProblemController.edit(problemId))
   }}
 }

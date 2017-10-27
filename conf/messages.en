@@ -15,6 +15,9 @@ ticket.answer.message=Antwort wurde gespeichert!
 problem.create.message=Aufgabe{0} wurde angelegt.
 problem.update.message=Aufgabe{0} wurde aktualisiert.
 
+problem.translation.create.message=Übersetung nach {1} für Aufgabe {0} wurde angelegt.
+problem.translation.update.message=Übersetung nach {1} für Aufgabe {0} wurde aktualisiert.
+
 testcase.create.message=Testcase {0} wurde angelegt.
 testcase.update.message=Testcase {0} wurde aktualisiert.
 

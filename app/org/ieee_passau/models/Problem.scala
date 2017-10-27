@@ -5,8 +5,11 @@ import java.util.Date
 import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
 import play.api.db.slick.{Session, _}
+import play.api.i18n.Lang
 
-import scala.slick.lifted.{CompiledFunction, ProvenShape}
+import scala.slick.ast.BaseTypedType
+import scala.slick.jdbc.JdbcType
+import scala.slick.lifted.{CompiledFunction, ForeignKeyQuery, ProvenShape}
 
 case class Problem (id: Option[Int], title: String, door: Int, description: String, readableStart: Date,
                     readableStop: Date, solvableStart: Date, solvableStop: Date, evalMode: EvalMode) extends Entity[Problem] {
@@ -50,4 +53,30 @@ object Problems extends TableQuery(new Problems(_)) {
       Query(Problems.filter(_.door === door).length).first == 0
     }
   }
+}
+
+case class ProblemTranslation(problemId: Int, language: Lang, title: String, description: String)
+
+class ProblemTranslations(tag: Tag) extends Table[ProblemTranslation](tag, "problem_translations") {
+  def problemId: Column[Int] = column[Int]("problem_id")
+  def lang: Column[Lang] = column[Lang]("language_code")(ProblemTranslations.LangTypeMapper)
+  def title: Column[String] = column[String]("title")
+  def description: Column[String] = column[String]("description")
+
+  def problem: ForeignKeyQuery[Problems, Problem] = foreignKey("problem_fk", problemId, Problems)(_.id) // references problems (id) on update cascade on delete cascade
+
+  override def * : ProvenShape[ProblemTranslation] = (problemId, lang, title, description) <> (ProblemTranslation.tupled, ProblemTranslation.unapply)
+}
+
+object ProblemTranslations extends TableQuery(new ProblemTranslations(_)){
+  def byProblem(problemId: Int): CompiledFunction[(Column[Int]) => Query[ProblemTranslations, ProblemTranslation, Seq], Column[Int], Int, Query[ProblemTranslations, ProblemTranslation, Seq], Seq[ProblemTranslation]] = this.findBy(_.problemId)
+  def byProblemLang(problemId: Int, lang: Lang): Query[ProblemTranslations, ProblemTranslation, Seq] = this.filter(t => t.problemId === problemId && t.lang === lang)
+  def byProblemLang(problemId: Int, lang: String): Query[ProblemTranslations, ProblemTranslation, Seq] = this.filter(t => t.problemId === problemId && t.lang === Lang(lang))
+
+  def update(lang: String, problemTranslation: ProblemTranslation)(implicit session: Session): Int = this.filter(t => t.problemId === problemTranslation.problemId && t.lang === Lang(lang)).update(problemTranslation)
+
+  implicit val LangTypeMapper: JdbcType[Lang] with BaseTypedType[Lang] = MappedColumnType.base[Lang, String](
+    l => l.code,
+    c => Lang(c)
+  )
 }

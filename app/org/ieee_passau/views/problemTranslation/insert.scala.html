@@ -1,0 +1,22 @@
+@import helper._
+@import org.ieee_passau.models.{ProblemTranslation, User}
+@import org.ieee_passau.views.html.main
+@(pid: Int, trans: Form[ProblemTranslation])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
+
+@main("Testfall hinzufügen") {
+
+    <ol class="breadcrumb">
+        <li><a href="@org.ieee_passau.controllers.routes.ProblemController.index">Übersicht</a></li>
+        <li><a href="@org.ieee_passau.controllers.routes.ProblemController.edit(pid)">Problem</a></li>
+        <li class="active">Übersetzung</li>
+    </ol>
+
+    @form(org.ieee_passau.controllers.routes.ProblemController.saveTranslation(pid), 'class -> "form-horizontal") {
+        @CSRF.formField
+        <fieldset>
+            <div class="well">
+                @_form(pid, trans)(lang)
+            </div>
+        </fieldset>
+    }
+}

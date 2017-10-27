@@ -1,8 +1,8 @@
 @import helper._
-@import org.ieee_passau.models.{EvalMode, EvalTask, Problem, Testcase, User}
-@import org.ieee_passau.views.html.{evaltask, main, testcase}
 @import org.ieee_passau.controllers.routes
-@(pid: Int, testcases: List[Testcase], evalTasks: List[EvalTask], problem: Form[Problem], evalModes: List[EvalMode])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
+@import org.ieee_passau.models.{EvalMode, EvalTask, Problem, ProblemTranslation, Testcase, User}
+@import org.ieee_passau.views.html.{evaltask, main, testcase, problemTranslation}
+@(pid: Int, testcases: List[Testcase], evalTasks: List[EvalTask], translations: List[ProblemTranslation], problem: Form[Problem], evalModes: List[EvalMode])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main("Edit problem") {
 
@@ -17,6 +17,9 @@
             @_form(problem, evalModes)
         </div>
     }
+
+    <h3>Übersetzungen</h3>
+    @problemTranslation.index(pid, translations)
 
     <h3>Testfälle</h3>
     @testcase.index(pid, testcases)
