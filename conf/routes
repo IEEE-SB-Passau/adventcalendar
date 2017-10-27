@@ -76,7 +76,9 @@ GET         /admin/monitoring/stat                     org.ieee_passau.controlle
 POST        /admin/monitoring/:id/delete               org.ieee_passau.controllers.EvaluationController.cancel(id: Int)
 GET         /admin/monitoring/maintenance              org.ieee_passau.controllers.EvaluationController.maintenance
 POST        /admin/monitoring/maintenance              org.ieee_passau.controllers.EvaluationController.playPause
-POST        /admin/status/:id                          org.ieee_passau.controllers.EvaluationController.changeStatus(id: Int)
+
+GET         /admin/status/:id/:lang                    org.ieee_passau.controllers.EvaluationController.editPage(id: Int, lang: String)
+POST        /admin/status/:id/:lang                    org.ieee_passau.controllers.EvaluationController.changePage(id: Int, lang: String)
 
 GET         /admin/ticktes                             org.ieee_passau.controllers.TicketController.index
 GET         /admin/ticket/:id                          org.ieee_passau.controllers.TicketController.view(id: Int)

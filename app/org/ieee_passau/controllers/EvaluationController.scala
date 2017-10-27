@@ -12,10 +12,11 @@ import org.ieee_passau.evaluation.Messages._
 import org.ieee_passau.forms.MaintenanceForms
 import org.ieee_passau.models._
 import org.ieee_passau.utils.ListHelper._
-import org.ieee_passau.utils.PermissionCheck
+import org.ieee_passau.utils.{LanguageHelper, PermissionCheck}
 import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
 import play.api.db.slick._
+import play.api.i18n.Lang
 import play.api.libs.concurrent.Akka
 import play.api.mvc._
 
@@ -168,28 +169,18 @@ object EvaluationController extends Controller with PermissionCheck {
   def maintenance: Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
 
-    val statusPosting = Postings.byId(1).first
-    val frontpage = Postings.byId(2).first
-
     val state = Await.result((monitoringActor ? StatusQ).mapTo[StatusM], 50 millis)
     Ok(org.ieee_passau.views.html.monitoring.maintenance(state.run,
-      MaintenanceForms.statusForm.fill((state.run, state.message)),
-      MaintenanceForms.postingForm.fill(statusPosting),
-      MaintenanceForms.postingForm.fill(frontpage)))
+      MaintenanceForms.statusForm.fill((state.run, state.message)), Postings.list(LanguageHelper.defaultLanguage)))
   }}
 
   def playPause: Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
 
-    val statusPosting = Postings.byId(1).first
-    val frontpage = Postings.byId(2).first
-
     val state = Await.result((monitoringActor ? StatusQ).mapTo[StatusM], 50 millis)
     MaintenanceForms.statusForm.bindFromRequest.fold(
       errorForm => {
-        BadRequest(org.ieee_passau.views.html.monitoring.maintenance(state.run, errorForm,
-          MaintenanceForms.postingForm.fill(statusPosting),
-          MaintenanceForms.postingForm.fill(frontpage)))
+        BadRequest(org.ieee_passau.views.html.monitoring.maintenance(state.run, errorForm, Postings.list(LanguageHelper.defaultLanguage)))
       },
       status => {
         monitoringActor ! StatusM(status._1, status._2)
@@ -199,31 +190,29 @@ object EvaluationController extends Controller with PermissionCheck {
     )
   }}
 
-  def changeStatus(id: Int): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+  def editPage(id: Int, lang: String): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
 
-    val statusPosting = Postings.byId(1).first
-    val frontpage = Postings.byId(2).first
+    Postings.byIdLang(id, lang).firstOption.map { post =>
+      Ok(org.ieee_passau.views.html.monitoring.pageEditor(id, lang, MaintenanceForms.postingForm.fill(post)))
+    } .getOrElse {
+      val post = Posting(Some(id), Lang(lang), "", "", new Date)
+      Postings += post
+      Ok(org.ieee_passau.views.html.monitoring.pageEditor(id, lang, MaintenanceForms.postingForm.fill(post)))
+    }
+  }}
 
-    val state = Await.result((monitoringActor ? StatusQ).mapTo[StatusM], 50 millis)
+  def changePage(id: Int, lang: String): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+    implicit val sessionUser = Some(admin)
+
     MaintenanceForms.postingForm.bindFromRequest.fold(
       errorForm => {
-        if (id == 1) {
-          BadRequest(org.ieee_passau.views.html.monitoring.maintenance(state.run,
-            MaintenanceForms.statusForm.fill((state.run, state.message)),
-            errorForm,
-            MaintenanceForms.postingForm.fill(frontpage)))
-        } else {
-          BadRequest(org.ieee_passau.views.html.monitoring.maintenance(state.run,
-            MaintenanceForms.statusForm.fill((state.run, state.message)),
-            MaintenanceForms.postingForm.fill(statusPosting),
-            errorForm))
-        }
+          BadRequest(org.ieee_passau.views.html.monitoring.pageEditor(id, lang, errorForm))
       },
       posting => {
-        Postings.update(id, posting)
+        Postings.update(id, lang, posting)
         Redirect(org.ieee_passau.controllers.routes.EvaluationController.maintenance())
-          .flashing("success" ->  play.api.i18n.Messages("status.message.update.message"))
+          .flashing("success" ->  play.api.i18n.Messages("postings.update.message"))
       }
     )
   }}

@@ -73,10 +73,11 @@ object MainController extends Controller with PermissionCheck {
 
   def calendar = DBAction { implicit rs =>
     implicit val sessionUser = getUserFromSession(request2session)
+    val displayLang = request2lang
 
     val now = new Date()
     val problems = Problems.filter(_.readableStart <= now).filter(_.readableStop > now).sortBy(_.door.asc).list
-    val posting = Postings.byId(2).first
+    val posting = Postings.byId(Postings.calendarPosting, displayLang).head
 
     // show all problems for debugging:
     //val problems = Query(Problems).sortBy(_.door.asc).list;
@@ -86,8 +87,9 @@ object MainController extends Controller with PermissionCheck {
 
   def status = DBAction { implicit rs =>
     implicit val sessionUser = getUserFromSession(request2session)
+    val displayLang = request2lang
 
-    val posting = Postings.byId(1).first
+    val posting = Postings.byId(Postings.statusPosting, displayLang).head
 
     Ok(org.ieee_passau.views.html.general.status(posting))
   }

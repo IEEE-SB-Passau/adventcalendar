@@ -49,7 +49,7 @@
                                 <li class="dropdown
                                     @if(List(Messages("nav.admin.users"), Messages("nav.admin.problems"), Messages("nav.admin.tickets"),
                                     Messages("nav.admin.submissions"), Messages("nav.admin.evalqueue"), Messages("nav.admin.stats"),
-                                    Messages("nav.admin.vms"), Messages("nav.admin.editcontent")).contains(title)) { active }" >
+                                    Messages("nav.admin.vms"), Messages("nav.admin.postings")).contains(title)) { active }" >
                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">@Messages("nav.admin.message") <b class="caret"></b></a>
                                     <ul class="dropdown-menu">
                                         <li @if(title == Messages("nav.admin.users"))       { class="active" }><a href="@org.ieee_passau.controllers.routes.UserController.index"            >@Messages("nav.admin.users")</a></li>
@@ -59,7 +59,7 @@
                                         <li @if(title == Messages("nav.admin.evalqueue"))   { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.indexQueued">@Messages("nav.admin.evalqueue")</a></li>
                                         <li @if(title == Messages("nav.admin.vms"))         { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.vms"        >@Messages("nav.admin.vms")</a></li>
                                         <li @if(title == Messages("nav.admin.stats"))       { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.stats"      >@Messages("nav.admin.stats")</a></li>
-                                        <li @if(title == Messages("nav.admin.editcontent")) { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.maintenance">@Messages("nav.admin.editcontent")</a></li>
+                                        <li @if(title == Messages("nav.admin.postings")) { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.maintenance">@Messages("nav.admin.postings")</a></li>
                                     </ul>
                                 </li>
                             }}

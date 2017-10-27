@@ -1,13 +1,14 @@
 @import helper._
 @import org.ieee_passau.models.{Posting, User}
-@import org.ieee_passau.views.html.bootstrap3.{buttonSave, text, textareaBs}
+@import org.ieee_passau.utils.LanguageHelper
+@import org.ieee_passau.views.html.bootstrap3.textareaBs
 @import org.ieee_passau.views.html.main
 @import play.api.data.Form
-@import play.api.i18n.Lang
+@import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.{Flash, RequestHeader}
-@(running: Boolean, statusMessage: Form[(Boolean, String)], statusPost: Form[Posting], frontpage: Form[Posting])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
+@(running: Boolean, statusMessage: Form[(Boolean, String)], postings: Map[Int, List[Posting]])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
-@main("Wartung") {
+@main(Messages("nav.admin.postings")) {
     <h3>Statusmeldung</h3>
     @if(running) {
         <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.EvaluationController.playPause">
@@ -41,29 +42,37 @@
         </form>
     }
 
-    <h3>Startseite</h3>
-    <div class="well">
-        <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.EvaluationController.changeStatus(2)">
-            @CSRF.formField
-            <fieldset>
-                @text(frontpage("title"), label = "Titel", placeholder = "Titel")
-                @textareaBs(frontpage("content"),  label = "Inhalt", placeholder = "Inhalt", wysiwyg = true)
+    <h3>@Messages("postings.edit")</h3>
 
-                @buttonSave()
-            </fieldset>
-        </form>
-    </div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>@Messages("postings.post.title")</th>
+                <th>@Messages("postings.post.default")</th>
+                <th>@Messages("postings.post.trans")</th>
+            </tr>
+        </thead>
+        <tbody>
+        @postings.map { case (id, list) =>
+            <tr>
+                <td>
+                    @list.head.title
+                </td>
+                <td>
+                    @Messages("language.icon")(LanguageHelper.defaultLanguage)
+                    <a href="@org.ieee_passau.controllers.routes.EvaluationController.editPage(id, LanguageHelper.defaultLanguage.code)" class="btn btn-default">
+                        <span class="glyphicon glyphicon-pencil"></span>
+                    </a>
+                </td>
+                <td>@list.filter(!_.lang.equals(LanguageHelper.defaultLanguage)).map { p =>
+                    @Messages("language.icon")(p.lang)
+                    <a href="@org.ieee_passau.controllers.routes.EvaluationController.editPage(id, p.lang.code)" class="btn btn-default">
+                        <span class="glyphicon glyphicon-pencil"></span>
+                    </a>
 
-    <h3>Meldungsübersicht</h3>
-    <div class="well">
-        <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.EvaluationController.changeStatus(1)">
-            @CSRF.formField
-            <fieldset>
-                @text(statusPost("title"), label = "Titel", placeholder = "Title")
-                @textareaBs(statusPost("content"),  label = "Inhalt", placeholder = "Inhalt", wysiwyg = true)
-
-                @buttonSave()
-            </fieldset>
-        </form>
-    </div>
+                }</td>
+            </tr>
+        }
+        </tbody>
+    </table>
 }

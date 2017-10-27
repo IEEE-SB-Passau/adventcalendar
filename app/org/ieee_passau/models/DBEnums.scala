@@ -4,7 +4,6 @@ import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
 import play.api.db.slick.{Session => _, _}
 
-import scala.concurrent.duration.{Duration, DurationInt}
 import scala.slick.ast.BaseTypedType
 import scala.slick.jdbc.JdbcType
 import scala.slick.lifted.ProvenShape

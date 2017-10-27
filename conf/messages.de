@@ -34,8 +34,8 @@ submit.ratelimit.timer=Es kann nur eine Lösung pro Minute eingereicht werden!
 submit.ratelimit.queue=Solange deine letzte Lösung noch nicht ausgewertet wurde, kannst du nur alle 15 Minuten eine Lösung einreichen!
 
 status.update.message=Status wurde geändert.
+#TODO
 status.message.message=Die Auswertung ist im Moment angehalten, bitte habe etwas Geduld, das Team kümmert sich darum!<br>
-status.message.update.message=Meldung wurde geändert.
 
 jobs.error.invalidjob=Dieser Job existiert nicht!
 jobs.control.cancel.message=Dieser Job existiert nicht!
@@ -67,10 +67,17 @@ nav.admin.message=Admin
 nav.admin.vms=Vms
 nav.admin.stats=Statistiken
 nav.admin.evalqueue=Queue
-nav.admin.editcontent=Seite bearbeiten
+nav.admin.postings=Seite bearbeiten
 nav.admin.users=Benutzerliste
 nav.admin.problems=Aufgabenliste
 nav.admin.tickets=Fragenliste
 nav.admin.submissions=Abgabenübersicht
 
 problem.title=Aufgabe
+
+postings.edit=Seite bearbeiten
+postings.page=Seite
+postings.post.title=Title
+postings.post.default=Standardversion
+postings.post.trans=Übersetzungen
+postings.update.message=Meldung wurde geändert.
