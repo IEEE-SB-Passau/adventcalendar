@@ -3,6 +3,8 @@
 @import helper._
 @import org.ieee_passau.models.User
 @import org.ieee_passau.views.html.main
+@import play.api.i18n.Lang
+@import play.api.mvc.{Flash, RequestHeader}
 @(list: List[(Int, Int, Int, String, String, Int, String, Date, Option[Date])])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main("Queued") {

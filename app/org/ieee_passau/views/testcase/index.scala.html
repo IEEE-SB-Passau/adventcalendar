@@ -1,4 +1,6 @@
 @import org.ieee_passau.models.Testcase
+@import play.api.i18n.Lang
+@import play.api.mvc.RequestHeader
 @import views.html.helper.CSRF
 @(pid: Int, testcases: List[Testcase])(implicit requestHeader: RequestHeader, lang: Lang)
 

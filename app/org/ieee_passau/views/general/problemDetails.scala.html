@@ -1,14 +1,17 @@
 @import org.ieee_passau.controllers.Beans.{SolutionListEntry, TicketText}
 @import org.ieee_passau.models.{Language, Problem, Ticket, User}
-@import org.ieee_passau.views.html.bootstrap3._
-@import org.ieee_passau.views.html.general._
+@import org.ieee_passau.views.html.bootstrap3.{textareaBs, buttonSave}
+@import org.ieee_passau.views.html.solution.{solutionForm, solutionListAutoReload}
 @import org.ieee_passau.views.html.main
 @import org.ieee_passau.views.html.ticket.ticketView
+@import play.api.data.Form
+@import play.api.i18n.{Lang, Messages}
+@import play.api.mvc.{Flash, RequestHeader}
 @import play.twirl.api.Html
 @import views.html.helper.{CSRF, form}
 @(problem: Problem, languages: List[Language], lastLang: String, solutions: List[SolutionListEntry], tickets: List[(Ticket, String)], ticketForm: Form[TicketText], message: (String, String))(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
-@main("Aufgabe " + problem.door + ": " + problem.title, isProblemTitle = true) {
+@main(Messages("problem.title") + problem.door + ": " + problem.title, hasTitle = true) {
     @Html(problem.description)
 
     <h3>Fragen und Antworten</h3>

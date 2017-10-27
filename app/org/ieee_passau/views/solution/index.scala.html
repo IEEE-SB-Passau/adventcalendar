@@ -1,6 +1,8 @@
 @import org.ieee_passau.controllers.Beans.SubmissionListEntry
 @import org.ieee_passau.models.{Canceled, Passed, Queued, User}
 @import org.ieee_passau.views.html.main
+@import play.api.i18n.Lang
+@import play.api.mvc.Flash
 @(list: List[SubmissionListEntry], pages: Int, page: Int, ordering: String)(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 
 @main("Abgabenliste") {

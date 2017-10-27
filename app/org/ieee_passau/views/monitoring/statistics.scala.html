@@ -1,6 +1,7 @@
 @import org.ieee_passau.models.User
 @import org.ieee_passau.views.html.main
-
+@import play.api.i18n.Lang
+@import play.api.mvc.Flash
 @(numJobs1H: Int, vms1H: List[(String, Int)], langs1H: List[(String, Int)], numJobsFull: Int, vmsFull: List[(String, Int)], langsFull: List[(String, Int)])(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 
 @main("Statistik") {
@@ -36,9 +37,9 @@
                 </tr>
             </thead>
             <tbody>
-            @langs1H.map { case (lang, num) =>
+            @langs1H.map { case (lan, num) =>
                 <tr>
-                    <td>@lang</td>
+                    <td>@lan</td>
                     <td>@num</td>
                 </tr>
             }
@@ -78,9 +79,9 @@
                 </tr>
             </thead>
             <tbody>
-            @langsFull.map { case (lang, num) =>
+            @langsFull.map { case (lan, num) =>
                 <tr>
-                    <td>@lang</td>
+                    <td>@lan</td>
                     <td>@num</td>
                 </tr>
             }

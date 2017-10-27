@@ -1,13 +1,15 @@
-@import org.ieee_passau.views.html.bootstrap3.{buttonSave, text, textareaBs}
 @import org.ieee_passau.models.ProblemTranslation
-@(pid: Int, trans: Form[ProblemTranslation])(lang: Lang)
+@import org.ieee_passau.views.html.bootstrap3.{buttonSave, text, textareaBs}
+@import play.api.data.Form
+@import play.api.i18n.Lang
+@(pid: Int, trans: Form[ProblemTranslation])(implicit lang: Lang)
 
 <fieldset>
     <input type="hidden" name="problemId" value="@pid" />
     @text(trans("language"), label = "Sprache", placeholder = "de")
     @* TODO error handling for duplicate languages *@
     @text(trans("title"), label = "Titel", placeholder = "Titel")
-    @textareaBs(trans("description"), label = "Beschreibung", placeholder = "Beschreibung", rows = 3, wysiwyg = true)
+    @textareaBs(trans("description"), label = "Beschreibung", placeholder = "Beschreibung", wysiwyg = true)
 
     @buttonSave()
 </fieldset>

@@ -46,3 +46,30 @@ error.invalidlink=Dieser Link ist nicht gültig!
 
 language.name=en
 language.icon=🇺🇸
+
+page.title=IEEE SB Passau Adventskalender 2017
+page.footer=&copy; 2017 IEEE Student Branch Passau - <a href="https://ieee.uni-passau.de/pages/contact/">Impressum</a>
+
+nav.calendar=Adventskalender
+nav.problems=Aufgaben
+nav.ranking=Rangliste
+nav.info=Informationen
+nav.news=Meldungen
+nav.faq=FAQ
+nav.rules=Regeln
+nav.examples=Beispiele
+nav.contact=Kontakt
+nav.feedback=Feedback
+nav.user.login=Anmelden
+nav.user.logout=Abmelden
+nav.user.register=Registrieren
+nav.user.greeting= Hallo {1} {0}!
+nav.admin.message=Admin
+nav.admin.vms=Vms
+nav.admin.stats=Statistiken
+nav.admin.evalqueue=Queue
+nav.admin.editcontent=Seite bearbeiten
+nav.admin.users=Benutzerliste
+nav.admin.problems=Aufgabenliste
+nav.admin.tickets=Fragenliste
+nav.admin.submissions=Abgabenübersicht

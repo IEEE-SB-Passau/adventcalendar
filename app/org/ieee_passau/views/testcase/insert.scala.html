@@ -1,6 +1,9 @@
 @import helper._
 @import org.ieee_passau.models.{Testcase, User, Visibility}
 @import org.ieee_passau.views.html.main
+@import play.api.data.Form
+@import play.api.i18n.Lang
+@import play.api.mvc.{Flash, RequestHeader}
 @(pid: Int, visibilities: List[Visibility], testcase: Form[Testcase])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main("Testfall hinzufügen") {

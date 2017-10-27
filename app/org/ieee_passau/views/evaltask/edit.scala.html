@@ -1,6 +1,9 @@
 @import helper._
 @import org.ieee_passau.models.{EvalTask, User}
 @import org.ieee_passau.views.html.main
+@import play.api.data.Form
+@import play.api.i18n.Lang
+@import play.api.mvc.{Flash, RequestHeader}
 @(pid: Int, id: Int, task: Form[EvalTask])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main("Auswertungsschritt bearbeiten") {

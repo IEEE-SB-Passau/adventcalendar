@@ -1,5 +1,7 @@
 @import org.ieee_passau.models.EvalTask
 @import org.ieee_passau.utils.ViewHelper._
+@import play.api.i18n.Lang
+@import play.api.mvc.RequestHeader
 @import views.html.helper.CSRF
 @(pid: Int, tasks: List[EvalTask])(implicit requestHeader: RequestHeader, lang: Lang)
 

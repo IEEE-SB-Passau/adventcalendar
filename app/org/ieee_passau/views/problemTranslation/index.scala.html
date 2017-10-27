@@ -1,5 +1,7 @@
-@import views.html.helper.CSRF
 @import org.ieee_passau.models.ProblemTranslation
+@import play.api.i18n.Lang
+@import play.api.mvc.RequestHeader
+@import views.html.helper.CSRF
 @(pid: Int, translations: List[ProblemTranslation])(implicit requestHeader: RequestHeader, lang: Lang)
 
 <table class="table table-striped">

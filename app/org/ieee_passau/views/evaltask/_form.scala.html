@@ -1,5 +1,7 @@
-@import org.ieee_passau.models.{EvalTask, User}
+@import org.ieee_passau.models.EvalTask
 @import org.ieee_passau.views.html.bootstrap3.{buttonSave, checkboxBs, text}
+@import play.api.data.Form
+@import play.api.i18n.Lang
 @(pid: Int, task: Form[EvalTask])(implicit lang: Lang)
 
 <fieldset>

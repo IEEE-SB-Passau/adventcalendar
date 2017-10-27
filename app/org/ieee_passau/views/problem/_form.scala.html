@@ -1,5 +1,7 @@
-@import org.ieee_passau.models.{EvalMode, Problem, User}
+@import org.ieee_passau.models.{EvalMode, Problem}
 @import org.ieee_passau.views.html.bootstrap3.{buttonSave, text, textareaBs}
+@import play.api.data.Form
+@import play.api.i18n.Lang
 @(problem: Form[Problem], evalModes: List[EvalMode])(implicit lang: Lang)
 
 <fieldset>
@@ -20,7 +22,7 @@
             </span>
         </div>
     </div>
-    @textareaBs(problem("description"), label = "Beschreibung", placeholder = "Beschreibung", rows = 3, wysiwyg = true)
+    @textareaBs(problem("description"), label = "Beschreibung", placeholder = "Beschreibung", wysiwyg = true)
 
     @dateManualError(problem("readableStart"), label = "Sichtbar ab", placeholder = "01.12.2013")
     @{

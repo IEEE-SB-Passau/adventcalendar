@@ -1,11 +1,12 @@
 @import org.ieee_passau.controllers.Beans.ProblemInfo
 @import org.ieee_passau.models.{Best, Dynamic, Static, User}
+@import org.ieee_passau.utils.ViewHelper.showCheckmark
 @import org.ieee_passau.views.html.main
+@import play.api.i18n.{Lang, Messages}
+@import play.api.mvc.Flash
 @(problems: List[ProblemInfo])(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 
-@import org.ieee_passau.utils.ViewHelper._
-
-@main("Aufgaben") {
+@main(Messages("nav.problems")) {
     <table class="table table-striped">
         <thead>
             <tr>

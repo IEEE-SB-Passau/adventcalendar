@@ -1,5 +1,6 @@
 @import org.ieee_passau.controllers.Beans.SolutionListEntry
 @import org.ieee_passau.models.{Canceled, CompileError, Language, MemoryExceeded, Passed, Private, ProgramError, Public, Queued, RuntimeExceeded, WrongAnswer}
+@import play.api.i18n.Lang
 @(solutions: List[SolutionListEntry], languages: List[Language], showAll: Boolean = false)(implicit lang: Lang)
 @* showPrivate shows also private testcases *@
 

@@ -1,4 +1,6 @@
 @import org.ieee_passau.models.Language
+@import play.api.i18n.Lang
+@import play.api.mvc.RequestHeader
 @(languages: List[Language], lastLanguage: String)(implicit requestHeader: RequestHeader, lang: Lang)
 
 @import views.html.helper.CSRF

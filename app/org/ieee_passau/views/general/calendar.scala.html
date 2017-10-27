@@ -1,8 +1,11 @@
 @import org.ieee_passau.models.{Posting, Problem, User}
 @import org.ieee_passau.views.html.main
+@import play.api.i18n.Lang
+@import play.api.mvc.Flash
+@import play.twirl.api.Html
 @(posting: Posting, problems: List[Problem])(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 
-@main("Adventskalender") {
+@main("Adventskalender", isFullPage = true) {
     @Html(posting.content)
 
     <h3>Viel Spaß beim Knobeln!</h3>

@@ -2,6 +2,9 @@
 @import org.ieee_passau.models.{Problem, Ticket, User}
 @import org.ieee_passau.views.html.bootstrap3.{buttonSave, checkboxBs, textareaBs}
 @import org.ieee_passau.views.html.main
+@import play.api.data.Form
+@import play.api.i18n.Lang
+@import play.api.mvc.{Flash, RequestHeader}
 @import views.html.helper.{CSRF, form}
 @(ticket: (Ticket, User, Problem), answers: List[(Ticket, String)], ticketForm: Form[TicketText])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 

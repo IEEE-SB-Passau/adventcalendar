@@ -2,6 +2,9 @@
 @import org.ieee_passau.models.{User, UserRegistration}
 @import org.ieee_passau.views.html.bootstrap3._
 @import org.ieee_passau.views.html.main
+@import play.api.data.Form
+@import play.api.i18n.Lang
+@import play.api.mvc.{Flash, RequestHeader}
 @(registrationForm: Form[UserRegistration])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main("Registrieren") {

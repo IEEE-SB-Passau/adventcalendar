@@ -1,6 +1,9 @@
+@import controllers.routes
 @import org.ieee_passau.models.User
-@import play.api.i18n.Messages
-@(title: String, isProblemTitle: Boolean = false)(content: Html)(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
+@import play.api.i18n.{Lang, Messages}
+@import play.api.mvc.Flash
+@import play.twirl.api.Html
+@(title: String, isFullPage: Boolean = false, hasTitle: Boolean = false)(content: Html)(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 <!DOCTYPE html>
 
 <html>
@@ -11,9 +14,9 @@
         <link rel="shortcut icon" type="image/x-icon" href="@routes.Assets.at("images/favicon.ico")">
     </head>
     <body>
-        <div class='container @if(title == "Adventskalender") { fullbody }'>
+        <div class='container @if(isFullPage) { fullbody }'>
             <div class="page-header">
-                <h1>IEEE SB Passau Adventskalender 2016</h1>
+                <h1>@Html(Messages("page.title"))</h1>
                 <nav class="navbar navbar-default" role="navigation">
                         <!-- Brand and toggle get grouped for better mobile display -->
                     <div class="navbar-header">
@@ -28,45 +31,47 @@
                     <!-- Collect the nav links, forms, and other content for toggling -->
                     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                         <ul class="nav navbar-nav">
-                            <li @if(title == "Adventskalender") { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.calendar#doors">Adventskalender</a></li>
-                            <li @if(title == "Aufgaben") { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.problems">Aufgaben</a></li>
-                            <li @if(title == "Rangliste") { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.ranking">Rangliste</a></li>
-                            <li @if(title == "Meldungen") { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.status">Meldungen</a></li>
+                            <li @if(title == Messages("nav.calendar")) { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.calendar#doors">@Messages("nav.calendar")</a></li>
+                            <li @if(title == Messages("nav.problems") || title.startsWith(Messages("problem.title"))) { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.problems">@Messages("nav.problems")</a></li>
+                            <li @if(title == Messages("nav.ranking"))  { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.ranking"       >@Messages("nav.ranking")</a></li>
+                            <li class="dropdown @if(List(Messages("nav.news"), Messages("nav.faq"), Messages("nav.rules"), Messages("nav.examples")).contains(title)) { active }" >
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">@Messages("nav.info") <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    <li @if(title == Messages("nav.news"))  { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.status">@Messages("nav.news")</a></li>
+                                    <li @if(title == Messages("nav.faq"))   { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.faq"   >@Messages("nav.faq")</a></li>
+                                    <li @if(title == Messages("nav.rules")) { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.rules" >@Messages("nav.rules")</a></li>
+                                </ul>
+                            </li>
                             @if(sessionUser.isEmpty) {
-                                <li @if(title == "Registrieren") { class="active" }><a href="@org.ieee_passau.controllers.routes.UserController.register">Registrieren</a></li>
-                                <li @if(title == "Login") { class="active" }><a href="@org.ieee_passau.controllers.routes.UserController.login">Login</a></li>
+                                <li @if(title == Messages("nav.user.register")) { class="active" }><a href="@org.ieee_passau.controllers.routes.UserController.register">@Messages("nav.user.register")</a></li>
+                                <li @if(title == Messages("nav.user.login"))    { class="active" }><a href="@org.ieee_passau.controllers.routes.UserController.login"   >@Messages("nav.user.login")</a></li>
                             } else { @if(sessionUser.get.admin) {
-                                <li class="dropdown @if(List("Benutzerliste", "Problemliste", "Fragenliste", "Abgabenliste").contains(title)) { active }" >
-                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Admin <b class="caret"></b></a>
+                                <li class="dropdown
+                                    @if(List(Messages("nav.admin.users"), Messages("nav.admin.problems"), Messages("nav.admin.tickets"),
+                                    Messages("nav.admin.submissions"), Messages("nav.admin.evalqueue"), Messages("nav.admin.stats"),
+                                    Messages("nav.admin.vms"), Messages("nav.admin.editcontent")).contains(title)) { active }" >
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">@Messages("nav.admin.message") <b class="caret"></b></a>
                                     <ul class="dropdown-menu">
-                                        <li @if(title == "Benutzerliste") { class="active" }><a href="@org.ieee_passau.controllers.routes.UserController.index">Benutzer</a></li>
-                                        <li @if(title == "Problemliste") { class="active" }><a href="@org.ieee_passau.controllers.routes.ProblemController.index">Probleme</a></li>
-                                        <li @if(title == "Fragenliste") { class="active" }><a href="@org.ieee_passau.controllers.routes.TicketController.index">Fragen</a></li>
-                                        <li @if(title == "Abgabenliste") { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.index(1)">Abgabenübersicht</a></li>
-                                    </ul>
-                                </li>
-                                <li class="dropdown @if(List("Queued", "Statistik", "Evaluation VMs", "Wartung").contains(title)) { active }" >
-                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Monitoring <b class="caret"></b></a>
-                                    <ul class="dropdown-menu">
-                                        <li @if(title == "Wartung") { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.maintenance">Wartung</a></li>
-                                        <li @if(title == "Statistik") { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.stats    ">Statisitk</a></li>
-                                        <li @if(title == "Queued") { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.indexQueued">Queued</a></li>
-                                        <li @if(title == "Evaluation VMs") { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.vms">VMs</a></li>
+                                        <li @if(title == Messages("nav.admin.users"))       { class="active" }><a href="@org.ieee_passau.controllers.routes.UserController.index"            >@Messages("nav.admin.users")</a></li>
+                                        <li @if(title == Messages("nav.admin.problems"))    { class="active" }><a href="@org.ieee_passau.controllers.routes.ProblemController.index"         >@Messages("nav.admin.problems")</a></li>
+                                        <li @if(title == Messages("nav.admin.tickets"))     { class="active" }><a href="@org.ieee_passau.controllers.routes.TicketController.index"          >@Messages("nav.admin.tickets")</a></li>
+                                        <li @if(title == Messages("nav.admin.submissions")) { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.index()"    >@Messages("nav.admin.submissions")</a></li>
+                                        <li @if(title == Messages("nav.admin.evalqueue"))   { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.indexQueued">@Messages("nav.admin.evalqueue")</a></li>
+                                        <li @if(title == Messages("nav.admin.vms"))         { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.vms"        >@Messages("nav.admin.vms")</a></li>
+                                        <li @if(title == Messages("nav.admin.stats"))       { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.stats"      >@Messages("nav.admin.stats")</a></li>
+                                        <li @if(title == Messages("nav.admin.editcontent")) { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.maintenance">@Messages("nav.admin.editcontent")</a></li>
                                     </ul>
                                 </li>
                             }}
-                            <li @if(title == "FAQ") { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.faq">FAQ</a></li>
-                            <li @if(title == "Regeln") { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.rules">Regeln</a></li>
-                            <li @if(title == "Kontakt") { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.contact">Kontakt</a></li>
-                            @*<li @if(title == "Feedback") { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.feedback">Feedback</a></li>*@
+                            <li @if(title == Messages("nav.contact"))  { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.contact" >@Messages("nav.contact")</a></li>
+                            @*<li @if(title == Messages("nav.feedback")) { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.feedback">@Messages("nav.feedback")</a></li>*@
                             @if(sessionUser.isDefined) {
-                                <li @if(title == "Logout") { class="active" }><a href="@org.ieee_passau.controllers.routes.UserController.logout">Logout</a></li>
+                                <li @if(title == Messages("nav.user.logout")) { class="active" }><a href="@org.ieee_passau.controllers.routes.UserController.logout">@Messages("nav.user.logout")</a></li>
                             }
                         </ul>
                         @if(sessionUser.isDefined) {
                             <p class="navbar-text navbar-right">
-                                Hallo, @if(sessionUser.get.admin) { Admin }
-                                @{sessionUser.get.username}!
+                                @Messages("nav.user.greeting", sessionUser.get.username, if(sessionUser.get.admin) Messages("nav.admin.message") else "")
                             </p>
                         }
 
@@ -95,7 +100,7 @@
                 <div class="alert alert-danger">@Html(flash.get("danger").get)</div>
             }
 
-            @if(isProblemTitle) {
+            @if(hasTitle) {
                 <h3>@title</h3>
             }
             <div class="row box-round">
@@ -104,7 +109,7 @@
 
             <div class="row footer box-round">
                 <div class="col-sm-12" id="footer">
-                    <small>&copy; 2016 IEEE Student Branch Passau - <a href="https://ieee.uni-passau.de/pages/contact/">Impressum</a></small>
+                    <small>@Html(Messages("page.footer"))</small>
                 </div>
             </div>
         </div>

@@ -1,5 +1,7 @@
 @import org.ieee_passau.models.User
 @import org.ieee_passau.views.html.main
+@import play.api.i18n.Lang
+@import play.api.mvc.Flash
 @(errorID: Option[String])(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 
 @main("Interner Fehler") {

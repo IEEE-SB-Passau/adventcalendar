@@ -1,7 +1,10 @@
 @import helper._
 @import org.ieee_passau.controllers.routes
 @import org.ieee_passau.models.{EvalMode, EvalTask, Problem, ProblemTranslation, Testcase, User}
-@import org.ieee_passau.views.html.{evaltask, main, testcase, problemTranslation}
+@import org.ieee_passau.views.html.{evaltask, main, problemTranslation, testcase}
+@import play.api.data.Form
+@import play.api.i18n.Lang
+@import play.api.mvc.{Flash, RequestHeader}
 @(pid: Int, testcases: List[Testcase], evalTasks: List[EvalTask], translations: List[ProblemTranslation], problem: Form[Problem], evalModes: List[EvalMode])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main("Edit problem") {

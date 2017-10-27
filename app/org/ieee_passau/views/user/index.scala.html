@@ -2,6 +2,8 @@
 @import org.ieee_passau.models.User
 @import org.ieee_passau.utils.ViewHelper._
 @import org.ieee_passau.views.html.main
+@import play.api.i18n.Lang
+@import play.api.mvc.{Flash, RequestHeader}
 @(users: List[User])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main("Benutzerliste") {

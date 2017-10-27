@@ -2,6 +2,9 @@
 @import org.ieee_passau.models.{Posting, User}
 @import org.ieee_passau.views.html.bootstrap3.{buttonSave, text, textareaBs}
 @import org.ieee_passau.views.html.main
+@import play.api.data.Form
+@import play.api.i18n.Lang
+@import play.api.mvc.{Flash, RequestHeader}
 @(running: Boolean, statusMessage: Form[(Boolean, String)], statusPost: Form[Posting], frontpage: Form[Posting])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main("Wartung") {
@@ -44,7 +47,7 @@
             @CSRF.formField
             <fieldset>
                 @text(frontpage("title"), label = "Titel", placeholder = "Titel")
-                @textareaBs(frontpage("content"), rows = 3,  label = "Inhalt", placeholder = "Inhalt", wysiwyg = true)
+                @textareaBs(frontpage("content"),  label = "Inhalt", placeholder = "Inhalt", wysiwyg = true)
 
                 @buttonSave()
             </fieldset>
@@ -57,7 +60,7 @@
             @CSRF.formField
             <fieldset>
                 @text(statusPost("title"), label = "Titel", placeholder = "Title")
-                @textareaBs(statusPost("content"), rows = 3,  label = "Inhalt", placeholder = "Inhalt", wysiwyg = true)
+                @textareaBs(statusPost("content"),  label = "Inhalt", placeholder = "Inhalt", wysiwyg = true)
 
                 @buttonSave()
             </fieldset>

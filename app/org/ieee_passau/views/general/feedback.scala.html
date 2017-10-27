@@ -2,6 +2,9 @@
 @import org.ieee_passau.models.{Feedback, User}
 @import org.ieee_passau.views.html.bootstrap3._
 @import org.ieee_passau.views.html.main
+@import play.api.data.Form
+@import play.api.i18n.Lang
+@import play.api.mvc.{Flash, RequestHeader}
 @(feedback: Form[Feedback])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main("Feedback") {
@@ -9,9 +12,9 @@
         @CSRF.formField
         <div class="well">
             @radiobuttons(feedback("rating"), label = "Rating", buttonNameList = List("1", "2", "3", "4", "5"))
-            @textareaBs(feedback("pro"), label = "Hat mir gut gefallen", placeholder = "")
-            @textareaBs(feedback("con"), label = "Kann man verbessern", placeholder = "")
-            @textareaBs(feedback("freetext"), label = "Weitere Anmerkungen", placeholder = "")
+            @textareaBs(feedback("pro"), label = "Hat mir gut gefallen")
+            @textareaBs(feedback("con"), label = "Kann man verbessern")
+            @textareaBs(feedback("freetext"), label = "Weitere Anmerkungen")
             @buttonSave()
         </div>
     }
