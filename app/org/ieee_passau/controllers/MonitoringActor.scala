@@ -23,12 +23,11 @@ class MonitoringActor extends Actor {
   private val nodes = mutable.HashMap[String, VMStatus]()
 
   override def receive: Receive = {
-    case StatusQ => sender ! StatusM(running, status)
-    case StatusM(state, message) =>
+    case StatusQ => sender ! StatusM(running)
+    case StatusM(state) =>
       running = state
-      status = message
-      context.actorSelection("../Evaluator/VMMaster") ! StatusM(state, message)
-      context.actorSelection("../Evaluator/InputRegulator") ! StatusM(state, message)
+      context.actorSelection("../Evaluator/VMMaster") ! StatusM(state)
+      context.actorSelection("../Evaluator/InputRegulator") ! StatusM(state)
     case RunningJobsQ => pipe (context.actorSelection("../Evaluator/InputRegulator") ? RunningJobsQ) to sender
     case RunningVMsQ => pipe ((context.actorSelection("../Evaluator/VMMaster") ? RunningVMsQ) flatMap {
       case list: List[(String, Int) @unchecked] => Future {

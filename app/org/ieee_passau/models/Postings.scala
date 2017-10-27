@@ -27,7 +27,8 @@ object Postings extends TableQuery(new Postings(_)) {
   implicit private def mapper =  LanguageHelper.LangTypeMapper
 
   val calendarPosting = 2
-  val statusPosting = 1
+  val newsPosting = 1
+  val statusPosting = 3
 
   def byId(id: Int, preferredLang: Lang): List[Posting] = list(preferredLang)(id)
   def byIdLang(id: Int, lang: String): Query[Postings, Posting, Seq] = this.filter(p => p.id === id && p.lang === Lang(lang))

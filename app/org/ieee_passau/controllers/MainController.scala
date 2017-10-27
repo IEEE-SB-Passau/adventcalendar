@@ -8,7 +8,7 @@ import akka.util.Timeout
 import org.ieee_passau.controllers.Beans._
 import org.ieee_passau.forms.{ProblemForms, UserForms}
 import org.ieee_passau.models.DateSupport._
-import org.ieee_passau.models._
+import org.ieee_passau.models.{Postings, _}
 import org.ieee_passau.utils.{ListHelper, PermissionCheck}
 import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
@@ -220,13 +220,12 @@ object MainController extends Controller with PermissionCheck {
             else if (sessionUser.nonEmpty && lastAllSolution.nonEmpty) lastAllSolution.get.language
             else "JAVA"
 
-          val running = Await.result(EvaluationController.monitoringActor ? StatusQ, 100 milli).asInstanceOf[StatusM]
-          //TODO i18n
-          val flash = if (!running.run) "warning" -> (Messages("status.message.message") + running.message) else "" -> ""
-
+          val running = Await.result((EvaluationController.monitoringActor ? StatusQ).mapTo[StatusM], 100 millis)
           val displayLang = request2lang
           val trans = ProblemTranslations.byProblemLang(problem.id.get, displayLang.code).firstOption
           val transProblem = if (trans.nonEmpty) problem.copy(title=trans.get.title, description=trans.get.description) else problem
+          val posting = Postings.byIdLang(Postings.statusPosting, displayLang.code).firstOption
+          val flash = if (!running.run) "warning" -> (if (posting.nonEmpty) posting.get.content else Messages("status.messages.message")) else "" -> ""
           Ok(org.ieee_passau.views.html.general.problemDetails(transProblem, langs, lastLang, solutions, tickets, ProblemForms.ticketForm, flash))
         }
     }

@@ -10,9 +10,8 @@ import play.api.i18n.Lang
 object MaintenanceForms {
   val statusForm = Form(
     mapping(
-      "state" -> text,
-      "msg" -> text
-    )((state: String, message: String) => (state == "true", message))((status: (Boolean, String)) => Some((status._1.toString, status._2)))
+      "state" -> text
+    )((state: String) => state == "true")((status: (Boolean)) => Some(status.toString))
   )
 
   val postingForm = Form(

@@ -43,7 +43,7 @@ class InputRegulator(jobLimit: Int, jobLifetime: Duration) extends EvaluationAct
   }
 
   override def receive: Receive = {
-    case StatusM(state, _) =>
+    case StatusM(state) =>
       fetchedJobs.clear()
       running = state
 

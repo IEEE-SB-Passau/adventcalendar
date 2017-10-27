@@ -169,9 +169,14 @@ object EvaluationController extends Controller with PermissionCheck {
   def maintenance: Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
 
+    val displayLang = request2lang
     val state = Await.result((monitoringActor ? StatusQ).mapTo[StatusM], 50 millis)
-    Ok(org.ieee_passau.views.html.monitoring.maintenance(state.run,
-      MaintenanceForms.statusForm.fill((state.run, state.message)), Postings.list(LanguageHelper.defaultLanguage)))
+    Postings.byIdLang(Postings.statusPosting, displayLang.code).firstOption.map { post =>
+      Ok(org.ieee_passau.views.html.monitoring.maintenance(state.run, post.content, Postings.list(LanguageHelper.defaultLanguage)))
+    } getOrElse {
+      Redirect(org.ieee_passau.controllers.routes.EvaluationController.editPage(Postings.statusPosting, displayLang.code))
+        .flashing("waring" -> play.api.i18n.Messages("postings.post.missing"))
+    }
   }}
 
   def playPause: Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
@@ -180,10 +185,11 @@ object EvaluationController extends Controller with PermissionCheck {
     val state = Await.result((monitoringActor ? StatusQ).mapTo[StatusM], 50 millis)
     MaintenanceForms.statusForm.bindFromRequest.fold(
       errorForm => {
-        BadRequest(org.ieee_passau.views.html.monitoring.maintenance(state.run, errorForm, Postings.list(LanguageHelper.defaultLanguage)))
+        Redirect(org.ieee_passau.controllers.routes.EvaluationController.maintenance())
+          .flashing("warning" -> play.api.i18n.Messages("status.update.error"))
       },
       status => {
-        monitoringActor ! StatusM(status._1, status._2)
+        monitoringActor ! StatusM(status)
         Redirect(org.ieee_passau.controllers.routes.EvaluationController.maintenance())
           .flashing("success" -> play.api.i18n.Messages("status.update.message"))
       }
@@ -195,7 +201,7 @@ object EvaluationController extends Controller with PermissionCheck {
 
     Postings.byIdLang(id, lang).firstOption.map { post =>
       Ok(org.ieee_passau.views.html.monitoring.pageEditor(id, lang, MaintenanceForms.postingForm.fill(post)))
-    } .getOrElse {
+    } getOrElse {
       val post = Posting(Some(id), Lang(lang), "", "", new Date)
       Postings += post
       Ok(org.ieee_passau.views.html.monitoring.pageEditor(id, lang, MaintenanceForms.postingForm.fill(post)))

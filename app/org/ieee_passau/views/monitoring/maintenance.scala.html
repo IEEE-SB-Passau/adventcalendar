@@ -1,26 +1,23 @@
 @import helper._
 @import org.ieee_passau.models.{Posting, User}
 @import org.ieee_passau.utils.LanguageHelper
-@import org.ieee_passau.views.html.bootstrap3.textareaBs
 @import org.ieee_passau.views.html.main
-@import play.api.data.Form
 @import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.{Flash, RequestHeader}
-@(running: Boolean, statusMessage: Form[(Boolean, String)], postings: Map[Int, List[Posting]])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
+@import play.twirl.api.Html
+@(running: Boolean, statusMessage: String, postings: Map[Int, List[Posting]])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main(Messages("nav.admin.postings")) {
     <h3>Statusmeldung</h3>
+    @* TODO *@
     @if(running) {
         <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.EvaluationController.playPause">
             @CSRF.formField
             <div class="well">
                 <fieldset>
                     <input type="hidden" name="state" value="false"/>
-
-                    @textareaBs(statusMessage("msg"), label = "Nachricht", placeholder = "Nachricht", wysiwyg = true)
-
                     <div class="form-group"><div class="col-sm-offset-2 col-sm-10">
-                        <button type="submit" class="btn btn-danger"><span class="glyphicon glyphicon-pause"></span> Evaluierung anhalten</button>
+                        <button type="submit" class="btn btn-danger pull-right"><span class="glyphicon glyphicon-pause"></span> Evaluierung anhalten</button>
                     </div></div>
                 </fieldset>
             </div>
@@ -29,11 +26,9 @@
         <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.EvaluationController.playPause">
             @CSRF.formField
             <div class="well alert-danger">
-                Aktuell ist das System angehalten
                 <fieldset>
                     <input type="hidden" name="state" value="true"/>
-                    <input type="hidden" name="msg" value=""/>
-
+                    @Html(statusMessage)
                     <div class="form-group"><div class="col-sm-offset-2 col-sm-10">
                         <button type="submit" class="btn btn-success pull-right"><span class="glyphicon glyphicon-play"></span> Evaluierung starten</button>
                     </div></div>

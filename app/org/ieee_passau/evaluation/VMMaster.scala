@@ -41,7 +41,7 @@ class VMMaster extends EvaluationActor with AkkaScopingHelper {
   }
 
   override def receive: Receive = {
-    case StatusM(false, _) => router.routees.foreach {
+    case StatusM(false) => router.routees.foreach {
       routee => context.stop(routee.asInstanceOf[ActorRefRoutee].ref)
     }
     //    case StatusM(true) =>

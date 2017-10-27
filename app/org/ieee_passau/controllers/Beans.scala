@@ -30,7 +30,7 @@ object Beans {
 
   case class RunningVMsQ()
 
-  case class StatusM(run: Boolean, message: String)
+  case class StatusM(run: Boolean)
 
   case class StatusQ()
 
