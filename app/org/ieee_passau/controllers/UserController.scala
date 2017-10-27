@@ -211,10 +211,14 @@ object UserController extends Controller with PermissionCheck {
       val user = sessionUser.get
       Users.update(user.id.get, user.copy(lang = Some(lang)))
     }
-    //TODO get current page
-    Redirect(org.ieee_passau.controllers.routes.MainController.calendar()).withCookies(
-      Cookie(play.Play.langCookieName(), lang)
-    )
+
+    val refererUrl = rs.headers.get("referer")
+    val cookie = Cookie(play.Play.langCookieName(), lang)
+    if (refererUrl.nonEmpty) {
+      Redirect(refererUrl.get, 303).withCookies(cookie)
+    } else {
+      Redirect(org.ieee_passau.controllers.routes.MainController.calendar()).withCookies(cookie)
+    }
   }
 
   def update(id: Int): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
