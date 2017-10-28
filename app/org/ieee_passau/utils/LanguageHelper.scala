@@ -15,6 +15,8 @@ object LanguageHelper {
       if (x == y) return 0
       if (x.equals(preferred)) return -1
       if (y.equals(preferred)) return 1
+      if (x.equals(defaultLanguage)) return 1
+      if (y.equals(defaultLanguage)) return -1
       x.code.compareTo(y.code)
     }
   }
