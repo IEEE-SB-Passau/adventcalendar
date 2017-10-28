@@ -19,7 +19,7 @@ GET         /examples                                  org.ieee_passau.controlle
 GET         /rules                                     org.ieee_passau.controllers.MainController.rules
 GET         /feedback                                  org.ieee_passau.controllers.MainController.feedback
 POST        /feedback                                  org.ieee_passau.controllers.MainController.submitFeedback
-GET         /status                                    org.ieee_passau.controllers.MainController.status
+GET         /news                                      org.ieee_passau.controllers.MainController.news
 
 GET         /logout                                    org.ieee_passau.controllers.UserController.logout
 GET         /login                                     org.ieee_passau.controllers.UserController.login

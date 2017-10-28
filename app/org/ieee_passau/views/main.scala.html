@@ -37,9 +37,9 @@
                             <li class="dropdown @if(List(Messages("nav.news"), Messages("nav.faq"), Messages("nav.rules"), Messages("nav.examples")).contains(title)) { active }" >
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">@Messages("nav.info") <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
-                                    <li @if(title == Messages("nav.news"))  { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.status">@Messages("nav.news")</a></li>
-                                    <li @if(title == Messages("nav.faq"))   { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.faq"   >@Messages("nav.faq")</a></li>
-                                    <li @if(title == Messages("nav.rules")) { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.rules" >@Messages("nav.rules")</a></li>
+                                    <li @if(title == Messages("nav.news"))  { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.news" >@Messages("nav.news")</a></li>
+                                    <li @if(title == Messages("nav.faq"))   { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.faq"  >@Messages("nav.faq")</a></li>
+                                    <li @if(title == Messages("nav.rules")) { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.rules">@Messages("nav.rules")</a></li>
                                 </ul>
                             </li>
                             @if(sessionUser.isEmpty) {

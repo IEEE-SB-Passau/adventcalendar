@@ -85,11 +85,11 @@ object MainController extends Controller with PermissionCheck {
     Ok(org.ieee_passau.views.html.general.calendar(posting, problems))
   }
 
-  def status = DBAction { implicit rs =>
+  def news = DBAction { implicit rs =>
     implicit val sessionUser = getUserFromSession(request2session)
     val displayLang = request2lang
 
-    val posting = Postings.byId(Postings.statusPosting, displayLang).head
+    val posting = Postings.byId(Postings.newsPosting, displayLang).head
 
     Ok(org.ieee_passau.views.html.general.status(posting))
   }
