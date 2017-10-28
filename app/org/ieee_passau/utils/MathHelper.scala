@@ -22,5 +22,4 @@ object MathHelper {
     val dur = Duration(t)
     FiniteDuration(dur.toMillis, "milliseconds")
   }
-
 }

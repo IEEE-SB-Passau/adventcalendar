@@ -13,11 +13,8 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-
-// TODO i18n
 class MonitoringActor extends Actor {
   private var running = true
-  private var status = "<a href=\"https://ieee.uni-passau.de/de/veranstaltungen/wettbewerbe/adventskalender-status-changelog/\">Schau mal hier vorbei</a>"
   implicit val timeout = Timeout(5000 milliseconds)
 
   private val nodes = mutable.HashMap[String, VMStatus]()

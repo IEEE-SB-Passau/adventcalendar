@@ -29,9 +29,11 @@ object TestcaseForms {
       "scoreCalc" -> boolean,
       "runCorrect" -> boolean,
       "runWrong" -> boolean
-    )((id: Option[Int], problemId: Int, position: Int, command: String, outputCheck: Boolean, scoreCalc: Boolean, runCorrect: Boolean, runWrong: Boolean)
-        => EvalTask(id, problemId, position, command, "", Array(), outputCheck, scoreCalc, command.contains("{stdIn}"),
-        command.contains("{expOut}"), command.contains("{progOut}"), command.contains("{program}"), runCorrect, runWrong)
-    )((t: EvalTask) => Some(t.id, t.problemId, t.position, t.command, t.outputCheck, t.scoreCalc, t.runCorrect, t.runWrong))
+    )
+    ((id: Option[Int], problemId: Int, position: Int, command: String, outputCheck: Boolean, scoreCalc: Boolean,
+        runCorrect: Boolean, runWrong: Boolean) =>
+      EvalTask(id, problemId, position, command, "", Array(), outputCheck, scoreCalc, command.contains("{stdIn}"),
+        command.contains("{expOut}"), command.contains("{progOut}"), command.contains("{program}"), runCorrect, runWrong))
+    ((t: EvalTask) => Some(t.id, t.problemId, t.position, t.command, t.outputCheck, t.scoreCalc, t.runCorrect, t.runWrong))
   )
 }

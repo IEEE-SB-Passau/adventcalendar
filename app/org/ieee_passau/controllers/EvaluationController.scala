@@ -73,7 +73,8 @@ object EvaluationController extends Controller with PermissionCheck {
 
     val sorted = sort(ordering, solutions)
 
-    Ok(org.ieee_passau.views.html.solution.index(sorted.slice((page - 1) * subsPerPage, (page - 1) * subsPerPage + subsPerPage), (sorted.length / subsPerPage) + 1, page, ordering))
+    Ok(org.ieee_passau.views.html.solution.index(sorted.slice((page - 1) * subsPerPage,
+      (page - 1) * subsPerPage + subsPerPage), (sorted.length / subsPerPage) + 1, page, ordering))
   }}
 
   def indexQueued: Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>

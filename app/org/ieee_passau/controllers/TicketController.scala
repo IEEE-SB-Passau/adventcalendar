@@ -49,7 +49,8 @@ object TicketController extends Controller with PermissionCheck {
       },
       ticket => {
         val problem = Problems.byDoor(door).first
-        val id = (Tickets returning Tickets.map(_.id)) += Ticket(None, problem.id, sessionUser.get.id, None, ticket.text, public = false, now)
+        val id = (Tickets returning Tickets.map(_.id)) +=
+          Ticket(None, problem.id, sessionUser.get.id, None, ticket.text, public = false, now)
 
         //TODO i18n
         val email = Email(

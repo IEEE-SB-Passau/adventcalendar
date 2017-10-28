@@ -15,7 +15,7 @@ case class Solution (id: Option[Int], userId: Int, problemId: Int, language: Str
 class Solutions(tag: Tag) extends TableWithId[Solution](tag, "solutions") {
   def userId: Column[Int] = column[Int]("user_id")
   def problemId: Column[Int] = column[Int]("problem_id")
-  def language: Column[String] = column[String]("language") // references e_prog_lang (language) on update restrict on delete restrict
+  def language: Column[String] = column[String]("language")
   def program: Column[String] = column[String]("program")
   def programName: Column[String] = column[String]("program_name")
   def ip: Column[String] = column[String]("ip")
@@ -23,19 +23,14 @@ class Solutions(tag: Tag) extends TableWithId[Solution](tag, "solutions") {
   def browserId: Column[String] = column[String]("browser_id")
   def created: Column[Date] = column[Date]("created")
 
-  def user: ForeignKeyQuery[Users, User] = foreignKey("user_fk", userId, Users)(_.id) // references user (id) on update cascade on delete cascade
-  def problem: ForeignKeyQuery[Problems, Problem] = foreignKey("problem_fk", problemId, Problems)(_.id) // references problems (id) on update cascade on delete cascade
+  def user: ForeignKeyQuery[Users, User] = foreignKey("user_fk", userId, Users)(_.id)
+  def problem: ForeignKeyQuery[Problems, Problem] = foreignKey("problem_fk", problemId, Problems)(_.id)
 
-  override def * : ProvenShape[Solution] = (id.?, userId, problemId, language, program, programName, ip.?, userAgent.?, browserId.?, created) <>
-    (Solution.tupled, Solution.unapply)
+  override def * : ProvenShape[Solution] = (id.?, userId, problemId, language, program, programName, ip.?, userAgent.?,
+    browserId.?, created) <> (Solution.tupled, Solution.unapply)
 }
 
 object Solutions extends TableQuery(new Solutions(_)) {
-//  def testruns = Testruns.filter(_.solutionId === id)
-  def byProblemId: CompiledFunction[(Column[Int]) => Query[Solutions, Solution, Seq], Column[Int], Int, Query[Solutions, Solution, Seq], Seq[Solution]] = this.findBy(_.problemId)
-
-  def byDoor(door: Int)(implicit session: Session): Unit = {
-    byProblemId(Problems.byDoor(door).firstOption.get.id.get)
-    def update(id: Int, solution: Solution)(implicit session: Session) = this.filter(_.id === id).update(solution.withId(id))
-  }
+  def byProblemId: CompiledFunction[(Column[Int]) => Query[Solutions, Solution, Seq], Column[Int], Int, Query[Solutions, Solution, Seq], Seq[Solution]] =
+    this.findBy(_.problemId)
 }

@@ -23,7 +23,10 @@ class Tickets(tag: Tag) extends TableWithId[Ticket](tag, "tickets") {
 }
 
 object Tickets extends TableQuery(new Tickets(_)) {
-  def byProblemId: CompiledFunction[(Column[Int]) => Query[Tickets, Ticket, Seq], Column[Int], Int, Query[Tickets, Ticket, Seq], Seq[Ticket]] = this.findBy(_.problemId)
-  def byId: CompiledFunction[(Column[Int]) => Query[Tickets, Ticket, Seq], Column[Int], Int, Query[Tickets, Ticket, Seq], Seq[Ticket]] = this.findBy(_.id)
-  def update(id: Int, ticket: Ticket)(implicit session: Session): Int = this.filter(_.id === id).update(ticket.withId(id))
+  def byProblemId: CompiledFunction[(Column[Int]) => Query[Tickets, Ticket, Seq], Column[Int], Int, Query[Tickets, Ticket, Seq], Seq[Ticket]] =
+    this.findBy(_.problemId)
+  def byId: CompiledFunction[(Column[Int]) => Query[Tickets, Ticket, Seq], Column[Int], Int, Query[Tickets, Ticket, Seq], Seq[Ticket]] =
+    this.findBy(_.id)
+  def update(id: Int, ticket: Ticket)(implicit session: Session): Int =
+    this.filter(_.id === id).update(ticket.withId(id))
 }

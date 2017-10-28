@@ -32,47 +32,52 @@ object EvalTaskController extends Controller with PermissionCheck {
     Ok(org.ieee_passau.views.html.evaltask.insert(pid, TestcaseForms.evalTaskForm))
   }}
 
-  def save(pid: Int): Action[MultipartFormData[TemporaryFile]] = requireAdmin(parse.multipartFormData) { admin => DBAction(parse.multipartFormData) { implicit rs =>
-    implicit val sessionUser = Some(admin)
-    TestcaseForms.evalTaskForm.bindFromRequest.fold(
-      errorForm => {
-        BadRequest(org.ieee_passau.views.html.evaltask.insert(pid, errorForm))
-      },
+  def save(pid: Int): Action[MultipartFormData[TemporaryFile]] = requireAdmin(parse.multipartFormData) { admin =>
+    DBAction(parse.multipartFormData) { implicit rs =>
+      implicit val sessionUser = Some(admin)
+      TestcaseForms.evalTaskForm.bindFromRequest.fold(
+        errorForm => {
+          BadRequest(org.ieee_passau.views.html.evaltask.insert(pid, errorForm))
+        },
 
-      newTaskRaw => {
-        rs.body.file("program").map { program =>
-          val newTask: EvalTask = newTaskRaw.copy(filename = program.filename, file = new File(program.ref.file).toByteArray())
-          val id = (EvalTasks returning EvalTasks.map(_.id)) += newTask
-          Redirect(org.ieee_passau.controllers.routes.EvalTaskController.edit(pid, id))
-            .flashing("success" -> Messages("evaltask.create.message", newTaskRaw.position.toString))
-        } getOrElse {
-          BadRequest(org.ieee_passau.views.html.evaltask.insert(pid, TestcaseForms.evalTaskForm.fill(newTaskRaw).withError("program", Messages("evaltask.create.error.filemissing"))))
+        newTaskRaw => {
+          rs.body.file("program").map { program =>
+            val newTask: EvalTask = newTaskRaw.copy(filename = program.filename, file = new File(program.ref.file).toByteArray())
+            val id = (EvalTasks returning EvalTasks.map(_.id)) += newTask
+            Redirect(org.ieee_passau.controllers.routes.EvalTaskController.edit(pid, id))
+              .flashing("success" -> Messages("evaltask.create.message", newTaskRaw.position.toString))
+          } getOrElse {
+            BadRequest(org.ieee_passau.views.html.evaltask.insert(pid,
+              TestcaseForms.evalTaskForm.fill(newTaskRaw).withError("program", Messages("evaltask.create.error.filemissing"))))
+          }
         }
-      }
-    )
-  }}
+      )
+    }
+  }
 
-  def update(pid: Int, id: Int): Action[MultipartFormData[TemporaryFile]] = requireAdmin(parse.multipartFormData) { admin => DBAction(parse.multipartFormData) { implicit rs =>
-    implicit val sessionUser = Some(admin)
-    TestcaseForms.evalTaskForm.bindFromRequest.fold(
-      errorForm => {
-        BadRequest(org.ieee_passau.views.html.evaltask.edit(pid, id, errorForm))
-      },
+  def update(pid: Int, id: Int): Action[MultipartFormData[TemporaryFile]] = requireAdmin(parse.multipartFormData) { admin =>
+    DBAction(parse.multipartFormData) { implicit rs =>
+      implicit val sessionUser = Some(admin)
+      TestcaseForms.evalTaskForm.bindFromRequest.fold(
+        errorForm => {
+          BadRequest(org.ieee_passau.views.html.evaltask.edit(pid, id, errorForm))
+        },
 
-      task => {
-        rs.body.file("program").map { program =>
-          val newTask = task.copy(filename = program.filename, file = new File(program.ref.file).toByteArray())
-          EvalTasks.update(id, newTask)
-          Redirect(org.ieee_passau.controllers.routes.EvalTaskController.edit(pid, id))
-            .flashing("success" -> Messages("evaltask.update.message", task.position.toString))
-        } getOrElse {
-          val oldTask = EvalTasks.byId(id).first
-          val newTask = task.copy(filename = oldTask.filename, file = oldTask.file)
-          EvalTasks.update(id, newTask)
-          Redirect(org.ieee_passau.controllers.routes.EvalTaskController.edit(pid, id))
-            .flashing("success" -> Messages("evaltask.update.message", task.position.toString))
+        task => {
+          rs.body.file("program").map { program =>
+            val newTask = task.copy(filename = program.filename, file = new File(program.ref.file).toByteArray())
+            EvalTasks.update(id, newTask)
+            Redirect(org.ieee_passau.controllers.routes.EvalTaskController.edit(pid, id))
+              .flashing("success" -> Messages("evaltask.update.message", task.position.toString))
+          } getOrElse {
+            val oldTask = EvalTasks.byId(id).first
+            val newTask = task.copy(filename = oldTask.filename, file = oldTask.file)
+            EvalTasks.update(id, newTask)
+            Redirect(org.ieee_passau.controllers.routes.EvalTaskController.edit(pid, id))
+              .flashing("success" -> Messages("evaltask.update.message", task.position.toString))
+          }
         }
-      }
-    )
-  }}
+      )
+    }
+  }
 }

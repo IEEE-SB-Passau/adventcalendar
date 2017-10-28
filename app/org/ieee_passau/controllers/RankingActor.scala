@@ -24,8 +24,10 @@ class RankingActor extends Actor {
   val TICK_INTERVAL: FiniteDuration = 1 minute
 
   // always calculate this first, so we can use it for the ranking
-  private var problemsAll: List[((Int, Date, Date), Int, String, Double, EvalMode, Int, Int, Int, List[Int])] = calcProblemList(showHiddenUsers = true)
-  private var problemsNormal: List[((Int, Date, Date), Int, String, Double, EvalMode, Int, Int, Int, List[Int])] = calcProblemList(showHiddenUsers = false)
+  private var problemsAll: List[((Int, Date, Date), Int, String, Double, EvalMode, Int, Int, Int, List[Int])] =
+    calcProblemList(showHiddenUsers = true)
+  private var problemsNormal: List[((Int, Date, Date), Int, String, Double, EvalMode, Int, Int, Int, List[Int])] =
+    calcProblemList(showHiddenUsers = false)
   private var rankingAll: List[(Int, User, Double, Int)] = calcRanking(showAll = true)
   private var rankingNormal: List[(Int, User, Double, Int)] = calcRanking(showAll = false)
 

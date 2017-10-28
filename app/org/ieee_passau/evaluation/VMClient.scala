@@ -136,24 +136,28 @@ class VMClient(host: String, port: Int, name:String)
         if (!(resultXml \\ "successful").text.toBoolean) throw new RuntimeException("Received no valid result from eval.")
 
         // Compile result
-        compilerResult.exitCode = if ((resultXml \\ "outputs" \ "compilation" \ "returnCode").text.isEmpty) None else Some((resultXml \\ "outputs" \ "compilation" \ "returnCode").text.toInt)
+        compilerResult.exitCode = if ((resultXml \\ "outputs" \ "compilation" \ "returnCode").text.isEmpty) None
+                                  else Some((resultXml \\ "outputs" \ "compilation" \ "returnCode").text.toInt)
         compilerResult.stdout = Some(base64Decode((resultXml \\ "outputs" \ "compilation" \ "streams" \ "stdOut").text))
         compilerResult.stderr = Some(base64Decode((resultXml \\ "outputs" \ "compilation" \ "streams" \ "stdErr").text))
         compilerResult.duration = Duration((resultXml \\ "utilization" \ "compilation" \ "runtime").text.toFloat, MILLISECONDS)
         compilerResult.memory = (resultXml \\ "utilization" \ "compilation" \ "memory").text.toFloat
         compilerResult.terminationResult = Some((resultXml \\ "outputs" \ "compilation" \ "terminationReason").text)
 
-        log.info("%s compiled sourcecode for %s with exit code %d in %d millis".format(this, job, compilerResult.exitCode.getOrElse(-1), compilerResult.duration.toMillis))
+        log.info("%s compiled sourcecode for %s with exit code %d in %d millis".format(this, job,
+          compilerResult.exitCode.getOrElse(-1), compilerResult.duration.toMillis))
 
         // Evaluation result
-        evaluationResult.exitCode = if ((resultXml \\ "outputs" \ "evaluation" \ "returnCode").text.isEmpty) None else Some((resultXml \\ "outputs" \ "evaluation" \ "returnCode").text.toInt)
+        evaluationResult.exitCode = if ((resultXml \\ "outputs" \ "evaluation" \ "returnCode").text.isEmpty) None
+                                    else Some((resultXml \\ "outputs" \ "evaluation" \ "returnCode").text.toInt)
         evaluationResult.stdout = Some(base64Decode((resultXml \\ "outputs" \ "evaluation" \ "streams" \ "stdOut").text))
         evaluationResult.stderr = Some(base64Decode((resultXml \\ "outputs" \ "evaluation" \ "streams" \ "stdErr").text))
         evaluationResult.duration = Duration((resultXml \\ "utilization" \ "evaluation" \ "runtime").text.toFloat, MILLISECONDS)
         evaluationResult.memory = (resultXml \\ "utilization" \ "evaluation" \ "memory").text.toFloat
         evaluationResult.terminationResult = Some((resultXml \\ "outputs" \ "evaluation" \ "terminationReason").text)
 
-        log.info("%s evaluated sourcecode for %s with exit code %d in %d millis".format(this, job, evaluationResult.exitCode.getOrElse(-1), evaluationResult.duration.toMillis))
+        log.info("%s evaluated sourcecode for %s with exit code %d in %d millis".format(this, job,
+          evaluationResult.exitCode.getOrElse(-1), evaluationResult.duration.toMillis))
 
         val result = if (evaluationResult.terminationResult.getOrElse("").contains("time")) {
           RuntimeExceeded
@@ -233,7 +237,8 @@ class VMClient(host: String, port: Int, name:String)
         if ((resultXml \\ "successfull").text.toBoolean) throw new RuntimeException("Received no valid result from eval.")
 
         // Evaluation result
-        evaluationResult.exitCode = if ((resultXml \\ "outputs" \ "evaluation" \ "returnCode").text.isEmpty) None else Some((resultXml \\ "outputs" \ "evaluation" \ "returnCode").text.toInt)
+        evaluationResult.exitCode = if ((resultXml \\ "outputs" \ "evaluation" \ "returnCode").text.isEmpty) None
+                                    else Some((resultXml \\ "outputs" \ "evaluation" \ "returnCode").text.toInt)
         evaluationResult.stdout = Some(base64Decode((resultXml \\ "outputs" \ "evaluation" \ "streams" \ "stdOut").text))
 
         if (evaluationResult.stdout.get.isEmpty) evaluationResult.stdout = None
@@ -249,7 +254,8 @@ class VMClient(host: String, port: Int, name:String)
           case _ => // ignore
         }}
 
-        log.info("%s evaluated task for %s with exit code %d in %d millis".format(this, job, evaluationResult.exitCode.getOrElse(-1), evaluationResult.duration.toMillis))
+        log.info("%s evaluated task for %s with exit code %d in %d millis".format(this, job,
+          evaluationResult.exitCode.getOrElse(-1), evaluationResult.duration.toMillis))
       }
     }
 

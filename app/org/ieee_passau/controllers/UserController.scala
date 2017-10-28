@@ -97,7 +97,8 @@ object UserController extends Controller with PermissionCheck {
 
       registration => {
         val createdUser: User = registration.makeUser
-        val link = org.ieee_passau.controllers.routes.UserController.activate(createdUser.activationToken.get).absoluteURL(secure = play.Configuration.root().getBoolean("application.https", false))
+        val link = org.ieee_passau.controllers.routes.UserController.activate(createdUser.activationToken.get)
+          .absoluteURL(secure = play.Configuration.root().getBoolean("application.https", false))
         // TODO i18n
         val regMail = Email(
           "IEEE Adventskalender Registrierung",
@@ -148,7 +149,8 @@ object UserController extends Controller with PermissionCheck {
         //TODO i18n
         val user = Users.byUsername(username).first
         val token = PasswordHasher.generateUrlString()
-        val link = org.ieee_passau.controllers.routes.UserController.editPassword(token).absoluteURL(secure = play.Configuration.root().getBoolean("application.https", false))
+        val link = org.ieee_passau.controllers.routes.UserController.editPassword(token)
+          .absoluteURL(secure = play.Configuration.root().getBoolean("application.https", false))
         val regMail = Email(
           "IEEE Adventskalender Benutzerservice",
           "IEEE Adventskalender <adventskalender@ieee.students.uni-passau.de>",

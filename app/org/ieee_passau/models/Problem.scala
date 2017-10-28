@@ -33,13 +33,17 @@ class Problems(tag: Tag) extends TableWithId[Problem](tag, "problems") {
   def solvableStop: Column[Date] = column[Date]("solvable_stop")
   def evalMode: Column[EvalMode] = column[EvalMode]("eval_mode") (EvalMode.evalModeTypeMapper)
 
-  def * : ProvenShape[Problem] = (id.?, title, door, description, readableStart, readableStop, solvableStart, solvableStop, evalMode) <> (Problem.tupled, Problem.unapply)
+  def * : ProvenShape[Problem] = (id.?, title, door, description, readableStart, readableStop, solvableStart,
+    solvableStop, evalMode) <> (Problem.tupled, Problem.unapply)
 }
 
 object Problems extends TableQuery(new Problems(_)) {
-  def byDoor: CompiledFunction[(Column[Int]) => Query[Problems, Problem, Seq], Column[Int], Int, Query[Problems, Problem, Seq], Seq[Problem]] = this.findBy(_.door)
-  def byId: CompiledFunction[(Column[Int]) => Query[Problems, Problem, Seq], Column[Int], Int, Query[Problems, Problem, Seq], Seq[Problem]] = this.findBy(_.id)
-  def update(id: Int, problem: Problem)(implicit session: Session): Int = this.filter(_.id === id).update(problem.withId(id))
+  def byDoor: CompiledFunction[(Column[Int]) => Query[Problems, Problem, Seq], Column[Int], Int, Query[Problems, Problem, Seq], Seq[Problem]] =
+    this.findBy(_.door)
+  def byId: CompiledFunction[(Column[Int]) => Query[Problems, Problem, Seq], Column[Int], Int, Query[Problems, Problem, Seq], Seq[Problem]] =
+    this.findBy(_.id)
+  def update(id: Int, problem: Problem)(implicit session: Session): Int =
+    this.filter(_.id === id).update(problem.withId(id))
 
   def doorAvailable(door: Int, id: Int): Boolean = {
     DB.withSession { implicit session: Session =>
@@ -62,7 +66,7 @@ class ProblemTranslations(tag: Tag) extends Table[ProblemTranslation](tag, "prob
   def title: Column[String] = column[String]("title")
   def description: Column[String] = column[String]("description")
 
-  def problem: ForeignKeyQuery[Problems, Problem] = foreignKey("problem_fk", problemId, Problems)(_.id) // references problems (id) on update cascade on delete cascade
+  def problem: ForeignKeyQuery[Problems, Problem] = foreignKey("problem_fk", problemId, Problems)(_.id)
 
   override def * : ProvenShape[ProblemTranslation] = (problemId, lang, title, description) <> (ProblemTranslation.tupled, ProblemTranslation.unapply)
 }
@@ -70,9 +74,13 @@ class ProblemTranslations(tag: Tag) extends Table[ProblemTranslation](tag, "prob
 object ProblemTranslations extends TableQuery(new ProblemTranslations(_)){
   implicit private def mapper =  LanguageHelper.LangTypeMapper
 
-  def byProblem(problemId: Int): CompiledFunction[(Column[Int]) => Query[ProblemTranslations, ProblemTranslation, Seq], Column[Int], Int, Query[ProblemTranslations, ProblemTranslation, Seq], Seq[ProblemTranslation]] = this.findBy(_.problemId)
-  def byProblemLang(problemId: Int, lang: Lang): Query[ProblemTranslations, ProblemTranslation, Seq] = this.filter(t => t.problemId === problemId && t.lang === lang)
-  def byProblemLang(problemId: Int, lang: String): Query[ProblemTranslations, ProblemTranslation, Seq] = this.filter(t => t.problemId === problemId && t.lang === Lang(lang))
+  def byProblem(problemId: Int): CompiledFunction[(Column[Int]) => Query[ProblemTranslations, ProblemTranslation, Seq], Column[Int], Int, Query[ProblemTranslations, ProblemTranslation, Seq], Seq[ProblemTranslation]] =
+    this.findBy(_.problemId)
+  def byProblemLang(problemId: Int, lang: Lang): Query[ProblemTranslations, ProblemTranslation, Seq] =
+    this.filter(t => t.problemId === problemId && t.lang === lang)
+  def byProblemLang(problemId: Int, lang: String): Query[ProblemTranslations, ProblemTranslation, Seq] =
+    this.filter(t => t.problemId === problemId && t.lang === Lang(lang))
 
-  def update(lang: String, problemTranslation: ProblemTranslation)(implicit session: Session): Int = this.filter(t => t.problemId === problemTranslation.problemId && t.lang === Lang(lang)).update(problemTranslation)
+  def update(lang: String, problemTranslation: ProblemTranslation)(implicit session: Session): Int =
+    this.filter(t => t.problemId === problemTranslation.problemId && t.lang === Lang(lang)).update(problemTranslation)
 }

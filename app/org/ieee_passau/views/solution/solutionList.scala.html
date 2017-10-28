@@ -46,7 +46,9 @@
                     </div>
 
                     @s.testcases.map { t =>
-                        <div class="panel @if(t.testrun.result == Passed) { panel-success } @if(t.testrun.stage.isDefined) { panel-info }
+                        <div class="panel
+                            @if(t.testrun.result == Passed) { panel-success }
+                            @if(t.testrun.stage.isDefined) { panel-info }
                             @if(t.testrun.result != Passed && t.testrun.stage.isEmpty && t.testrun.result != Canceled) { panel-danger }
                             @if(t.testrun.result == Canceled) { panel-warning }">
                             <div class="panel-heading">

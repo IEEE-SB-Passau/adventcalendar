@@ -23,6 +23,7 @@ class Postings(tag: Tag) extends Table[Posting](tag, "postings") {
 
   override def * : ProvenShape[Posting] = (id.?, lang, title, content, date) <> (Posting.tupled, Posting.unapply)
 }
+
 object Postings extends TableQuery(new Postings(_)) {
   implicit private def mapper =  LanguageHelper.LangTypeMapper
 
@@ -45,5 +46,6 @@ object Postings extends TableQuery(new Postings(_)) {
     )
   }
 
-  def update(id: Int, lang: String, posting: Posting)(implicit session: Session): Int = this.filter(p => p.id === id && p.lang === Lang(lang)).update(posting.withId(id))
+  def update(id: Int, lang: String, posting: Posting)(implicit session: Session): Int =
+    this.filter(p => p.id === id && p.lang === Lang(lang)).update(posting.withId(id))
 }

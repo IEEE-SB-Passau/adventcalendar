@@ -25,13 +25,17 @@ class EvalTasks(tag: Tag) extends TableWithId[EvalTask](tag, "eval_task") {
   def runCorrect: Column[Boolean] = column[Boolean]("run_on_correct_result")
   def runWrong: Column[Boolean] = column[Boolean]("run_on_wrong_result")
 
-  def problem: ForeignKeyQuery[Problems, Problem] = foreignKey("problem_fk", problemId, Problems)(_.id) // references problems (id) on update cascade on delete cascade
+  def problem: ForeignKeyQuery[Problems, Problem] = foreignKey("problem_fk", problemId, Problems)(_.id)
 
-  override def * : ProvenShape[EvalTask] = (id.?, problemId, position, command, filename, file, outputCheck, scoreCalc, useStdin, useExpout, useProgout, useProgram, runCorrect, runWrong) <> (EvalTask.tupled, EvalTask.unapply)
+  override def * : ProvenShape[EvalTask] = (id.?, problemId, position, command, filename, file, outputCheck, scoreCalc,
+    useStdin, useExpout, useProgout, useProgram, runCorrect, runWrong) <> (EvalTask.tupled, EvalTask.unapply)
 }
 
 object EvalTasks extends TableQuery(new EvalTasks(_)) {
-  def byProblemId: CompiledFunction[(Column[Int]) => Query[EvalTasks, EvalTask, Seq], Column[Int], Int, Query[EvalTasks, EvalTask, Seq], Seq[EvalTask]] = this.findBy(_.problemId)
-  def byId: CompiledFunction[(Column[Int]) => Query[EvalTasks, EvalTask, Seq], Column[Int], Int, Query[EvalTasks, EvalTask, Seq], Seq[EvalTask]] = this.findBy(_.id)
-  def update(id: Int, evalTask: EvalTask)(implicit session: Session): Int = this.filter(_.id === id).update(evalTask.withId(id))
+  def byProblemId: CompiledFunction[(Column[Int]) => Query[EvalTasks, EvalTask, Seq], Column[Int], Int, Query[EvalTasks, EvalTask, Seq], Seq[EvalTask]] =
+    this.findBy(_.problemId)
+  def byId: CompiledFunction[(Column[Int]) => Query[EvalTasks, EvalTask, Seq], Column[Int], Int, Query[EvalTasks, EvalTask, Seq], Seq[EvalTask]] =
+    this.findBy(_.id)
+  def update(id: Int, evalTask: EvalTask)(implicit session: Session): Int =
+    this.filter(_.id === id).update(evalTask.withId(id))
 }

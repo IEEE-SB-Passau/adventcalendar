@@ -14,16 +14,19 @@ class Testcases(tag: Tag) extends TableWithId[Testcase](tag, "testcases") {
   def position: Column[Int] = column[Int]("position")
   def visibility: Column[Visibility] = column[Visibility]("visibility") (Visibility.visibilityTypeMapper)
   def input: Column[String] = column[String]("input")
-  def expectedOutput: Column[String] = column[String]("expected_output") //references e_test_visibility (Visibility) on update restrict on delete restrict
+  def expectedOutput: Column[String] = column[String]("expected_output")
   def points: Column[Int] = column[Int]("points")
 
-  def problem: ForeignKeyQuery[Problems, Problem] = foreignKey("problem_fk", problemId, Problems)(_.id) // references problems (id) on update cascade on delete cascade
+  def problem: ForeignKeyQuery[Problems, Problem] = foreignKey("problem_fk", problemId, Problems)(_.id)
 
   override def * : ProvenShape[Testcase] = (id.?, problemId, position, visibility, input, expectedOutput, points) <> (Testcase.tupled, Testcase.unapply)
 }
 
 object Testcases extends TableQuery(new Testcases(_)) {
-  def byProblemId: CompiledFunction[(Column[Int]) => Query[Testcases, Testcase, Seq], Column[Int], Int, Query[Testcases, Testcase, Seq], Seq[Testcase]] = this.findBy(_.problemId)
-  def byId: CompiledFunction[(Column[Int]) => Query[Testcases, Testcase, Seq], Column[Int], Int, Query[Testcases, Testcase, Seq], Seq[Testcase]] = this.findBy(_.id)
-  def update(id: Int, testcase: Testcase)(implicit session: Session): Int = this.filter(_.id === id).update(testcase.withId(id))
+  def byProblemId: CompiledFunction[(Column[Int]) => Query[Testcases, Testcase, Seq], Column[Int], Int, Query[Testcases, Testcase, Seq], Seq[Testcase]] =
+    this.findBy(_.problemId)
+  def byId: CompiledFunction[(Column[Int]) => Query[Testcases, Testcase, Seq], Column[Int], Int, Query[Testcases, Testcase, Seq], Seq[Testcase]] =
+    this.findBy(_.id)
+  def update(id: Int, testcase: Testcase)(implicit session: Session): Int =
+    this.filter(_.id === id).update(testcase.withId(id))
 }

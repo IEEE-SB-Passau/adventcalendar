@@ -31,10 +31,14 @@ class Users(tag: Tag) extends TableWithId[User](tag, "users") {
 }
 
 object Users extends TableQuery(new Users(_)) {
-  def byUsername: CompiledFunction[(Column[String]) => Query[Users, User, Seq], Column[String], String, Query[Users, User, Seq], Seq[User]] = this.findBy(_.username)
-  def byId: CompiledFunction[(Column[Int]) => Query[Users, User, Seq], Column[Int], Int, Query[Users, User, Seq], Seq[User]] = this.findBy(_.id)
-  def byToken: CompiledFunction[(Column[String]) => Query[Users, User, Seq], Column[String], String, Query[Users, User, Seq], Seq[User]] = this.findBy(_.activationToken)
-  def update(id: Int, user: User)(implicit session: Session): Int = this.filter(_.id === id).update(user.withId(id))
+  def byUsername: CompiledFunction[(Column[String]) => Query[Users, User, Seq], Column[String], String, Query[Users, User, Seq], Seq[User]] =
+    this.findBy(_.username)
+  def byId: CompiledFunction[(Column[Int]) => Query[Users, User, Seq], Column[Int], Int, Query[Users, User, Seq], Seq[User]] =
+    this.findBy(_.id)
+  def byToken: CompiledFunction[(Column[String]) => Query[Users, User, Seq], Column[String], String, Query[Users, User, Seq], Seq[User]] =
+    this.findBy(_.activationToken)
+  def update(id: Int, user: User)(implicit session: Session): Int =
+    this.filter(_.id === id).update(user.withId(id))
 
   def usernameAvailable(username: String): Boolean = {
     DB.withSession { implicit session: Session =>
@@ -78,7 +82,8 @@ case class UserLogin(username: String, password: String) {
   }
 }
 
-case class UserRegistration(username: String, password: (String, String), email: String, semester: Option[Int], studySubject: Option[String], school: Option[String]) {
+case class UserRegistration(username: String, password: (String, String), email: String, semester: Option[Int],
+                            studySubject: Option[String], school: Option[String]) {
   def makeUser: User = {
     val pwd = PasswordHasher.hashPassword(this.password._1)
     val link = PasswordHasher.generateUrlString()
