@@ -31,13 +31,13 @@ object Postings extends TableQuery(new Postings(_)) {
   val newsPosting = 1
   val statusPosting = 3
 
-  def byId(id: Int, preferredLang: Lang): List[Posting] =
+  def byId(id: Int, preferredLang: Lang): List[Posting] = DB.withSession { implicit session: Session =>
     (for {
       p <- Postings if p.id === id
     } yield (p.id.?, p.lang, p.title, p.content, p.date)
       ).list.sortBy(_._2 /*lang*/)(LanguageHelper.ordering(preferredLang))
       .map(p => Posting.tupled(p))
-
+  }
   def byIdLang(id: Int, lang: String): Query[Postings, Posting, Seq] = this.filter(p => p.id === id && p.lang === Lang(lang))
 
   def list(preferredLang: Lang): Map[Int, List[Posting]] = DB.withSession { implicit session: Session =>
