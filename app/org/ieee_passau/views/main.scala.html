@@ -72,15 +72,13 @@
                                 <li @if(title == Messages("nav.user.logout")) { class="active" }><a href="@org.ieee_passau.controllers.routes.UserController.logout">@Messages("nav.user.logout")</a></li>
                             }
                         </ul>
-                        @if(sessionUser.isDefined) {
-                            <p class="navbar-text navbar-right">
+                        <ul class="nav navbar-nav navbar-right">
+                            @if(sessionUser.isDefined) {
+                                <li class="navbar-text">
                                 @Messages("nav.user.greeting", sessionUser.get.username, if(sessionUser.get.admin) Messages("nav.admin.message") else "")
-                            </p>
-                        }
-
-                        @* TODO *@
-                        <p class="navbar-text navbar-right">
-                            <li class="dropdown active">
+                                </li>
+                            }
+                            <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">@Messages("language.icon") <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
                                 @for(l <- LanguageHelper.orderedLangs(lang)) {
@@ -90,7 +88,7 @@
                                 }
                                 </ul>
                             </li>
-                        </p>
+                        </ul>
                     </div>
                     <!-- /.navbar-collapse -->
                 </nav>
