@@ -1,8 +1,9 @@
 package org.ieee_passau.utils
 
+import play.api.Application
 import play.api.db.slick.Config.driver.simple._
 import play.api.db.slick.{Session => _}
-import play.api.i18n.Lang
+import play.api.i18n.{DefaultMessagesPlugin, Lang}
 
 import scala.language.implicitConversions
 import scala.slick.ast.BaseTypedType
@@ -33,4 +34,17 @@ object LanguageHelper {
     l => l.code,
     c => if (c.isEmpty) defaultLanguage else Lang(c)
   )
+}
+
+class customMessagePlugin(app: Application) extends DefaultMessagesPlugin(app = app) {
+
+  private lazy val pluginEnabled = app.configuration.getString("custommessagesplugin")
+
+  override protected def messages = {
+    Lang.availables(app).map(_.code).map { lang =>
+      (lang, loadMessages("messages_" + lang + ".properties"))
+    }.toMap
+      .+("default" -> loadMessages("messages"))
+      .+("default.play" -> loadMessages("messages.default"))
+  }
 }
