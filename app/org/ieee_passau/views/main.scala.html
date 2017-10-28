@@ -6,8 +6,9 @@
 @(title: String, isFullPage: Boolean = false, hasTitle: Boolean = false)(content: Html)(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 <!DOCTYPE html>
 
-<html>
+<html lang="@lang.code">
     <head>
+        <meta charset="UTF-8">
         <title>@title</title>
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/highlight/idea.css")">
