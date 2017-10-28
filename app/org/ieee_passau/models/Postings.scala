@@ -8,7 +8,7 @@ import play.api.db.slick.Config.driver.simple._
 import play.api.db.slick.{DB, Session}
 import play.api.i18n.Lang
 
-import scala.slick.lifted.{CompiledFunction, ProvenShape}
+import scala.slick.lifted.ProvenShape
 
 case class Posting(id: Option[Int], lang: Lang, title: String, content:String, date: Date)  extends Entity[Posting] {
   override def withId(id: Int): Posting = this.copy(id = Some(id))
@@ -26,6 +26,8 @@ class Postings(tag: Tag) extends Table[Posting](tag, "postings") {
 
 object Page extends Enumeration {
   type Page = Value
+
+  def byId(id: Int): Page = values.filter(_.id == id).head
 
   val news = Value(1, "news")
   val calendar = Value(2, "calendar")

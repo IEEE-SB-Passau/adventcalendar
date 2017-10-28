@@ -5,8 +5,8 @@
 @import play.twirl.api.Html
 @(posting: Posting)(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 
-@main(posting.title) {
-    <h3>@posting.title</h3>
+@main(Messages(posting.title)) {
+    <h3>@Messages(posting.title)</h3>
 
     @Html(posting.content)
 }

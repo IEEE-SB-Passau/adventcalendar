@@ -11,7 +11,7 @@
 @import views.html.helper.{CSRF, form}
 @(problem: Problem, languages: List[Language], lastLang: String, solutions: List[SolutionListEntry], tickets: List[(Ticket, String)], ticketForm: Form[TicketText], message: (String, String))(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
-@main(Messages("problem.title") + problem.door + ": " + problem.title, hasTitle = true) {
+@main(Messages("problem.title") + " " + problem.door + ": " + problem.title, hasTitle = true) {
     @Html(problem.description)
 
     <h3>Fragen und Antworten</h3>

@@ -112,6 +112,9 @@ submit.ratelimit.queue=Solange deine letzte Lösung noch nicht ausgewertet wurde
 
 status.update.message=Status wurde geändert.
 status.update.error=Status konnte nicht geändert werden.
+status.title=Evaluierungstatus
+status.eval.start=Evaluierung starten
+status.eval.stop=Evaluierung anhalten
 
 jobs.error.invalidjob=Dieser Job existiert nicht!
 jobs.control.cancel.message=Job wurde abgebrochen!
@@ -119,23 +122,20 @@ jobs.control.revaluate.message=Testfall wird neu ausgewertet!
 
 feedback.submit.message=Vielen Danke für deine Rückmeldung!
 
+frontpage.greeting=Viel Spaß beim Knobeln!
+
 language.name=de
 language.icon=🇩🇪
 
 #HTML--->
 page.title=IEEE SB Passau Adventskalender 2017
 page.footer=&copy; 2017 IEEE Student Branch Passau - <a href="https://ieee.uni-passau.de/pages/contact/">Impressum</a>
+frontpage.pic.source=Bildquelle: "Christmas Tux 2012" von Mark Riedesel, Creative Commons 3.0 (BY-NC-SA)
 #<---HTML
 
-nav.calendar=Adventskalender
 nav.problems=Aufgaben
 nav.ranking=Rangliste
 nav.info=Informationen
-nav.news=Meldungen
-nav.faq=FAQ
-nav.rules=Regeln
-nav.examples=Beispiele
-nav.contact=Kontakt
 nav.feedback=Feedback
 nav.user.login=Anmelden
 nav.user.logout=Abmelden
@@ -152,6 +152,7 @@ nav.admin.submissions=Abgabenübersicht
 posting.edit=Seite bearbeiten
 posting.page=Seite
 posting.post.title=Titel
+posting.post.content=Inhalt
 posting.post.default=Standardversion
 posting.post.trans=Übersetzungen
 posting.update.message=Meldung wurde geändert.
@@ -195,6 +196,15 @@ error.500.long=Oha, da ist wohl etwas schief gelaufen.\
   lass es uns <a href="@org.ieee_passau.controllers.routes.MainController.contact">wissen</a>.
 error.500.code=Erwähne bitte in deiner Mail die Fehlernummer <strong>{0}</strong>!
 #<---HTML
+
+# List of postings/pages in lower case
+calendar=Adventskalender
+news=Meldungen
+faq=FAQ
+rules=Regeln
+examples=Beispiele
+contact=Kontakt
+status=Evaluierungstatus
 
 #TODO list of visibilities in lower case
 #TODO list of eval modes in lower case

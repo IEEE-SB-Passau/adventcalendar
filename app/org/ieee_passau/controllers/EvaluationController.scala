@@ -217,7 +217,8 @@ object EvaluationController extends Controller with PermissionCheck {
           BadRequest(org.ieee_passau.views.html.monitoring.pageEditor(id, lang, errorForm))
       },
       posting => {
-        Postings.update(id, lang, posting)
+
+        Postings.update(id, lang, posting.copy(title=Page.byId(id).toString))
         Redirect(org.ieee_passau.controllers.routes.EvaluationController.maintenance())
           .flashing("success" ->  play.api.i18n.Messages("posting.update.message"))
       }

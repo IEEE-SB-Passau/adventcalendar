@@ -5,7 +5,7 @@
 @import play.api.mvc.{Flash, RequestHeader}
 @(problems: List[Problem])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
-@main(Messages("nav.admin.problemlist")) {
+@main(Messages("problem.list.title")) {
     <table class="table table-striped">
         <thead>
             <tr>

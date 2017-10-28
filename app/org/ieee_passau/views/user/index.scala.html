@@ -6,7 +6,7 @@
 @import play.api.mvc.{Flash, RequestHeader}
 @(users: List[User])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
-@main("Benutzerliste") {
+@main(Messages("user.list.title")) {
     <table class="table table-striped">
         <thead>
             <tr>

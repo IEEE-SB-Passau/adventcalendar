@@ -1,5 +1,5 @@
 #TODO
-user.list.title=Users
+user.list.title=User list
 user.impersonate.message=You are now logged in as {0}.
 user.login.message=Welcome back {0}!
 user.login.error=Login failed!
@@ -21,8 +21,8 @@ ticket.create.message=We will take a look at your question.
 ticket.answer.error=There was an error answering the question!
 ticket.answer.message=The answer was successfully saved!
 
-problem.title=Problem
-problem.list.title=Tasks
+problem.title=Task
+problem.list.title=Task list
 
 problem.create.message=Created task {0}.
 problem.update.message=Updated task {0}.
@@ -61,23 +61,20 @@ jobs.control.revaluate.message=Testcase will be reevaluated!
 
 feedback.submit.message=Thank you for your feedback!
 
+frontpage.greeting=Merry coding!
+
 language.name=en
 language.icon=🇺🇸
 
 #HTML--->
 page.title=IEEE SB Passau Advent Calendar 2017
 page.footer=&copy; 2017 IEEE Student Branch Passau - <a href="https://ieee.uni-passau.de/pages/contact/">Impressum</a>
+frontpage.pic.source=Source: "Christmas Tux 2012" by Mark Riedesel, Creative Commons 3.0 (BY-NC-SA)
 #<---HTML
 
-nav.calendar=Advent calendar
 nav.problems=Tasks
 nav.ranking=Scoreboard
 nav.info=Information
-nav.news=Announcements
-nav.faq=FAQ
-nav.rules=Rules
-nav.examples=Examples
-nav.contact=Contact
 nav.feedback=Feedback
 nav.user.login=Login
 nav.user.logout=Logout
@@ -128,3 +125,11 @@ error.500.long=Ooops, something went wrong.\
   If you encounter this error again, <a href="@org.ieee_passau.controllers.routes.MainController.contact">let us know</a>.
 error.500.code=Please mention the error code <strong>{0}</strong> in your email!
 #<---HTML
+
+calendar=Advent calendar
+news=Announcements
+faq=FAQ
+rules=Rules
+examples=Examples
+contact=Contact
+status=Evaluierungstatus

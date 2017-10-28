@@ -15,12 +15,25 @@
 
     <div class="well">
         <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.EvaluationController.changePage(id, lng)">
-            @CSRF.formField
-            <input type="hidden" name="id" value="@id" />
             <fieldset>
-                @text(post("lang"), label = "Sprache", placeholder="en")
-                @text(post("title"), label = "Titel", placeholder = "Titel")
-                @textareaBs(post("content"),  label = "Inhalt", placeholder = "Inhalt", wysiwyg = true)
+                @CSRF.formField
+                <input type="hidden" name="id" value="@id" />
+
+                @text(post("lang"), label = Messages("general.language"), placeholder="en")
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">@Messages("posting.post.title")</label>
+                    <div class="col-sm-10">
+                        <input type="text"
+                        class="form-control"
+                        id="title"
+                        name="title"
+                        value="@Messages(post("title").value.getOrElse(""))(Lang(post("lang").value.get))"
+                        disabled/>
+                        <input type="hidden" name="title" value="@post("title").value.getOrElse("")" />
+                        <span class="help-block"></span>
+                    </div>
+                </div>
+                @textareaBs(post("content"),  label = Messages("posting.post.content"), placeholder = Messages("posting.post.content"), wysiwyg = true)
 
                 @buttonSave()
             </fieldset>

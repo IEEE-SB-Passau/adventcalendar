@@ -1,14 +1,14 @@
 @import org.ieee_passau.models.{Posting, Problem, User}
 @import org.ieee_passau.views.html.main
-@import play.api.i18n.Lang
+@import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.Flash
 @import play.twirl.api.Html
 @(posting: Posting, problems: List[Problem])(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 
-@main("Adventskalender", isFullPage = true) {
+@main(Messages(posting.title), isFullPage = true) {
     @Html(posting.content)
 
-    <h3>Viel Spaß beim Knobeln!</h3>
+    <h3>@Messages("frontpage.greeting")</h3>
     <hr>
 
     <a name="doors"></a>
@@ -20,5 +20,5 @@
         }
         </div>
     </div>
-    <small>Bildquelle: "Christmas Tux 2012" von Mark Riedesel, Creative Commons 3.0 (BY-NC-SA)</small>
+    <small>@Messages("frontpage.pic.source")</small>
 }

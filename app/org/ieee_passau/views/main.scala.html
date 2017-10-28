@@ -34,15 +34,15 @@
                     <!-- Collect the nav links, forms, and other content for toggling -->
                     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                         <ul class="nav navbar-nav">
-                            <li @if(title == Messages("nav.calendar")) { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.calendar#doors">@Messages("nav.calendar")</a></li>
-                            <li @if(title == Messages("nav.problems") || title.startsWith(Messages("problem.title"))) { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.problems">@Messages("nav.problems")</a></li>
+                            <li @if(title == Messages("calendar"))     { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.calendar#doors">@Messages("calendar")</a></li>
+                            <li @if(title == Messages("nav.problems")) { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.problems">@Messages("nav.problems")</a></li>
                             <li @if(title == Messages("nav.ranking"))  { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.ranking"       >@Messages("nav.ranking")</a></li>
-                            <li class="dropdown @if(List(Messages("nav.news"), Messages("nav.faq"), Messages("nav.rules"), Messages("nav.examples")).contains(title)) { active }" >
+                            <li class="dropdown @if(List(Messages(Page.news.toString), Messages(Page.rules.toString), Messages(Page.faq.toString), Messages(Page.examples.toString)).contains(title)) { active }" >
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">@Messages("nav.info") <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
-                                    <li @if(title == Messages("nav.news"))  { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.content(Page.news.toString)" >@Messages("nav.news")</a></li>
-                                    <li @if(title == Messages("nav.faq"))   { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.content(Page.faq.toString)"  >@Messages("nav.faq")</a></li>
-                                    <li @if(title == Messages("nav.rules")) { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.content(Page.rules.toString)">@Messages("nav.rules")</a></li>
+                                    <li @if(title == Messages(Page.news.toString))  { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.content(Page.news.toString)" >@Messages(Page.news.toString)</a></li>
+                                    <li @if(title == Messages(Page.faq.toString))   { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.content(Page.faq.toString)"  >@Messages(Page.faq.toString)</a></li>
+                                    <li @if(title == Messages(Page.rules.toString)) { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.content(Page.rules.toString)">@Messages(Page.rules.toString)</a></li>
                                 </ul>
                             </li>
                             @if(sessionUser.isEmpty) {
@@ -66,7 +66,7 @@
                                     </ul>
                                 </li>
                             }}
-                            <li @if(title == Messages("nav.contact")) { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.content(Page.contact.toString)" >@Messages("nav.contact")</a></li>
+                            <li @if(title == Messages(Page.contact.toString)) { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.content(Page.contact.toString)" >@Messages(Page.contact.toString)</a></li>
                             @*<li @if(title == Messages("nav.feedback")) { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.feedback">@Messages("nav.feedback")</a></li>*@
                             @if(sessionUser.isDefined) {
                                 <li @if(title == Messages("nav.user.logout")) { class="active" }><a href="@org.ieee_passau.controllers.routes.UserController.logout">@Messages("nav.user.logout")</a></li>
