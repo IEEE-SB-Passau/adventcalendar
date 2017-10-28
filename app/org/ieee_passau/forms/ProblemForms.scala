@@ -25,8 +25,8 @@ object ProblemForms {
 
       verifying(Messages("problem.create.error.door"), p =>
           if (p.id.isDefined) Problems.doorAvailable(p.door, p.id.get) else Problems.doorAvailable(p.door))
-      verifying(Messages("error.date.reverse", Messages("problem.form.readablestop"), Messages("problem.form.readablestart")), p => p.readableStart.compareTo(p.readableStop) < 0)
-      verifying(Messages("error.date.reverse", Messages("problem.form.solvablestop"), Messages("problem.form.solvablestart")), p => p.solvableStart.compareTo(p.solvableStop) < 0)
+      verifying(Messages("error.date.reverse", Messages("problem.readablestop"), Messages("problem.readablestart")), p => p.readableStart.compareTo(p.readableStop) < 0)
+      verifying(Messages("error.date.reverse", Messages("problem.solvablestop"), Messages("problem.solvablestart")), p => p.solvableStart.compareTo(p.solvableStop) < 0)
   )
 
   val problemTranslationForm = Form(

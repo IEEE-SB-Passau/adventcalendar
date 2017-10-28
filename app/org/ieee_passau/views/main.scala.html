@@ -49,19 +49,19 @@
                                 <li @if(title == Messages("nav.user.login"))    { class="active" }><a href="@org.ieee_passau.controllers.routes.UserController.login"   >@Messages("nav.user.login")</a></li>
                             } else { @if(sessionUser.get.admin) {
                                 <li class="dropdown
-                                    @if(List(Messages("nav.admin.users"), Messages("nav.admin.problems"), Messages("nav.admin.tickets"),
+                                    @if(List(Messages("user.list.title"), Messages("problem.list.title"), Messages("ticket.list.title"),
                                     Messages("nav.admin.submissions"), Messages("nav.admin.evalqueue"), Messages("nav.admin.stats"),
                                     Messages("nav.admin.vms"), Messages("nav.admin.postings")).contains(title)) { active }" >
                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">@Messages("nav.admin.message") <b class="caret"></b></a>
                                     <ul class="dropdown-menu">
-                                        <li @if(title == Messages("nav.admin.users"))       { class="active" }><a href="@org.ieee_passau.controllers.routes.UserController.index"            >@Messages("nav.admin.users")</a></li>
-                                        <li @if(title == Messages("nav.admin.problems"))    { class="active" }><a href="@org.ieee_passau.controllers.routes.ProblemController.index"         >@Messages("nav.admin.problems")</a></li>
-                                        <li @if(title == Messages("nav.admin.tickets"))     { class="active" }><a href="@org.ieee_passau.controllers.routes.TicketController.index"          >@Messages("nav.admin.tickets")</a></li>
+                                        <li @if(title == Messages("user.list.title"))       { class="active" }><a href="@org.ieee_passau.controllers.routes.UserController.index"            >@Messages("user.list.title")</a></li>
+                                        <li @if(title == Messages("problem.list.title"))    { class="active" }><a href="@org.ieee_passau.controllers.routes.ProblemController.index"         >@Messages("problem.list.title")</a></li>
+                                        <li @if(title == Messages("ticket.list.title"))     { class="active" }><a href="@org.ieee_passau.controllers.routes.TicketController.index"          >@Messages("ticket.list.title")</a></li>
                                         <li @if(title == Messages("nav.admin.submissions")) { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.index()"    >@Messages("nav.admin.submissions")</a></li>
                                         <li @if(title == Messages("nav.admin.evalqueue"))   { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.indexQueued">@Messages("nav.admin.evalqueue")</a></li>
                                         <li @if(title == Messages("nav.admin.vms"))         { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.vms"        >@Messages("nav.admin.vms")</a></li>
                                         <li @if(title == Messages("nav.admin.stats"))       { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.stats"      >@Messages("nav.admin.stats")</a></li>
-                                        <li @if(title == Messages("nav.admin.postings")) { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.maintenance">@Messages("nav.admin.postings")</a></li>
+                                        <li @if(title == Messages("nav.admin.postings"))    { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.maintenance">@Messages("nav.admin.postings")</a></li>
                                     </ul>
                                 </li>
                             }}

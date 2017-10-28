@@ -1,4 +1,5 @@
 #TODO
+user.list.title=Users
 user.impersonate.message=You are now logged in as {0}.
 user.login.message=Welcome back {0}!
 user.login.error=Login failed!
@@ -9,9 +10,11 @@ user.register.message=Welcome {0}!
 user.register.verify.message=We sent an email to the provided address. Please use the contained link to reset your password.
 user.update.message=User {0} was updated.
 
-user.form.error.usernametake=Username already in use!
-user.form.error.emailtaken=There already exists an account with this email address!
-user.form.error.passwordsnomatch=Passwords do not match!
+user.error.usernametake=Username already in use!
+user.error.emailtaken=There already exists an account with this email address!
+user.error.passwordsnomatch=Passwords do not match!
+
+ticket.list.title=Questions
 
 ticket.create.error=There was an error while creating your question!
 ticket.create.message=We will take a look at your question.
@@ -19,14 +22,15 @@ ticket.answer.error=There was an error answering the question!
 ticket.answer.message=The answer was successfully saved!
 
 problem.title=Problem
+problem.list.title=Tasks
 
 problem.create.message=Created task {0}.
 problem.update.message=Updated task {0}.
 
-problem.form.readablestart=Visible from
-problem.form.readablestop=Visible until
-problem.form.solvablestart=Solvable from
-problem.form.solvablestop=Solvable until
+problem.readablestart=Visible from
+problem.readablestop=Visible until
+problem.solvablestart=Solvable from
+problem.solvablestop=Solvable until
 
 problem.create.error.door=This door already has anaother problem!
 
@@ -50,8 +54,6 @@ submit.ratelimit.timer=You may only submit one solution per minute!
 submit.ratelimit.queue=You can submit only one solution every 15 minutes while your last solution is under evaluation!
 
 status.update.message=Status was updated.
-#TODO
-status.message.message=Evaluation is currently suspended. Please be patient, we are working on this issue!<br>
 
 jobs.error.invalidjob=This job does not exist!
 jobs.control.cancel.message=Job successfully canceled!
@@ -86,18 +88,14 @@ nav.admin.vms=Vms
 nav.admin.stats=Statistics
 nav.admin.evalqueue=Queue
 nav.admin.postings=Edit page
-nav.admin.users=Users
-nav.admin.problems=Tasks
-nav.admin.tickets=Questions
 nav.admin.submissions=Submissions
 
-postings.edit=Edit page
-postings.page=Page
-postings.post.title=Title
-postings.post.default=Default version
-postings.post.trans=Translations
-postings.update.message=Updated message text.
-postings.update.error=This message does not exist.
+posting.edit=Edit page
+posting.page=Page
+posting.post.title=Title
+posting.post.default=Default version
+posting.post.trans=Translations
+posting.update.message=Updated message text.
 
 general.save=Save
 general.selectvalue=Please select

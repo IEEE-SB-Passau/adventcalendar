@@ -2,16 +2,16 @@
 @import org.ieee_passau.models.{EvalTask, User}
 @import org.ieee_passau.views.html.main
 @import play.api.data.Form
-@import play.api.i18n.Lang
+@import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.{Flash, RequestHeader}
 @(pid: Int, id: Int, task: Form[EvalTask])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
-@main("Auswertungsschritt bearbeiten") {
+@main(Messages("evaltask.edit")) {
 
     <ol class="breadcrumb">
-        <li><a href="@org.ieee_passau.controllers.routes.ProblemController.index">Übersicht</a></li>
-        <li><a href="@org.ieee_passau.controllers.routes.ProblemController.edit(pid)">Problem</a></li>
-        <li class="active">Auswertungsschritt</li>
+        <li><a href="@org.ieee_passau.controllers.routes.ProblemController.index">@Messages("general.listoverview")</a></li>
+        <li><a href="@org.ieee_passau.controllers.routes.ProblemController.edit(pid)">@Messages("problem.title")</a></li>
+        <li class="active">@Messages("evaltask.title")</li>
     </ol>
 
     <form action="@org.ieee_passau.controllers.routes.EvalTaskController.update(pid, id)" method="post" enctype="multipart/form-data" class="form-horizontal">

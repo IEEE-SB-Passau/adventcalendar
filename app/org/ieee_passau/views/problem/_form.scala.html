@@ -1,20 +1,22 @@
 @import org.ieee_passau.models.{EvalMode, Problem}
 @import org.ieee_passau.views.html.bootstrap3.{buttonSave, text, textareaBs}
 @import play.api.data.Form
-@import play.api.i18n.Lang
+@import play.api.i18n.{Lang, Messages}
+@import org.ieee_passau.utils.LanguageHelper
 @(problem: Form[Problem], evalModes: List[EvalMode])(implicit lang: Lang)
 
 <fieldset>
     @if(problem.value.isDefined) {
         <input type="hidden" name="id" value="@problem.value.get.id.get" />
     }
-    @text(problem("title"), label = "Titel", placeholder = "Titel")
+    @text(problem("title"), label = Messages("problem.name"), placeholder = Messages("problem.name"))
+    @* TODO i18n door error *@
     <div class="form-group @if(problem.errors.nonEmpty) {
         @problem.errors.map { e => @if(e.message.contains("Tür")) { has-error } }
     }">
-        <label class="col-sm-2 control-label">Türchen</label>
+        <label class="col-sm-2 control-label">@Messages("problem.door")</label>
         <div class="col-sm-10">
-            <input type="text" class="form-control" id="door" name="door" value="@problem("door").value.getOrElse("")" placeholder="Türchen"/>
+            <input type="text" class="form-control" id="door" name="door" value="@problem("door").value.getOrElse("")" placeholder="@Messages("problem.door")"/>
             <span class="help-block">
                 @if(problem.errors.nonEmpty) {
                     @problem.errors.map { e => @if(e.messages.head.contains("Tür")) { @e.messages.head }}
@@ -22,9 +24,10 @@
             </span>
         </div>
     </div>
-    @textareaBs(problem("description"), label = "Beschreibung", placeholder = "Beschreibung", wysiwyg = true)
+    @textareaBs(problem("description"), label = Messages("problem.description.lang", Messages("language.name")(LanguageHelper.defaultLanguage)), placeholder =  Messages("problem.description"), wysiwyg = true)
 
-    @dateManualError(problem("readableStart"), label = "Sichtbar ab", placeholder = "01.12.2013")
+    @dateManualError(problem("readableStart"), label =  Messages("problem.readabblestart"), placeholder = "01.12.2013")
+    @* TODO i18n error *@
     @{
         var hasError = false
         var errorMsg = ""
@@ -34,9 +37,10 @@
                 errorMsg = e.messages.head
             }}
         }
-        dateManualError(problem("readableStop"), label = "Sichtbar bis", placeholder = "01.12.2013", hasError = hasError, errorMsg = errorMsg)
+        dateManualError(problem("readableStop"), label =  Messages("problem.readabblestop"), placeholder = "01.12.2013", hasError = hasError, errorMsg = errorMsg)
     }
-    @dateManualError(problem("solvableStart"), label = "Lösbar ab", placeholder = "01.12.2013")
+    @dateManualError(problem("solvableStart"), label = Messages("problem.solvablestart"), placeholder = "01.12.2013")
+    @* TODO i18n error *@
     @{
         var hasError = false
         var errorMsg = ""
@@ -46,15 +50,15 @@
                 errorMsg = e.message
             }}
         }
-        dateManualError(problem("solvableStop"), label = "Lösbar bis", placeholder = "01.12.2013", hasError = hasError, errorMsg = errorMsg)
+        dateManualError(problem("solvableStop"), label =  Messages("problem.solvablestop"), placeholder = "01.12.2013", hasError = hasError, errorMsg = errorMsg)
     }
 
     <div class="form-group">
-        <label for="evalMode" class="col-sm-2 control-label">Bewertungsmodus</label>
+        <label for="evalMode" class="col-sm-2 control-label">@Messages("problem.evalmode")</label>
         <div class="col-sm-10">
             <select id="evalMode" size="1" name="evalMode" class="col-sm-10 form-control">
             @evalModes.map { mode =>
-                <option value="@mode.mode" @{if(problem.value.isDefined && mode.mode == problem.get.evalMode.toString) "selected" }>@mode.mode</option>
+                <option value="@mode.mode" @{if(problem.value.isDefined && mode.mode == problem.get.evalMode.toString) "selected" }>@Messages(mode.mode.toLowerCase)</option>
             }
             </select>
         </div>

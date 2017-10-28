@@ -7,12 +7,12 @@
 @import play.api.mvc.{Flash, RequestHeader}
 @(pid: Int, trans: Form[ProblemTranslation])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
-@main("Testfall bearbeiten") {
+@main(Messages("problem.translation.edit")) {
 
     <ol class="breadcrumb">
-        <li><a href="@org.ieee_passau.controllers.routes.ProblemController.index">Übersicht</a></li>
-        <li><a href="@org.ieee_passau.controllers.routes.ProblemController.edit(pid)">Problem</a></li>
-        <li class="active">Übersetung</li>
+        <li><a href="@org.ieee_passau.controllers.routes.ProblemController.index">@Messages("general.listoverview")</a></li>
+        <li><a href="@org.ieee_passau.controllers.routes.ProblemController.edit(pid)">@Messages("problem.title")</a></li>
+        <li class="active">@Messages("problem.translation.title")</li>
     </ol>
 
     @form(routes.ProblemController.updateTranslation(pid, trans("language").value.get), 'class -> "form-horizontal") {

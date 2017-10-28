@@ -2,15 +2,15 @@
 @import org.ieee_passau.models.{EvalMode, Problem, User}
 @import org.ieee_passau.views.html.main
 @import play.api.data.Form
-@import play.api.i18n.Lang
+@import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.{Flash, RequestHeader}
 @(problem: Form[Problem], evalModes: List[EvalMode])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
-@main("Problem hinzufügen") {
+@main(Messages("problem.create")) {
 
     <ol class="breadcrumb">
-        <li><a href="@org.ieee_passau.controllers.routes.ProblemController.index">Übersicht</a></li>
-        <li class="active">Problem</li>
+        <li><a href="@org.ieee_passau.controllers.routes.ProblemController.index">@Messages("general.listoverview")</a></li>
+        <li class="active">@Messages("problem.title")</li>
     </ol>
 
     @form(org.ieee_passau.controllers.routes.ProblemController.save, 'class -> "form-horizontal") {

@@ -3,30 +3,30 @@
 @import org.ieee_passau.views.html.bootstrap3._
 @import org.ieee_passau.views.html.main
 @import play.api.data.Form
-@import play.api.i18n.Lang
+@import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.{Flash, RequestHeader}
 @(id: Int, user: Form[User])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
-@main("User bearbeiten") {
+@main(Messages("user.edit")) {
     @form(org.ieee_passau.controllers.routes.UserController.update(id), 'class -> "form-horizontal") {
         @CSRF.formField
         <fieldset>
-            <div class="well">
-                @text(user("username"), label = "Username", placeholder = "Username")
-                @password(user("password"), label = "Passwort", placeholder = "Passwort")
-                @text(user("email"), label = "E-Mail", placeholder = "E-Mail")
-                @checkboxBs(user("active"), label = "Aktiv")
-                @checkboxBs(user("admin"), label = "Admin")
-                @checkboxBs(user("hidden"), label = "nicht gewertet")
-                @text(user("school"), label = "Universität oder Schule", placeholder = "Studiengang")
-                @text(user("semester"), label = "Semester oder Jahrgangstufe", placeholder = "Semester")
-                @text(user("studySubject"), label = "Studiengang", placeholder = "Studiengang")
+                <div class="well">
+                @text(user("username"), label = Messages("user.username"), placeholder = Messages("user.username"))
+                @password(user("password"), label = Messages("user.password"), placeholder = Messages("user.password"))
+                @text(user("email"), label = Messages("user.email"), placeholder = Messages("user.email"))
+                @checkboxBs(user("active"), label = Messages("user.active"))
+                @checkboxBs(user("admin"), label = Messages("user.admin"))
+                @checkboxBs(user("hidden"), label = Messages("user.hidden"))
+                @text(user("school"), label = Messages("user.school"), placeholder = Messages("user.school"))
+                @text(user("semester"), label = Messages("user.semester"), placeholder = Messages("user.semester"))
+                @text(user("studySubject"), label = Messages("user.studysubject"), placeholder = Messages("user.studysubject"))
 
                 @buttonSave()
             </div>
         </fieldset>
     }
     <p class="text-right">
-        <a class="btn btn-default" href="@org.ieee_passau.controllers.routes.UserController.impersonate(id)"><span class="glyphicon glyphicon-user"></span> Als dieser Benutzer anmelden</a>
+        <a class="btn btn-default" href="@org.ieee_passau.controllers.routes.UserController.impersonate(id)"><span class="glyphicon glyphicon-user"></span> @Messages("user.impersonate")</a>
     </p>
 }

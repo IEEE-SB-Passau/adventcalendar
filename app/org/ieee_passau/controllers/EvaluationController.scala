@@ -176,7 +176,7 @@ object EvaluationController extends Controller with PermissionCheck {
       Ok(org.ieee_passau.views.html.monitoring.maintenance(state.run, post.content, Postings.list(LanguageHelper.defaultLanguage)))
     } getOrElse {
       Redirect(org.ieee_passau.controllers.routes.EvaluationController.editPage(Postings.statusPosting, displayLang.code))
-        .flashing("waring" -> play.api.i18n.Messages("postings.post.missing"))
+        .flashing("waring" -> play.api.i18n.Messages("posting.post.missing"))
     }
   }}
 
@@ -219,7 +219,7 @@ object EvaluationController extends Controller with PermissionCheck {
       posting => {
         Postings.update(id, lang, posting)
         Redirect(org.ieee_passau.controllers.routes.EvaluationController.maintenance())
-          .flashing("success" ->  play.api.i18n.Messages("postings.update.message"))
+          .flashing("success" ->  play.api.i18n.Messages("posting.update.message"))
       }
     )
   }}

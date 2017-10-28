@@ -6,12 +6,12 @@
 @import play.api.mvc.{Flash, RequestHeader}
 @(pid: Int, task: Form[EvalTask])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
-@main("Auswertungsschritt hinzufügen") {
+@main(Messages("evaltask.create")) {
 
     <ol class="breadcrumb">
-        <li><a href="@org.ieee_passau.controllers.routes.ProblemController.index">Übersicht</a></li>
-        <li><a href="@org.ieee_passau.controllers.routes.ProblemController.edit(pid)">Problem</a></li>
-        <li class="active">Auswertungsschritt</li>
+        <li><a href="@org.ieee_passau.controllers.routes.ProblemController.index">@Messages("general.listoverview")</a></li>
+        <li><a href="@org.ieee_passau.controllers.routes.ProblemController.edit(pid)">@Messages("problem.title")</a></li>
+        <li class="active">@Messages("evaltask.title")</li>
     </ol>
 
     <form action="@org.ieee_passau.controllers.routes.EvalTaskController.insert(pid)" method="post" enctype="multipart/form-data" class="form-horizontal">

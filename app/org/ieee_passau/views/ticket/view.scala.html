@@ -3,12 +3,12 @@
 @import org.ieee_passau.views.html.bootstrap3.{buttonSave, checkboxBs, textareaBs}
 @import org.ieee_passau.views.html.main
 @import play.api.data.Form
-@import play.api.i18n.Lang
+@import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.{Flash, RequestHeader}
 @import views.html.helper.{CSRF, form}
 @(ticket: (Ticket, User, Problem), answers: List[(Ticket, String)], ticketForm: Form[TicketText])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
-@main("Fragen anzeigen") {
+@main(Messages("ticket.list.show")) {
     @defining((ticket._1, ticket._2.username) +: answers) { list: List[(Ticket, String)] =>
         @ticketView(list, expanded = true, admin = true)
     }
@@ -16,8 +16,8 @@
     @form(org.ieee_passau.controllers.routes.TicketController.answerTicket(ticket._1.id.get), 'class -> "form-horizontal") {
         @CSRF.formField
         <div class="well">
-            @checkboxBs(ticketForm("public"), label = "Öffentlich")
-            @textareaBs(ticketForm("text"), label = "Antwort")
+            @checkboxBs(ticketForm("public"), label = Messages("ticket.public"))
+            @textareaBs(ticketForm("text"), label = Messages("ticket.answers.title"))
             @buttonSave()
         </div>
     }

@@ -1,29 +1,29 @@
 @import org.ieee_passau.models.{Testcase, Visibility}
 @import org.ieee_passau.views.html.bootstrap3.{buttonSave, text, textareaBs}
 @import play.api.data.Form
-@import play.api.i18n.Lang
+@import play.api.i18n.{Lang, Messages}
 @(pid: Int, testcase: Form[Testcase], visibilities: List[Visibility])(lang: Lang)
 
 <fieldset>
     <input type="hidden" name="problemId" value="@pid" />
-    @text(testcase("position"), label = "Position", placeholder = "Position")
+    @text(testcase("position"), label = Messages("testcase.position"), placeholder = Messages("testcase.position"))
 
     <div class="form-group">
-        <label for="visibility" class="col-sm-2 control-label">Sichtbarkeit</label>
+        <label for="visibility" class="col-sm-2 control-label">@Messages("testcase.visibility")</label>
         <div class="col-sm-10">
             <select id="visibility" size="1" name="visibility" class="col-sm-10 form-control">
             @visibilities.map { vis =>
                 <option value="@vis.scope"
                     @{if(testcase.value.isDefined && vis.scope == testcase.get.visibility.toString) "selected" else if (vis.scope == "PRIVATE") "selectet"}
-                >@vis.scope.toLowerCase.capitalize </option>
+                >@Messages(vis.scope.toLowerCase)</option>
             }
             </select>
         </div>
     </div>
 
-    @textareaBs(testcase("input"), label = "Eingabe", placeholder = "Eingabe")
-    @textareaBs(testcase("output"), label = "Erwartete Ausgabe", placeholder = "Ausgabe")
-    @text(testcase("points"), label = "Punkte", placeholder = "Punkte")
+    @textareaBs(testcase("input"), label = Messages("testcase.input"), placeholder = Messages("testcase.input"))
+    @textareaBs(testcase("output"), label = Messages("testcase.output"), placeholder = Messages("testcase.output"))
+    @text(testcase("points"), label = Messages("testcase.points"), placeholder = Messages("testcase.points"))
 
     @buttonSave()
 </fieldset>

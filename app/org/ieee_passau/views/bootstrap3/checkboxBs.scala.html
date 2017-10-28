@@ -1,4 +1,5 @@
-@(field: Field, label: String = "CHANGEME", help: String = "")
+@import play.api.i18n.{Lang, Messages}
+@(field: Field, label: String = "CHANGEME", help: String = "")(implicit lang: Lang)
 
 <div class="form-group @if(field.hasErrors) { has-error }">
     <label for="@field.id" class="col-sm-2 control-label">@label</label>

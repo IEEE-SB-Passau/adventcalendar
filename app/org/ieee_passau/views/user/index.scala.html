@@ -2,7 +2,7 @@
 @import org.ieee_passau.models.User
 @import org.ieee_passau.utils.ViewHelper._
 @import org.ieee_passau.views.html.main
-@import play.api.i18n.Lang
+@import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.{Flash, RequestHeader}
 @(users: List[User])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
@@ -10,11 +10,11 @@
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Username</th>
-                <th>E-Mail</th>
-                <th>Aktiv</th>
-                <th>Admin</th>
+                <th>@Messages("general.id")</th>
+                <th>@Messages("user.title")</th>
+                <th>@Messages("user.email")</th>
+                <th>@Messages("user.active")</th>
+                <th>@Messages("user.admin")</th>
                 <th></th>
             </tr>
         </thead>
@@ -30,7 +30,7 @@
                     <a href="@org.ieee_passau.controllers.routes.UserController.edit(user.id.get)" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span></a>
                     <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.UserController.delete(user.id.get)">
                         @CSRF.formField
-                        <button type="submit" onclick="return(window.confirm('Wirklich löschen?'))" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span></button>
+                        <button type="submit" onclick="return(window.confirm('@Messages("general.delete.confirm")'))" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span></button>
                     </form>
                 </td>
             </tr>

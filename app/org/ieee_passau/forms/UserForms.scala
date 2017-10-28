@@ -27,12 +27,12 @@ object UserForms {
 
   def registrationForm = Form(
     mapping(
-      "username" -> nonEmptyText(3, 30).verifying(Messages("user.form.error.usernametake"), u => Users.usernameAvailable(u)),
+      "username" -> nonEmptyText(3, 30).verifying(Messages("user.error.usernametake"), u => Users.usernameAvailable(u)),
       "password" -> tuple(
         "main" -> nonEmptyText(6, 128),
         "repeat" -> text
-      ).verifying(Messages("user.form.error.passwordsnomatch"), pw => pw._1 == pw._2),
-      "email" -> email.verifying(Messages("user.form.error.emailtaken"), e => Users.emailAvailable(e)),
+      ).verifying(Messages("user.error.passwordsnomatch"), pw => pw._1 == pw._2),
+      "email" -> email.verifying(Messages("user.error.emailtaken"), e => Users.emailAvailable(e)),
       "semester" -> optional(number),
       "studySubject" -> optional(nonEmptyText),
       "school" -> optional(nonEmptyText)
@@ -52,7 +52,7 @@ object UserForms {
       "password" -> tuple(
         "main" -> nonEmptyText(6, 128),
         "repeat" -> text
-      ).verifying(Messages("user.form.error.passwordsnomatch"), pw => pw._1 == pw._2)
+      ).verifying(Messages("user.error.passwordsnomatch"), pw => pw._1 == pw._2)
     )((password: (String, String)) => password._1)((password: String) => Some("",""))
   )
 

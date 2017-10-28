@@ -2,16 +2,16 @@
 @import org.ieee_passau.models.{Testcase, User, Visibility}
 @import org.ieee_passau.views.html.main
 @import play.api.data.Form
-@import play.api.i18n.Lang
+@import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.{Flash, RequestHeader}
 @(pid: Int, id: Int, visibilities: List[Visibility], testcase: Form[Testcase])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
-@main("Testfall bearbeiten") {
+@main(Messages("testcase.edit")) {
 
     <ol class="breadcrumb">
-        <li><a href="@org.ieee_passau.controllers.routes.ProblemController.index">Übersicht</a></li>
-        <li><a href="@org.ieee_passau.controllers.routes.ProblemController.edit(pid)">Problem</a></li>
-        <li class="active">Testfall</li>
+        <li><a href="@org.ieee_passau.controllers.routes.ProblemController.index">@Messages("general.listoverview")</a></li>
+        <li><a href="@org.ieee_passau.controllers.routes.ProblemController.edit(pid)">@Messages("problem.title")</a></li>
+        <li class="active">@Messages("testcase.title")</li>
     </ol>
 
     @form(org.ieee_passau.controllers.routes.TestcaseController.update(pid, id), 'class -> "form-horizontal") {

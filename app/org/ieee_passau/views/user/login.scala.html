@@ -3,11 +3,12 @@
 @import org.ieee_passau.views.html.bootstrap3.{password, text}
 @import org.ieee_passau.views.html.main
 @import play.api.data.Form
-@import play.api.i18n.Lang
+@import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.{Flash, RequestHeader}
+@import  play.twirl.api.Html
 @(loginForm: Form[UserLogin])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
-@main("Login") {
+@main(Messages("nav.user.login")) {
     <div class="well col-md-6 col-md-offset-3">
         @if(loginForm.hasGlobalErrors) {
             <div class="alert alert-danger">
@@ -20,16 +21,15 @@
         @form(org.ieee_passau.controllers.routes.UserController.authenticate, 'class -> "form-horizontal") {
             @CSRF.formField
             <fieldset>
-                @text(loginForm("username"), label = "Username")
-                @password(loginForm("password"), label = "Passwort")
+                @text(loginForm("username"), label = Messages("user.username"))
+                @password(loginForm("password"), label = Messages("user.password"))
 
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-10">
-                        <button id="submit" type="submit" value="Submit" class="btn btn-primary">Login</button>
+                        <button id="submit" type="submit" value="Submit" class="btn btn-primary">@Messages("nav.user.login")</button>
                     </div>
                 </div>
-
-                <small>Falls du dein Passwort vergessen hast, kannst du es <a href="@org.ieee_passau.controllers.routes.UserController.resetPassword">hier</a> zurücksetzen.</small>
+                <small>@Html(Messages("user.resetpassword.text", org.ieee_passau.controllers.routes.UserController.resetPassword))</small>
 
             </fieldset>
         }
