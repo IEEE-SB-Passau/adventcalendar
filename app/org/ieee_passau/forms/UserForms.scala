@@ -3,6 +3,7 @@ package org.ieee_passau.forms
 import org.ieee_passau.models._
 import play.api.data.Forms._
 import play.api.data._
+import play.api.i18n.Messages
 
 object UserForms {
   def userForm = Form(
@@ -26,12 +27,12 @@ object UserForms {
 
   def registrationForm = Form(
     mapping(
-      "username" -> nonEmptyText(3, 30).verifying("Benutzername bereits in Verwendung!", u => Users.usernameAvailable(u)),
+      "username" -> nonEmptyText(3, 30).verifying(Messages("user.form.error.usernametake"), u => Users.usernameAvailable(u)),
       "password" -> tuple(
         "main" -> nonEmptyText(6, 128),
         "repeat" -> text
-      ).verifying("Passwörter stimmen nicht überein!", pw => pw._1 == pw._2),
-      "email" -> email.verifying("E-Mail wird bereits für einen anderen Account verwendet!", e => Users.emailAvailable(e)),
+      ).verifying(Messages("user.form.error.passwordsnomatch"), pw => pw._1 == pw._2),
+      "email" -> email.verifying(Messages("user.form.error.emailtaken"), e => Users.emailAvailable(e)),
       "semester" -> optional(number),
       "studySubject" -> optional(nonEmptyText),
       "school" -> optional(nonEmptyText)
@@ -43,7 +44,7 @@ object UserForms {
       "username" -> nonEmptyText(3, 30),
       "password" -> nonEmptyText(6, 128)
     )(UserLogin.apply)(UserLogin.unapply)
-      verifying("Login fehlgeschlagen!", login => login.authenticate().isDefined)
+      verifying(Messages("user.login.error"), login => login.authenticate().isDefined)
   )
 
   def passwordForm = Form(
@@ -51,7 +52,7 @@ object UserForms {
       "password" -> tuple(
         "main" -> nonEmptyText(6, 128),
         "repeat" -> text
-      ).verifying("Passwörter stimmen nicht überein!", pw => pw._1 == pw._2)
+      ).verifying(Messages("user.form.error.passwordsnomatch"), pw => pw._1 == pw._2)
     )((password: (String, String)) => password._1)((password: String) => Some("",""))
   )
 
@@ -59,7 +60,7 @@ object UserForms {
     mapping(
       "username" -> nonEmptyText(3, 30)
     )((username: String) => username)((username: String) => Some(username))
-      verifying("Benutzername existiert nicht!", u => !Users.usernameAvailable(u))
+      verifying(Messages("user.notexist"), u => !Users.usernameAvailable(u))
   )
 
   def feedbackForm = Form(

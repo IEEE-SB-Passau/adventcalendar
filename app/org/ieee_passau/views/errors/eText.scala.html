@@ -1,9 +1,10 @@
 @import org.ieee_passau.models.User
 @import org.ieee_passau.views.html.main
-@import play.api.i18n.Lang
+@import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.Flash
+@import play.twirl.api.Html
 @(string: String)(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 
-@main("Fehler") {
-    <p>@string</p>
+@main(Messages("error.custom.short")) {
+    <p>@Html(string)</p>
 }

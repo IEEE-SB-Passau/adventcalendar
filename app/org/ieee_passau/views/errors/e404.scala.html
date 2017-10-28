@@ -1,13 +1,10 @@
 @import org.ieee_passau.models.User
 @import org.ieee_passau.views.html.main
-@import play.api.i18n.Lang
+@import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.Flash
+@import play.twirl.api.Html
 @()(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 
-@main("Seite nicht gefunden") {
-    <p>
-        Hier scheint nichts zu sein.
-        Falls du hier trotzdem etwas erwartet hast,
-        lass es uns <a href="@org.ieee_passau.controllers.routes.MainController.contact">wissen</a>.
-    </p>
+@main(Messages("error.404.short")) {
+    <p>@Html(Messages("error.404.long"))</p>
 }

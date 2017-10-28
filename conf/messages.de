@@ -1,21 +1,36 @@
 user.impersonate.message=Du bis nun als {0} angemeldet.
 user.login.message=Willkommen zurück {0}!
+user.login.error=Login fehlgeschlagen!
+user.notexist=Benutzername existiert nicht!
 user.logout.message=Bis bald {0}!
 user.register.error.existing=Benutzer {0} wurde angelegt. Bitte verifiziere deine E-Mailadresse mit dem zugesandten Link.
 user.register.message=Willkommen {0}!
 user.register.verify.message=Es wurde eine E-Mail an die angegeben Adresse gesendet. Bitte benutze den Link um dein Passwort zurückzusetzen.
 user.update.message=Benutzer {0} wurde aktualisiert.
 
+user.form.error.usernametake=Benutzername bereits in Verwendung!
+user.form.error.emailtaken=E-Mail wird bereits für einen anderen Account verwendet!
+user.form.error.passwordsnomatch=Passwörter stimmen nicht überein!
+
 ticket.create.error=Beim Erstellen deiner Frage ist etwas schief gelaufen!
 ticket.create.message=Wir werden uns um deine Frage kümmern.
 ticket.answer.error=Beim Beantworten der Frage ist etwas schief gelaufen!
 ticket.answer.message=Antwort wurde gespeichert!
+
+problem.title=Aufgabe
 
 problem.create.message=Aufgabe {0} wurde angelegt.
 problem.update.message=Aufgabe {0} wurde aktualisiert.
 
 problem.translation.create.message=Übersetung nach {1} für Aufgabe {0} wurde angelegt.
 problem.translation.update.message=Übersetung nach {1} für Aufgabe {0} wurde aktualisiert.
+
+problem.form.readablestart=Sichtbar ab
+problem.form.readablestop=Sichtbar bis
+problem.form.solvablestart=Lösbar bis
+problem.form.solvablestop=Lösbar ab
+
+problem.create.error.door=Diese Tür hat schon ein anderes Problem!
 
 testcase.create.message=Testcase {0} wurde angelegt.
 testcase.update.message=Testcase {0} wurde aktualisiert.
@@ -40,13 +55,15 @@ jobs.error.invalidjob=Dieser Job existiert nicht!
 jobs.control.cancel.message=Job wurde abgebrochen!
 jobs.control.revaluate.message=Testfall wird neu ausgewertet!
 
-error.invalidlink=Dieser Link ist nicht gültig!
+feedback.submit.message=Vielen Danke für deine Rückmeldung!
 
 language.name=de
 language.icon=🇩🇪
 
+#HTML--->
 page.title=IEEE SB Passau Adventskalender 2017
 page.footer=&copy; 2017 IEEE Student Branch Passau - <a href="https://ieee.uni-passau.de/pages/contact/">Impressum</a>
+#<---HTML
 
 nav.calendar=Adventskalender
 nav.problems=Aufgaben
@@ -72,8 +89,6 @@ nav.admin.problems=Aufgabenliste
 nav.admin.tickets=Fragenliste
 nav.admin.submissions=Abgabenübersicht
 
-problem.title=Aufgabe
-
 postings.edit=Seite bearbeiten
 postings.page=Seite
 postings.post.title=Titel
@@ -81,3 +96,37 @@ postings.post.default=Standardversion
 postings.post.trans=Übersetzungen
 postings.update.message=Meldung wurde geändert.
 postings.post.missing=Dieser Post muss erst angelegt werden.
+
+general.save=Speichern
+general.selectvalue=Bitte auswählen
+
+error.invalid=Eingabe ist ungültig
+error.required=Erforderlich
+error.number=Eingabe ist keine Zahl
+error.min=Eingegebener Wert ist zu klein
+error.max=Eingegebener Wert is zu groß
+error.minLength=Eingabe ist zu kurz
+error.maxLength=Eingabe ist zu lang
+error.email=Keine gültige E-Mail Adresse
+error.expected.date=Kein gültiges Datum
+error.expected.jodadate.format=Kein gültiges Datum
+error.date.reverse=''{0}'' muss nach ''{1}'' sein!
+error.path.empty=Leerer Pfad
+error.csrf=Das Formular ist abgelaufen. Lade die Seite bitte neu!
+error.invalidlink=Dieser Link ist nicht gültig!
+
+error.403.short=Keine Berechtigung
+error.404.short=Seite nicht gefunden
+error.500.short=Interner Fehler
+error.403.long=Du scheinst keine Berechtigung zu haben diese Seite aufzurufen.
+error.custom.short=Fehler
+#HTML---->
+error.404.long=Hier scheint nichts zu sein.\
+  Falls du hier trotzdem etwas erwartet hast,\
+  lass es uns <a href="@org.ieee_passau.controllers.routes.MainController.contact">wissen</a>.
+error.500.long=Oha, da ist wohl etwas schief gelaufen.\
+  Was auch immer du gerade getan hast, probiere es am besten in ein paar Minuten noch einmal.\
+  Solltest du dann immer noch auf diesen Fehler stoßen,\
+  lass es uns <a href="@org.ieee_passau.controllers.routes.MainController.contact">wissen</a>.
+error.500.code=Erwähne bitte in deiner Mail die Fehlernummer <strong>{0}</strong>!
+#<---HTML

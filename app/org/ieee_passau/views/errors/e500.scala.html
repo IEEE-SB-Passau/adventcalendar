@@ -1,16 +1,14 @@
 @import org.ieee_passau.models.User
 @import org.ieee_passau.views.html.main
-@import play.api.i18n.Lang
+@import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.Flash
+@import play.twirl.api.Html
 @(errorID: Option[String])(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 
-@main("Interner Fehler") {
+@main(Messages("error.500.short")) {
     <p>
-        Oha, da ist wohl etwas schief gelaufen.
-        Was auch immer du gerade getan hast, probiere es am besten in ein paar Minuten noch einmal.
-        Solltest du dann immer noch auf diesen Fehler stoßen,
-        lass es uns <a href="@org.ieee_passau.controllers.routes.MainController.contact">wissen</a>.
-        @if(errorID.isDefined) { Erwähne bitte in deiner Mail die Fehlernummer <strong>@errorID.get</strong>! }
+        @Html(Messages("error.500.long"))
+        @if(errorID.isDefined) { @Html(Messages("error.500.code", errorID.get)) }
     </p>
 <p>
 ............................................________ <br />

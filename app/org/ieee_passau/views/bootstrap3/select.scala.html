@@ -1,3 +1,4 @@
+@import play.api.i18n.Messages
 @(field: Field, label: String = "CHANGEME", optionMap: Map[String, Boolean], isMultiple: Boolean, help: String = "")
 
 <div class="form-group @if(field.hasErrors) { has-error }">
@@ -7,7 +8,7 @@
                 id="@field.id"
                 name="@if(isMultiple) { @(field.name + "[]") } else { @field.name }"
                 @if(isMultiple) { multiple="multiple" }>
-            @if(!isMultiple) { <option class="blank" value="">Please select a value</option> }
+            @if(!isMultiple) { <option class="blank" value="">@Messages("general.select")</option> }
             @for( (optionName, isSelected) <- optionMap) {
                 <option id="@optionName"
                         value="@optionName"

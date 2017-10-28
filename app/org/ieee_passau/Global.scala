@@ -5,6 +5,7 @@ import java.io.{PrintWriter, StringWriter}
 import evaluation.Evaluator
 import play.api.Play.current
 import play.api._
+import play.api.i18n.Messages
 import play.api.libs.mailer._
 import play.api.mvc._
 import play.filters.csrf.CSRF.ErrorHandler
@@ -74,6 +75,6 @@ class CSRFFilterError extends ErrorHandler with PermissionCheck {
   override def handle(req: RequestHeader, msg: String): Result = {
     implicit val sessionUser = getUserFromSession(req.session)
     implicit val flash = Flash()
-    BadRequest(views.html.errors.eText("Das Formular ist abgelaufen. Lade die Seite bitte neu!"))
+    BadRequest(views.html.errors.eText(Messages("error.csrf")))
   }
 }

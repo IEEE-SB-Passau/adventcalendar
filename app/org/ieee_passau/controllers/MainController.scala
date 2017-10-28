@@ -260,7 +260,7 @@ object MainController extends Controller with PermissionCheck {
       fb => {
         Feedbacks += Feedback(None, sessionUser.get.id.get, fb.rating, fb.pro, fb.con, fb.freetext)
         Redirect(org.ieee_passau.controllers.routes.MainController.calendar())
-          .flashing("success" -> "Vielen Danke für deine Rückmeldung")
+          .flashing("success" -> Messages("feedback.submit.message"))
       }
     )
   }}
