@@ -1,85 +1,85 @@
 #TODO
-user.impersonate.message=Du bis nun als {0} angemeldet.
-user.login.message=Willkommen zurück {0}!
-user.logout.message=Bis bald {0}!
-user.register.error.existing=Benutzer {0} wurde angelegt. Bitte verifiziere deine E-Mailadresse mit dem zugesandten Link.
-user.register.message=Willkommen {0}!
-user.register.verify.message=Es wurde eine E-Mail an die angegeben Adresse gesendet. Bitte benutze den Link um dein Passwort zurückzusetzen
-user.update.message=Benutzer {0} wurde aktualisiert.
+user.impersonate.message=You are now logged in as {0}.
+user.login.message=Welcome back {0}!
+user.logout.message=See you soon, {0}!
+user.register.error.existing=User {0} was created. Please verify your email address with the link we sent you.
+user.register.message=Welcome {0}!
+user.register.verify.message=We sent an email to the provided address. Please use the contained link to reset your password.
+user.update.message=User {0} was updated.
 
-ticket.create.error=Beim Erstellen deiner Frage ist etwas schief gelaufen!
+ticket.create.error=There was an error while creating your question!
 ticket.create.message=We will take a look at your question.
-ticket.answer.error=Beim Beantworten der Frage ist etwas schief gelaufen!
-ticket.answer.message=Antwort wurde gespeichert!
+ticket.answer.error=There was an error answering the question!
+ticket.answer.message=The answer was successfully saved!
 
-problem.create.message=Aufgabe{0} wurde angelegt.
-problem.update.message=Aufgabe{0} wurde aktualisiert.
+problem.create.message=Created task {0}.
+problem.update.message=Updated task {0}.
 
-problem.translation.create.message=Übersetung nach {1} für Aufgabe {0} wurde angelegt.
-problem.translation.update.message=Übersetung nach {1} für Aufgabe {0} wurde aktualisiert.
+problem.translation.create.message=Created {1} translation for task {0}.
+problem.translation.update.message=Updated {1} translation for task {0}.
 
-testcase.create.message=Testcase {0} wurde angelegt.
-testcase.update.message=Testcase {0} wurde aktualisiert.
+testcase.create.message=Created testcase {0}.
+testcase.update.message=Updated testcase {0}.
 
-evaltask.create.message=Auswertungsschritt {0} wurde angelegt.
-evaltask.create.error.filemissing=Es muss eine Datei angegeben werden!
-evaltask.update.message=Auswertungsschritt {0} wurde angelegt.
+evaltask.create.message=Created evaluation task {0}.
+evaltask.create.error.filemissing=A file must be provided!
+evaltask.update.message=Updated evaluation task {0}.
 
-submit.success.message=Lösung wurde eingereicht.
-submit.error.message=Lösung konnte nicht eingereicht werden.
-submit.error.filesize=Die eingereichte Datei ist zu groß!
-submit.error.fileformat=Die Datei kann nicht als Programmtext gelesen werden!
-submit.error.invalidlang=Die angegebene Sprache wird nicht akzeptiert!
-submit.ratelimit.message=Du kannst momentan keine Lösung einreichen.
-submit.ratelimit.timer=Es kann nur eine Lösung pro Minute eingereicht werden!
-submit.ratelimit.queue=Solange deine letzte Lösung noch nicht ausgewertet wurde, kannst du nur alle 15 Minuten eine Lösung einreichen!
+submit.success.message=Solution successfully submitted.
+submit.error.message=Solution could not be submitted.
+submit.error.filesize=The file is too big!
+submit.error.fileformat=The file can not be read as a valid program!
+submit.error.invalidlang=The given language is not supported!
+submit.ratelimit.message=You cannot submit a solution right now.
+submit.ratelimit.timer=You may only submit one solution per minute!
+submit.ratelimit.queue=You can submit only one solution every 15 minutes while your last solution is under evaluation!
 
-status.update.message=Status wurde geändert.
+status.update.message=Status was updated.
 #TODO
-status.message.message=Die Auswertung ist im Moment angehalten, bitte habe etwas Geduld, das Team kümmert sich darum!<br>
+status.message.message=Evaluation is currently suspended. Please be patient, we are working on this issue!<br>
 
-jobs.error.invalidjob=Dieser Job existiert nicht!
-jobs.control.cancel.message=Dieser Job existiert nicht!
-jobs.control.revaluate.message=Testfall wird neu ausgewertet!
+jobs.error.invalidjob=This job does not exist!
+jobs.control.cancel.message=Job successfully canceled!
+jobs.control.revaluate.message=Testcase will be reevaluated!
 
-error.invalidlink=Dieser Link ist nicht gültig!
+error.invalidlink=This link is invalid!
 
 language.name=en
 language.icon=🇺🇸
 
-page.title=IEEE SB Passau Adventskalender 2017
+page.title=IEEE SB Passau Advent Calendar 2017
 page.footer=&copy; 2017 IEEE Student Branch Passau - <a href="https://ieee.uni-passau.de/pages/contact/">Impressum</a>
 
-nav.calendar=Adventskalender
-nav.problems=Aufgaben
-nav.ranking=Rangliste
-nav.info=Informationen
-nav.news=Meldungen
+nav.calendar=Advent calendar
+nav.problems=Tasks
+nav.ranking=Scoreboard
+nav.info=Information
+nav.news=Announcements
 nav.faq=FAQ
-nav.rules=Regeln
-nav.examples=Beispiele
-nav.contact=Kontakt
+nav.rules=Rules
+nav.examples=Examples
+nav.contact=Contact
 nav.feedback=Feedback
-nav.user.login=Anmelden
-nav.user.logout=Abmelden
-nav.user.register=Registrieren
-nav.user.greeting= Hallo {1} {0}!
+nav.user.login=Login
+nav.user.logout=Logout
+nav.user.register=Register
+nav.user.greeting= Hello {1} {0}!
 nav.admin.message=Admin
 nav.admin.vms=Vms
-nav.admin.stats=Statistiken
+nav.admin.stats=Statistics
 nav.admin.evalqueue=Queue
-nav.admin.postings=Seite bearbeiten
-nav.admin.users=Benutzerliste
-nav.admin.problems=Aufgabenliste
-nav.admin.tickets=Fragenliste
-nav.admin.submissions=Abgabenübersicht
+nav.admin.postings=Edit page
+nav.admin.users=Users
+nav.admin.problems=Tasks
+nav.admin.tickets=Questions
+nav.admin.submissions=Submissions
 
-problem.title=Aufgabe
+problem.title=Task
 
-postings.edit=Seite bearbeiten
-postings.page=Seite
+postings.edit=Edit page
+postings.page=Page
 postings.post.title=Title
-postings.post.default=Standardversion
-postings.post.trans=Übersetzungen
-postings.update.message=Meldung wurde geändert.
-postings.update.error=Diese Meldung existert nicht.
+postings.post.default=Default version
+postings.post.trans=Translations
+postings.update.message=Updated message text.
+postings.update.error=This message does not exist.
