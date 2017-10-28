@@ -3,6 +3,7 @@
 @import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.Flash
 @import play.twirl.api.Html
+@import org.ieee_passau.utils.LanguageHelper
 @(title: String, isFullPage: Boolean = false, hasTitle: Boolean = false)(content: Html)(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 <!DOCTYPE html>
 
@@ -78,9 +79,16 @@
 
                         @* TODO *@
                         <p class="navbar-text navbar-right">
-                            <a href="@org.ieee_passau.controllers.routes.UserController.updateLang(if(Messages("language.name") == "de") "en" else "de")">
-                                @Messages("language.icon")
-                            </a>
+                            <li class="dropdown active">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">@Messages("language.icon") <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                @for(l <- LanguageHelper.orderedLangs(lang)) {
+                                    <li><a href="@org.ieee_passau.controllers.routes.UserController.updateLang(l.language)">
+                                    @Messages("language.icon")(l)
+                                    </a></li>
+                                }
+                                </ul>
+                            </li>
                         </p>
                     </div>
                     <!-- /.navbar-collapse -->

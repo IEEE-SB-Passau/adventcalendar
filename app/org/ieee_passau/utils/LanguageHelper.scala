@@ -21,6 +21,12 @@ object LanguageHelper {
     }
   }
 
+  val langs: List[Lang] = play.Configuration.root().getString("application.langs").split(",").map(
+    l => Lang(l)
+  ).toList
+
+  def orderedLangs(preferredLang: Lang): List[Lang] = langs.sorted(LanguageHelper.ordering(preferredLang))
+
   val defaultLanguage = Lang(play.Configuration.root().getString("application.langs").split(",")(0))
 
   implicit val LangTypeMapper: JdbcType[Lang] with BaseTypedType[Lang] = MappedColumnType.base[Lang, String](
