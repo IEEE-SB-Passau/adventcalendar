@@ -1,8 +1,8 @@
 @import org.ieee_passau.controllers.Beans.{SolutionListEntry, TicketText}
-@import org.ieee_passau.models.{Language, Problem, Ticket, User}
-@import org.ieee_passau.views.html.bootstrap3.{textareaBs, buttonSave}
-@import org.ieee_passau.views.html.solution.{solutionForm, solutionListAutoReload}
+@import org.ieee_passau.models.{Language, Page, Problem, Ticket, User}
+@import org.ieee_passau.views.html.bootstrap3.{buttonSave, textareaBs}
 @import org.ieee_passau.views.html.main
+@import org.ieee_passau.views.html.solution.{solutionForm, solutionListAutoReload}
 @import org.ieee_passau.views.html.ticket.ticketView
 @import play.api.data.Form
 @import play.api.i18n.{Lang, Messages}
@@ -45,7 +45,7 @@
     @if(solutions.nonEmpty) {
         <h3>Bisherige Lösungen</h3>
         <p>Falls dir nicht ganz klar ist, was die ein oder andere Fehlermeldung jetzt genau bedeutet, schau doch einfach
-            in den <a href="@org.ieee_passau.controllers.routes.MainController.faq">FAQ</a> nach.</p>
+            in den <a href="@org.ieee_passau.controllers.routes.MainController.content(Page.faq.toString)">FAQ</a> nach.</p>
 
         @solutionListAutoReload(solutions, languages, problem.door)
     }

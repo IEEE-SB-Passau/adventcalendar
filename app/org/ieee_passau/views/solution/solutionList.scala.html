@@ -1,5 +1,5 @@
 @import org.ieee_passau.controllers.Beans.SolutionListEntry
-@import org.ieee_passau.models.{Canceled, CompileError, Language, MemoryExceeded, Passed, Private, ProgramError, Public, Queued, RuntimeExceeded, WrongAnswer}
+@import org.ieee_passau.models.{Canceled, CompileError, Language, MemoryExceeded, Passed, Private, ProgramError, Public, Queued, RuntimeExceeded, WrongAnswer, Page}
 @import play.api.i18n.Lang
 @(solutions: List[SolutionListEntry], languages: List[Language], showAll: Boolean = false)(implicit lang: Lang)
 @* showPrivate shows also private testcases *@
@@ -31,7 +31,7 @@
                         @if(s.state == Queued) { Lösung wird noch ausgewertet... }
                         @if(s.state == WrongAnswer) { Lösung enthält Fehler }
                         @if(s.state == Canceled) {
-                            Lösung wurde vom Adventskalender-Team abgebrochen, melde dich bei <a href="@org.ieee_passau.controllers.routes.MainController.contact">uns</a>, um zu erfahren was passiert ist }
+                            Lösung wurde vom Adventskalender-Team abgebrochen, melde dich bei <a href="@org.ieee_passau.controllers.routes.MainController.content(Page.contact.toString)">uns</a>, um zu erfahren was passiert ist }
                     </p>
 
                     <p>

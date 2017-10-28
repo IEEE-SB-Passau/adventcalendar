@@ -24,12 +24,20 @@ class Postings(tag: Tag) extends Table[Posting](tag, "postings") {
   override def * : ProvenShape[Posting] = (id.?, lang, title, content, date) <> (Posting.tupled, Posting.unapply)
 }
 
+object Page extends Enumeration {
+  type Page = Value
+
+  val news = Value(1, "news")
+  val calendar = Value(2, "calendar")
+  val status = Value(3, "status")
+  val faq = Value(4, "faq")
+  val rules = Value(5, "rules")
+  val examples = Value(6, "examples")
+  val contact = Value(7, "contact")
+}
+
 object Postings extends TableQuery(new Postings(_)) {
   implicit private def mapper =  LanguageHelper.LangTypeMapper
-
-  val calendarPosting = 2
-  val newsPosting = 1
-  val statusPosting = 3
 
   def byId(id: Int, preferredLang: Lang): List[Posting] = DB.withSession { implicit session: Session =>
     (for {

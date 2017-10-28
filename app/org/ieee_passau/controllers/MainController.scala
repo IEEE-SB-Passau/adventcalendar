@@ -77,7 +77,7 @@ object MainController extends Controller with PermissionCheck {
 
     val now = new Date()
     val problems = Problems.filter(_.readableStart <= now).filter(_.readableStop > now).sortBy(_.door.asc).list
-    val posting = Postings.byId(Postings.calendarPosting, displayLang).head
+    val posting = Postings.byId(Page.calendar.id, displayLang).head
 
     // show all problems for debugging:
     //val problems = Query(Problems).sortBy(_.door.asc).list;
@@ -85,13 +85,14 @@ object MainController extends Controller with PermissionCheck {
     Ok(org.ieee_passau.views.html.general.calendar(posting, problems))
   }
 
-  def news = DBAction { implicit rs =>
+  def content(page: String) = DBAction { implicit rs =>
     implicit val sessionUser = getUserFromSession(request2session)
     val displayLang = request2lang
 
-    val posting = Postings.byId(Postings.newsPosting, displayLang).head
+    val pageId = Page.withName(page).id
+    val posting = Postings.byId(pageId, displayLang).head
 
-    Ok(org.ieee_passau.views.html.general.status(posting))
+    Ok(org.ieee_passau.views.html.general.content(posting))
   }
 
   /**
@@ -224,7 +225,7 @@ object MainController extends Controller with PermissionCheck {
           val displayLang = request2lang
           val trans = ProblemTranslations.byProblemLang(problem.id.get, displayLang.code).firstOption
           val transProblem = if (trans.nonEmpty) problem.copy(title=trans.get.title, description=trans.get.description) else problem
-          val posting = Postings.byIdLang(Postings.statusPosting, displayLang.code).firstOption
+          val posting = Postings.byIdLang(Page.status.id, displayLang.code).firstOption
           val flash = if (!running.run) "warning" -> (if (posting.nonEmpty) posting.get.content else Messages("status.messages.message")) else "" -> ""
           Ok(org.ieee_passau.views.html.general.problemDetails(transProblem, langs, lastLang, solutions, tickets, ProblemForms.ticketForm, flash))
         }

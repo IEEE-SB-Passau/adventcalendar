@@ -1,9 +1,10 @@
-@import org.ieee_passau.models.Language
+@import org.ieee_passau.models.{Language, Page}
 @import play.api.i18n.Lang
 @import play.api.mvc.RequestHeader
+@import helper._
 @(languages: List[Language], lastLanguage: String)(implicit requestHeader: RequestHeader, lang: Lang)
 
-@import views.html.helper.CSRF
+@@import views.html.helper.CSRF
 
 <form action="#" method="post" enctype="multipart/form-data" class="form-horizontal">
     @CSRF.formField
@@ -32,7 +33,7 @@
                 </div>
 
                 <p><small>*Bei Java und Scala bitte die Main-Methode in der Klasse bzw. dem Objekt "Solution" einreichen und kein Package verwenden.</small></p>
-                <p><small>Falls dir dein Programm Probleme bereitet, werfe doch einen Blick in die <a href="@org.ieee_passau.controllers.routes.MainController.faq">FAQ</a> oder seh dir unsere <a href="@org.ieee_passau.controllers.routes.MainController.examples">Beispielprogramme</a> an.</small></p>
+                <p><small>Falls dir dein Programm Probleme bereitet, werfe doch einen Blick in die <a href="@org.ieee_passau.controllers.routes.MainController.content(Page.faq.toString)">FAQ</a> oder seh dir unsere <a href="@org.ieee_passau.controllers.routes.MainController.content(Page.examples.toString)">Beispielprogramme</a> an.</small></p>
             </div>
         </div>
 

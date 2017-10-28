@@ -172,10 +172,10 @@ object EvaluationController extends Controller with PermissionCheck {
 
     val displayLang = request2lang
     val state = Await.result((monitoringActor ? StatusQ).mapTo[StatusM], 50 millis)
-    Postings.byIdLang(Postings.statusPosting, displayLang.code).firstOption.map { post =>
+    Postings.byIdLang(Page.status.id, displayLang.code).firstOption.map { post =>
       Ok(org.ieee_passau.views.html.monitoring.maintenance(state.run, post.content, Postings.list(LanguageHelper.defaultLanguage)))
     } getOrElse {
-      Redirect(org.ieee_passau.controllers.routes.EvaluationController.editPage(Postings.statusPosting, displayLang.code))
+      Redirect(org.ieee_passau.controllers.routes.EvaluationController.editPage(Page.status.id, displayLang.code))
         .flashing("waring" -> play.api.i18n.Messages("posting.post.missing"))
     }
   }}
