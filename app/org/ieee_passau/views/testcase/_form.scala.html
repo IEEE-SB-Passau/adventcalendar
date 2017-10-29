@@ -1,5 +1,5 @@
 @import org.ieee_passau.models.{Testcase, Visibility}
-@import org.ieee_passau.views.html.bootstrap3.{buttonSave, text, textareaBs}
+@import org.ieee_passau.views.html.bootstrap3.{buttonSave, fileloader, text, textareaBs}
 @import play.api.data.Form
 @import play.api.i18n.{Lang, Messages}
 @(pid: Int, testcase: Form[Testcase], visibilities: List[Visibility])(implicit lang: Lang)
@@ -22,7 +22,9 @@
     </div>
 
     @textareaBs(testcase("input"), label = Messages("testcase.input"), placeholder = Messages("testcase.input"))
+    @fileloader("input")
     @textareaBs(testcase("output"), label = Messages("testcase.output"), placeholder = Messages("testcase.output"))
+    @fileloader("output")
     @text(testcase("points"), label = Messages("testcase.points"), placeholder = Messages("testcase.points"))
 
     @buttonSave()

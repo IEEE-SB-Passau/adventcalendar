@@ -1,8 +1,8 @@
 @import org.ieee_passau.models.{EvalMode, Problem}
-@import org.ieee_passau.views.html.bootstrap3.{buttonSave, text, textareaBs}
+@import org.ieee_passau.utils.LanguageHelper
+@import org.ieee_passau.views.html.bootstrap3.{buttonSave, fileloader, text, textareaBs}
 @import play.api.data.Form
 @import play.api.i18n.{Lang, Messages}
-@import org.ieee_passau.utils.LanguageHelper
 @(problem: Form[Problem], evalModes: List[EvalMode])(implicit lang: Lang)
 
 <fieldset>
@@ -25,6 +25,7 @@
         </div>
     </div>
     @textareaBs(problem("description"), label = Messages("problem.description.lang", Messages("language.name")(LanguageHelper.defaultLanguage)), placeholder =  Messages("problem.description"), wysiwyg = true)
+    @fileloader("description")
 
     @dateManualError(problem("readableStart"), label =  Messages("problem.readabblestart"), placeholder = "01.12.2013")
     @* TODO i18n error *@
