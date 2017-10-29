@@ -5,7 +5,7 @@
 @import org.ieee_passau.views.html.main
 @import play.api.i18n.Lang
 @import play.api.mvc.{Flash, RequestHeader}
-@(list: List[(Int, Int, Int, String, String, Int, String, Date, Option[Date])])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
+@(list: List[(Int, Int, Int, Int, String, String, Int, String, Date, Option[Date])])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main("Queued") {
     <table class="table table-striped">
@@ -21,9 +21,9 @@
             </tr>
         </thead>
         <tbody>
-        @list.map {case (sid, rid, stage, language, user, door, title, dateSub, dateQueued) =>
+        @list.map {case (rid, sid, cid, stage, language, user, door, title, dateSub, dateQueued) =>
             <tr>
-                <td><a href="@org.ieee_passau.controllers.routes.EvaluationController.details(sid)">@sid</a> / @rid / @stage</td>
+                <td><a href="@org.ieee_passau.controllers.routes.EvaluationController.details(sid)">@sid</a> / @cid / @stage</td>
                 <td>@door @title</td>
                 <td>@user</td>
                 <td>@language</td>

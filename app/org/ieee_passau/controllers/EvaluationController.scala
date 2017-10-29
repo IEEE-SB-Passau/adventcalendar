@@ -93,14 +93,14 @@ object EvaluationController extends Controller with PermissionCheck {
     val runningList = for {
       j <- jobs
       r <- testruns if r._1 /*testrun*/ .id.get == j._1 /*job*/ .testrunId
-    } yield (r._4.id.get, j._1.testrunId, r._1.stage.get, r._4.language, r._5.username, r._3.door, r._3.title, r._4.created, Some(j._2))
+    } yield (r._1.id.get, r._4.id.get, r._2.id.get, r._1.stage.get, r._4.language, r._5.username, r._3.door, r._3.title, r._4.created, Some(j._2))
 
-    val running = runningList.map(t => t._2)
+    val running = runningList.map(t => t._1)
     val list = runningList ++ (for {
       r <- testruns if !running.contains(r._1.id.get)
-    } yield (r._4.id.get, r._1.id.get, r._1.stage.get, r._4.language, r._5.username, r._3.door, r._3.title, r._4.created, None))
+    } yield (r._1.id.get, r._4.id.get, r._2.id.get, r._1.stage.get, r._4.language, r._5.username, r._3.door, r._3.title, r._4.created, None))
 
-    Ok(org.ieee_passau.views.html.monitoring.indexQueued(list.sortBy(_._8)(Ordering[Date]).sortBy(_._9)(Ordering[Option[Date]].reverse)))
+    Ok(org.ieee_passau.views.html.monitoring.indexQueued(list.sortBy(_._9)(Ordering[Date]).sortBy(_._10)(Ordering[Option[Date]].reverse)))
   }}
 
   def details(id: Int): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
