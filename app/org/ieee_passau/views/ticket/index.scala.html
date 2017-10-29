@@ -4,7 +4,7 @@
 @import org.ieee_passau.views.html.main
 @import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.{Flash, RequestHeader}
-@(tickets: List[(Ticket, User, Problem)])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
+@(tickets: List[(Ticket, User, Problem, Boolean)])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main(Messages("ticket.list.title")) {
     <table class="table table-striped">
@@ -19,8 +19,8 @@
             </tr>
         </thead>
         <tbody>
-        @tickets.map { case (t: Ticket, u: User, p: Problem) =>
-            <tr>
+        @tickets.map { case (t: Ticket, u: User, p: Problem, answered: Boolean) =>
+            <tr class="@if(answered) {success}">
                 <td>@t.id</td>
                 <td>@p.door @p.title</td>
                 <td>@u.username</td>
@@ -28,7 +28,11 @@
                 <td>@showCheckmark(t.public)</td>
                 <td>
                     <a href="@org.ieee_passau.controllers.routes.TicketController.view(t.id.get)" class="btn btn-default">
-                        <span class="glyphicon glyphicon-pencil"></span>
+                        @if(answered) {
+                            <span class="glyphicon glyphicon-pencil"></span>
+                        } else {
+                            <span class="glyphicon glyphicon-send"></span>
+                        }
                     </a>
 
                     <form style="display : inline" method="POST" action="@org.ieee_passau.controllers.routes.TicketController.delete(t.id.get)">

@@ -16,12 +16,18 @@ object TicketController extends Controller with PermissionCheck {
 
   def index: Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
-    val list = for {
+    val responses = for {
+      t <- Tickets if t.responseTo.?.isDefined
+    } yield t.responseTo
+
+    val list = (for {
       t <- Tickets if t.responseTo.?.isEmpty
       u <- Users if u.id === t.userId
       p <- Problems if p.id === t.problemId
-    } yield (t, u, p)
-    Ok(org.ieee_passau.views.html.ticket.index(list.sortBy(_._1.created.desc).list))
+    } yield (t, u, p)).sortBy(_._1.created.desc).list
+      .map(q => (q._1, q._2, q._3, responses.filter(_ === q._1.id).firstOption.isDefined))
+
+    Ok(org.ieee_passau.views.html.ticket.index(list))
   }}
 
   def view(id: Int): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
@@ -91,6 +97,7 @@ object TicketController extends Controller with PermissionCheck {
               subject = "Adventskalender Antwort auf die Frage zu Aufgabe " + problem.get.door + " " + problem.get.title,
               from = sessionUser.get.username + " @ Adventskalender <adventskalender@ieee.students.uni-passau.de>",
               to = List(recipient.get.email),
+              cc = List("adventskalender@ieee.students.uni-passau.de"),
               bodyText = Some(ticket.text)
             )
             MailerPlugin.send(email)
