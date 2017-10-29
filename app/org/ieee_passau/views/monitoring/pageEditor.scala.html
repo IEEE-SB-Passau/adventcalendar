@@ -14,7 +14,7 @@
     </ol>
 
     <div class="well">
-        <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.EvaluationController.changePage(id, lng)">
+        <form class="form-horizontal" method="POST" action="@org.ieee_passau.controllers.routes.EvaluationController.changePage(id, lng)">
             <fieldset>
                 @CSRF.formField
                 <input type="hidden" name="id" value="@id" />

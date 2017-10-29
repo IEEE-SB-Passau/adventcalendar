@@ -13,22 +13,25 @@
         @form(org.ieee_passau.controllers.routes.UserController.create, 'class -> "form-horizontal") {
             @CSRF.formField
             <fieldset>
-                @text(registrationForm("username"), label = Messages("user.username") + "*", placeholder = Messages("user.username"))
+                @text(registrationForm("username"), label = Messages("user.username") + "*", placeholder = Messages("user.username"), offset = "col-sm-3", width = "col-sm-9")
                 @password2(registrationForm("password"), registrationForm("password.main"), registrationForm("password.repeat"),
                     label1 = Messages("user.password") + "*", label2 = " " + Messages("user.password.repeat") + "*",
-                    placeholder = Messages("user.password"), help = Messages("user.help.password"))
-                @text(registrationForm("email"), label = Messages("user.email") + "*", placeholder = Messages("user.email"))
-                @text(registrationForm("school"), label = Messages("user.school"), placeholder = Messages("user.school"))
-                @text(registrationForm("semester"), label = Messages("user.semester"), placeholder = Messages("user.semester"))
-                @text(registrationForm("studySubject"), label = Messages("user.studysubject"), placeholder = Messages("user.studysubject"))
+                    placeholder = Messages("user.password"), help = Messages("user.help.password"),
+                    offset = "col-sm-3", width = "col-sm-9")
+                @text(registrationForm("email"), label = Messages("user.email") + "*", placeholder = Messages("user.email"), offset = "col-sm-3", width = "col-sm-9")
+                @text(registrationForm("school"), label = Messages("user.school"), placeholder = Messages("user.school"), offset = "col-sm-3", width = "col-sm-9")
+                @text(registrationForm("semester"), label = Messages("user.semester"), placeholder = Messages("user.semester"), offset = "col-sm-3", width = "col-sm-9")
+                @text(registrationForm("studySubject"), label = Messages("user.studysubject"), placeholder = Messages("user.studysubject"), offset = "col-sm-3", width = "col-sm-9")
 
                 <div class="form-group">
-                    <div class="col-sm-offset-2 col-sm-10">
+                    <div class="col-sm-offset-3 col-sm-9">
                         <button id="submit" type="submit" value="Submit" class="btn btn-primary">@Messages("nav.user.register")</button>
                     </div>
                 </div>
             </fieldset>
         }
-        <small>@Html(Messages("user.help.register"))</small>
+        <div class="pull-right">
+            <small>@Html(Messages("user.help.register"))</small>
+        </div>
     </div>
 }

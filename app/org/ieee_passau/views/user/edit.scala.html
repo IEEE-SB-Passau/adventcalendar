@@ -11,7 +11,7 @@
     @form(org.ieee_passau.controllers.routes.UserController.update(id), 'class -> "form-horizontal") {
         @CSRF.formField
         <fieldset>
-                <div class="well">
+            <div class="well">
                 @text(user("username"), label = Messages("user.username"), placeholder = Messages("user.username"))
                 @password(user("password"), label = Messages("user.password"), placeholder = Messages("user.password"))
                 @text(user("email"), label = Messages("user.email"), placeholder = Messages("user.email"))

@@ -1,10 +1,9 @@
 @import org.ieee_passau.models.{Language, Page}
 @import play.api.i18n.Lang
 @import play.api.mvc.RequestHeader
-@import helper._
+@import views.html.helper.CSRF
 @(languages: List[Language], lastLanguage: String)(implicit requestHeader: RequestHeader, lang: Lang)
 
-@@import views.html.helper.CSRF
 
 <form action="#" method="post" enctype="multipart/form-data" class="form-horizontal">
     @CSRF.formField

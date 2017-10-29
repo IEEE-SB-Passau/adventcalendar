@@ -2,7 +2,7 @@
 @import org.ieee_passau.views.html.bootstrap3.{buttonSave, text, textareaBs}
 @import play.api.data.Form
 @import play.api.i18n.{Lang, Messages}
-@(pid: Int, testcase: Form[Testcase], visibilities: List[Visibility])(lang: Lang)
+@(pid: Int, testcase: Form[Testcase], visibilities: List[Visibility])(implicit lang: Lang)
 
 <fieldset>
     <input type="hidden" name="problemId" value="@pid" />

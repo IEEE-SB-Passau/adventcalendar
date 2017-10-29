@@ -21,15 +21,17 @@
         @form(org.ieee_passau.controllers.routes.UserController.authenticate, 'class -> "form-horizontal") {
             @CSRF.formField
             <fieldset>
-                @text(loginForm("username"), label = Messages("user.username"))
-                @password(loginForm("password"), label = Messages("user.password"))
+                @text(loginForm("username"), label = Messages("user.username"), offset = "col-sm-3", width = "col-sm-9")
+                @password(loginForm("password"), label = Messages("user.password"), offset = "col-sm-3", width = "col-sm-9")
 
                 <div class="form-group">
-                    <div class="col-sm-offset-2 col-sm-10">
+                    <div class="col-sm-offset-3 col-sm-9">
                         <button id="submit" type="submit" value="Submit" class="btn btn-primary">@Messages("nav.user.login")</button>
                     </div>
                 </div>
-                <small>@Html(Messages("user.resetpassword.text", org.ieee_passau.controllers.routes.UserController.resetPassword))</small>
+                <div class="pull-right">
+                    <small>@Html(Messages("user.resetpassword.text", org.ieee_passau.controllers.routes.UserController.resetPassword))</small>
+                </div>
 
             </fieldset>
         }
