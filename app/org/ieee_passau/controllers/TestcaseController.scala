@@ -70,9 +70,14 @@ object TestcaseController extends Controller with PermissionCheck {
         val solutions = for {
           s <- Solutions if s.problemId === pid
         } yield s.id
-        solutions.foreach(s =>
-          Testruns += Testrun(None, s, id, None, None, None, None, None, None, None, None, Queued, None, now, Some(0), None, now)
-        )
+        solutions.foreach(s => {
+          val maybeExisting = Testruns.bySolutionIdTestcaseId(s, id).firstOption
+          if (maybeExisting.isDefined) {
+            Testruns.update(maybeExisting.get.id.get, maybeExisting.get.copy(result = Queued, stage = Some(0)))
+          } else {
+            Testruns += Testrun(None, s, id, None, None, None, None, None, None, None, None, Queued, None, now, Some(0), None, now)
+          }
+        })
         Redirect(org.ieee_passau.controllers.routes.TestcaseController.edit(pid, id))
           .flashing("success" -> Messages("testcase.update.message", testcase.position.toString))
       }

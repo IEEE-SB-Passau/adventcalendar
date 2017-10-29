@@ -43,6 +43,9 @@ class Testruns(tag: Tag) extends TableWithId[Testrun](tag, "testruns") {
 object Testruns extends TableQuery(new Testruns(_)) {
   def bySolutionId: CompiledFunction[(Column[Int]) => Query[Testruns, Testrun, Seq], Column[Int], Int, Query[Testruns, Testrun, Seq], Seq[Testrun]] =
     this.findBy(_.solutionId)
+  def bySolutionIdTestcaseId(solutionId: Int, testcaseId: Int): Query[Testruns, Testrun, Seq] =
+    filter(r => r.solutionId === solutionId && r.testcaseId === testcaseId)
+
   def byId: CompiledFunction[(Column[Int]) => Query[Testruns, Testrun, Seq], Column[Int], Int, Query[Testruns, Testrun, Seq], Seq[Testrun]] =
     this.findBy(_.id)
   def update(id: Int, testrun: Testrun)(implicit session: Session): Int =
