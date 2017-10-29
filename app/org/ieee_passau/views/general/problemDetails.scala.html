@@ -33,7 +33,7 @@
     @if(problem.solvable) {
         @if(sessionUser.isDefined) {
             <div class="well">
-                @solutionForm(languages, lastLang)
+                @solutionForm(problem.door, languages, lastLang)
             </div>
         } else {
             <p>Bitte logge dich ein, um eine Lösung einzureichen...</p>

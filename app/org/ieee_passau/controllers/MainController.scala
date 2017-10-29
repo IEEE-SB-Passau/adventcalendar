@@ -14,11 +14,12 @@ import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
 import play.api.db.slick._
 import play.api.i18n.Messages
+import play.api.libs.Files
 import play.api.libs.Files.TemporaryFile
 import play.api.libs.concurrent.Akka
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{JsPath, Json, Writes}
-import play.api.mvc._
+import play.api.mvc.{Result, _}
 
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -95,12 +96,9 @@ object MainController extends Controller with PermissionCheck {
     Ok(org.ieee_passau.views.html.general.content(posting))
   }
 
-  /**
-    * Submits the provided solution and queues the corresponding test-runs.
-    *
-    * @param door the number of the calendar door this task is behind
-    */
-  def solve(door: Int): Action[MultipartFormData[TemporaryFile]] = DBAction(parse.multipartFormData) { implicit rs =>
+
+  def handleSubmission(door: Int, getFile: DBSessionRequest[MultipartFormData[Files.TemporaryFile]] => (String, String))
+                      (implicit rs: DBSessionRequest[MultipartFormData[Files.TemporaryFile]]): Result = {
     implicit val sessionUser = getUserFromSession(request2session)
     val now = new Date()
     val problem = Problems.byDoor(door).first
@@ -127,51 +125,84 @@ object MainController extends Controller with PermissionCheck {
       Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door)).flashing("danger" ->
         (Messages("submit.error.message") + " " + Messages("submit.error.invalidlang")))
     } else {
+      val submission = getFile(rs)
+      // When using 2 proxys, the maximal possible remote-ip length with separators is 49 chars -> rounding up to 50
+      val remoteAddress = Some(rs.remoteAddress.take(50))
 
-      rs.body.file("solution").map { submission =>
-        val sourceFile = submission.ref.file
-        if (sourceFile.length > 262144) {
-          Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
-            .flashing("danger" -> (Messages("submit.error.message") + " " + Messages("submit.error.filesize")))
-        } else {
-          // When using 2 proxys, the maximal possible remote-ip length with separators is 49 chars -> rounding up to 50
-          val remoteAddress = Some(rs.remoteAddress.take(50))
-
-          val userAgent = if (rs.headers.get("User-Agent").isDefined) {
-            Some(rs.headers.get("User-Agent").get.take(150))
-          } else {
-            None
-          }
-
-          var success = false
-
-          try {
-            val solution = (Solutions returning Solutions.map(_.id)) +=
-              Solution(None, sessionUser.get.id.get, Problems.byDoor(door).firstOption.get.id.get, lang,
-                File(sourceFile).slurp, submission.filename, remoteAddress, userAgent, None, now)
-
-            val id = Problems.byDoor(door).firstOption.get.id.get
-            val q = for {
-              t <- Testcases if t.problemId === id
-            } yield t.id
-            q.list.foreach(t =>
-              Testruns += Testrun(None, solution, t, None, None, None, None, None, None, None, None, Queued, None, now, Some(0), None, now)
-            )
-
-            success = true
-          } catch {
-            case pokemon: Throwable => // ignore
-          }
-          if (success) Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door).url + "#latest")
-            .flashing("success" -> Messages("submit.success.message"))
-          else Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
-            .flashing("danger" -> (Messages("submit.error.message") + " " + Messages("submit.error.fileformat")))
-        }
-      } getOrElse {
-        Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
-          .flashing("danger" -> Messages("submit.error.message"))
+      val userAgent = if (rs.headers.get("User-Agent").isDefined) {
+        Some(rs.headers.get("User-Agent").get.take(150))
+      } else {
+        None
       }
+
+      var success = false
+
+      try {
+        val solution = (Solutions returning Solutions.map(_.id)) +=
+          Solution(None, sessionUser.get.id.get, Problems.byDoor(door).firstOption.get.id.get, lang,
+            submission._1, submission._2, remoteAddress, userAgent, None, now)
+
+        val id = Problems.byDoor(door).firstOption.get.id.get
+        val q = for {
+          t <- Testcases if t.problemId === id
+        } yield t.id
+        q.list.foreach(t =>
+          Testruns += Testrun(None, solution, t, None, None, None, None, None, None, None, None, Queued, None, now, Some(0), None, now)
+        )
+
+        success = true
+      } catch {
+        case pokemon: Throwable => // ignore
+      }
+      if (success) Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door).url + "#latest")
+        .flashing("success" -> Messages("submit.success.message"))
+      else Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
+        .flashing("danger" -> (Messages("submit.error.message") + " " + Messages("submit.error.fileformat")))
     }
+  }
+
+  /**
+    * Submits the provided solution and queues the corresponding test-runs.
+    *
+    * @param door the number of the calendar door this task is behind
+    */
+  def solveFile(door: Int): Action[MultipartFormData[TemporaryFile]] = DBAction(parse.multipartFormData) { implicit rs =>
+    rs.body.file("solution").map { submission =>
+      val sourceFile = submission.ref.file
+      if (sourceFile.length > 262144) {
+        Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
+          .flashing("danger" -> (Messages("submit.error.message") + " " + Messages("submit.error.filesize")))
+      } else {
+        handleSubmission(door, rs => (File(sourceFile).slurp, submission.filename))
+      }
+    } getOrElse {
+      Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
+        .flashing("danger" -> Messages("submit.error.message"))
+    }
+  }
+
+  /**
+    * Submits the provided solution and queues the corresponding test-runs.
+    *
+    * @param door the number of the calendar door this task is behind
+    */
+  def solveString(door: Int): Action[MultipartFormData[TemporaryFile]] = DBAction(parse.multipartFormData) { implicit rs =>
+    rs.body.dataParts.find(_._1 == "submissiontext").map { submission =>
+      if (submission._2.head.length > 262144) {
+        Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
+          .flashing("danger" -> (Messages("submit.error.message") + " " + Messages("submit.error.filesize")))
+      } else {
+        // TODO proper file name
+        handleSubmission(door, rs => (submission._2.head, "Solution"))
+      }
+    } getOrElse {
+      Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
+        .flashing("danger" -> Messages("submit.error.message"))
+    }
+  }
+
+  def codeEditor(door: Int) = Action { implicit rs =>
+    Ok(org.ieee_passau.views.html.solution.codeEditor(door))
   }
 
   /**

@@ -1,0 +1,59 @@
+@import play.api.i18n.{Lang, Messages}
+@(door: Int)(implicit lang: Lang)
+
+<style>#preview {
+    position: relative;
+    /*width: 500px;*/
+    height: 400px;
+}</style>
+<div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+        <div class="panel panel-default">
+            <div class="panel-heading"><h3 class="panel-title">@Messages("submit.codeeditor")</h3></div>
+            <div class="panel-body">
+                <div id="preview"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<input name="submissiontext" id="submissiontext" type="hidden" value=""/>
+
+<div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+        <input type="submit" value="@Messages("submit.submit")" onmouseover="updateEdits();"
+        formaction="@org.ieee_passau.controllers.routes.MainController.solveString(door)" class="btn btn-primary"/>
+    </div>
+</div>
+
+<script src="@routes.Assets.at("javascripts/ace/ace.js")" type="text/javascript" charset="utf-8"></script>
+<script src="@routes.Assets.at("javascripts/ace/ext-modelist.js ")" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript">
+    function updateEdits() {
+        submissiontext.value = editor.getValue();
+    }
+
+    function loadSource(input) {
+        var fileToLoad = input.files[0];
+
+        var fileReader = new FileReader();
+        fileReader.onload = function (fileLoadedEvent) {
+            editor.setValue(fileLoadedEvent.target.result);
+            submissiontext.value = fileLoadedEvent.target.result;
+            updateLang();
+
+        };
+        fileReader.readAsText(fileToLoad, "UTF-8");
+    }
+
+    function updateLang() {
+        var mode = modelist.getModeForPath(filename.value).mode;
+        editor.session.setMode(mode);
+        var langClass = langs[lang.value];
+    }
+
+    var editor = ace.edit("preview");
+    editor.getSession().setMode("ace/mode/javascript");
+    var modelist = ace.require("ace/ext/modelist");
+
+    loadSource(solution);
+</script>

@@ -7,7 +7,9 @@ GET         /                                          org.ieee_passau.controlle
 
 GET         /problems                                  org.ieee_passau.controllers.MainController.problems
 GET         /problem/:door                             org.ieee_passau.controllers.MainController.problemDetails(door: Int)
-POST        /problem/:door                             org.ieee_passau.controllers.MainController.solve(door: Int)
+GET         /problem/editor/:door                      org.ieee_passau.controllers.MainController.codeEditor(door: Int)
+POST        /problem/:door                             org.ieee_passau.controllers.MainController.solveFile(door: Int)
+POST        /problem/v2/:door                          org.ieee_passau.controllers.MainController.solveString(door: Int)
 GET         /problem/:door/solutions                   org.ieee_passau.controllers.MainController.getUserProblemSolutions(door: Int)
 POST        /problem/:door/question                    org.ieee_passau.controllers.TicketController.submitTicket(door: Int)
 
