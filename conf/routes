@@ -18,7 +18,6 @@ GET         /ranking                                   org.ieee_passau.controlle
 GET         /calendar                                  org.ieee_passau.controllers.MainController.calendar
 GET         /contact                                   org.ieee_passau.controllers.MainController.contact
 GET         /examples                                  org.ieee_passau.controllers.MainController.examples
-GET         /rules                                     org.ieee_passau.controllers.MainController.rules
 GET         /$page<(contact|faq|examples|rules|news|calendar)> org.ieee_passau.controllers.MainController.content(page)
 GET         /feedback                                  org.ieee_passau.controllers.MainController.feedback
 POST        /feedback                                  org.ieee_passau.controllers.MainController.submitFeedback
