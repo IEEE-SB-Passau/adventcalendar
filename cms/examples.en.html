@@ -1,0 +1,339 @@
+<p>Here you can find several example programs, which demonstrate how in- and output can be implemented by solving a simple example problem.</p>
+
+<h3>Problem</h3>
+<p>The task is to implement a program that reads a list of numbers, calculates the cross sum of each number and then, outputs them.</p>
+
+<h4>Input</h4>
+<p>The first line contains a number (1 < n < 1000) which tells how often a cross sum has to be calculated. Then, there follow
+    n more lines. Each of these lines contains only digits. The number of digits is limited to (1 &le; z &le; 50).</p>
+
+<h4>Output</h4>
+<p>For each input line the corresponding cross sum has to be written. Each cross sum gets its own line:
+    there must be a newline (\n oder \r\n) after each cross sum.</p>
+
+<h4>Example</h4>
+<h5>Input</h5>
+<pre>5
+00001
+1234
+0101
+5005
+22</pre>
+
+<h5>Output</h5>
+<pre>1
+10
+2
+10
+4</pre>
+
+<h3>Implementations</h3>
+
+<h4>Java</h4>
+<pre><code class="java">import java.util.Scanner;
+
+public class Solution {
+
+    public static void main(String[] args) {
+        Scanner in = new Scanner(System.in);
+        int numTestcases = Integer.parseInt(in.nextLine());
+
+        for (int i = 0; i < numTestcases; i++) {
+            String testcase = in.nextLine();
+            int result = 0;
+            for (int j = 0; j < testcase.length(); j++) {
+                char c = testcase.charAt(j);
+                result += Character.getNumericValue(c);
+            }
+            System.out.println(result);
+        }
+     }
+
+}
+    </code></pre>
+
+<h4>PHP</h4>
+<pre><code class="php">&lt;?php
+
+$num_testcases = intval(fgets(STDIN));
+
+for ($i = 0; $i &lt; $num_testcases; $i++) {
+    $testcase = fgets(STDIN);
+
+    // remove newline character at the end of $testcase
+    $testcase = trim($testcase);
+
+    $result = 0;
+    for ($j = 0; $j &lt; strlen($testcase); $j++) {
+        $result += intval($testcase[$j]);
+    }
+
+    print($result."\n");
+}
+    </code></pre>
+
+<h4>JavaScript</h4>
+<pre><code class="javascript">var readline = require("readline");
+var rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
+function solve(testcase) {
+    var sum = 0;
+    for (var i = 0; i &lt; testcase.length; i++) {
+        sum += parseInt(testcase.charAt(i));
+    }
+    return sum;
+}
+
+var numTestcases = null;
+var done = 0;
+
+rl.on("line", function(line) {
+    if (numTestcases === null) {
+        numTestcases = parseInt(line);
+    } else if (done &lt; numTestcases) {
+        var solution = solve(line);
+        process.stdout.write(solution + "\n");
+        done++;
+    }
+});
+    </code></pre>
+
+<h4>Python 2</h4>
+<pre><code class="python">num_testcases = int(raw_input())
+
+for _ in xrange(num_testcases):
+    testcase = raw_input()
+    result = 0
+    for digit in testcase:
+        result += int(digit)
+    print result
+    </code></pre>
+
+<h4>Python 3</h4>
+<pre><code class="python">num_testcases = int(input())
+
+for _ in range(num_testcases):
+    testcase = input()
+    result = 0
+    for digit in testcase:
+        result += int(digit)
+    print(result)
+    </code></pre>
+
+<h4>C</h4>
+<pre><code class="c">#include &lt;stdio.h&gt;
+
+int main(int argv, int** argc) {
+    int num_testcases;
+    fscanf(stdin,"%d\n", &num_testcases);
+
+    for(int i = 0; i &lt; num_testcases; i++) {
+        int sum = 0;
+        int j;
+
+        while((j = fgetc(stdin)) != '\n') {
+            if(j == EOF) return 1;
+            // note: ascii values for '0'-'9' are 48-57
+            sum += j - 48;
+        }
+
+        printf("%d\n", sum);
+    }
+}
+    </code></pre>
+
+<h4>C++</h4>
+<pre><code class="cpp">#include &lt;iostream&gt;
+
+using namespace std;
+
+int main() {
+    int num_testcases;
+    cin &gt;&gt; num_testcases;
+
+    for(int i = 0; i &lt; num_testcases; i++) {
+        string number;
+        cin &gt;&gt; number;
+
+        int sum = 0;
+        for (int j = 0; j &lt; number.size(); j++){
+            // note: ascii values for '0'-'9' are 48-57
+            sum += number[j] - 48;
+        }
+
+        cout &lt;&lt; sum &lt;&lt; endl;
+    }
+}
+    </code></pre>
+
+<h4>Ruby</h4>
+<pre><code class="ruby">num_testcases = gets.to_i
+
+for _ in 1..num_testcases
+    testcase = gets
+    result = 0
+    for i in 0..testcase.length
+        result += testcase[i].to_i
+    end
+    puts result
+end
+    </code></pre>
+
+<h4>Perl</h4>
+<pre><code class="perl">use strict;
+use warnings;
+
+my $num_testcases = &lt;STDIN&gt;;
+
+for (my $i = 0; $i &lt; $num_testcases; $i++) {
+    my $testcase = &lt;STDIN&gt;;
+
+    # remove newline character at the end of $testcase
+    chomp($testcase);
+
+    my $result = 0;
+    for (my $j = 0; $j &lt; length($testcase); $j++) {
+        $result += substr($testcase, $j, 1);
+    }
+    print($result."\n");
+}
+    </code></pre>
+
+<h4>Scala</h4>
+<pre><code class="scala">import scala.io.StdIn
+
+object Solution {
+
+    def main(args: Array[String]): Unit = {
+        val numTestcases = StdIn.readInt()
+
+        for (_ <- 1 to numTestcases) {
+            val testcase = StdIn.readLine()
+            var result = 0
+            for (c <- testcase) {
+                result += c.asDigit
+            }
+            println(result)
+        }
+    }
+
+}
+    </code></pre>
+
+<h4>Haskell</h4>
+<pre><code class="haskell">--
+-- Cross-sum-Problem
+--
+-- Execute with
+--    ghc -e main QSum1.hs
+-- ("-e main" sets the function "main" as entry point).
+--
+-- Or: Compile the program with
+--    ghc -o qsum1 QSum1.hs
+-- and then
+--    ./qsum1
+-- to start the program.
+--
+
+--
+-- Solution for the cross-sum-problem.
+--
+solution :: String -> String
+solution input = output
+    where
+      -- Split the whole input into separate lines
+      -- by using the function lines :: String -> [String].
+      inputLines :: [String]
+      inputLines = lines input
+
+      -- "head inputLines" is the first line of the input (= number
+      -- of cross sum calculations which have to be performed).
+      -- "read" converts the String to a Int.
+      count :: Int
+      count = read (head inputLines)
+
+      -- The numbers for which we need the cross sums follow ("tail inputLines").
+      -- We take the "count" lines and convert them to integers (via "read").
+      numbers :: [Integer]
+      numbers = map read (take count (tail inputLines))
+
+      -- Compute the cross sum for each number.
+      qsums :: [Integer]
+      qsums = map qsum numbers
+
+      -- Convert the calculated cross sums (via "show") into Strings.
+      outputLines :: [String]
+      outputLines = map show qsums
+
+      -- Concatenate the output via "unlines :: [String] -> String"
+      -- unlines adds a newline ("\n") after each string, even after the last string.
+      output :: String
+      output = unlines outputLines
+
+-- Cross sum calculation
+qsum :: Integer -> Integer
+qsum x
+    | x < 10     =  x
+    | otherwise  =  (x `mod` 10) + qsum (x `div` 10)
+
+--
+-- Entry point: "main"
+-- The function "main" has to have the signature "IO ()".
+-- The function "interact :: (String -> String) -> IO ()"
+-- takes as an argument (here: "solution") a function (from String
+-- to String), to which the whole input is given (as String)
+-- and that produces the complete output (also as String).
+--
+main :: IO ()
+main = interact solution
+    </code></pre>
+
+<h4>C#</h4>
+<pre><code class="csharp">using System;
+
+public class Solution {
+
+    public static void Main(string[] args) {
+        int numTc;
+        // Read a line from STDIN
+        string input = Console.ReadLine();
+
+        /*
+        * Parse the number of test cases by providing its textual
+        * representation and the target int variable (the latter as an
+        * output parameter);
+        *
+        * Instead of throwing an exception, int.TryParse returns false if
+        * the given input string is not an integer value.
+        */
+        if (!int.TryParse(input, out numTc) || numTc &lt; 1 || numTc &gt; 1000) {
+            // Write error message to STDERR
+            Console.Error.WriteLine("Malformed testcase count!");
+            return;
+        }
+
+        for (int i = 0; i &lt; numTc; ++i) {
+            string testCase = Console.ReadLine();
+            // Compute result and write to STDOUT
+            int sum = computeSum(testCase);
+            Console.WriteLine(sum);
+        }
+    }
+
+    private static int computeSum(string digitString) {
+        int sum = 0;
+        foreach (char c in digitString) {
+            if (c &gt;= '0' && c &lt;= '9') {
+                sum += c - '0';
+            } else {
+                throw new ArgumentException("Not a digit!");
+            }
+        }
+        return sum;
+    }
+
+}
+    </code></pre>
