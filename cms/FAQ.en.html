@@ -1,0 +1,256 @@
+<h3>General</h3>
+
+<h4>Are only students allowed to participate?</h4>
+<p>No, everybody may participate. It does not matter if student, or not.</p>
+
+<h4>When will the problems be made public?</h4>
+<p>Each problem will be made public at 9:00 am (Passau local time). The first problem starts on 01.12.2017, the last one on 24.12.2017.</p>
+
+<h4>Do I have to solve a problem within 24h?</h4>
+<p>No, all problems can be solved until the end of the year. The time of the submission does not influence your score.</p>
+
+<h4>How will the winner be determined if there is a tie?</h4>
+<p>If there are several participants with the same score in the end, the first three places will be determined by a jury.</p>
+
+<h4>Which criteria does the jury take into account?</h4>
+<p>The jury will focus on these criteria:</p>
+<ul>
+    <li><strong>Code-Style:</strong> Your code should be readable and comprehensible. Meaningful identifiers and a good structure might help!</li>
+    <li><strong>Comments:</strong> Few well-placed comments can help the jury understand your program. However, nobody wants to read page-filling documentation. If you found an especially clever algorithm or solution, you may of course explain it in more detail.</li>
+    <li><strong>Sophistication:</strong> Submissions which are particularly efficient or need very little code always impress the jury! Remember that your code should still be readable.</li>
+</ul>
+<p>If needed, the jury can take other aspects of your submission into account.</p>
+
+<h4>How are points awarded?</h4>
+<p>Depending on the problem, points are awarded either static, or dynamic. Furthermore, there are problems for which criteria additional to passing all testcases must be fullfilled.</p>
+<h5>Static score</h5>
+<p>Each problem has several testcases with which your submission is evaluated. Each testcase values a specific number of points. A problem with four testcases with each 25 points values 100 points in total. If the submission passes three of the testcases, it is awarded with 75 points. The total score of a participant results from the sum of his best submission for each task.</p>
+<h5>Dynamic score</h5>
+<p>Each problem has several testcases with which your submission is evaluated. The problem values up to 100 points depending on the number of solved testcases. The more participants solve the problem, the less points can be achieved.<br />The score is calculated like this:<br /> <br /> Total submissions (one per participant) for the problem: <strong>total</strong><br />Correct submissions (one per participant) for the problem: <strong>solved</strong><br /> The submission factor (between 1 and 0) based on the solved testcases: <strong>sf</strong><br /> Minimum points for a solved problem: 50<br /> Maximum points for a solved problem: 100<br /> Fraction of correct solutions: <strong>sr</strong> = solved / total<br /> Problem factor: <strong>cf</strong> = 50 + (100 - 50) * (1 - sr)<br /> <br /> Then, the score is: <strong>Score</strong> = sf * cf</p>
+<p>&nbsp;</p>
+
+<h4>Will I get points for partially solved problems?</h4>
+<p>Yes, even if you fail some testcases, you will get points for the testcases you passed. The submission with the most points scored counts for your total score.</p>
+
+
+<h3>Program Execution</h3>
+
+<h4>What is the "Compiler Status"?</h4>
+<p>The compiler status is a number returned to the system by the compiler after compiling the program. A value of 0 signals that there were no problems. Other values suggest an error during compilation.</p>
+
+<h4>What is the"Program Status"?</h4>
+<p>The program status is a number returned to the system by the program after finishing execution. A value of 0 signals that the program terminated ordinary.Other values suggest a crash or another error.</p>
+
+<h4>What limitations has my program?</h4>
+<p>Your program has a memory limit of 250Mb and a time limit of 60s per testcase. To ensure a fair competition you should renounce any "creative" submissions as an error in the evaluation system has a negative effect on all participants.</p>
+
+<h4>How long is my program allowed to run?</h4>
+<p>Your program may use up to 60s of runtime per testcase.</p>
+
+<h4>How much memory may my program use?</h4>
+<p>Your program may use up to 250Mb of memory for each testcase.</p>
+
+<h4>How is the input sent to my program?</h4>
+<p>When a testcase is evaluated, your program gets its input from the standart input (STDIN), that is similar to typing the input on the keyboard. After all input data has been sent, the standard input gets closed with an "End Of File" (EOF). Your program has to evaluate the input, calculate a result and finally output the result.</p>
+
+<h4>How should my program output its results?</h4>
+<p>Your program has to evaluate the input, calculate a result and output that result. The output must be sent to the standard output (STDOUT). As a linebreak either \n (newline) or \r\n (carriage return &amp; newline) may be used. Be aware that often a linebreak is needed also after the last line of output!</p>
+
+<h4>How can I implement in-/output in my favourite programming language?</h4>
+<p>We have created several <a href="@org.ieee_passau.controllers.routes.MainController.content(">example programs</a>, which demonstrate in- and output in some popular programming languages.</p>
+
+<h4>What programming languages are supported?</h4>
+<p>The following programming languages can be used: C, Cobol, C++, C#, D, Forth, Fortran, FreePascal, Go, Haskell, Intercal, Java, Javascript, Lua, MMIX, OCaml, Objective-C, Perl, PHP, Python2, Python3, Rust, Scala, TCL, Vala oder VisualBasic .NET<br /> Your submission must consist of one single file. If not stated otherwise, you have only the possibilities provided by the languages' standard library.</p>
+
+<h4>Can you install library X for programming language Y?</h4>
+<p>No! In principle, we only provide the standard library for all languages in order to ensure that each language is about equally useful. To lift all languages to a comparable level by installing libraries would be too difficult: How would you port the functionality of numpy to COBOL, Fortran or TCL? That is why we restrict each language to its standard library. Anyway, where would be the fun if the solution for each problem was simply calling a library function?</p>
+<table class="table">
+    <thead>
+    <tr>
+        <th>Language</th>
+        <th>Compiler, Distribution / Version</th>
+        <th>Remark</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>C</td>
+        <td><a href="https://gcc.gnu.org/">GCC 4.9.3</a></td>
+        <td>Standard: C11, linked against libm</td>
+    </tr>
+    <tr>
+        <td>COBOL</td>
+        <td><a href="http://sourceforge.net/projects/open-cobol/">OpenCOBOL 1.1</a></td>
+        <td>Free Format</td>
+    </tr>
+    <tr>
+        <td>C++</td>
+        <td><a href="https://gcc.gnu.org">GCC 4.9.3</a></td>
+        <td>Standard: C++11, linked against libm</td>
+    </tr>
+    <tr>
+        <td>C#</td>
+        <td><a href="http://www.mono-project.com/">Mono C# compiler version 4.8.0.371</a></td>
+        <td>Mono Project</td>
+    </tr>
+    <tr>
+        <td>D</td>
+        <td><a href="http://dlang.org/">LDC: DMD v2.068.2 and LLVM 3.8.1&lt;</a></td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>Forth</td>
+        <td><a href="https://www.gnu.org/software/gforth/">Gforth 0.7.3</a></td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>Fortran</td>
+        <td><a href="https://gcc.gnu.org/">GCC 4.9.3</a></td>
+        <td>Standard: Fortran 90</td>
+    </tr>
+    <tr>
+        <td>FreePascal</td>
+        <td><a href="http://www.freepascal.org/">fpc 2.4.6</a></td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>Go</td>
+        <td><a href="https://golang.org/">Go 1.7.3</a></td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>Haskell</td>
+        <td><a href="https://www.haskell.org/platform/">The Haskell Platform 2013.2.0.0-r2</a></td>
+        <td>Compiler is ghc Version 7.8.4</td>
+    </tr>
+    <tr>
+        <td>Intercal</td>
+        <td><a href="http://c.intercal.org.uk/">C-INTERCAL 30.0</a></td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>Java</td>
+        <td><a href="http://www.oracle.com/technetwork/java/index.html">Oracle's Java SE Development Kit 1.8.0.112</a></td>
+        <td>Please submit the main-method in the class "Solution" and do not use a package.</td>
+    </tr>
+    <tr>
+        <td>JavaScript</td>
+        <td><a href="https://nodejs.org">Node.js 4.6.1</a></td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>Lua</td>
+        <td><a href="http://www.lua.org/">Lua 5.1.5-r3</a></td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>MMIX</td>
+        <td><a href="http://mmix.cs.hm.edu/">MMIX 20131017</a></td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>OCaml</td>
+        <td><a href="http://ocaml.org/">OCaml 4.02.3</a></td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>Objective C</td>
+        <td><a href="https://gcc.gnu.org/">GCC 4.9.3</a></td>
+        <td>Standard: C99, linked against libm, with <a href="http://www.gnustep.org/resources/documentation/Developer/Base/Reference/Base.html">GNUstep Base 1.24.6-r1</a></td>
+    </tr>
+    <tr>
+        <td>Perl</td>
+        <td><a href="http://www.perl.org/">Perl 5.22.2</a></td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>PHP</td>
+        <td><a href="http://php.net/">PHP 5.6.28-pl0</a></td>
+        <td>Zend Engine v2.6.0, with Zend OPcache v7.0.6-dev</td>
+    </tr>
+    <tr>
+        <td>Python 2</td>
+        <td><a href="https://www.python.org/">Python 2.7.12</a></td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>Python 3</td>
+        <td><a href="https://www.python.org/">Python 3.4.5</a></td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>Ruby</td>
+        <td><a href="https://www.ruby-lang.org">Ruby 2.1.9p490</a></td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>Rust</td>
+        <td><a href="https://www.rust-lang.org/">Rust 1.13.0</a></td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>Scala</td>
+        <td><a href="http://scala-lang.org/">Scala 2.11.8</a></td>
+        <td>Please submit the main-method in the object "Solution" and do not use a packag</td>
+    </tr>
+    <tr>
+        <td>Tool Command Language</td>
+        <td><a href="http://tcl.tk/">TCL 8.5.17</a></td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>Vala</td>
+        <td><a href="https://wiki.gnome.org/Projects/Vala">Vala 0.32.1</a></td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>Visual Basic .Net</td>
+        <td><a href="http://www.mono-project.com/">Mono-Basic 4.8.0.371</a></td>
+        <td>Mono Project</td>
+    </tr>
+    </tbody>
+</table>
+
+
+<h3>Program Evaluation</h3>
+
+<h4>Why aresome testcases marked as "private"?</h4>
+<p>There are several reasons why not all testcases are visible to the public: First, we need to prevent that the solutions are calculated manually and are then hardcoded into the program. Second, the private testcases often check special and cornercases, which are not covered by the public testcases.</p>
+
+<h4>Why does it take so long to evaluate my submission?</h4>
+<p>If many participants submit a solution at once it may take some time to evaluate all tasks. Please be patient if that happens. If you still have no result after 15 minutes you may contact us.</p>
+
+
+<h3>Evaluation Status</h3>
+
+<h4>What does the status "Solution contains errors" mean?</h4>
+<p>Your submission did not pass one or more testcases. Carefully check the list of testcases agaion and rework your solution</p>
+
+<h4>What does the status "Submission is under evaluation..." mean?</h4>
+<p>Your submission is still under evaluation by the system, therefore there is no result available yet. Perhaps some testcases are already completed.</p>
+
+<h4>What does the status "Wrong output" mean?</h4>
+<p>The output of your program does not match the expected result. Before starting debugging, check if you missed a linebreak as this is a very common error.</p>
+
+<h4>What does the status "Teatcase under evaluation"?</h4>
+<p>To completely solve a problem all testcases must be passed. Testcases which are under evaluation are not processed yet. If there still is a testcase under evaluation 15 minutes after your submission, please contact us.</p>
+
+<h4>What does the status "Runtime error in the program" mean?</h4>
+<p>If your program crashes or returns an error message the testcase is considered as failed. You should identify the problem using the error message and fix your program accordingly.</p>
+
+<h4>What does the status "Memory limit exceeded" mean?</h4>
+<p>In this case your program exceeded the allowed memory limit. If this happens, your program is killed immediately as it is not allowed to allocate more memory.</p>
+
+<h4>What does the status "Runtime limit exceeded" mean?</h4>
+<p>If a testcase has this status, your program exceeded the runtime limit and therefore was killed. If you encounter this error you should find a more efficient implementation or algorithm.</p>
+
+<h4>What does the status "Compilation error" mean?</h4>
+<p>Somehow your program could not be processed by the compiler. Please check the compiler output or errors. If you can compile your program with the standard distribution of the used language and you believe that the error is caused by our system, please contact us.</p>
+
+<h4>Why are scripting languages compiled?</h4>
+<p>Everybody knows that scripting languages are not compiled, however we still do it - to be more specific, we parse the program. If this yields an error, this is not considered an erroneous submission but a "compiler error".</p>
+
+
+<h3>I have a problem! / My question wasn't answered!</h3>
+<p>If you have a question or remark regarding a problem you can contact us via the question-form below the problem description. Be aware that we can not always answer questions regarding a problem or its implementation.</p>
+<p>You can also write us an email: <a href="mailto:adventskalender@@ieee.students.uni-passau.de">adventskalender@@ieee.students.uni-passau.de</a>. We are always glad to recieve remarks or bug reports.</p>

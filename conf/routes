@@ -17,7 +17,6 @@ GET         /ranking                                   org.ieee_passau.controlle
 # TODO remvoe when migrated to cms
 GET         /calendar                                  org.ieee_passau.controllers.MainController.calendar
 GET         /contact                                   org.ieee_passau.controllers.MainController.contact
-GET         /faq                                       org.ieee_passau.controllers.MainController.faq
 GET         /examples                                  org.ieee_passau.controllers.MainController.examples
 GET         /rules                                     org.ieee_passau.controllers.MainController.rules
 GET         /$page<(contact|faq|examples|rules|news|calendar)> org.ieee_passau.controllers.MainController.content(page)
