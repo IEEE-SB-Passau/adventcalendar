@@ -133,7 +133,7 @@ class VMClient(host: String, port: Int, name:String)
         val resultXml = Await.result((connection ? data) (timeout).mapTo[Elem], timeout.duration)
         log.debug("%s successfully deployed sourcecode for %s".format(this, job))
 
-        if (!(resultXml \\ "successful").text.toBoolean) throw new RuntimeException("Received no valid result from eval.")
+        if (!(resultXml \\ "successful").text.toBoolean) throw new RuntimeException("Received no valid result from eval. " + (resultXml \\ "reason").text + "\n" + (resultXml \\ "message").text)
 
         // Compile result
         compilerResult.exitCode = if ((resultXml \\ "outputs" \ "compilation" \ "returnCode").text.isEmpty) None
@@ -336,6 +336,8 @@ class TCPActor(host: String, port: Int) extends EvaluationActor {
                 <ieee-advent-calendar>
                   <run>
                     <successful>False</successful>
+                    <reason>{e.getMessage}</reason>
+                    <message>{e.getStackTrace}</message>
                   </run>
                 </ieee-advent-calendar>
               sender ! error
