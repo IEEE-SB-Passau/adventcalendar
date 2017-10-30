@@ -16,7 +16,6 @@ POST        /problem/:door/question                    org.ieee_passau.controlle
 GET         /ranking                                   org.ieee_passau.controllers.MainController.ranking
 # TODO remvoe when migrated to cms
 GET         /calendar                                  org.ieee_passau.controllers.MainController.calendar
-GET         /contact                                   org.ieee_passau.controllers.MainController.contact
 GET         /examples                                  org.ieee_passau.controllers.MainController.examples
 GET         /$page<(contact|faq|examples|rules|news|calendar)> org.ieee_passau.controllers.MainController.content(page)
 GET         /feedback                                  org.ieee_passau.controllers.MainController.feedback
