@@ -55,10 +55,11 @@ object TicketController extends Controller with PermissionCheck {
       },
       ticket => {
         val problem = Problems.byDoor(door).first
+        val language = request2lang
         val id = (Tickets returning Tickets.map(_.id)) +=
-          Ticket(None, problem.id, sessionUser.get.id, None, ticket.text, public = false, now)
+          Ticket(None, problem.id, sessionUser.get.id, None, ticket.text, public = false, now, language)
 
-        //TODO i18n
+        //TODO i18n with 'language'
         val email = Email(
           subject = "Adventskalender Frage zu Aufgabe " + problem.door + " " + problem.title,
           from = sessionUser.get.username + " @ Adventskalender <adventskalender@ieee.students.uni-passau.de>",
@@ -88,11 +89,11 @@ object TicketController extends Controller with PermissionCheck {
           val recipient = Users.byId(parent.get.userId.get).firstOption
           if (problem.isDefined && recipient.isDefined) {
 
-            Tickets += Ticket(None, parent.get.problemId, sessionUser.get.id, Some(id), ticket.text, public = ticket.public, now)
+            Tickets += Ticket(None, parent.get.problemId, sessionUser.get.id, Some(id), ticket.text, public = ticket.public, now, parent.get.language)
             val updated = parent.get.copy(public = ticket.public)
             Tickets.update(id, updated)
 
-            //TODO i18n
+            //TODO i18n with 'parent.get.language'
             val email = Email(
               subject = "Adventskalender Antwort auf die Frage zu Aufgabe " + problem.get.door + " " + problem.get.title,
               from = sessionUser.get.username + " @ Adventskalender <adventskalender@ieee.students.uni-passau.de>",

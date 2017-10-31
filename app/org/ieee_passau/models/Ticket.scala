@@ -2,12 +2,14 @@ package org.ieee_passau.models
 
 import java.util.Date
 
+import org.ieee_passau.utils.LanguageHelper
 import play.api.db.slick.Config.driver.simple._
+import play.api.i18n.Lang
 
 import scala.slick.lifted.{CompiledFunction, ProvenShape}
 
 case class Ticket(id: Option[Int], problemId: Option[Int], userId: Option[Int], responseTo: Option[Int], text: String,
-                  public: Boolean, created: Date) extends Entity[Ticket] {
+                  public: Boolean, created: Date, language: Lang) extends Entity[Ticket] {
   override def withId(id: Int): Ticket = this.copy(id = Some(id))
 }
 
@@ -18,8 +20,9 @@ class Tickets(tag: Tag) extends TableWithId[Ticket](tag, "tickets") {
   def text: Column[String] = column[String]("ticket_text")
   def public: Column[Boolean] = column[Boolean]("is_public")
   def created: Column[Date] = column[Date]("created")
+  def language: Column[Lang] = column[Lang]("lang")(LanguageHelper.LangTypeMapper)
 
-  override def * : ProvenShape[Ticket] = (id.?, problemId.?, userId.?, responseTo.?, text, public, created) <> (Ticket.tupled, Ticket.unapply)
+  override def * : ProvenShape[Ticket] = (id.?, problemId.?, userId.?, responseTo.?, text, public, created, language) <> (Ticket.tupled, Ticket.unapply)
 }
 
 object Tickets extends TableQuery(new Tickets(_)) {
