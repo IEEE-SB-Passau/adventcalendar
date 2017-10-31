@@ -7,6 +7,7 @@
 @import play.api.mvc.{Flash, RequestHeader}
 @(feedback: Form[Feedback])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
+@* TODO i18n *@
 @main("Feedback") {
     @form(org.ieee_passau.controllers.routes.MainController.submitFeedback, 'class -> "form-horizontal") {
         @CSRF.formField

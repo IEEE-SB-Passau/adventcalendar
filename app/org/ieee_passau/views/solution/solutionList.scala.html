@@ -4,6 +4,7 @@
 @(solutions: List[SolutionListEntry], languages: List[Language], showAll: Boolean = false)(implicit lang: Lang)
 @* showPrivate shows also private testcases *@
 
+@* TODO i18n *@
 @solutions.map { s =>
     <div id="@s.solution.id" data-state="@s.state">
         <div class="panel @if(s.state == Passed) { panel-success } @if(s.state == Queued) { panel-info }

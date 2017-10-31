@@ -7,7 +7,7 @@
 @import play.api.mvc.{Flash, RequestHeader}
 @(pid: Int, testcases: List[Testcase], evalTasks: List[EvalTask], translations: List[ProblemTranslation], problem: Form[Problem], evalModes: List[EvalMode])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
-@main("Edit problem") {
+@main(Messages("problem.edit")) {
 
     <ol class="breadcrumb">
         <li><a href="@routes.ProblemController.index">@Messages("general.listoverview")</a></li>

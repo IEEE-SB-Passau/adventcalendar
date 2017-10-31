@@ -4,7 +4,7 @@
 @import views.html.helper.CSRF
 @(door: Int, languages: List[Language], lastLanguage: String)(implicit requestHeader: RequestHeader, lang: Lang)
 
-
+@* TODO i18n *@
 <form id="submissionForm" action="#" method="post" enctype="multipart/form-data" class="form-horizontal">
     @CSRF.formField
     <fieldset>

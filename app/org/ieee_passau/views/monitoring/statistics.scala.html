@@ -4,6 +4,7 @@
 @import play.api.mvc.Flash
 @(numJobs1H: Int, vms1H: List[(String, Int)], langs1H: List[(String, Int)], numJobsFull: Int, vmsFull: List[(String, Int)], langsFull: List[(String, Int)])(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 
+@* TODO i18n *@
 @main("Statistik") {
     <div class="row"><div class="col-sm-12"><h3>Letzte Stunde</h3></div></div>
     <div class="row"><div class="col-sm-6">

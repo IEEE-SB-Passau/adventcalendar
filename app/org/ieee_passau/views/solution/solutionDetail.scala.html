@@ -5,6 +5,7 @@
 @import play.api.mvc.Flash
 @(s: SolutionListEntry, languages: List[Language], user: User, problem: Problem)(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 
+@* TODO i18n *@
 @main("Abgabe " + s.solution.id.get) {
     <div class="well">
         <p><label class="col-sm-2 control-label">Benutzer</label>

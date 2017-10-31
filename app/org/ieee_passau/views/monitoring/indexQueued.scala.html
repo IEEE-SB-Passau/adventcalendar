@@ -7,6 +7,7 @@
 @import play.api.mvc.{Flash, RequestHeader}
 @(list: List[(Int, Int, Int, Int, String, String, Int, String, Date, Option[Date])])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
+@* TODO i18n *@
 @main("Queued") {
     <table class="table table-striped">
         <thead>

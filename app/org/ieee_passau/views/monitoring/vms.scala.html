@@ -5,6 +5,7 @@
 @import play.api.mvc.Flash
 @(running: Boolean, vms: List[(String, Int, VMStatus)])(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 
+@* TODO i18n *@
 @main("Evaluation VMs") {
     @if(!running) {
         <div class="well alert-danger">

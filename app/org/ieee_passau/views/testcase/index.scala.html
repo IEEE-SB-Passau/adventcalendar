@@ -20,7 +20,7 @@
                 <td>@testcase.id</td>
                 <td>@testcase.position</td>
                 <td>@testcase.points</td>
-                <td>@testcase.visibility.scope</td>
+                <td>@Messages(testcase.visibility.scope.toLowerCase)</td>
                 <td>
                     <a href="@org.ieee_passau.controllers.routes.TestcaseController.edit(pid, testcase.id.get)" class="btn btn-default">
                         <span class="glyphicon glyphicon-pencil"></span>
