@@ -1,6 +1,6 @@
 @import helper._
 @import org.ieee_passau.models.{Posting, User}
-@import org.ieee_passau.views.html.bootstrap3.{buttonSave, text, textareaBs}
+@import org.ieee_passau.views.html.bootstrap3.{buttonSave, fileloader, text, textareaBs}
 @import org.ieee_passau.views.html.main
 @import play.api.data.Form
 @import play.api.i18n.{Lang, Messages}
@@ -34,6 +34,7 @@
                     </div>
                 </div>
                 @textareaBs(post("content"),  label = Messages("posting.post.content"), placeholder = Messages("posting.post.content"), wysiwyg = true)
+                @fileloader("content")
 
                 @buttonSave()
             </fieldset>
