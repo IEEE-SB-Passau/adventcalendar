@@ -29,9 +29,9 @@ object Page extends Enumeration {
 
   def byId(id: Int): Page = values.filter(_.id == id).head
 
-  val news = Value(1, "news")
+  val status = Value(1, "status")
   val calendar = Value(2, "calendar")
-  val status = Value(3, "status")
+  val news = Value(3, "news")
   val faq = Value(4, "faq")
   val rules = Value(5, "rules")
   val examples = Value(6, "examples")

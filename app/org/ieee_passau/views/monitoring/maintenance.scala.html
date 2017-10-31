@@ -47,7 +47,7 @@
             </tr>
         </thead>
         <tbody>
-        @postings.map { case (id, list) =>
+        @postings.toList.sortBy(_._1).map { case (id, list) =>
             <tr>
                 <td>
                     @Messages(list.head.title)
