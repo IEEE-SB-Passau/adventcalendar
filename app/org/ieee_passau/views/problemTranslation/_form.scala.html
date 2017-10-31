@@ -7,11 +7,33 @@
 
 <fieldset>
     <input type="hidden" name="problemId" value="@pid" />
-    @text(trans("language"), label = Messages("general.language"), placeholder = "de")
-    @* TODO error handling for duplicate languages *@
+    <div class="form-group @if(trans.errors.nonEmpty) {
+            @trans.errors.map { e => @if(e.key == "duplicate_translation") { has-error } }
+        }">
+        <label for="visibility" class="col-sm-2 control-label">@Messages("general.language")</label>
+        <div class="col-sm-10">
+            <select id="language" size="1" name="language" class="col-sm-10 form-control">
+            @LanguageHelper.langs.map { l =>
+                <option value="@l.code"
+                    @{if(Lang.get(trans("language").value.getOrElse("")).isDefined && Lang(trans("language").value.get) == l) "selected"}
+                >@Messages("language.name")(l)</option>
+            }
+            </select>
+            <span class="help-block">
+            @if(trans.errors.nonEmpty) {
+                @trans.errors.map { e => @if(e.key == "duplicate_translation") { @e.message }}
+            }
+            </span>
+        </div>
+    </div>
+
     @text(trans("title"), label = Messages("problem.name"), placeholder = Messages("problem.name"))
-    @textareaBs(trans("description"), label = Messages("problem.description.lang",
-        Messages("language.name")(trans("language").value.fold(LanguageHelper.defaultLanguage)(c => Lang(c)))),
+    @textareaBs(trans("description"),
+        label = Messages("problem.description.lang",
+            if(trans("language").value.isDefined)
+                Messages("language.name")(trans("language").value.fold(LanguageHelper.defaultLanguage)(c => Lang(c)))
+            else Messages("general.language")
+        ),
         placeholder = Messages("problem.description"), wysiwyg = true)
     @fileloader("description")
 

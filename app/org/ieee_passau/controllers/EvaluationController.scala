@@ -197,6 +197,12 @@ object EvaluationController extends Controller with PermissionCheck {
     )
   }}
 
+  def createPage(id: Int): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+    implicit val sessionUser = Some(admin)
+    val title = Postings.byId(id, LanguageHelper.defaultLanguage).head.title
+    Ok(org.ieee_passau.views.html.monitoring.pageEditor(id, "", MaintenanceForms.postingForm, title))
+  }}
+
   def editPage(id: Int, lang: String): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
 
@@ -207,6 +213,25 @@ object EvaluationController extends Controller with PermissionCheck {
       Postings += post
       Ok(org.ieee_passau.views.html.monitoring.pageEditor(id, lang, MaintenanceForms.postingForm.fill(post)))
     }
+  }}
+
+  def addPage(id: Int): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+    implicit val sessionUser = Some(admin)
+
+    MaintenanceForms.postingForm.bindFromRequest.fold(
+      errorForm => {
+        BadRequest(org.ieee_passau.views.html.monitoring.pageEditor(id, "", errorForm))
+      },
+      posting => {
+        if (Postings.byIdLang(id, posting.lang.code).firstOption.isDefined) {
+          BadRequest(org.ieee_passau.views.html.monitoring.pageEditor(id, "", MaintenanceForms.postingForm.fill(posting)))
+        } else {
+          Postings += posting
+          Redirect(org.ieee_passau.controllers.routes.EvaluationController.maintenance())
+            .flashing("success" -> play.api.i18n.Messages("posting.update.message"))
+        }
+      }
+    )
   }}
 
   def changePage(id: Int, lang: String): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>

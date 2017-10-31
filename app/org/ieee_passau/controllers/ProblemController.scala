@@ -1,6 +1,7 @@
 package org.ieee_passau.controllers
 
 import org.ieee_passau.controllers.Beans.UpdateRankingM
+import org.ieee_passau.controllers.EvaluationController.Redirect
 import org.ieee_passau.forms.ProblemForms
 import org.ieee_passau.models._
 import org.ieee_passau.utils.PermissionCheck
@@ -90,9 +91,14 @@ object ProblemController extends Controller with PermissionCheck {
       },
 
       newTrans => {
-        ProblemTranslations += newTrans
-        Redirect(org.ieee_passau.controllers.routes.ProblemController.edit(newTrans.problemId))
-          .flashing("success" -> Messages("problem.translation.create.message", newTrans.title, newTrans.language.code))
+        if (ProblemTranslations.byProblemLang(problemId, newTrans.language).firstOption.isDefined) {
+          BadRequest(org.ieee_passau.views.html.problemTranslation.insert(problemId,
+            ProblemForms.problemTranslationForm.fill(newTrans).withError("duplicate_translation", Messages("problem.translation.create.error.exists"))))
+        } else {
+          ProblemTranslations += newTrans
+          Redirect(org.ieee_passau.controllers.routes.ProblemController.edit(newTrans.problemId))
+            .flashing("success" -> Messages("problem.translation.create.message", newTrans.title, newTrans.language.code))
+        }
       }
     )
   }}

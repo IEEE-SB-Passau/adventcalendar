@@ -3,6 +3,7 @@
 @import org.ieee_passau.views.html.bootstrap3.{buttonSave, fileloader, text, textareaBs}
 @import play.api.data.Form
 @import play.api.i18n.{Lang, Messages}
+@import org.ieee_passau.utils.ViewHelper
 @(problem: Form[Problem], evalModes: List[EvalMode])(implicit lang: Lang)
 
 <fieldset>
@@ -10,48 +11,34 @@
         <input type="hidden" name="id" value="@problem.value.get.id.get" />
     }
     @text(problem("title"), label = Messages("problem.name"), placeholder = Messages("problem.name"))
-    @* TODO i18n door error *@
     <div class="form-group @if(problem.errors.nonEmpty) {
-        @problem.errors.map { e => @if(e.message.contains("Tür")) { has-error } }
-    }">
+        @problem.errors.map { e => @if(e.message == "problem.create.error.door") { has-error } }
+    } @if(problem("door").hasErrors) { has-error }">
         <label class="col-sm-2 control-label">@Messages("problem.door")</label>
         <div class="col-sm-10">
             <input type="text" class="form-control" id="door" name="door" value="@problem("door").value.getOrElse("")" placeholder="@Messages("problem.door")"/>
             <span class="help-block">
                 @if(problem.errors.nonEmpty) {
-                    @problem.errors.map { e => @if(e.messages.head.contains("Tür")) { @e.messages.head }}
+                    @problem.errors.map { e => @if(e.messages.head == "problem.create.error.door") { @Messages(e.messages.head, Messages("problem.readablestop"), Messages("problem.readablestart")) }}
                 }
             </span>
+            <span class="help-block">@{ problem("door").error.map { error => Messages(error.message) }}</span>
         </div>
     </div>
     @textareaBs(problem("description"), label = Messages("problem.description.lang", Messages("language.name")(LanguageHelper.defaultLanguage)), placeholder =  Messages("problem.description"), wysiwyg = true)
     @fileloader("description")
 
-    @dateManualError(problem("readableStart"), label =  Messages("problem.readabblestart"), placeholder = "01.12.2013")
-    @* TODO i18n error *@
+    @dateManualError(problem("readableStart"), label =  Messages("problem.readablestart"), placeholder = "01.12.2013")
     @{
-        var hasError = false
-        var errorMsg = ""
-        if(problem.errors.nonEmpty) {
-            problem.errors.foreach { e => if(e.messages.head.contains("Sichtbar")) {
-                hasError = true
-                errorMsg = e.messages.head
-            }}
-        }
-        dateManualError(problem("readableStop"), label =  Messages("problem.readabblestop"), placeholder = "01.12.2013", hasError = hasError, errorMsg = errorMsg)
+        val (hasError, error) = ViewHelper.checkAmbiguesKey("vis", problem)
+        dateManualError(problem("readableStop"), label =  Messages("problem.readablestop"), placeholder = "01.12.2013",
+            hasError = hasError, errorMsg = Messages(error, Messages("problem.readablestop"), Messages("problem.readablestart")))
     }
     @dateManualError(problem("solvableStart"), label = Messages("problem.solvablestart"), placeholder = "01.12.2013")
-    @* TODO i18n error *@
     @{
-        var hasError = false
-        var errorMsg = ""
-        if(problem.errors.nonEmpty) {
-            problem.errors.foreach { e => if(e.messages.head.contains("Lösbar")) {
-                hasError = true
-                errorMsg = e.message
-            }}
-        }
-        dateManualError(problem("solvableStop"), label =  Messages("problem.solvablestop"), placeholder = "01.12.2013", hasError = hasError, errorMsg = errorMsg)
+        val (hasError, error) = ViewHelper.checkAmbiguesKey("vis", problem)
+        dateManualError(problem("solvableStop"), label =  Messages("problem.solvablestop"), placeholder = "01.12.2013",
+            hasError = hasError, errorMsg = Messages(error, Messages("problem.solvablestop"), Messages("problem.solvablestart")))
     }
 
     <div class="form-group">

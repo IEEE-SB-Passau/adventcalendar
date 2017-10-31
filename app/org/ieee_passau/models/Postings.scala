@@ -48,7 +48,11 @@ object Postings extends TableQuery(new Postings(_)) {
       ).list.sortBy(_._2 /*lang*/)(LanguageHelper.ordering(preferredLang))
       .map(p => Posting.tupled(p))
   }
-  def byIdLang(id: Int, lang: String): Query[Postings, Posting, Seq] = this.filter(p => p.id === id && p.lang === Lang(lang))
+  def byIdLang(id: Int, lang: String): Query[Postings, Posting, Seq] = {
+    val lng = Lang.get(lang)
+    if(lng.isDefined) this.filter(p => p.id === id && p.lang === lng.get)
+    else Query.empty.asInstanceOf[Query[Postings, Posting, Seq]]
+  }
 
   def list(preferredLang: Lang): Map[Int, List[Posting]] = DB.withSession { implicit session: Session =>
     (for {

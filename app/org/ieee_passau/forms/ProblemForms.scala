@@ -23,10 +23,10 @@ object ProblemForms {
       Problem(if (id.isDefined) Some(id.get.toInt) else None, title, door, description, readableStart, readableStop, solvableStart, solvableStop, EvalMode(evalMode)))
     ((p: Problem) => Some(Some(p.id.toString), p.title, p.door, p.description, p.readableStart, p.readableStop, p.solvableStart, p.solvableStop, p.evalMode.mode))
 
-      verifying(Messages("problem.create.error.door"), p =>
+      verifying("problem.create.error.door", p =>
           if (p.id.isDefined) Problems.doorAvailable(p.door, p.id.get) else Problems.doorAvailable(p.door))
-      verifying(Messages("error.date.reverse", Messages("problem.readablestop"), Messages("problem.readablestart")), p => p.readableStart.compareTo(p.readableStop) < 0)
-      verifying(Messages("error.date.reverse", Messages("problem.solvablestop"), Messages("problem.solvablestart")), p => p.solvableStart.compareTo(p.solvableStop) < 0)
+      verifying("viserror.date.reverse", p => p.readableStart.compareTo(p.readableStop) < 0)
+      verifying("sloverror.date.reverse", p => p.solvableStart.compareTo(p.solvableStop) < 0)
   )
 
   val problemTranslationForm = Form(

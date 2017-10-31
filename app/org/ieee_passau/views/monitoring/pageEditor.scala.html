@@ -1,11 +1,12 @@
 @import helper._
 @import org.ieee_passau.models.{Posting, User}
+@import org.ieee_passau.utils.LanguageHelper
 @import org.ieee_passau.views.html.bootstrap3.{buttonSave, fileloader, text, textareaBs}
 @import org.ieee_passau.views.html.main
 @import play.api.data.Form
 @import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.{Flash, RequestHeader}
-@(id: Int, lng: String, post: Form[Posting])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
+@(id: Int, lng: String, post: Form[Posting], title: String = "")(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main(Messages("nav.admin.postings")) {
     <ol class="breadcrumb">
@@ -14,22 +15,39 @@
     </ol>
 
     <div class="well">
-        <form class="form-horizontal" method="POST" action="@org.ieee_passau.controllers.routes.EvaluationController.changePage(id, lng)">
+        <form class="form-horizontal" method="POST" action="@if(lng.isEmpty) {
+            @org.ieee_passau.controllers.routes.EvaluationController.addPage(id) } else {
+            @org.ieee_passau.controllers.routes.EvaluationController.changePage(id, lng)}">
             <fieldset>
                 @CSRF.formField
                 <input type="hidden" name="id" value="@id" />
 
-                @text(post("lang"), label = Messages("general.language"), placeholder="en")
+                <div class="form-group">
+                    <label for="visibility" class="col-sm-2 control-label">@Messages("general.language")</label>
+                    <div class="col-sm-10">
+                        <select id="lang" size="1" name="lang" class="col-sm-10 form-control">
+                        @LanguageHelper.langs.map { l =>
+                            <option value="@l.code"
+                                @{if(Lang.get(lng).isDefined && Lang(lng) == l) "selected"}
+                            >@Messages("language.name")(l)</option>
+                        }
+                        </select>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label class="col-sm-2 control-label">@Messages("posting.post.title")</label>
                     <div class="col-sm-10">
                         <input type="text"
-                        class="form-control"
-                        id="title"
-                        name="title"
-                        value="@Messages(post("title").value.getOrElse(""))(Lang(post("lang").value.get))"
-                        disabled/>
+                               class="form-control"
+                               id="title"
+                               name="title"
+                               value="@if(post("lang").value.isDefined) {
+                                        @Messages(post("title").value.getOrElse(""))(Lang(post("lang").value.get))
+                                      } else { @title }"
+                               disabled/>
                         <input type="hidden" name="title" value="@post("title").value.getOrElse("")" />
+
                         <span class="help-block"></span>
                     </div>
                 </div>

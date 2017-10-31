@@ -2,6 +2,7 @@ package org.ieee_passau.utils
 
 import org.ieee_passau.models.{User, Users}
 import play.api.Play.current
+import play.api.data.Form
 import play.api.db.slick.Config.driver.simple._
 import play.api.db.slick._
 
@@ -34,5 +35,17 @@ object ViewHelper {
     } else {
       <span class="glyphicon glyphicon-remove"></span>
     }
+  }
+
+  def checkAmbiguesKey(prefix: String, form: Form[_]): (Boolean, String) = {
+    var hasError = false
+    var error = ""
+    if(form.errors.nonEmpty) {
+      form.errors.foreach { e => if(e.messages.head.contains(prefix)) {
+        hasError = true
+        error = e.message.substring(prefix.length)
+      }}
+    }
+    (hasError, error)
   }
 }

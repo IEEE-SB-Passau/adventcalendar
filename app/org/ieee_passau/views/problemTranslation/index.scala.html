@@ -15,7 +15,7 @@
     <tbody>
         @translations.map { trans =>
             <tr>
-                <td>@trans.language.code</td>
+                <td>@Messages("language.name")(trans.language)</td>
                 <td>@trans.title</td>
                 <td>
                     <a href="@org.ieee_passau.controllers.routes.ProblemController.editTranslation(pid, trans.language.code)" class="btn btn-default">

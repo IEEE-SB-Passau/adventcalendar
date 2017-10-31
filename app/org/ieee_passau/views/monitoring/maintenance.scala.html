@@ -58,13 +58,18 @@
                         <span class="glyphicon glyphicon-pencil"></span>
                     </a>
                 </td>
-                <td>@list.filter(!_.lang.equals(LanguageHelper.defaultLanguage)).map { p =>
+                <td>
+                    @list.filter(!_.lang.equals(LanguageHelper.defaultLanguage)).map { p =>
                     @Messages("language.icon")(p.lang)
                     <a href="@org.ieee_passau.controllers.routes.EvaluationController.editPage(id, p.lang.code)" class="btn btn-default">
                         <span class="glyphicon glyphicon-pencil"></span>
                     </a>
+                    }
 
-                }</td>
+                    <a href="@org.ieee_passau.controllers.routes.EvaluationController.createPage(id)" class="btn btn-default">
+                        <span class="glyphicon glyphicon-plus"></span>
+                    </a>
+                </td>
             </tr>
         }
         </tbody>
