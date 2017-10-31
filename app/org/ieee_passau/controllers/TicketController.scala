@@ -3,7 +3,7 @@ package org.ieee_passau.controllers
 import java.util.Date
 
 import org.ieee_passau.forms.ProblemForms
-import org.ieee_passau.models.{Problems, Ticket, Tickets, Users}
+import org.ieee_passau.models._
 import org.ieee_passau.utils.PermissionCheck
 import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
@@ -54,22 +54,29 @@ object TicketController extends Controller with PermissionCheck {
           .flashing("danger" -> Messages("ticket.create.error"))
       },
       ticket => {
-        val problem = Problems.byDoor(door).first
+        val problem = Problems.byDoor(door).firstOption
         val language = request2lang
-        val id = (Tickets returning Tickets.map(_.id)) +=
-          Ticket(None, problem.id, sessionUser.get.id, None, ticket.text, public = false, now, language)
+        if (problem.isDefined) {
 
-        //TODO i18n with 'language'
-        val email = Email(
-          subject = "Adventskalender Frage zu Aufgabe " + problem.door + " " + problem.title,
-          from = sessionUser.get.username + " @ Adventskalender <adventskalender@ieee.students.uni-passau.de>",
-          to = List("adventskalender@ieee.students.uni-passau.de"),
-          bodyText = Some(ticket.text + "\n\n" + "Antworten: \n" + org.ieee_passau.controllers.routes.TicketController.view(id).absoluteURL(play.Configuration.root().getBoolean("application.https", false)))
-        )
-        MailerPlugin.send(email)
+          val problemTitle = ProblemTranslations.byProblemLang(problem.get.id.get, language).firstOption.fold(problem.get.title)(_.title)
 
-        Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
-          .flashing("success" -> Messages("ticket.create.message"))
+          val id = (Tickets returning Tickets.map(_.id)) +=
+            Ticket(None, problem.get.id, sessionUser.get.id, None, ticket.text, public = false, now, language)
+
+          val email = Email(
+            subject = Messages("email.ticket.subject", Messages("ticket.title")(language) + " zu " + Messages("problem.title")(language) + " " + problem.get.door + ": " + problemTitle)(language),
+            from = sessionUser.get.username + " @ " + play.Configuration.root().getString("email.from"),
+            to = List(play.Configuration.root().getString("email.from")),
+            bodyText = Some(ticket.text + "\n\n" + Messages("ticket.answer")(language) + ": " + org.ieee_passau.controllers.routes.TicketController.view(id).absoluteURL(play.Configuration.root().getBoolean("application.https", false)))
+          )
+          MailerPlugin.send(email)
+
+          Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
+            .flashing("success" -> Messages("ticket.create.message"))
+        } else {
+          Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
+            .flashing("danger" -> Messages("ticket.create.error"))
+        }
       }
     )
   }}
@@ -93,12 +100,13 @@ object TicketController extends Controller with PermissionCheck {
             val updated = parent.get.copy(public = ticket.public)
             Tickets.update(id, updated)
 
-            //TODO i18n with 'parent.get.language'
+            val msgLang = parent.get.language
+            val problemTitle = ProblemTranslations.byProblemLang(problem.get.id.get, msgLang).firstOption.fold(problem.get.title)(_.title)
             val email = Email(
-              subject = "Adventskalender Antwort auf die Frage zu Aufgabe " + problem.get.door + " " + problem.get.title,
-              from = sessionUser.get.username + " @ Adventskalender <adventskalender@ieee.students.uni-passau.de>",
+              subject = Messages("email.answer.subject", Messages("ticket.title")(msgLang) +  " zu " + Messages("problem.title")(msgLang) + " " + problem.get.door + ": " + problemTitle)(msgLang),
+              from = sessionUser.get.username + " @ " + play.Configuration.root().getString("email.from"),
               to = List(recipient.get.email),
-              cc = List("adventskalender@ieee.students.uni-passau.de"),
+              cc = List(play.Configuration.root().getString("email.from")),
               bodyText = Some(ticket.text)
             )
             MailerPlugin.send(email)

@@ -99,14 +99,11 @@ object UserController extends Controller with PermissionCheck {
         val createdUser: User = registration.makeUser
         val link = org.ieee_passau.controllers.routes.UserController.activate(createdUser.activationToken.get)
           .absoluteURL(secure = play.Configuration.root().getBoolean("application.https", false))
-        // TODO i18n
         val regMail = Email(
-          "IEEE Adventskalender Registrierung",
-          "IEEE Adventskalender <adventskalender@ieee.students.uni-passau.de>",
-          List(createdUser.email),
-          Some("Hallo " + createdUser.username +
-            ",\n\nKlicke bitte folgenden Link um deinen Accout beim IEEE Adventskalender zu aktivieren:\n" +
-            link + "\n\nViel Spaß beim Mitmachen,\nDas Adventskalender-Team")
+          subject = Messages("email.register.subject"),
+          from = play.Configuration.root().getString("email.from"),
+          to = List(createdUser.email),
+          bodyText = Some(Messages("email.register.body", createdUser.username, link))
         )
         MailerPlugin.send(regMail)
         Users += createdUser
@@ -146,18 +143,15 @@ object UserController extends Controller with PermissionCheck {
       },
 
       username => {
-        //TODO i18n
         val user = Users.byUsername(username).first
         val token = PasswordHasher.generateUrlString()
         val link = org.ieee_passau.controllers.routes.UserController.editPassword(token)
           .absoluteURL(secure = play.Configuration.root().getBoolean("application.https", false))
         val regMail = Email(
-          "IEEE Adventskalender Benutzerservice",
-          "IEEE Adventskalender <adventskalender@ieee.students.uni-passau.de>",
-          List(user.email),
-          Some("Hallo " + user.username +
-            ",\n\nKlicke bitte folgenden Link um deinen Passowort beim IEEE Adventskalender zu zurückzusetzen:\n" +
-            link + "\n\nWeiterhin viel Spaß beim Mitmachen,\nDas Adventskalender-Team")
+          subject = Messages("email.passwordreset.subject"),
+          from = play.Configuration.root().getString("email.from"),
+          to = List(user.email),
+          bodyText = Some(Messages("email.passwordreset.body"))
         )
         MailerPlugin.send(regMail)
         Users.update(user.id.get, user.copy(activationToken = Some(token)))
