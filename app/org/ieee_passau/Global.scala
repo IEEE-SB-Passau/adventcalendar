@@ -19,13 +19,13 @@ object Global extends WithFilters(CSRFFilter(errorHandler = new CSRFFilterError(
 
   override def onHandlerNotFound(request: RequestHeader): Future[Result] = {
     implicit val sessionUser = getUserFromSession(request.session)
-    implicit val flash = Flash.emptyCookie
+    implicit val rs = request
     Future.successful(NotFound(views.html.errors.e404()))
   }
 
   override def onError(request: RequestHeader, ex: Throwable): Future[Result] = {
     implicit val sessionUser = getUserFromSession(request.session)
-    implicit val flash = Flash.emptyCookie
+    implicit val rs = request
     val id = ex match {
       case pex: PlayException =>
         Some(pex.id)
@@ -58,7 +58,7 @@ object Global extends WithFilters(CSRFFilter(errorHandler = new CSRFFilterError(
 
   override def onBadRequest(request: RequestHeader, error: String): Future[Result] = {
     implicit val sessionUser = getUserFromSession(request.session)
-    implicit val flash = Flash.emptyCookie
+    implicit val rs = request
 
     Future.successful(InternalServerError(views.html.errors.e404()))
   }
