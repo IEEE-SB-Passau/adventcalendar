@@ -52,26 +52,6 @@ object MainController extends Controller with PermissionCheck {
     ranking.map(list => Ok(org.ieee_passau.views.html.general.ranking(list)))
   }
 
-  def contact = Action { implicit rs =>
-    implicit val sessionUser = getUserFromSession(request2session)
-    Ok(org.ieee_passau.views.html.static.contact())
-  }
-
-  def faq = Action { implicit rs =>
-    implicit val sessionUser = getUserFromSession(request2session)
-    Ok(org.ieee_passau.views.html.static.faq())
-  }
-
-  def examples = Action { implicit rs =>
-    implicit val sessionUser = getUserFromSession(request2session)
-    Ok(org.ieee_passau.views.html.static.examples())
-  }
-
-  def rules = Action { implicit rs =>
-    implicit val sessionUser = getUserFromSession(request2session)
-    Ok(org.ieee_passau.views.html.static.rules())
-  }
-
   def calendar = DBAction { implicit rs =>
     implicit val sessionUser = getUserFromSession(request2session)
     val displayLang = request2lang
