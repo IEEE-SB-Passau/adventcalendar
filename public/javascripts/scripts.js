@@ -24,6 +24,7 @@ $(document).ready(function() {
 //Enable TinyMCE on all textareas with class 'wysiwyg'
 // tinymce.init({selector:'textarea.wysiwyg', plugins: 'code link', browser_spellcheck: true, convert_urls: false});
 
+// Enable summernote on all textareas with class 'wysiwyg'
 $(document).ready(function() {
     $('textarea.wysiwyg').summernote();
 });
@@ -36,10 +37,17 @@ function loadFileAsText(input, textarea) {
     fileReader.onload = function(fileLoadedEvent) {
         // special handling for wysiwyg editor
         if (textarea.classList.contains("wysiwyg")) {
-            tinymce.get(textarea.id).setContent(fileLoadedEvent.target.result);
+            $('.wysiwyg').summernote('code', fileLoadedEvent.target.result);
         } else {
         textarea.value = fileLoadedEvent.target.result;
         }
     };
     fileReader.readAsText(fileToLoad, "UTF-8");
 }
+
+// fix summernote link mangling
+$('.wysiwyg').summernote({
+    onCreateLink: function (url) {
+        return url;
+    }
+});

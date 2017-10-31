@@ -28,4 +28,5 @@ moment.js           MIT LICENSE             http://momentjs.com
 Highlight.js        BSD LICENSE             https://highlightjs.org
 Bootstrap           Apache LICENSE 2.0      http://getbootstrap.com
 TinyMCE             LGPL 2.1                https://www.tinymce.com
+summernote          MIT LICENSE             https://summernote.org/
 ACE                 BSD 3-clause            https://ace.c9.io/
