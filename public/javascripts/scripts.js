@@ -22,7 +22,11 @@ $(document).ready(function() {
 });
 
 //Enable TinyMCE on all textareas with class 'wysiwyg'
-tinymce.init({selector:'textarea.wysiwyg', plugins: 'code link', browser_spellcheck: true, convert_urls: false});
+// tinymce.init({selector:'textarea.wysiwyg', plugins: 'code link', browser_spellcheck: true, convert_urls: false});
+
+$(document).ready(function() {
+    $('textarea.wysiwyg').summernote();
+});
 
 // file loader for loading text files into textareas
 function loadFileAsText(input, textarea) {
