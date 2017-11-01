@@ -3,6 +3,8 @@
 @import org.ieee_passau.views.html.main
 @import play.api.i18n.Lang
 @import play.api.mvc.Flash
+@import play.twirl.api.TemplateMagic._
+@import scala.language.implicitConversions
 @(s: SolutionListEntry, languages: List[Language], user: User, problem: Problem)(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 
 @* TODO i18n *@

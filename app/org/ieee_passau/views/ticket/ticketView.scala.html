@@ -2,6 +2,8 @@
 @import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.RequestHeader
 @import views.html.helper.CSRF
+@import play.twirl.api.TemplateMagic._
+@import scala.language.implicitConversions
 @(tickets: List[(Ticket, String)], expanded: Boolean = false, admin: Boolean = false)(implicit requestHeader: RequestHeader, lang: Lang)
 
 @tickets.filter(t => t._1.responseTo.isEmpty).map { case (t: Ticket, un) =>

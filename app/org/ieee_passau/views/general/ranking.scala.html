@@ -5,15 +5,14 @@
 @import play.api.mvc.Flash
 @(users: List[(Int, String, Boolean, Int, Int, Int)])(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 
-@* TODO i18n *@
 @main(Messages("nav.ranking")) {
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>Platz</th>
-                <th>Name</th>
-                <th>Punkte</th>
-                <th>Gelöste Aufgaben</th>
+                <th>@Messages("ranking.position")</th>
+                <th>@Messages("user.title")</th>
+                <th>@Messages("testcase.points")</th>
+                <th>@Messages("ranking.solves")</th>
             </tr>
         </thead>
         <tbody>
@@ -27,7 +26,5 @@
         }
         </tbody>
     </table>
-    <p>@if(users.isEmpty) {
-        Scheinbar hat noch keiner eine Aufgabe gelöst. Schau bei den <a href="@org.ieee_passau.controllers.routes.MainController.problems">Aufgaben</a> vorbei und sei der Erste.
-    }</p>
+    <p>@if(users.isEmpty) { @Html(Messages("ranking.empty", org.ieee_passau.controllers.routes.MainController.problems)) }</p>
 }

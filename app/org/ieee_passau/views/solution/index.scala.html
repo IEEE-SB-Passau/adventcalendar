@@ -1,21 +1,22 @@
 @import org.ieee_passau.controllers.Beans.SubmissionListEntry
 @import org.ieee_passau.models.{Canceled, Passed, Queued, User}
 @import org.ieee_passau.views.html.main
-@import play.api.i18n.Lang
+@import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.Flash
+@import play.twirl.api.TemplateMagic._
+@import scala.language.implicitConversions
 @(list: List[SubmissionListEntry], pages: Int, page: Int, ordering: String)(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 
-@* TODO i18n *@
-@main("Abgabenliste") {
+@main(Messages("submission.list.title")) {
     <table class="table table-striped">
         <thead>
             <tr>
-                <th><a href="@org.ieee_passau.controllers.routes.EvaluationController.index(1, "date")">Abgabe</a></th>
-                <th><a href="@org.ieee_passau.controllers.routes.EvaluationController.index(1, "problem")">Problem</a></th>
-                <th><a href="@org.ieee_passau.controllers.routes.EvaluationController.index(1, "user")">Benutzer</a></th>
-                <th><a href="@org.ieee_passau.controllers.routes.EvaluationController.index(1, "lang")">Sprache</a></th>
-                <th>Testcases</th>
-                <th>Erstellt</th>
+                <th><a href="@org.ieee_passau.controllers.routes.EvaluationController.index()">@Messages("submission.title")</a></th>
+                <th><a href="@org.ieee_passau.controllers.routes.EvaluationController.index(1, "problem")">@Messages("problem.title")</a></th>
+                <th><a href="@org.ieee_passau.controllers.routes.EvaluationController.index(1, "user")">@Messages("user.title")</a></th>
+                <th><a href="@org.ieee_passau.controllers.routes.EvaluationController.index(1, "lang")">@Messages("submission.codelang")</a></th>
+                <th>@Messages("testcase.title")</th>
+                <th>@Messages("general.createdate")</th>
                 <th></th>
             </tr>
         </thead>

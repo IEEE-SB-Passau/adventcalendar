@@ -64,7 +64,7 @@ object TicketController extends Controller with PermissionCheck {
             Ticket(None, problem.get.id, sessionUser.get.id, None, ticket.text, public = false, now, language)
 
           val email = Email(
-            subject = Messages("email.ticket.subject", Messages("ticket.title")(language) + " zu " + Messages("problem.title")(language) + " " + problem.get.door + ": " + problemTitle)(language),
+            subject = Messages("email.header")(language) + " " +  Messages("ticket.title")(language) + " zu " + Messages("problem.title")(language) + " " + problem.get.door + ": " + problemTitle,
             from = sessionUser.get.username + " @ " + play.Configuration.root().getString("email.from"),
             to = List(play.Configuration.root().getString("email.from")),
             bodyText = Some(ticket.text + "\n\n" + Messages("ticket.answer")(language) + ": " + org.ieee_passau.controllers.routes.TicketController.view(id).absoluteURL(play.Configuration.root().getBoolean("application.https", false)))
@@ -103,7 +103,7 @@ object TicketController extends Controller with PermissionCheck {
             val msgLang = parent.get.language
             val problemTitle = ProblemTranslations.byProblemLang(problem.get.id.get, msgLang).firstOption.fold(problem.get.title)(_.title)
             val email = Email(
-              subject = Messages("email.answer.subject", Messages("ticket.title")(msgLang) +  " zu " + Messages("problem.title")(msgLang) + " " + problem.get.door + ": " + problemTitle)(msgLang),
+              subject = Messages("email.header")(msgLang) + " " + Messages("email.answer.subject", Messages("ticket.title")(msgLang) +  " zu " + Messages("problem.title")(msgLang) + " " + problem.get.door + ": " + problemTitle)(msgLang),
               from = sessionUser.get.username + " @ " + play.Configuration.root().getString("email.from"),
               to = List(recipient.get.email),
               cc = List(play.Configuration.root().getString("email.from")),

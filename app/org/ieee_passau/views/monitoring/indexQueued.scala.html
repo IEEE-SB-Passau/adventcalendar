@@ -1,10 +1,11 @@
 @import java.util.Date
-
 @import helper._
 @import org.ieee_passau.models.User
 @import org.ieee_passau.views.html.main
 @import play.api.i18n.Lang
 @import play.api.mvc.{Flash, RequestHeader}
+@import play.twirl.api.TemplateMagic._
+@import scala.language.implicitConversions
 @(list: List[(Int, Int, Int, Int, String, String, Int, String, Date, Option[Date])])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @* TODO i18n *@

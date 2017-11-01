@@ -4,6 +4,8 @@
 @import org.ieee_passau.views.html.main
 @import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.{Flash, RequestHeader}
+@import play.twirl.api.TemplateMagic._
+@import scala.language.implicitConversions
 @(tickets: List[(Ticket, User, Problem, Boolean)])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main(Messages("ticket.list.title")) {
@@ -13,7 +15,7 @@
                 <th>@Messages("general.id")</th>
                 <th>@Messages("problem.title")</th>
                 <th>@Messages("user.title")</th>
-                <th>@Messages("ticket.date")</th>
+                <th>@Messages("general.createdate")</th>
                 <th>@Messages("ticket.public")</th>
                 <th></th>
             </tr>

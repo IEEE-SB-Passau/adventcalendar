@@ -42,6 +42,7 @@ object EvaluationController extends Controller with PermissionCheck {
 
   def index(page: Int, ordering: String): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
+    val lng = request2lang
 
     val subsPerPage = 50
 
@@ -50,16 +51,18 @@ object EvaluationController extends Controller with PermissionCheck {
       tr <- Testruns if tr.solutionId === s.id
       p <- Problems if p.id === s.problemId
       u <- Users if u.id === s.userId
-    } yield (s.id, s.language, u.username, p.door, p.title, s.created, tr.result, tr.stage.?)
+    } yield (s.id, s.language, u.username, p.id, p.door, p.title, s.created, tr.result, tr.stage.?)
 
     val solutions = solutionsQuery.list.view.groupBy(_._1).map { case (sid, sols) =>
       val solvedTestcases = sols.count(_._7 == Passed)
       val allTestcases = sols.length
 
-      val solved = sols.forall { case (_, _, _, _, _, _, r, _) => r == Passed }
-      val failed = sols.exists { case (_, _, _, _, _, _, r, _) => r != Passed && r != Queued }
-      val canceled = sols.forall { case (_, _, _, _, _, _, r, _) => r == Canceled || r == Passed }
-      val queued = sols.exists { case (_, _, _, _, _, _, _, s) => s.isDefined }
+      val title = ProblemTranslations.byProblemLang(sols.head._4/*problem*/, lng).firstOption.fold(sols.head._6)(_.title)
+
+      val solved = sols.forall { case (_, _, _, _, _, _, _, r, _) => r == Passed }
+      val failed = sols.exists { case (_, _, _, _, _, _, _, r, _) => r != Passed && r != Queued }
+      val canceled = sols.forall { case (_, _, _, _, _, _, _, r, _) => r == Canceled || r == Passed }
+      val queued = sols.exists { case (_, _, _, _, _, _, _, _, s) => s.isDefined }
       val state = if (queued)
         Queued
       else if (canceled && !solved)
@@ -68,7 +71,7 @@ object EvaluationController extends Controller with PermissionCheck {
         WrongAnswer
       else
         Passed
-      SubmissionListEntry(sid, sols.head._2, sols.head._3, sols.head._4, sols.head._5, sols.head._6, solvedTestcases, allTestcases, state)
+      SubmissionListEntry(sid, sols.head._2, sols.head._3, sols.head._5, title, sols.head._7, solvedTestcases, allTestcases, state)
     }.toList
 
     val sorted = sort(ordering, solutions)

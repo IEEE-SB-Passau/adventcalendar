@@ -3,6 +3,7 @@
 @import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.Flash
 @import play.twirl.api.Html
+@import play.api.mvc.RequestHeader
 @(errorID: Option[String])(implicit flash: Flash, sessionUser: Option[User], lang: Lang, request: RequestHeader)
 
 @main(Messages("error.500.short")) {

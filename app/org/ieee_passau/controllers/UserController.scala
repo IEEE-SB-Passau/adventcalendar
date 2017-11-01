@@ -100,7 +100,7 @@ object UserController extends Controller with PermissionCheck {
         val link = org.ieee_passau.controllers.routes.UserController.activate(createdUser.activationToken.get)
           .absoluteURL(secure = play.Configuration.root().getBoolean("application.https", false))
         val regMail = Email(
-          subject = Messages("email.register.subject"),
+          subject = Messages("email.header") + " " + Messages("email.register.subject"),
           from = play.Configuration.root().getString("email.from"),
           to = List(createdUser.email),
           bodyText = Some(Messages("email.register.body", createdUser.username, link))
@@ -148,7 +148,7 @@ object UserController extends Controller with PermissionCheck {
         val link = org.ieee_passau.controllers.routes.UserController.editPassword(token)
           .absoluteURL(secure = play.Configuration.root().getBoolean("application.https", false))
         val regMail = Email(
-          subject = Messages("email.passwordreset.subject"),
+          subject = Messages("email.header") + " " + Messages("email.passwordreset.subject"),
           from = play.Configuration.root().getString("email.from"),
           to = List(user.email),
           bodyText = Some(Messages("email.passwordreset.body"))
