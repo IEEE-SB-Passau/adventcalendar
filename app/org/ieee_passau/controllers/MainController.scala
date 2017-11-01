@@ -66,6 +66,11 @@ object MainController extends Controller with PermissionCheck {
     Ok(org.ieee_passau.views.html.general.calendar(posting, problems))
   }
 
+  /**
+    * Display the requested page from the cms
+    *
+    * @param page the page to display
+    */
   def content(page: String) = DBAction { implicit rs =>
     implicit val sessionUser = getUserFromSession(request2session)
     val displayLang = request2lang
@@ -76,69 +81,97 @@ object MainController extends Controller with PermissionCheck {
     Ok(org.ieee_passau.views.html.general.content(posting))
   }
 
+  /**
+    * Logic for handling submissions.
+    *
+    * @param door       the door of the problem
+    * @param sourcecode the submitted sourcecode
+    * @param filename   the file name of the source file, default: "", we will guess a proper name based on the language
+    */
+  def handleSubmission(door: Int, sourcecode: String, filename: String = "")(implicit rs: DBSessionRequest[MultipartFormData[Files.TemporaryFile]]): Result = {
 
-  def handleSubmission(door: Int, getFile: DBSessionRequest[MultipartFormData[Files.TemporaryFile]] => (String, String))
-                      (implicit rs: DBSessionRequest[MultipartFormData[Files.TemporaryFile]]): Result = {
     implicit val sessionUser = getUserFromSession(request2session)
+    if (sessionUser.isEmpty) {
+      return Unauthorized(org.ieee_passau.views.html.errors.e403())
+    }
+
+    val problem = Problems.byDoor(door).firstOption
+    if (problem.isEmpty) {
+      return NotFound(org.ieee_passau.views.html.errors.e404())
+    }
+
+    if (!problem.get.solvable) {
+      return Unauthorized(org.ieee_passau.views.html.errors.e403())
+    }
+
     val now = new Date()
-    val problem = Problems.byDoor(door).first
     val lastSolutions = Solutions.filter(_.userId === sessionUser.get.id.get).sortBy(_.created.desc)
-    val lastLocalSolution = lastSolutions.filter(_.problemId === problem.id).sortBy(_.created.desc).firstOption
-    val sid: Int = if (lastLocalSolution.isEmpty) -1 else lastLocalSolution.get.id.get
-    val trs = for {
+    val lastLocalSolution = lastSolutions.filter(_.problemId === problem.get.id).sortBy(_.created.desc).firstOption
+    val sid: Int = lastLocalSolution.fold(-1)(s => s.id.get)
+
+    if (lastSolutions.firstOption.nonEmpty && lastSolutions.first.created.after(new Date(now.getTime - 60000)) && !sessionUser.get.admin) {
+      return Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door)).flashing("danger" ->
+        (Messages("submit.ratelimit.message") + " " + Messages("submit.ratelimit.timer")))
+    }
+
+    val trs = (for {
       t <- Testruns if t.solutionId === sid && t.result === (Queued: org.ieee_passau.models.Result)
-    } yield t.created
+    } yield t.created).sortBy(_.desc).list
+
+    if (trs.nonEmpty && trs.head.after(new Date(now.getTime - 900000)) && !sessionUser.get.admin) {
+      return Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door)).flashing("danger" ->
+        (Messages("submit.ratelimit.message") + " " + Messages("submit.ratelimit.queue")))
+    }
 
     val lang = rs.body.dataParts("lang").headOption.getOrElse("")
-
-    if (sessionUser.isEmpty) {
-      Unauthorized(org.ieee_passau.views.html.errors.e403())
-    } else if (!problem.solvable) {
-      Unauthorized(org.ieee_passau.views.html.errors.e403())
-    } else if (lastSolutions.firstOption.nonEmpty && lastSolutions.first.created.after(new Date(now.getTime - 60000)) && !sessionUser.get.admin) {
-      Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door)).flashing("danger" ->
-        (Messages("submit.ratelimit.message") + " " + Messages("submit.ratelimit.timer")))
-    } else if (trs.list.nonEmpty && trs.sortBy(_.desc).list.head.after(new Date(now.getTime - 900000)) && !sessionUser.get.admin) {
-      Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door)).flashing("danger" ->
-        (Messages("submit.ratelimit.message") + " " + Messages("submit.ratelimit.queue")))
-    } else if (Languages.byLang(lang).isEmpty) {
-      Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door)).flashing("danger" ->
+    if (Languages.byLang(lang).isEmpty) {
+      return Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door)).flashing("danger" ->
         (Messages("submit.error.message") + " " + Messages("submit.error.invalidlang")))
-    } else {
-      val submission = getFile(rs)
-      // When using 2 proxys, the maximal possible remote-ip length with separators is 49 chars -> rounding up to 50
-      val remoteAddress = Some(rs.remoteAddress.take(50))
+    }
 
-      val userAgent = if (rs.headers.get("User-Agent").isDefined) {
-        Some(rs.headers.get("User-Agent").get.take(150))
-      } else {
-        None
-      }
+    // When using 2 proxies, the maximal possible remote-ip length with separators is 49 chars -> rounding up to 50
+    val remoteAddress = Some(rs.remoteAddress.take(50))
+    val userAgent = rs.headers.get("User-Agent").fold(None: Option[String])(ua => Some(ua.take(150)))
 
-      var success = false
+    val fixedFilename =
+      // special handling for java and scala
+      if (lang == "JAVA" || lang == "SCALA")
 
-      try {
-        val solution = (Solutions returning Solutions.map(_.id)) +=
-          Solution(None, sessionUser.get.id.get, Problems.byDoor(door).firstOption.get.id.get, lang,
-            submission._1, submission._2, remoteAddress, userAgent, None, now)
+      // if we know the filename, use it
+        if (!filename.isEmpty) {
+          val ext = filename.lastIndexOf(".")
 
-        val id = Problems.byDoor(door).firstOption.get.id.get
-        val q = for {
-          t <- Testcases if t.problemId === id
-        } yield t.id
-        q.list.foreach(t =>
-          Testruns += Testrun(None, solution, t, None, None, None, None, None, None, None, None, Queued, None, now, Some(0), None, now)
-        )
+          // but without file extension
+          if (ext != -1) filename.substring(0, ext)
+          else filename
 
-        success = true
-      } catch {
-        case pokemon: Throwable => // ignore
-      }
-      if (success) Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door).url + "#latest")
-        .flashing("success" -> Messages("submit.success.message"))
-      else Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
+        // else use "Solution" as name
+        } else "Solution"
+
+      // otherwise just use "infile", compilers will know how to handle it
+      else "infile"
+
+
+    try {
+      val pid = Problems.byDoor(door).first.id.get
+
+      val solution = (Solutions returning Solutions.map(_.id)) +=
+        Solution(None, sessionUser.get.id.get, pid, lang, sourcecode, fixedFilename, remoteAddress, userAgent, None, now)
+
+      (for {
+        t <- Testcases if t.problemId === pid
+      } yield t.id).foreach(t =>
+        Testruns += Testrun(None, solution, t, None, None, None, None, None, None, None, None, Queued, None, now, Some(0), None, now)
+      )
+
+    } catch {
+      case _ /*pokemon*/: Throwable => // ignore
+      return Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
         .flashing("danger" -> (Messages("submit.error.message") + " " + Messages("submit.error.fileformat")))
     }
+
+    Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door).url + "#latest")
+      .flashing("success" -> Messages("submit.success.message"))
   }
 
   /**
@@ -153,7 +186,7 @@ object MainController extends Controller with PermissionCheck {
         Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
           .flashing("danger" -> (Messages("submit.error.message") + " " + Messages("submit.error.filesize")))
       } else {
-        handleSubmission(door, rs => (File(sourceFile).slurp, submission.filename))
+        handleSubmission(door, File(sourceFile).slurp, submission.filename)
       }
     } getOrElse {
       Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
@@ -172,8 +205,7 @@ object MainController extends Controller with PermissionCheck {
         Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
           .flashing("danger" -> (Messages("submit.error.message") + " " + Messages("submit.error.filesize")))
       } else {
-        // TODO proper file name
-        handleSubmission(door, rs => (submission._2.head, "Solution"))
+        handleSubmission(door, submission._2.head)
       }
     } getOrElse {
       Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
