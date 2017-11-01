@@ -33,11 +33,13 @@ class RankingActor extends Actor {
 
   private val tickSchedule = Akka.system.scheduler.schedule(STARTUP_DELAY, TICK_INTERVAL, self, UpdateRankingM)
 
-  private def calcUserPoints(userProblemSolutions: Iterable[Map[Int, Seq[UserSolution]]], all:  Map[Int, SeqView[UserSolution, Seq[_]]]): Double = {
+  private def calcUserPoints(userProblemSolutions: Iterable[Map[Int, Seq[UserSolution]]],
+                             problemUserBestSubmission: Map[Int, Map[User, (Int, Int)]],
+                             problemRankings:  Map[Int, Map[Int, Double]]): Double = {
+
     userProblemSolutions.map { problem: Map[Int, Seq[UserSolution]] =>
       val head = problem.values.head.head
-      // for each problem get best solution for each user based on sum of points for solved testcases and sum them up
-      val sf = MathHelper.max(problem.map(solution => solution._2.map(test => test.points).sum).toList)
+      val sf = problemUserBestSubmission(head.problem)(head.user)._2
       head.evalMode match {
         case Static => sf
 
@@ -46,7 +48,7 @@ class RankingActor extends Actor {
           val problem = problemList.find(_._1._1 == head.problem).get
           (sf * calcChallengeFactor(problem._8, problem._7)) / 100
 
-        case Best => 0 //TODO
+        case Best => problemRankings(head.problem)(sf) * 100
 
         case NoEval => 0
       }
@@ -64,13 +66,17 @@ class RankingActor extends Actor {
 
     val numTest: Map[Int, List[Testcase]] = Testcases.filter(t => t.visibility =!= (Hidden: Visibility)).list.groupBy(_.problemId)
 
-    val users = solutions.list.view.map(x => UserSolution.tupled(x)).groupBy(_.user.id.get)
+    val userSolutions = solutions.list.view.map(x => UserSolution.tupled(x))
+    val users = userSolutions.groupBy(_.user.id.get)
+    val problemUserSolutions = bestProblemUserSolution(userSolutions.groupBy(_.problem))
+    val problemRanking = (for { p <- Problems if p.evalMode === (Best: EvalMode) } yield p.id).list.map(p => (p, calcChallengeRankFactor(problemUserSolutions(p).toList))).toMap
+
     users.map {
       case (_, values) =>
-        val us = values.head
+        val user = values.head.user
         val map = values.view.groupBy(_.problem).map(x => x._2.groupBy(_.solution))
         (
-          us.user, calcUserPoints(map, users),
+          user, calcUserPoints(map, problemUserSolutions, problemRanking),
           // for each problem look if a solution exists for witch # of passed testcases equals # of testcases for this problem and count those problems
           map.filter(problem => problem.head._2.head.evalMode != NoEval).count(problem => problem.exists(solution => solution._2.size == numTest(solution._2.head.problem).size))
         )
@@ -95,14 +101,34 @@ class RankingActor extends Actor {
     cf
   }
 
+  /**
+    * Gives each user a score based on the reached points form all users.
+    * Similar to the normalized integral of the histogram of best submission points
+    * @param submissions map of user/points tuple
+    * @return a map of points to rating factor
+    */
+  private def calcChallengeRankFactor(submissions: List[(User, (Int, Int))]) = {
+    val sorted = submissions.map(x => (x._1, x._2._2)).sortBy(_._2 /* points */).groupBy(_._2 /* points */)
+    val count = submissions.size
+
+    // sum up the count of users with submissions for each point bracket of their best submission and divide the sum by
+    // the total count of users with submissions starting from the bottom
+    sorted.scanLeft((0, 0d, 0))((last, next) => (next._1, (last._3 + next._2.size).toDouble/count, last._3 + next._2.size)).map(x =>(x._1, x._2)).toMap
+  }
+
+  private def bestProblemUserSolution(problems:  Map[Int, SeqView[Beans.UserSolution, Seq[_]]]): Map[Int, Map[User, (Int, Int)]] = {
+    problems.map { case (problem, problemSubmissions) =>
+      // for each problem and each user get best solution for the user based on sum of points for solved testcases
+      (problem, problemSubmissions.view.groupBy(_.user).map(x => (x._1, MathHelper.max(x._2.groupBy(_.solution).map(y => (y._2.map(_.points).sum, y._1)).toList))).map { case (pid, (points, sid)) => (pid, (sid, points))})
+    }
+  }
+
   private def calcProblemPoints(mode: EvalMode, problemSolutions: SeqView[ProblemSolution, List[ProblemSolution]], total: Int, correct: Int): Double = {
     mode match {
-      case Static => // sum up points over all testcases
-        problemSolutions.groupBy(_.testcase).map(_._2.head.points).sum
+      case Static | Best => // sum up points over all testcases
+      problemSolutions.groupBy(_.testcase).map(_._2.head.points).sum
 
       case Dynamic => calcChallengeFactor(correct, total)
-
-      case Best => 0 //TODO
 
       case NoEval => 0
     }
