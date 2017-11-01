@@ -3,6 +3,7 @@ package org.ieee_passau.controllers
 import java.util.Date
 
 import org.ieee_passau.models._
+import play.api.i18n.Lang
 
 object Beans {
 
@@ -13,7 +14,7 @@ object Beans {
 
   case class SubmissionListEntry(id: Int, lang: String, user: String, door: Int, title: String, date: Date, passedTC: Int, allTC: Int, result: Result)
 
-  case class ProblemInfo(id: Int, door: Int, name: String, points: Int, evalMode: EvalMode, tries: Int, correctSolutions: Int, solved: Boolean)
+  case class ProblemInfo(id: Int, door: Int, name: String, points: Int, ownPoints: Int, evalMode: EvalMode, tries: Int, correctSolutions: Int, solved: Boolean)
 
   case class TestrunListEntry(position: Int, testcase: Testcase, testrun: Testrun)
 
@@ -36,7 +37,7 @@ object Beans {
 
   case class RankingQ(userId: Int, displayHiddenUsers: Boolean)
 
-  case class ProblemsQ(userId: Int, unHide: Boolean)
+  case class ProblemsQ(userId: Int, lang: Lang, unHide: Boolean)
 
   case class VMStatusM(vMStatus: VMStatus)
 

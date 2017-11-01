@@ -30,17 +30,19 @@ class RankingActor extends Actor {
     calcProblemList(showHiddenUsers = false)
   private var rankingAll: List[(Int, User, Double, Int)] = calcRanking(showAll = true)
   private var rankingNormal: List[(Int, User, Double, Int)] = calcRanking(showAll = false)
+  private var userProblemPointsAll: Map[User, (Map[Int, Double], Int)] = calcUserPointsMap(showAll = true)
+  private var userProblemPointsNormal: Map[User, (Map[Int, Double], Int)] = calcUserPointsMap(showAll = false)
 
   private val tickSchedule = Akka.system.scheduler.schedule(STARTUP_DELAY, TICK_INTERVAL, self, UpdateRankingM)
 
   private def calcUserPoints(userProblemSolutions: Iterable[Map[Int, Seq[UserSolution]]],
                              problemUserBestSubmission: Map[Int, Map[User, (Int, Int)]],
-                             problemRankings:  Map[Int, Map[Int, Double]]): Double = {
+                             problemRankings:  Map[Int, Map[Int, Double]]) = {
 
     userProblemSolutions.map { problem: Map[Int, Seq[UserSolution]] =>
       val head = problem.values.head.head
       val sf = problemUserBestSubmission(head.problem)(head.user)._2
-      head.evalMode match {
+      (head.problem, head.evalMode match {
         case Static => sf
 
         case Dynamic =>
@@ -51,35 +53,20 @@ class RankingActor extends Actor {
         case Best => problemRankings(head.problem)(sf) * 100
 
         case NoEval => 0
-      }
-    }.sum
+      })
+    } .toMap
   }
 
   private def calcRanking(showAll: Boolean): List[(Int, User, Double, Int)] = { DB.withSession { implicit session =>
-    val solutions = for {
-      r <- Testruns       if r.result === (Passed: Result)
-      c <- r.testcase     if c.visibility =!= (Hidden: Visibility)
-      s <- r.solution
-      u <- s.user         if u.hidden === false || (showAll: Boolean)
-      p <- s.problem      if p.evalMode =!= (NoEval: EvalMode) || (showAll: Boolean)
-    } yield (u, c.id, c.points, r.id, p.id, s.id, p.evalMode, r.score.?)
+    var userProblemPoints = calcUserPointsMap(showAll)
 
-    val numTest: Map[Int, List[Testcase]] = Testcases.filter(t => t.visibility =!= (Hidden: Visibility)).list.groupBy(_.problemId)
+    if (showAll)
+      userProblemPointsAll = userProblemPoints
+    else
+      userProblemPointsNormal = userProblemPoints
 
-    val userSolutions = solutions.list.view.map(x => UserSolution.tupled(x))
-    val users = userSolutions.groupBy(_.user.id.get)
-    val problemUserSolutions = bestProblemUserSolution(userSolutions.groupBy(_.problem))
-    val problemRanking = (for { p <- Problems if p.evalMode === (Best: EvalMode) } yield p.id).list.map(p => (p, calcChallengeRankFactor(problemUserSolutions(p).toList))).toMap
-
-    users.map {
-      case (_, values) =>
-        val user = values.head.user
-        val map = values.view.groupBy(_.problem).map(x => x._2.groupBy(_.solution))
-        (
-          user, calcUserPoints(map, problemUserSolutions, problemRanking),
-          // for each problem look if a solution exists for witch # of passed testcases equals # of testcases for this problem and count those problems
-          map.filter(problem => problem.head._2.head.evalMode != NoEval).count(problem => problem.exists(solution => solution._2.size == numTest(solution._2.head.problem).size))
-        )
+    userProblemPoints.map {
+      case (user, (userPoints, solved)) => (user, userPoints.values.sum, solved)
     }.toList.view.sortBy(-_._2 /*points*/).zipWithIndex.groupBy(_._1._2 /*points*/).toList.flatMap {
       case (_, rankingPos) => for {
         ((user, points, solved), index) <- rankingPos
@@ -122,6 +109,34 @@ class RankingActor extends Actor {
       (problem, problemSubmissions.view.groupBy(_.user).map(x => (x._1, MathHelper.max(x._2.groupBy(_.solution).map(y => (y._2.map(_.points).sum, y._1)).toList))).map { case (pid, (points, sid)) => (pid, (sid, points))})
     }
   }
+
+  private def calcUserPointsMap(showAll: Boolean) = { DB.withSession { implicit session =>
+    val solutions = for {
+      r <- Testruns       if r.result === (Passed: Result)
+      c <- r.testcase     if c.visibility =!= (Hidden: Visibility)
+      s <- r.solution
+      u <- s.user         if u.hidden === false || (showAll: Boolean)
+      p <- s.problem      if p.evalMode =!= (NoEval: EvalMode) || (showAll: Boolean)
+    } yield (u, c.id, c.points, r.id, p.id, s.id, p.evalMode, r.score.?)
+
+    val numTest: Map[Int, List[Testcase]] = Testcases.filter(t => t.visibility =!= (Hidden: Visibility)).list.groupBy(_.problemId)
+
+    val userSolutions = solutions.list.view.map(x => UserSolution.tupled(x))
+    val users = userSolutions.groupBy(_.user.id.get)
+    val problemUserSolutions = bestProblemUserSolution(userSolutions.groupBy(_.problem))
+    val problemRanking = (for { p <- Problems if p.evalMode === (Best: EvalMode) } yield p.id).list.map(p => (p, calcChallengeRankFactor(problemUserSolutions(p).toList))).toMap
+
+    users.map {
+      case (_, values) =>
+        val user = values.head.user
+        val map = values.view.groupBy(_.problem).map(x => x._2.groupBy(_.solution))
+        (
+          user, (calcUserPoints(map, problemUserSolutions, problemRanking),
+          // for each problem look if a solution exists for witch # of passed testcases equals # of testcases for this problem and count those problems
+          map.filter(problem => problem.head._2.head.evalMode != NoEval).count(problem => problem.exists(solution => solution._2.size == numTest(solution._2.head.problem).size))
+        ))
+    }
+  }}
 
   private def calcProblemPoints(mode: EvalMode, problemSolutions: SeqView[ProblemSolution, List[ProblemSolution]], total: Int, correct: Int): Double = {
     mode match {
@@ -194,14 +209,22 @@ class RankingActor extends Actor {
       rankingAll = calcRanking(showAll = true)
       rankingNormal = calcRanking(showAll = false)
 
-    case ProblemsQ(uid, displayAll) =>
-      val now = new Date()
-      val list = if (displayAll) problemsAll else problemsNormal
-      val problemList = list.filter(p => p._1._2.before(now) && p._1._3.after(now)).map {
-        case (problem, door, title, points, mode, tries, distinctTries, correctCount, correctList) =>
-          ProblemInfo(problem._1, door, title, points.floor.toInt, mode, tries, correctCount, correctList.contains(uid))
-      }.sortBy(_.door)
-      sender ! problemList
+    case ProblemsQ(uid, lang, displayAll) =>
+      DB.withSession { implicit session =>
+        val sessionUser = Users.byId(uid).firstOption
+        val now = new Date()
+        val list = if (displayAll) problemsAll else problemsNormal
+        val list2 = if (displayAll) userProblemPointsAll else userProblemPointsNormal
+
+        val problemList = list.filter(p => p._1._2.before(now) && p._1._3.after(now)).map {
+          case (problem, door, title, points, mode, tries, distinctTries, correctCount, correctList) =>
+            val ownPoints = sessionUser.fold(0)(user => list2.get(user).fold(0)(_._1.get(problem._1).fold(0)(_.floor.toInt)))
+            val problemTrans = ProblemTranslations.byProblemLang(problem._1, lang).firstOption
+            val problemTitle = if (problemTrans.isDefined) problemTrans.get.title else title
+            ProblemInfo(problem._1, door, problemTitle, points.floor.toInt, ownPoints, mode, tries, correctCount, correctList.contains(uid))
+        }.sortBy(_.door)
+        sender ! problemList
+      }
 
     case RankingQ(uid, displayAll) =>
       DB.withSession { implicit session =>

@@ -40,7 +40,7 @@ object MainController extends Controller with PermissionCheck {
     implicit val sessionUser = getUserFromSession(request2session)
     val suid = if (sessionUser.isDefined) sessionUser.get.id.get else -1
     val unHide = sessionUser.isDefined && sessionUser.get.hidden
-    val problems = (rankingActor ? ProblemsQ(suid, unHide)).mapTo[List[ProblemInfo]]
+    val problems = (rankingActor ? ProblemsQ(suid, request2lang, unHide)).mapTo[List[ProblemInfo]]
     problems.map(list => Ok(org.ieee_passau.views.html.general.problemList(list)))
   }
 

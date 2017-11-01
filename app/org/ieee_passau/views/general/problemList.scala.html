@@ -6,33 +6,28 @@
 @import play.api.mvc.Flash
 @(problems: List[ProblemInfo])(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 
-@* TODO i18n *@
 @main(Messages("nav.problems")) {
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>Tag</th>
-                <th>Name</th>
-                <th>Punkte</th>
-                <th>Versuche</th>
-                <th>Lösungen</th>
+                <th>@Messages("problem.door")</th>
+                <th>@Messages("problem.name")</th>
+                <th class="text-right">@Messages("testcase.points")</th>
+                <th>@Messages("problem.evalmode")</th>
+                <th>@Messages("submissions.tries")</th>
+                <th>@Messages("submissions.solves")</th>
                 @if(sessionUser.nonEmpty) {
-                    <th>Gelöst</th>
+                    <th>@Messages("submissions.solved")</th>
                 }
             </tr>
         </thead>
         <tbody>
         @problems.map { problem =>
-            <tr class="@if(problem.solved) {success}">
+            <tr class="@if(problem.solved) {success} @if(problem.ownPoints != 0 && !problem.solved) {warning}">
                 <td>@problem.door</td>
                 <td><a href="@org.ieee_passau.controllers.routes.MainController.problemDetails(problem.door)">@problem.name</a></td>
-                <td>
-                    @problem.points
-                    @if(problem.evalMode == Static) {(fest)}
-                    @if(problem.evalMode == Dynamic) {(dynamisch nach Abgaben)}
-                    @if(problem.evalMode == Best) {(dynamisch nach bester Abgabe)}
-                    @if(problem.evalMode == Best) {(keine Bewertung)}
-                </td>
+                <td class="text-right">@if(sessionUser.nonEmpty) { @problem.ownPoints /} @problem.points</td>
+                <td>@Messages(problem.evalMode.toString.toLowerCase)</td>
                 <td>@problem.tries</td>
                 <td>@problem.correctSolutions</td>
                 @if(sessionUser.nonEmpty) {
@@ -42,5 +37,5 @@
         }
         </tbody>
     </table>
-    <p>@if(problems.isEmpty) {Scheinbar gibt es noch keine Aufgaben zu lösen.}</p>
+    <p>@if(problems.isEmpty) { @Messages("problem.list.empty") }</p>
 }
