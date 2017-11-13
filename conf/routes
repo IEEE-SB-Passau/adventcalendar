@@ -7,7 +7,7 @@ GET         /                                          org.ieee_passau.controlle
 
 GET         /problems                                  org.ieee_passau.controllers.MainController.problems
 GET         /problem/:door                             org.ieee_passau.controllers.MainController.problemDetails(door: Int)
-GET         /problem/editor/:door                      org.ieee_passau.controllers.MainController.codeEditor(door: Int)
+GET         /problem/:door/editor/:lang                org.ieee_passau.controllers.MainController.codeEditor(door: Int, lang: String)
 POST        /problem/:door                             org.ieee_passau.controllers.MainController.solveFile(door: Int)
 POST        /problem/v2/:door                          org.ieee_passau.controllers.MainController.solveString(door: Int)
 GET         /problem/:door/solutions                   org.ieee_passau.controllers.MainController.getUserProblemSolutions(door: Int)
@@ -93,6 +93,9 @@ POST        /admin/ticket/:id/delete                   org.ieee_passau.controlle
 POST        /admin/vms/register                        org.ieee_passau.controllers.EvaluationController.registerVM
 POST        /admin/vms/registerv2                      org.ieee_passau.controllers.EvaluationController.registerVM
 POST        /admin/vms/remove                          org.ieee_passau.controllers.EvaluationController.removeVM
+
+# js router
+GET         /js/routes                                 org.ieee_passau.controllers.MainController.jsRoutes
 
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                              controllers.Assets.at(path="/public", file)

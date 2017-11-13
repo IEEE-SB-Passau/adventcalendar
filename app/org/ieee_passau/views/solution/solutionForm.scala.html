@@ -2,6 +2,7 @@
 @import play.api.i18n.Lang
 @import play.api.mvc.RequestHeader
 @import views.html.helper.CSRF
+@import org.ieee_passau.controllers.routes
 @(door: Int, languages: List[Language], lastLanguage: String)(implicit requestHeader: RequestHeader, lang: Lang)
 
 @* TODO i18n *@
@@ -49,13 +50,17 @@
         <div id="codeEditor"></div>
     </fieldset>
 
+    <script type="text/javascript" src="@org.ieee_passau.controllers.routes.MainController.jsRoutes"></script>
+    @helper.javascriptRouter("jsRoutes")(
+        routes.javascript.MainController.codeEditor
+    )
     <script type="text/javascript">
         var reloadMessage = '@Messages("submit.codeeditor.reload")';
 
         function loadCodeEditor() {
-            $.ajax({
-                url: "@org.ieee_passau.controllers.routes.MainController.codeEditor(door)"
-            }).done(function (data) {
+            $.ajax(
+                jsRoutes.org.ieee_passau.controllers.MainController.codeEditor('@door', lang.value)
+            ).done(function (data) {
                 $("#codeEditor").html(data);
             });
 

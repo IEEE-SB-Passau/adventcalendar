@@ -11,6 +11,7 @@ import org.ieee_passau.models.DateSupport._
 import org.ieee_passau.models.{Postings, _}
 import org.ieee_passau.utils.{ListHelper, PermissionCheck}
 import play.api.Play.current
+import play.api.Routes
 import play.api.db.slick.Config.driver.simple._
 import play.api.db.slick._
 import play.api.i18n.Messages
@@ -35,6 +36,14 @@ object MainController extends Controller with PermissionCheck {
   val NoHighlight = 0
   val Highlight = 1
   val HighlightSpecial = 2
+
+  def jsRoutes: Action[AnyContent] = Action { implicit request =>
+    Ok(
+      Routes.javascriptRouter("jsRoutes")(
+        routes.javascript.MainController.codeEditor
+      )
+    ).as("text/javascript")
+  }
 
   def problems: Action[AnyContent] = Action.async { implicit rs =>
     implicit val sessionUser = getUserFromSession(request2session)
@@ -213,8 +222,10 @@ object MainController extends Controller with PermissionCheck {
     }
   }
 
-  def codeEditor(door: Int) = Action { implicit rs =>
-    Ok(org.ieee_passau.views.html.solution.codeEditor(door))
+  def codeEditor(door: Int, lang: String): Action[AnyContent] = Action { implicit rs =>
+    Languages.byLang(lang).fold(BadRequest(""))(lng => {
+      Ok(org.ieee_passau.views.html.solution.codeEditor(door, lng.extension))
+    })
   }
 
   /**

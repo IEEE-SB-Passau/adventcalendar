@@ -1,5 +1,5 @@
 @import play.api.i18n.{Lang, Messages}
-@(door: Int)(implicit lang: Lang)
+@(door: Int, langExt: String)(implicit lang: Lang)
 
 <style>#preview {
     position: relative;
@@ -26,7 +26,8 @@
 </div>
 
 <script src="@routes.Assets.at("javascripts/ace/ace.js")" type="text/javascript" charset="utf-8"></script>
-<script src="@routes.Assets.at("javascripts/ace/ext-modelist.js ")" type="text/javascript" charset="utf-8"></script>
+<script src="@routes.Assets.at("javascripts/ace/ext-modelist.js")" type="text/javascript" charset="utf-8"></script>
+<script src="@routes.Assets.at("javascripts/ace/ext-language_tools.js")" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript">
     function updateEdits() {
         submissiontext.value = editor.getValue();
@@ -39,21 +40,25 @@
         fileReader.onload = function (fileLoadedEvent) {
             editor.setValue(fileLoadedEvent.target.result);
             submissiontext.value = fileLoadedEvent.target.result;
-            updateLang();
-
         };
         fileReader.readAsText(fileToLoad, "UTF-8");
     }
 
     function updateLang() {
-        var mode = modelist.getModeForPath(filename.value).mode;
+        var mode = modelist.getModeForPath('file.@langExt').mode;
         editor.session.setMode(mode);
-        var langClass = langs[lang.value];
     }
 
-    var editor = ace.edit("preview");
-    editor.getSession().setMode("ace/mode/javascript");
+    ace.require("ace/ext/language_tools");
     var modelist = ace.require("ace/ext/modelist");
+    var editor = ace.edit("preview");
 
+    editor.setOptions({
+        enableBasicAutocompletion: true,
+        enableSnippets: true,
+        enableLiveAutocompletion: false
+    });
+
+    updateLang();
     loadSource(solution);
 </script>
