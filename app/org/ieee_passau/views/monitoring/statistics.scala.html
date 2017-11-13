@@ -21,7 +21,7 @@
                 </tr>
             @vms1H.map { case (vm, num) =>
                 <tr>
-                    <td>@vm</td>
+                    <td>@if(vm == "_") { @Messages("canceled") } else { @vm }</td>
                     <td>@num</td>
                 </tr>
             }
@@ -63,7 +63,7 @@
                 </tr>
             @vmsFull.map { case (vm, num) =>
                 <tr>
-                    <td>@vm</td>
+                    <td>@if(vm == "_") { @Messages("canceled") } else { @vm }</td>
                     <td>@num</td>
                 </tr>
             }
