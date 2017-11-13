@@ -1,27 +1,26 @@
 @import org.ieee_passau.controllers.Beans.VMStatus
 @import org.ieee_passau.models.User
 @import org.ieee_passau.views.html.main
-@import play.api.i18n.Lang
+@import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.Flash
 @import play.twirl.api.TemplateMagic._
 @import scala.language.implicitConversions
 @(running: Boolean, vms: List[(String, Int, VMStatus)])(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 
-@* TODO i18n *@
-@main("Evaluation VMs") {
+@main(Messages("status.vms.title")) {
     @if(!running) {
         <div class="well alert-danger">
-            Aktuell ist das System angehalten
+            @Messages("status.paused")
         </div>
     }
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>Name</th>
-                <th>Angemeldete Benuzer</th>
-                <th>Last</th>
-                <th>Speicher</th>
-                <th>Letzte Rückmeldung</th>
+                <th>@Messages("stauts.vm.id")</th>
+                <th>@Messages("status.vms.numberofusers")</th>
+                <th>@Messages("status.vms.load")</th>
+                <th>@Messages("status.vms.memory")</th>
+                <th>@Messages("status.vms.lastheartbeat")</th>
             </tr>
         </thead>
         <tbody>
