@@ -1,0 +1,46 @@
+@import org.ieee_passau.models.{Language, User}
+@import org.ieee_passau.views.html.main
+@import play.api.i18n.{Lang, Messages}
+@import play.api.mvc.RequestHeader
+@import views.html.helper.CSRF
+@(languages: List[Language])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
+
+@main(Messages("codelang.list.title")) {
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>@Messages("general.id")</th>
+                <th>@Messages("codelang.name")</th>
+                <th>@Messages("codelang.cpufactor")</th>
+                <th>@Messages("codelang.memfactor")</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @languages.map { lng =>
+                <tr>
+                    <td>@lng.id</td>
+                    <td>@lng.name</td>
+                    <td>@lng.cpuFactor</td>
+                    <td>@lng.memFactor</td>
+                    <td>
+                        <a href="@org.ieee_passau.controllers.routes.LanguageController.edit(lng.id)" class="btn btn-default">
+                            <span class="glyphicon glyphicon-pencil"></span>
+                        </a>
+                    </td>
+                </tr>
+            }
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>
+                    <a href="@org.ieee_passau.controllers.routes.LanguageController.insert" class="btn btn-default">
+                        <span class="glyphicon glyphicon-plus"></span>
+                    </a>
+                </td>
+        <tr>
+        </tbody>
+    </table>
+}

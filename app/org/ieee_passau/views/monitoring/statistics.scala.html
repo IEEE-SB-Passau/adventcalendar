@@ -10,13 +10,13 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>@Messages("stauts.vm.id")</th>
+                    <th>@Messages("status.vm.id")</th>
                     <th>@Messages("general.count")</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>@Messages("general.count")</td>
+                    <td>@Messages("general.sum")</td>
                     <td>@numJobs1H</td>
                 </tr>
             @vms1H.map { case (vm, num) =>
@@ -32,7 +32,7 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>@Messages("submission.codelang")</th>
+                    <th>@Messages("codelang.title")</th>
                     <th>@Messages("general.count")</th>
                 </tr>
             </thead>
@@ -52,13 +52,13 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>@Messages("stauts.vm.id")</th>
+                    <th>@Messages("status.vm.id")</th>
                     <th>@Messages("general.count")</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>@Messages("general.count")</td>
+                    <td>@Messages("general.sum")</td>
                     <td>@numJobsFull</td>
                 </tr>
             @vmsFull.map { case (vm, num) =>
@@ -74,7 +74,7 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>@Messages("submission.codelang")</th>
+                    <th>@Messages("codelang.title")</th>
                     <th>@Messages("general.count")</th>
                 </tr>
             </thead>

@@ -79,6 +79,12 @@ POST        /admin/status/:id                          org.ieee_passau.controlle
 GET         /admin/status/:id/:lang                    org.ieee_passau.controllers.EvaluationController.editPage(id: Int, lang: String)
 POST        /admin/status/:id/:lang                    org.ieee_passau.controllers.EvaluationController.changePage(id: Int, lang: String)
 
+GET         /admin/codelangs                           org.ieee_passau.controllers.LanguageController.index
+GET         /admin/codelang/insert                     org.ieee_passau.controllers.LanguageController.insert
+POST        /admin/codelang/insert                     org.ieee_passau.controllers.LanguageController.save
+GET         /admin/codelang/:lang                      org.ieee_passau.controllers.LanguageController.edit(lang: String)
+POST        /admin/codelang/:lang                      org.ieee_passau.controllers.LanguageController.update(lang: String)
+
 GET         /admin/ticktes                             org.ieee_passau.controllers.TicketController.index
 GET         /admin/ticket/:id                          org.ieee_passau.controllers.TicketController.view(id: Int)
 POST        /admin/ticket/:id                          org.ieee_passau.controllers.TicketController.answerTicket(id: Int)

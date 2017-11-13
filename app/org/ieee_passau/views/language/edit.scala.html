@@ -1,0 +1,29 @@
+@import helper._
+@import org.ieee_passau.models.{Language, User}
+@import org.ieee_passau.views.html.bootstrap3.{buttonSave, text}
+@import org.ieee_passau.views.html.main
+@import play.api.data.Form
+@import play.api.i18n.{Lang, Messages}
+@import play.api.mvc.{Flash, RequestHeader}
+@(codelangId: String, language: Form[Language])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
+
+@main(Messages("codelang.edit")) {
+
+    <ol class="breadcrumb">
+        <li><a href="@org.ieee_passau.controllers.routes.LanguageController.index">@Messages("general.listoverview")</a></li>
+        <li class="active">@Messages("codelang.title")</li>
+    </ol>
+
+    @form(org.ieee_passau.controllers.routes.LanguageController.update(codelangId), 'class -> "form-horizontal") {
+        @CSRF.formField
+        <fieldset>
+            <div class="well">
+        @text(language("name"), label = Messages("codelang.name") , placeholder = "C, gcc")
+        @text(language("cpuFactor"), label = Messages("codelang.cpufactor"), placeholder = "1")
+        @text(language("memFactor"), label = Messages("codelang.memfactor"), placeholder = "1")
+
+                @buttonSave()
+            </div>
+        </fieldset>
+    }
+}
