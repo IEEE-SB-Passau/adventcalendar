@@ -1,4 +1,4 @@
-@import org.ieee_passau.models.{Testcase, Visibility}
+@import org.ieee_passau.models.{Testcase, Visibility, Private}
 @import org.ieee_passau.views.html.bootstrap3.{buttonSave, fileloader, text, textareaBs}
 @import play.api.data.Form
 @import play.api.i18n.{Lang, Messages}
@@ -14,8 +14,8 @@
             <select id="visibility" size="1" name="visibility" class="col-sm-10 form-control">
             @visibilities.map { vis =>
                 <option value="@vis.scope"
-                    @{if(testcase.value.isDefined && vis.scope == testcase.get.visibility.toString) "selected" else if (vis.scope == "PRIVATE") "selectet"}
-                >@Messages(vis.scope.toLowerCase)</option>
+                    @{if(testcase.value.isDefined && vis == testcase.get.visibility) "selected" else if (vis == Private) "selectet"}
+                >@Messages(vis.toString)</option>
             }
             </select>
         </div>

@@ -1,6 +1,7 @@
 @import org.ieee_passau.controllers.Beans.SolutionListEntry
-@import org.ieee_passau.models.{Canceled, CompileError, Language, MemoryExceeded, Passed, Private, ProgramError, Public, Queued, RuntimeExceeded, WrongAnswer, Page}
+@import org.ieee_passau.models.{Canceled, CompileError, Language, Page, Passed, Private, Public, Queued, WrongAnswer}
 @import play.api.i18n.{Lang, Messages}
+@import play.twirl.api.Html
 @(solutions: List[SolutionListEntry], languages: List[Language], showAll: Boolean = false)(implicit lang: Lang)
 @* showPrivate shows also private testcases *@
 
@@ -15,9 +16,9 @@
             <div class="panel-heading">
                 <h3 class="panel-title">
                     <a data-toggle="collapse" data-target="#solution@s.position" href="#solution@s.position">
-                        @if(s.state == Queued) { <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>} @Messages("solution.list.solution") @s.position
+                        @if(s.state == Queued) { <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>} @Messages("solution.title") @s.position
                         <span class="pull-right">
-                            @s.testcases.filter(_.testrun.result == Passed).map(_.testcase.points).sum / @s.testcases.map(_.testcase.points).sum @Messages("solution.list.points")
+                            @s.testcases.filter(_.testrun.result == Passed).map(_.testcase.points).sum / @s.testcases.map(_.testcase.points).sum @Messages("testcase.points")
                         </span>
                     </a>
                 </h3>
@@ -26,20 +27,14 @@
             <div id="solution@s.position" class="panel-collapse collapse @if(solutions.head == s) { in }">
                 <div class="panel-body">
                     <p>
-                        <Strong>@Messages("solution.list.state"):</Strong>
-                        @if(s.state == Passed) { @Messages("solution.list.passed") }
-                        @if(s.state == Queued) { @Messages("solution.list.queued") }
-                        @if(s.state == WrongAnswer) { @Messages("solution.list.wrong_answer") }
-                        @if(s.state == Canceled) {
-                            @Html(Messages("solution.list.canceled", org.ieee_passau.controllers.routes.MainController.content(Page.contact.toString))) }
+                        <Strong>@Messages("solution.state"):</Strong>
+                        @Html(Messages(s.state.toString, org.ieee_passau.controllers.routes.MainController.content(Page.contact.toString)))
                     </p>
 
-                    <p>
-                        <button type="button" class="btn" data-toggle="collapse" data-target="#code@s.position">
-                            <span class="glyphicon glyphicon-eye-open"></span>
-                            @Messages("solution.list.sourcecode") (@languages.filter(_.id == s.solution.language).map{l=>@l.name})
-                        </button>
-                    </p>
+                    <p><button type="button" class="btn" data-toggle="collapse" data-target="#code@s.position">
+                        <span class="glyphicon glyphicon-eye-open"></span>
+                        @Messages("submission.program_source") (@languages.filter(_.id == s.solution.language).map{l=>@l.name})
+                    </button></p>
 
                     <div id="code@s.position" class="collapse">
                         <pre><code class="@languages.filter(_.id == s.solution.language).map{l=>@l.highlightClass}">@s.solution.program</code></pre>
@@ -53,56 +48,49 @@
                             @if(t.testrun.result == Canceled) { panel-warning }">
                             <div class="panel-heading">
                                 <h3 class="panel-title">
-                                    @Messages("solution.list.testcase") @t.position @if(t.testcase.visibility == Private) { (@Messages("solution.list.private") }
-                                        <span class="pull-right">@t.testcase.points @Messages("solution.list.points")</span>
+                                    @Messages("testcase.title") @t.position @if(t.testcase.visibility == Private) { (@Messages(Private.toString)) }
+                                        <span class="pull-right">@t.testcase.points @Messages("testcase.points")</span>
                                 </h3>
                             </div>
 
                             <div class="panel-body">
                                 <p>
                                     <strong>Status:</strong>
-                                    @if(t.testrun.stage.isDefined) { @Messages("queued") } else {
-                                    @if(t.testrun.result == Passed) { @Messages("passed") }
-                                    @if(t.testrun.result == WrongAnswer) { @Messages("wrong_answer") }
-                                    @if(t.testrun.result == ProgramError) { @Messages("program_error") }
-                                    @if(t.testrun.result == MemoryExceeded) { @Messages("memory_exceeded") }
-                                    @if(t.testrun.result == RuntimeExceeded) { @Messages("runtime_exceeded") }
-                                    @if(t.testrun.result == CompileError) { @Messages("compiler_error") }
-                                    @if(t.testrun.result == Canceled) { @Messages("canceled") }}
+                                    @if(t.testrun.stage.isDefined) { @Html(Messages(Queued.toString)) } else { @Html(Messages(t.testrun.result.toString, org.ieee_passau.controllers.routes.MainController.content(Page.contact.toString))) }
                                 </p>
 
                                 @if(t.testrun.stage.isEmpty && (t.testcase.visibility == Public || showAll)) {
-                                    <p><strong>@Messages("solution.list.compiler_return"):</strong> @t.testrun.compExit</p>
+                                    <p><strong>@Messages("submission.compiler_return"):</strong> @t.testrun.compExit</p>
 
-                                    @Messages("solution.list.compiler_output"):
+                                    @Messages("submission.compiler_output"):
                                     <pre>@t.testrun.compOut</pre>
 
                                     @if(t.testrun.compErr.isDefined && t.testrun.compErr.get.length > 0) {
-                                        @Messages("solution.list.compiler_error"):
+                                        @Messages("submission.compiler_error"):
                                         <pre>@t.testrun.compErr</pre>
                                     }
 
                                     @if(t.testrun.result != CompileError) {
-                                        @Messages("solution.list.program_input"):
+                                        @Messages("submission.program_input"):
                                         <pre>@t.testcase.input</pre>
 
                                         <div class="row">
                                             <div  class="col-sm-6">
-                                                @Messages("solution.list.expected_output"):
+                                                @Messages("submission.expected_output"):
                                                 <pre class="expected-output">@t.testcase.expectedOutput</pre>
                                             </div>
                                             <div class="col-sm-6">
-                                                @Messages("solution.list.program_output"):
+                                                @Messages("submission.program_output"):
                                                 <pre class="actual-output">@t.testrun.progOut</pre>
                                             </div>
                                         </div>
 
                                         @if(t.testrun.progErr.isDefined && t.testrun.progErr.get.length > 0) {
-                                            @Messages("solution.list.program_error"):
+                                            @Messages("submission.program_error"):
                                             <pre>@t.testrun.progErr</pre>
                                         }
 
-                                        <p><strong>@Messages("solution.list.program_return"):</strong> @t.testrun.progExit</p>
+                                        <p><strong>@Messages("submission.program_return"):</strong> @t.testrun.progExit</p>
                                     }
                                 }
                             </div>

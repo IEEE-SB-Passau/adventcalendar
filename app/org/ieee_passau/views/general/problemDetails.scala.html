@@ -11,42 +11,40 @@
 @import views.html.helper.{CSRF, form}
 @(problem: Problem, languages: List[Language], lastLang: String, solutions: List[SolutionListEntry], tickets: List[(Ticket, String)], ticketForm: Form[TicketText], message: (String, String))(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
-@* TODO i18n *@
 @main(Messages("problem.title") + " " + problem.door + ": " + problem.title, hasTitle = true) {
     @Html(problem.description)
 
-    <h3>Fragen und Antworten</h3>
+    <h3>@Messages("problemdetails.qna")</h3>
     @ticketView(tickets)
 
     @if(sessionUser.isDefined) {
         @form(org.ieee_passau.controllers.routes.TicketController.submitTicket(problem.door), 'class -> "form-horizontal") {
             @CSRF.formField
             <div class="well">
-                @textareaBs(ticketForm("text"), label = "Frage")
+                @textareaBs(ticketForm("text"), label = Messages("ticket.title"))
                 @buttonSave()
             </div>
         }
     } else {
-        <p>Bitte logge dich ein, um eine Frage zu stellen...</p>
+        <p>@Html(Messages("problemdetails.notice.ticket"))</p>
     }
 
-    <h3>Lösung einreichen</h3>
+    <h3>@Messages("problemdetails.submit")</h3>
     @if(problem.solvable) {
         @if(sessionUser.isDefined) {
             <div class="well">
                 @solutionForm(problem.door, languages, lastLang)
             </div>
         } else {
-            <p>Bitte logge dich ein, um eine Lösung einzureichen...</p>
+            <p>@Html(Messages("problemdetails.notice.submit.login"))</p>
         }
     } else {
-        <p>Momentan können keine Lösungen eingereicht werden...</p>
+        <p>@Html(Messages("problemdetails.notice.submit.notsolvable"))</p>
     }
 
     @if(solutions.nonEmpty) {
-        <h3>Bisherige Lösungen</h3>
-        <p>Falls dir nicht ganz klar ist, was die ein oder andere Fehlermeldung jetzt genau bedeutet, schau doch einfach
-            in den <a href="@org.ieee_passau.controllers.routes.MainController.content(Page.faq.toString)">FAQ</a> nach.</p>
+        <h3>@Messages("problemdetails.submissionlist")</h3>
+        <p>@Html(Messages("problemdetails.notice.submit.errormsg", org.ieee_passau.controllers.routes.MainController.content(Page.faq.toString)))</p>
 
         @solutionListAutoReload(solutions, languages, problem.door)
     }

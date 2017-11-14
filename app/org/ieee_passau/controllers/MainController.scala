@@ -294,7 +294,7 @@ object MainController extends Controller with PermissionCheck {
         val langs = Languages.list
 
         val responseList = buildSolutionList(problem, user.id.get)
-          .map(e => (e.solution.id.get, e.state.toString, org.ieee_passau.views.html.solution.solutionList(List(e), langs).toString()))
+          .map(e => (e.solution.id.get, e.state.name, org.ieee_passau.views.html.solution.solutionList(List(e), langs).toString()))
           .map(e => SolutionJSON.tupled(e))
         val json = Json.toJson(responseList)
         Ok(json)

@@ -12,6 +12,7 @@
                 <th>@Messages("general.id")</th>
                 <th>@Messages("problem.name")</th>
                 <th>@Messages("problem.door")</th>
+                <th>@Messages("problem.evalmode")</th>
                 <th></th>
             </tr>
         </thead>
@@ -21,6 +22,7 @@
                 <td>@problem.id</td>
                 <td>@problem.title</td>
                 <td>@problem.door</td>
+                <td>@Messages(problem.evalMode.toString)</td>
                 <td>
                     <a href="@org.ieee_passau.controllers.routes.ProblemController.edit(problem.id.get)" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span></a>
                     <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.ProblemController.delete(problem.id.get)">

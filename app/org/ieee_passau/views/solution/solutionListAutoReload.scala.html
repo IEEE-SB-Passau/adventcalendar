@@ -1,9 +1,9 @@
 @import org.ieee_passau.controllers.Beans.SolutionListEntry
 @import org.ieee_passau.models.Language
 @import play.api.i18n.Lang
+@import org.ieee_passau.models.Queued
 @(solutions: List[SolutionListEntry], languages: List[Language], door: Int, showAll: Boolean = false)(implicit lang: Lang)
 
-@* todo fix togle when reloading *@
 <div id="solutionlist">
     @solutionList(solutions, languages)
 </div>
@@ -33,14 +33,14 @@
                             return;
                         }
 
-                        if (solution.status === "QUEUED" || solution.status !== solutionInfo.result) {
+                        if (solution.status === '@Queued.name' || solution.status !== solutionInfo.result) {
                             solution.status = solutionInfo.result;
 
                             if (solution.element.html() !== solutionInfo.html) {
                                 solution.element.html(solutionInfo.html);
                             }
 
-                            if (solution.status === "QUEUED") {
+                            if (solution.status === '@Queued.name') {
                                 queuedSolutionPresent = true;
                             }
                         }
@@ -58,7 +58,7 @@
                 var queuedSolutionPresent = false;
 
                 $.each(solutions, function (solution) {
-                    if (solution.status === "QUEUED") {
+                    if (solution.status === '@Queued.name') {
                         queuedSolutionPresent = true;
                         return false;
                     }

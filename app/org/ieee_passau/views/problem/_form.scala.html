@@ -1,6 +1,6 @@
 @import org.ieee_passau.models.{EvalMode, Problem}
 @import org.ieee_passau.utils.LanguageHelper
-@import org.ieee_passau.views.html.bootstrap3.{buttonSave, fileloader, text, textareaBs}
+@import org.ieee_passau.views.html.bootstrap3.{buttonSave, fileloader, text, textareaBs, dateManualError}
 @import play.api.data.Form
 @import play.api.i18n.{Lang, Messages}
 @import org.ieee_passau.utils.ViewHelper
@@ -46,7 +46,7 @@
         <div class="col-sm-10">
             <select id="evalMode" size="1" name="evalMode" class="col-sm-10 form-control">
             @evalModes.map { mode =>
-                <option value="@mode.mode" @{if(problem.value.isDefined && mode.mode == problem.get.evalMode.toString) "selected" }>@Messages(mode.mode.toLowerCase)</option>
+                <option value="@mode.mode" @{if(problem.value.isDefined && mode == problem.get.evalMode) "selected" }>@Messages(mode.toString)</option>
             }
             </select>
         </div>

@@ -27,7 +27,7 @@
                 <td>@problem.door</td>
                 <td><a href="@org.ieee_passau.controllers.routes.MainController.problemDetails(problem.door)">@problem.name</a></td>
                 <td class="text-right">@if(sessionUser.nonEmpty) { @problem.ownPoints /} @problem.points</td>
-                <td>@Messages(problem.evalMode.toString.toLowerCase)</td>
+                <td>@Messages(problem.evalMode.toString)</td>
                 <td>@problem.tries</td>
                 <td>@problem.correctSolutions</td>
                 @if(sessionUser.nonEmpty) {

@@ -15,7 +15,7 @@ object Result {
   )
 }
 case class Result(name: String) {
-  override def toString: String = name
+  override def toString: String = name.toLowerCase
 }
 object Queued extends Result("QUEUED")
 object Passed extends Result("PASSED")
@@ -60,7 +60,7 @@ object Visibility {
   )
 }
 case class Visibility(scope: String) {
-  override def toString: String = scope
+  override def toString: String = scope.toLowerCase
 }
 object Public extends Visibility("PUBLIC")
 object Private extends Visibility("PRIVATE")
@@ -79,7 +79,7 @@ object EvalMode {
   )
 }
 case class EvalMode(mode: String) {
-  override def toString: String = mode
+  override def toString: String = mode.toLowerCase
 }
 object Static extends EvalMode("STATIC")
 object Dynamic extends EvalMode("DYNAMIC")
