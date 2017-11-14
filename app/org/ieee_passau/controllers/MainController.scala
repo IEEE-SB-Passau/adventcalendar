@@ -293,10 +293,13 @@ object MainController extends Controller with PermissionCheck {
       case Some(problem) =>
         val langs = Languages.list
 
-        val responseList = buildSolutionList(problem, user.id.get)
-          .map(e => (e.solution.id.get, e.state.name, org.ieee_passau.views.html.solution.solutionList(List(e), langs).toString()))
-          .map(e => SolutionJSON.tupled(e))
-        val json = Json.toJson(responseList)
+        val solutionList= buildSolutionList(problem, user.id.get)
+        val responseList = solutionList.take(1)
+            .map(e => (e.solution.id.get, e.state.name, org.ieee_passau.views.html.solution.solutionList(List(e), langs).toString())) ++
+          solutionList.drop(1)
+            .map(e => (e.solution.id.get, e.state.name, org.ieee_passau.views.html.solution.solutionList(List(e), langs, first = false).toString()))
+
+        val json = Json.toJson(responseList.map(e => SolutionJSON.tupled(e)))
         Ok(json)
     }
   }}
