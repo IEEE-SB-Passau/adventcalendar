@@ -25,12 +25,12 @@ object LanguageController extends Controller with PermissionCheck {
 
   def insert: Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
-    Ok(org.ieee_passau.views.html.language.insert(MaintenanceForms.languageUpdateForm))
+    Ok(org.ieee_passau.views.html.language.insert(MaintenanceForms.languageNewForm))
   }}
 
   def save: Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
-    MaintenanceForms.languageUpdateForm.bindFromRequest.fold(
+    MaintenanceForms.languageNewForm.bindFromRequest.fold(
       errorForm => {
         BadRequest(org.ieee_passau.views.html.language.insert(errorForm))
       },
@@ -45,21 +45,18 @@ object LanguageController extends Controller with PermissionCheck {
 
   def update(language: String): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
+    Languages.byLang(language).fold(NotFound(org.ieee_passau.views.html.errors.e404()))(lng => {
       MaintenanceForms.languageUpdateForm.bindFromRequest.fold(
-      errorForm => {
-        Languages.byLang(language).fold(Redirect(org.ieee_passau.controllers.routes.LanguageController.index()))(
-          lng => BadRequest(org.ieee_passau.views.html.language.edit(lng.id, errorForm)))
-      },
+        errorForm => {
+          BadRequest(org.ieee_passau.views.html.language.edit(lng.id, errorForm))
+        },
 
-      codelang => {
-        Languages.byLang(language).fold(Redirect(org.ieee_passau.controllers.routes.LanguageController.index()))(
-          lng => {
-            Languages.update(lng.copy(name = codelang.name, cpuFactor = codelang.cpuFactor, memFactor = codelang.cpuFactor))
-            Redirect(org.ieee_passau.controllers.routes.LanguageController.edit(language))
-              .flashing("success" -> Messages("codelang.update.message", codelang.id))
-          }
-        )
-      }
-    )
+        codelang => {
+          Languages.update(lng.copy(name = codelang.name, cpuFactor = codelang.cpuFactor, memFactor = codelang.cpuFactor))
+          Redirect(org.ieee_passau.controllers.routes.LanguageController.edit(language))
+            .flashing("success" -> Messages("codelang.update.message", codelang.id))
+        }
+      )
+    })
   }}
 }
