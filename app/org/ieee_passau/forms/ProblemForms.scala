@@ -4,6 +4,7 @@ import org.ieee_passau.controllers.Beans.TicketText
 import org.ieee_passau.models.{EvalMode, Problem, ProblemTranslation, Problems}
 import play.api.data.Forms._
 import play.api.data._
+import play.api.data.format.Formats._
 import play.api.i18n.{Lang, Messages}
 
 object ProblemForms {
@@ -17,11 +18,16 @@ object ProblemForms {
       "readableStop" -> date("dd.MM.yyyy HH:mm"),
       "solvableStart" -> date("dd.MM.yyyy HH:mm"),
       "solvableStop" -> date("dd.MM.yyyy HH:mm"),
-      "evalMode" -> text
+      "evalMode" -> text,
+      "cpuFactor" -> of[Float],
+      "memFactor" -> of[Float]
     )
-    ((id: Option[String], title, door, description, readableStart, readableStop, solvableStart, solvableStop, evalMode: String) =>
-      Problem(if (id.isDefined) Some(id.get.toInt) else None, title, door, description, readableStart, readableStop, solvableStart, solvableStop, EvalMode(evalMode)))
-    ((p: Problem) => Some(Some(p.id.toString), p.title, p.door, p.description, p.readableStart, p.readableStop, p.solvableStart, p.solvableStop, p.evalMode.mode))
+    ((id: Option[String], title, door, description, readableStart, readableStop, solvableStart, solvableStop,
+      evalMode: String, cpuFacotr: Float, memFator: Float) =>
+      Problem(if (id.isDefined) Some(id.get.toInt) else None, title, door, description, readableStart, readableStop,
+        solvableStart, solvableStop, EvalMode(evalMode), cpuFacotr, memFator))
+    ((p: Problem) => Some(Some(p.id.toString), p.title, p.door, p.description, p.readableStart, p.readableStop,
+      p.solvableStart, p.solvableStop, p.evalMode.mode, p.cpuFactor, p.memFactor))
 
       verifying("problem.create.error.door", p =>
           if (p.id.isDefined) Problems.doorAvailable(p.door, p.id.get) else Problems.doorAvailable(p.door))

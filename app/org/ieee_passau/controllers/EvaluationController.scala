@@ -263,7 +263,7 @@ object EvaluationController extends Controller with PermissionCheck {
           .flashing("warning" -> play.api.i18n.Messages("jobs.error.invalidjob"))
       case Some(job) =>
         Testruns.update(id, job.copy(result = Canceled, vm = Some("_"), completed = new Date, stage = None))
-        Akka.system.eventStream.publish(JobFinished(BaseJob(job.testcaseId, "", "", "", "", "")))
+        Akka.system.eventStream.publish(JobFinished(BaseJob(0, job.testcaseId, "", "", "", "", "")))
         Redirect(org.ieee_passau.controllers.routes.EvaluationController.indexQueued())
           .flashing("success" -> play.api.i18n.Messages("jobs.control.cancel.message"))
     }

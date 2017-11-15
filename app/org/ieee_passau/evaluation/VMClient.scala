@@ -12,6 +12,9 @@ import org.ieee_passau.evaluation.Messages._
 import org.ieee_passau.models._
 import org.ieee_passau.utils.MathHelper
 import org.ieee_passau.utils.StringHelper._
+import play.api.Play.current
+import play.api.db.slick.Config.driver.simple._
+import play.api.db.slick._
 
 import scala.collection.immutable.StringOps
 import scala.concurrent.Await
@@ -30,7 +33,7 @@ object VMClient {
 class VMClient(host: String, port: Int, name:String)
   extends EvaluationActor {
 
-  private val timeout = Timeout(MathHelper.makeDuration(play.Configuration.root().getString("evaluator.inputregulator.joblifetime", "90 seconds")))
+  private var timeout = Timeout(MathHelper.makeDuration(play.Configuration.root().getString("evaluator.eval.basetime", "60 seconds")).mul(2))
 
   private case class ExecutionResult(var duration: Duration = 0 seconds,
                                      var memory: Float = 0,
@@ -108,8 +111,13 @@ class VMClient(host: String, port: Int, name:String)
     */
 
     job match {
-      case BaseJob(rid, l, program, programName, stdin, expout) => {
+      case BaseJob(pid, rid, l, program, programName, stdin, expout) => {
         val lang = Languages.byLang(l).get
+        val problem = DB.withSession { implicit session =>
+          Problems.byId(pid).first
+        }
+        val runtimeLimit = MathHelper.makeDuration(play.Configuration.root().getString("evaluator.eval.basetime")).mul(lang.cpuFactor * problem.cpuFactor)
+        timeout = Timeout(FiniteDuration(runtimeLimit.mul(2).toMillis, "milliseconds"))
         // Deploy Job
         val data =
           <ieee-advent-calendar>
@@ -127,6 +135,12 @@ class VMClient(host: String, port: Int, name:String)
               </inputs>
               <outputs>
               </outputs>
+              <limits>
+                <cpu>{runtimeLimit.toSeconds}</cpu>
+                <!-- seconds -->
+                <memory>{(lang.memFactor * problem.memFactor * play.Configuration.root().getInt("evaluator.eval.basemem", 100)).floor.toInt}</memory>
+                <!-- MB -->
+              </limits>
             </job>
           </ieee-advent-calendar>
 
@@ -206,6 +220,7 @@ class VMClient(host: String, port: Int, name:String)
 
       case NextStageJob(rid, stage, program, stdin, progOut, expOut, cmd, input, outputStdoutCheck, outputScore, filename, file) => {
         val lang = Languages.byLang(if (filename.endsWith("jar")) {"JAVAJAR"} else {"BINARY"}).get
+        timeout = Timeout(MathHelper.makeDuration("180 seconds"))
         // Deploy binary file
         val data =
           <ieee-advent-calendar>
@@ -228,6 +243,10 @@ class VMClient(host: String, port: Int, name:String)
                 {if (outputScore)       {<file id="score">{{homedir}}/score</file>}}
                 {if (outputStdoutCheck) {<file id="check">{{homedir}}/check</file>}}
               </outputs>
+              <limits>
+                <cpu>120</cpu>
+                <memory>2048</memory>
+              </limits>
             </job>
           </ieee-advent-calendar>
 

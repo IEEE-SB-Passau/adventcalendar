@@ -1,9 +1,8 @@
 @import org.ieee_passau.models.{EvalMode, Problem}
-@import org.ieee_passau.utils.LanguageHelper
-@import org.ieee_passau.views.html.bootstrap3.{buttonSave, fileloader, text, textareaBs, dateManualError}
+@import org.ieee_passau.utils.{LanguageHelper, ViewHelper}
+@import org.ieee_passau.views.html.bootstrap3._
 @import play.api.data.Form
 @import play.api.i18n.{Lang, Messages}
-@import org.ieee_passau.utils.ViewHelper
 @(problem: Form[Problem], evalModes: List[EvalMode])(implicit lang: Lang)
 
 <fieldset>
@@ -16,7 +15,7 @@
     } @if(problem("door").hasErrors) { has-error }">
         <label class="col-sm-2 control-label">@Messages("problem.door")</label>
         <div class="col-sm-10">
-            <input type="text" class="form-control" id="door" name="door" value="@problem("door").value.getOrElse("")" placeholder="@Messages("problem.door")"/>
+            <input type="number" class="form-control" id="door" name="door" value="@problem("door").value.getOrElse("")" placeholder="@Messages("problem.door")"/>
             <span class="help-block">
                 @if(problem.errors.nonEmpty) {
                     @problem.errors.map { e => @if(e.messages.head == "problem.create.error.door") { @Messages(e.messages.head, Messages("problem.readablestop"), Messages("problem.readablestart")) }}
@@ -51,6 +50,9 @@
             </select>
         </div>
     </div>
+
+    @number(problem("cpuFactor"), label = Messages("problem.cpufactor", play.Configuration.root().getString("evaluator.eval.basetime", "60 seconds")), step=0.1f)
+    @number(problem("memFactor"), label = Messages("problem.memfactor", play.Configuration.root().getInt("evaluator.eval.basemem", 100)), step=0.1f)
 
     @buttonSave()
 </fieldset>

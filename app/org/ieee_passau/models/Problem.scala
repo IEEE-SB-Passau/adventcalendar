@@ -5,13 +5,14 @@ import java.util.Date
 import org.ieee_passau.utils.LanguageHelper
 import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
-import play.api.db.slick.{Session, _}
+import play.api.db.slick.{DB, Session, _}
 import play.api.i18n.Lang
 
 import scala.slick.lifted.{CompiledFunction, ForeignKeyQuery, ProvenShape}
 
 case class Problem (id: Option[Int], title: String, door: Int, description: String, readableStart: Date,
-                    readableStop: Date, solvableStart: Date, solvableStop: Date, evalMode: EvalMode) extends Entity[Problem] {
+                    readableStop: Date, solvableStart: Date, solvableStop: Date, evalMode: EvalMode,
+                    cpuFactor: Float, memFactor: Float) extends Entity[Problem] {
   def withId(id: Int): Problem = this.copy(id = Some(id))
   def readable: Boolean = {
     val now = new Date()
@@ -32,9 +33,11 @@ class Problems(tag: Tag) extends TableWithId[Problem](tag, "problems") {
   def solvableStart: Column[Date] = column[Date]("solvable_start")
   def solvableStop: Column[Date] = column[Date]("solvable_stop")
   def evalMode: Column[EvalMode] = column[EvalMode]("eval_mode") (EvalMode.evalModeTypeMapper)
+  def cpuFactor: Column[Float] = column[Float]("cpu_factor")
+  def memFactor: Column[Float] = column[Float]("mem_factor")
 
   def * : ProvenShape[Problem] = (id.?, title, door, description, readableStart, readableStop, solvableStart,
-    solvableStop, evalMode) <> (Problem.tupled, Problem.unapply)
+    solvableStop, evalMode, cpuFactor, memFactor) <> (Problem.tupled, Problem.unapply)
 }
 
 object Problems extends TableQuery(new Problems(_)) {
@@ -51,11 +54,9 @@ object Problems extends TableQuery(new Problems(_)) {
     }
   }
 
-  def doorAvailable(door: Int): Boolean = {
-    DB.withSession { implicit session: Session =>
-      Query(Problems.filter(_.door === door).length).first == 0
-    }
-  }
+  def doorAvailable(door: Int): Boolean = { DB.withSession { implicit session: Session =>
+    Query(Problems.filter(_.door === door).length).first == 0
+  }}
 }
 
 case class ProblemTranslation(problemId: Int, language: Lang, title: String, description: String)

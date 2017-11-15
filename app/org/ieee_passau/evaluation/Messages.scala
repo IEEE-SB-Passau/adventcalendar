@@ -32,7 +32,8 @@ object Messages {
     }
   }
 
-  case class BaseJob(testrunId: Int,
+  case class BaseJob(problemId: Int,
+                     testrunId: Int,
                      language: String,
                      program: String,
                      programName: String,

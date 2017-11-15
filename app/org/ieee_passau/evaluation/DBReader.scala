@@ -29,6 +29,7 @@ class DBReader extends EvaluationActor {
           val stage = rawJob._8/*testrun*/.stage.get
           if (stage == 0) { // normal evaluation job
             Messages.BaseJob(
+              problemId = rawJob._7,
               testrunId = rawJob._2,
               language = rawJob._3,
               program = rawJob._4,
