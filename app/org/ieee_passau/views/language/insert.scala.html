@@ -1,6 +1,6 @@
 @import helper._
 @import org.ieee_passau.models.{Language, User}
-@import org.ieee_passau.views.html.bootstrap3.{buttonSave, text}
+@import org.ieee_passau.views.html.bootstrap3.{buttonSave, number, text}
 @import org.ieee_passau.views.html.main
 @import play.api.data.Form
 @import play.api.i18n.{Lang, Messages}
@@ -22,8 +22,8 @@
                 @text(language("name"), label = Messages("codelang.name") , placeholder = "C, gcc")
                 @text(language("extension"), label = Messages("codelang.fileextension"), placeholder = ".c")
                 @text(language("highlightClass"), label = Messages("codelang.highlightclass"), placeholder = "c")
-                @text(language("cpuFactor"), label = Messages("codelang.cpufactor"), placeholder = "1")
-                @text(language("memFactor"), label = Messages("codelang.memfactor"), placeholder = "1")
+                @number(language("cpuFactor"), label = Messages("codelang.cpufactor"), step=0.1f)
+                @number(language("memFactor"), label = Messages("codelang.memfactor"), step=0.1f)
 
                 @buttonSave()
             </div>

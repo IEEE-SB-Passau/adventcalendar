@@ -1,5 +1,5 @@
 @import org.ieee_passau.models.EvalTask
-@import org.ieee_passau.views.html.bootstrap3.{buttonSave, checkboxBs, text}
+@import org.ieee_passau.views.html.bootstrap3.{buttonSave, checkboxBs, number, text}
 @import play.api.data.Form
 @import play.api.i18n.{Lang, Messages}
 @import play.twirl.api.Html
@@ -7,7 +7,7 @@
 
 <fieldset>
     <input type="hidden" name="problemId" value="@pid" />
-    @text(task("position"), label = Messages("evaltask.position"), placeholder = Messages("evaltask.position"))
+    @number(task("position"), label = Messages("evaltask.position"), placeholder = Messages("evaltask.position"))
     <div class="col-sm-10 col-sm-offset-2"><h4>@Messages("evaltask.mask.description")</h4></div>
     <div class="col-sm-10 col-sm-offset-2"><p>@Html(Messages("evaltask.mask.list"))</p></div>
     @text(task("command"), label = Messages("evaltask.mask"), placeholder = "{stdIn}{expOut}")

@@ -1,12 +1,12 @@
 @import org.ieee_passau.models.{Testcase, Visibility, Private}
-@import org.ieee_passau.views.html.bootstrap3.{buttonSave, fileloader, text, textareaBs}
+@import org.ieee_passau.views.html.bootstrap3.{buttonSave, fileloader, number, text, textareaBs}
 @import play.api.data.Form
 @import play.api.i18n.{Lang, Messages}
 @(pid: Int, testcase: Form[Testcase], visibilities: List[Visibility])(implicit lang: Lang)
 
 <fieldset>
     <input type="hidden" name="problemId" value="@pid" />
-    @text(testcase("position"), label = Messages("testcase.position"), placeholder = Messages("testcase.position"))
+    @number(testcase("position"), label = Messages("testcase.position"), placeholder = Messages("testcase.position"))
 
     <div class="form-group">
         <label for="visibility" class="col-sm-2 control-label">@Messages("testcase.visibility")</label>
@@ -25,7 +25,7 @@
     @fileloader("input")
     @textareaBs(testcase("output"), label = Messages("testcase.output"), placeholder = Messages("testcase.output"))
     @fileloader("output")
-    @text(testcase("points"), label = Messages("testcase.points"), placeholder = Messages("testcase.points"))
+    @number(testcase("points"), label = Messages("testcase.points"), placeholder = Messages("testcase.points"))
 
     @buttonSave()
 </fieldset>
