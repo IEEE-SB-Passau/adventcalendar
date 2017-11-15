@@ -71,8 +71,9 @@ GET         /admin/monitoring/queued                   org.ieee_passau.controlle
 GET         /admin/monitoring/vms                      org.ieee_passau.controllers.EvaluationController.vms
 GET         /admin/monitoring/stat                     org.ieee_passau.controllers.EvaluationController.stats
 POST        /admin/monitoring/:id/delete               org.ieee_passau.controllers.EvaluationController.cancel(id: Int)
-GET         /admin/monitoring/maintenance              org.ieee_passau.controllers.EvaluationController.maintenance
-POST        /admin/monitoring/maintenance              org.ieee_passau.controllers.EvaluationController.playPause
+
+GET         /admin/maintenance                         org.ieee_passau.controllers.EvaluationController.maintenance
+POST        /admin/maintenance                         org.ieee_passau.controllers.EvaluationController.playPause
 
 GET         /admin/status/:id                          org.ieee_passau.controllers.EvaluationController.createPage(id: Int)
 POST        /admin/status/:id                          org.ieee_passau.controllers.EvaluationController.addPage(id: Int)
