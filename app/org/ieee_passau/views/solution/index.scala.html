@@ -1,3 +1,4 @@
+@import helper._
 @import org.ieee_passau.controllers.Beans.SubmissionListEntry
 @import org.ieee_passau.models.{Canceled, Passed, Queued, User}
 @import org.ieee_passau.views.html.main
@@ -5,7 +6,7 @@
 @import play.api.mvc.Flash
 @import play.twirl.api.TemplateMagic._
 @import scala.language.implicitConversions
-@(list: List[SubmissionListEntry], pages: Int, page: Int, ordering: String)(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
+@(list: List[SubmissionListEntry], pages: Int, page: Int, ordering: String)(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main(Messages("submission.list.title")) {
     <table class="table table-striped">
@@ -31,7 +32,12 @@
                 <td>@s.lang</td>
                 <td>@s.passedTC / @s.allTC</td>
                 <td>@s.date.format("dd.MM.yyyy HH:mm")</td>
-                <td><a href="@org.ieee_passau.controllers.routes.EvaluationController.reEval(s.id)" class="btn btn-default"><span class="glyphicon glyphicon-repeat"></span></a></td>
+                <td>
+                    <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.EvaluationController.reEval(s.id)">
+                        @CSRF.formField
+                        <button type="submit" onclick="return(window.confirm('@Messages("status.resubmit.warning")'))" class="btn btn-danger"><span class="glyphicon glyphicon-repeat"></span></button>
+                    </form>
+                </td>
             </tr>
         }
         </tbody>
@@ -39,7 +45,7 @@
 
     <nav class="text-center">
         <ul class="pagination">
-            <li @if(page <= 1) {class="disabled"}><a href="@org.ieee_passau.controllers.routes.EvaluationController.index(page - 1, ordering)">Zurück</a></li>
+            <li @if(page <= 1) {class="disabled"}><a href="@org.ieee_passau.controllers.routes.EvaluationController.index(page - 1, ordering)">@Messages("general.pagination.back")</a></li>
             @for( i <- 1 to pages) {
                 @if(i == page) {
                     <li class="active"><a href="#">@i</a></li>
@@ -47,7 +53,7 @@
                     <li><a href="@org.ieee_passau.controllers.routes.EvaluationController.index(i, ordering)">@i</a></li>
                 }
             }
-            <li @if(page >= pages) {class="disabled"}><a href="@org.ieee_passau.controllers.routes.EvaluationController.index(page + 1, ordering)">Weiter</a></li>
+            <li @if(page >= pages) {class="disabled"}><a href="@org.ieee_passau.controllers.routes.EvaluationController.index(page + 1, ordering)">@Messages("general.pagination.forward")</a></li>
         </ul>
     </nav>
 }

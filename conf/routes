@@ -65,7 +65,7 @@ POST        /admin/problem/:pid/task/:id/delete        org.ieee_passau.controlle
 
 GET         /admin/submission                          org.ieee_passau.controllers.EvaluationController.index(page: Int ?= 1, order: String ?="date")
 GET         /admin/submission/:id                      org.ieee_passau.controllers.EvaluationController.details(id: Int)
-GET         /admin/submission/:id/rerun                org.ieee_passau.controllers.EvaluationController.reEval(id: Int)
+POST        /admin/submission/:id/rerun                org.ieee_passau.controllers.EvaluationController.reEval(id: Int)
 
 GET         /admin/monitoring/queued                   org.ieee_passau.controllers.EvaluationController.indexQueued
 GET         /admin/monitoring/vms                      org.ieee_passau.controllers.EvaluationController.vms

@@ -37,7 +37,7 @@
                 <td>
                     <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.EvaluationController.cancel(rid)">
                         @CSRF.formField
-                        <button type="submit" onclick="return(window.confirm('@Messages("status.resubmit.warning")'))" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span></button>
+                        <button type="submit" onclick="return(window.confirm('@Messages("status.cancel.warning")'))" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span></button>
                     </form>
                 </td>
             </tr>
