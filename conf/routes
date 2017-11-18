@@ -14,7 +14,7 @@ GET         /problem/:door/solutions                   org.ieee_passau.controlle
 POST        /problem/:door/question                    org.ieee_passau.controllers.TicketController.submitTicket(door: Int)
 
 GET         /ranking                                   org.ieee_passau.controllers.MainController.ranking
-GET         /languages                                 org.ieee_passau.controllers.LanguageController.list
+GET         /codelangs                                 org.ieee_passau.controllers.LanguageController.list
 GET         /$page<(contact|faq|examples|rules|news|calendar)> org.ieee_passau.controllers.MainController.content(page)
 GET         /feedback                                  org.ieee_passau.controllers.MainController.feedback
 POST        /feedback                                  org.ieee_passau.controllers.MainController.submitFeedback

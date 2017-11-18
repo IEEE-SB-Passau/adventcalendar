@@ -5,7 +5,7 @@
 @import play.api.mvc.RequestHeader
 @(languages: List[Language])(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
 
-@main(Messages("codelang.list.title")) {
+@main(Messages("codelang.list.title") + " ") {
     <table class="table table-striped">
         <thead>
             <tr>
@@ -30,4 +30,10 @@
             }
         </tbody>
     </table>
+
+    @if(sessionUser.isDefined && sessionUser.get.admin) {
+        <p class="text-right">
+            <a class="btn btn-default" href="@org.ieee_passau.controllers.routes.LanguageController.index"><span class="glyphicon glyphicon-user"></span> @Messages("general.edit")</a>
+        </p>
+    }
 }

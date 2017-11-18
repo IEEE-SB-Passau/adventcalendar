@@ -39,7 +39,8 @@
                             <li @if(title == Messages("calendar"))     { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.calendar#doors">@Messages("calendar")</a></li>
                             <li @if(title == Messages("nav.problems")) { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.problems">@Messages("nav.problems")</a></li>
                             <li @if(title == Messages("nav.ranking"))  { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.ranking"       >@Messages("nav.ranking")</a></li>
-                            <li class="dropdown @if(List(Messages(Page.news.toString), Messages(Page.rules.toString), Messages(Page.faq.toString), Messages(Page.examples.toString)).contains(title)) { active }" >
+                            <li class="dropdown @if(List(Messages(Page.news.toString), Messages(Page.rules.toString), Messages(Page.faq.toString),
+                                Messages(Page.examples.toString), Messages("codelang.list.title") + " ").contains(title)) { active }" >
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">@Messages("nav.info") <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
                                     <li @if(title == Messages(Page.news.toString))  { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.content(Page.news.toString)" >@Messages(Page.news.toString)</a></li>

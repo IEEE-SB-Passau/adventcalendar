@@ -16,10 +16,10 @@ object LanguageController extends Controller with PermissionCheck {
     Ok(org.ieee_passau.views.html.language.index(Languages.sortBy(_.id.asc).list))
   }}
 
-  def list: Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
-    implicit val sessionUser = Some(admin)
+  def list: Action[AnyContent] = DBAction { implicit rs =>
+    implicit val sessionUser = getUserFromSession(request2session)
     Ok(org.ieee_passau.views.html.language.languages(Languages.sortBy(_.id.asc).list))
-  }}
+  }
 
   def edit(language: String): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
