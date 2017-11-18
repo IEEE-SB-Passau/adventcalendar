@@ -1,0 +1,33 @@
+@import org.ieee_passau.models.{Language, User}
+@import org.ieee_passau.utils.MathHelper
+@import org.ieee_passau.views.html.main
+@import play.api.i18n.{Lang, Messages}
+@import play.api.mvc.RequestHeader
+@(languages: List[Language])(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
+
+@main(Messages("codelang.list.title")) {
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>@Messages("codelang.title")</th>
+                <th>@Messages("codelang.name")</th>
+                <th>@Messages("codelang.time")</th>
+                <th>@Messages("codelang.memory")</th>
+                <th>@Messages("codelang.comment")</th>
+            </tr>
+        </thead>
+        <tbody>
+            @languages.map { lng =>
+                <tr>
+                @defining(lng.name.indexOf(",")) { split: Int =>
+                    <td>@lng.name.substring(0, split)</td>
+                    <td>@lng.name.substring(split + 2)</td>
+                }
+                    <td>@(MathHelper.makeDuration(play.Configuration.root().getString("evaluator.eval.basetime", "60 seconds")).mul(lng.cpuFactor).toSeconds) @Messages("general.seconds")</td>
+                    <td>@((lng.memFactor * play.Configuration.root().getInt("evaluator.eval.basemem", 100)).floor.toInt) MB</td>
+                    <td>@Html(lng.comment)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

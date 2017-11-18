@@ -32,7 +32,8 @@ object MaintenanceForms {
       "highlightClass" -> text,
       "extension" -> text,
       "cpuFactor" -> of[Float],
-      "memFactor" -> of[Float]
+      "memFactor" -> of[Float],
+      "comment" -> text
     )(Language.apply)(Language.unapply)
   )
 
@@ -40,8 +41,9 @@ object MaintenanceForms {
     mapping(
       "name" -> text,
       "cpuFactor" -> of[Float],
-      "memFactor" -> of[Float]
-    )((name, cpuFactor, memFactor) => Language("", name, "", "", cpuFactor, memFactor))
-    ((l: Language) => Some((l.name, l.cpuFactor, l.memFactor)))
+      "memFactor" -> of[Float],
+      "comment" -> text
+    )((name, cpuFactor, memFactor, comment) => Language("", name, "", "", cpuFactor, memFactor, comment))
+    ((l: Language) => Some((l.name, l.cpuFactor, l.memFactor, l.comment)))
   )
 }

@@ -32,7 +32,7 @@ class Results(tag: Tag) extends Table[Result](tag, "e_test_result") {
 }
 object Results extends TableQuery(new Results(_))
 
-case class Language(id: String, name: String, highlightClass: String, extension: String, cpuFactor: Float, memFactor: Float)
+case class Language(id: String, name: String, highlightClass: String, extension: String, cpuFactor: Float, memFactor: Float, comment: String)
 class Languages(tag: Tag) extends Table[Language](tag, "e_prog_lang") {
   def id: Column[String] = column[String]("language")
   def name: Column[String] = column[String]("name")
@@ -40,8 +40,9 @@ class Languages(tag: Tag) extends Table[Language](tag, "e_prog_lang") {
   def extension: Column[String] = column[String]("extension")
   def cpuFactor: Column[Float] = column[Float]("cpu_factor")
   def memFactor: Column[Float] = column[Float]("mem_factor")
+  def comment: Column[String] = column[String]("comment")
 
-  def * : ProvenShape[Language] = (id, name, highlightClass, extension, cpuFactor, memFactor) <> (Language.tupled, Language.unapply)
+  def * : ProvenShape[Language] = (id, name, highlightClass, extension, cpuFactor, memFactor, comment) <> (Language.tupled, Language.unapply)
 }
 object Languages extends TableQuery(new Languages(_)) {
   def byLang(lang: String): Option[Language] = {
