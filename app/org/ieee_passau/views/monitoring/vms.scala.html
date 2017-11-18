@@ -16,7 +16,8 @@
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>@Messages("stauts.vm.id")</th>
+                <th>@Messages("status.vm.id")</th>
+                <th>@Messages("status.vms.uri")</th>
                 <th>@Messages("status.vms.numberofusers")</th>
                 <th>@Messages("status.vms.load")</th>
                 <th>@Messages("status.vms.memory")</th>
@@ -27,6 +28,7 @@
         @vms.map { vm =>
             <tr>
                 <td>@vm._1</td>
+                <td>@vm._3.uri</td>
                 <td>@vm._3.users</td>
                 <td>@vm._3.load</td>
                 <td>@vm._3.mem</td>

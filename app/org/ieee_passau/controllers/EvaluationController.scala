@@ -295,9 +295,10 @@ object EvaluationController extends Controller with PermissionCheck {
 
     // Read configuration
     val m = rs.body \\ "node"
-    val actorName = (m \ "identifier").text
     val host = (m \ "host").text
     val port = (m \ "port").text.toInt
+    val actorName = (m \ "identifier").text
+    val uri =  host + ":" + port
 
     Akka.system.actorSelection("user/Evaluator/VMMaster") ? NewVM(Messages.Config(actorName, host, port))
 
@@ -306,7 +307,7 @@ object EvaluationController extends Controller with PermissionCheck {
     val mem = (m \\ "virtual").text.toFloat
     val swap = (m \\ "swap").text.toFloat
 
-    monitoringActor ! VMStatusM(VMStatus(actorName, numUser, load, mem, swap, new Date()))
+    monitoringActor ! VMStatusM(VMStatus(actorName, uri, numUser, load, mem, swap, new Date()))
 
     Ok("")
   }

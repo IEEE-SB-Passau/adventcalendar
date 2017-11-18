@@ -29,7 +29,7 @@ class MonitoringActor extends Actor {
     case RunningVMsQ => pipe ((context.actorSelection("../Evaluator/VMMaster") ? RunningVMsQ) flatMap {
       case list: List[(String, Int) @unchecked] => Future {
         list.map {
-          vm: (String, Int) => (vm._1, vm._2, nodes.getOrElse(vm._1, VMStatus(vm._1, 0, 0, 0, 0, new Date)))
+          vm: (String, Int) => (vm._1, vm._2, nodes.getOrElse(vm._1, VMStatus(vm._1, "", 0, 0, 0, 0, new Date)))
         }
       }
     }) to sender

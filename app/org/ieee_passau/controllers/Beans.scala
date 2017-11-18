@@ -22,7 +22,7 @@ object Beans {
 
   case class TicketText(text: String, public: Boolean)
 
-  case class VMStatus(actorName: String, users: Int, load: Float, mem: Float, swap: Float, ts: Date)
+  case class VMStatus(actorName: String, uri: String, users: Int, load: Float, mem: Float, swap: Float, ts: Date)
 
   case class SolutionJSON(id: Int, status: String, html: String)
 
