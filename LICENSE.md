@@ -29,3 +29,5 @@ Highlight.js        BSD LICENSE             https://highlightjs.org
 Bootstrap           Apache LICENSE 2.0      http://getbootstrap.com
 summernote          MIT LICENSE             https://summernote.org/
 ACE                 BSD 3-clause            https://ace.c9.io/
+Bootstrap Languages Apache LICENSE 2.0      http://usrz.github.io/bootstrap-languages
+                    
