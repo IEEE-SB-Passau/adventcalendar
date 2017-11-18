@@ -75,6 +75,7 @@ class CSRFFilterError extends ErrorHandler with PermissionCheck {
   override def handle(req: RequestHeader, msg: String): Result = {
     implicit val sessionUser = getUserFromSession(req.session)
     implicit val flash = Flash()
-    BadRequest(views.html.errors.eText(Messages("error.csrf")))
+    implicit val rs = req
+    BadRequest(views.html.errors.eText(Messages("error.csrf"))(flash, sessionUser, rs, request2lang))
   }
 }

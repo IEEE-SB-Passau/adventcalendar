@@ -45,6 +45,6 @@ function loadFileAsText(input, textarea) {
 // fix summernote link mangling
 $('.wysiwyg').summernote({
     onCreateLink: function (url) {
-        return url;
+        return jsRoutes.org.ieee_passau.controllers.MainController.calendar().url + url;
     }
 });

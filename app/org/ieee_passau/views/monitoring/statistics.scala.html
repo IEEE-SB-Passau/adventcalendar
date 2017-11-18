@@ -2,7 +2,7 @@
 @import org.ieee_passau.views.html.main
 @import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.Flash
-@(numJobs1H: Int, vms1H: List[(String, Int)], langs1H: List[(String, Int)], numJobsFull: Int, vmsFull: List[(String, Int)], langsFull: List[(String, Int)])(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
+@(numJobs1H: Int, vms1H: List[(String, Int)], langs1H: List[(String, Int)], numJobsFull: Int, vmsFull: List[(String, Int)], langsFull: List[(String, Int)])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main(Messages("nav.admin.stats")) {
     <div class="row"><div class="col-sm-12"><h3>@Messages("general.lasthour")</h3></div></div>

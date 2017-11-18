@@ -4,7 +4,7 @@
 @import org.ieee_passau.views.html.main
 @import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.Flash
-@(problems: List[ProblemInfo])(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
+@(problems: List[ProblemInfo])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main(Messages("nav.problems")) {
     <table class="table table-striped">

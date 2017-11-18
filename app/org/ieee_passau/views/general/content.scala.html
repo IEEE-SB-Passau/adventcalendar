@@ -3,7 +3,7 @@
 @import play.api.i18n.Lang
 @import play.api.mvc.Flash
 @import play.twirl.api.Html
-@(posting: Posting)(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
+@(posting: Posting)(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main(Messages(posting.title)) {
     <h3>@Messages(posting.title)</h3>

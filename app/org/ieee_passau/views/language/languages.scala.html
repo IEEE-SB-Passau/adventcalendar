@@ -3,7 +3,7 @@
 @import org.ieee_passau.views.html.main
 @import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.RequestHeader
-@(languages: List[Language])(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
+@(languages: List[Language])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main(Messages("codelang.list.title") + " ") {
     <table class="table table-striped">

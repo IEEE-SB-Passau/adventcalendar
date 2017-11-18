@@ -40,7 +40,8 @@ object MainController extends Controller with PermissionCheck {
   def jsRoutes: Action[AnyContent] = Action { implicit request =>
     Ok(
       Routes.javascriptRouter("jsRoutes")(
-        routes.javascript.MainController.codeEditor
+        org.ieee_passau.controllers.routes.javascript.MainController.codeEditor,
+        org.ieee_passau.controllers.routes.javascript.MainController.calendar
       )
     ).as("text/javascript")
   }

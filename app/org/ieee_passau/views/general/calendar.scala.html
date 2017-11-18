@@ -3,7 +3,7 @@
 @import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.Flash
 @import play.twirl.api.Html
-@(posting: Posting, problems: List[Problem])(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
+@(posting: Posting, problems: List[Problem])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main(Messages(posting.title), isFullPage = true) {
     @Html(posting.content)

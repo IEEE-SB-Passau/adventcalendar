@@ -3,7 +3,7 @@
 @import org.ieee_passau.views.html.main
 @import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.Flash
-@(users: List[(Int, String, Boolean, Int, Int, Int)])(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
+@(users: List[(Int, String, Boolean, Int, Int, Int)])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main(Messages("nav.ranking")) {
     <table class="table table-striped">

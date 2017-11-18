@@ -52,10 +52,6 @@
         <div id="codeEditor"></div>
     </fieldset>
 
-    <script type="text/javascript" src="@org.ieee_passau.controllers.routes.MainController.jsRoutes"></script>
-    @helper.javascriptRouter("jsRoutes")(
-        routes.javascript.MainController.codeEditor
-    )
     <script type="text/javascript">
         var reloadMessage = '@Messages("submit.codeeditor.reload")';
 

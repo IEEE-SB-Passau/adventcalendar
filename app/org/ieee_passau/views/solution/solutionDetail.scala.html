@@ -5,7 +5,7 @@
 @import play.api.mvc.Flash
 @import play.twirl.api.TemplateMagic._
 @import scala.language.implicitConversions
-@(s: SolutionListEntry, languages: List[Language], user: User, problem: Problem)(implicit flash: Flash, sessionUser: Option[User], lang: Lang)
+@(s: SolutionListEntry, languages: List[Language], user: User, problem: Problem)(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main(Messages("submission.title") + " " + s.solution.id.get) {
     <div class="well">
