@@ -1,7 +1,7 @@
 @import helper._
 @import org.ieee_passau.models.{Posting, User}
 @import org.ieee_passau.utils.LanguageHelper
-@import org.ieee_passau.views.html.bootstrap3.{buttonSave, fileloader, text, textareaBs}
+@import org.ieee_passau.views.html.bootstrap3.{buttonSave, fileloader, textareaBs}
 @import org.ieee_passau.views.html.main
 @import play.api.data.Form
 @import play.api.i18n.{Lang, Messages}
@@ -42,9 +42,7 @@
                                class="form-control"
                                id="title"
                                name="title"
-                               value="@if(post("lang").value.isDefined) {
-                                        @Messages(post("title").value.getOrElse(""))(Lang(post("lang").value.get))
-                                      } else { @title }"
+                               value="@if(post("lang").value.isDefined) { @Messages(post("title").value.getOrElse(""))(Lang(post("lang").value.get)) } else { @title }"
                                disabled/>
                         <input type="hidden" name="title" value="@post("title").value.getOrElse("")" />
 
