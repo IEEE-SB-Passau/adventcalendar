@@ -103,7 +103,8 @@ object UserController extends Controller with PermissionCheck {
       },
 
       registration => {
-        val createdUser: User = registration.makeUser
+        val createdUser: User = registration.makeUser(request2lang)
+        Users += createdUser
         val link = org.ieee_passau.controllers.routes.UserController.activate(createdUser.activationToken.get)
           .absoluteURL(secure = play.Configuration.root().getBoolean("application.https", false))
         val regMail = Email(
@@ -113,7 +114,6 @@ object UserController extends Controller with PermissionCheck {
           bodyText = Some(Messages("email.register.body", createdUser.username, link))
         )
         MailerPlugin.send(regMail)
-        Users += createdUser
         Redirect(org.ieee_passau.controllers.routes.UserController.login())
           .flashing("success" -> Messages("user.register.error.existing", createdUser.username))
       }

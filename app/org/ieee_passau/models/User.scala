@@ -4,6 +4,7 @@ import org.ieee_passau.utils.PasswordHasher
 import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
 import play.api.db.slick.{Session => _, _}
+import play.api.i18n.Lang
 
 import scala.slick.lifted.{CompiledFunction, ProvenShape}
 
@@ -84,7 +85,7 @@ case class UserLogin(username: String, password: String) {
 
 case class UserRegistration(username: String, password: (String, String), email: String, semester: Option[Int],
                             studySubject: Option[String], school: Option[String]) {
-  def makeUser: User = {
+  def makeUser(lang: Lang): User = {
     val pwd = PasswordHasher.hashPassword(this.password._1)
     val link = PasswordHasher.generateUrlString()
 
@@ -99,7 +100,7 @@ case class UserRegistration(username: String, password: (String, String), email:
       semester = this.semester,
       studySubject = this.studySubject,
       school = this.school,
-      lang = None,
+      lang = Some(lang.code),
       activationToken = Some(link)
     )
   }
