@@ -6,7 +6,7 @@ import org.ieee_passau.utils.{PasswordHasher, PermissionCheck}
 import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
 import play.api.db.slick._
-import play.api.i18n.Messages
+import play.api.i18n.{Lang, Messages}
 import play.api.libs.mailer._
 import play.api.mvc._
 
@@ -203,17 +203,24 @@ object UserController extends Controller with PermissionCheck {
   def updateLang(lang: String): Action[AnyContent] = DBAction { implicit rs =>
     implicit val sessionUser = getUserFromSession(request2session)
 
-    if (sessionUser.nonEmpty) {
-      val user = sessionUser.get
-      Users.update(user.id.get, user.copy(lang = Some(lang)))
-    }
+    val maybeLang = Lang.get(lang)
+    if (maybeLang.isEmpty || !Lang.availables.contains(maybeLang.get)) {
+      Redirect(org.ieee_passau.controllers.routes.MainController.calendar())
+        .flashing("danger" -> Messages("language.unsupported"))
 
-    val refererUrl = rs.headers.get("referer")
-    val cookie = Cookie(play.Play.langCookieName(), lang)
-    if (refererUrl.nonEmpty) {
-      Redirect(refererUrl.get, 303).withCookies(cookie)
     } else {
-      Redirect(org.ieee_passau.controllers.routes.MainController.calendar()).withCookies(cookie)
+      if (sessionUser.nonEmpty) {
+        val user = sessionUser.get
+        Users.update(user.id.get, user.copy(lang = Some(lang)))
+      }
+
+      val refererUrl = rs.headers.get("referer")
+      val cookie = Cookie(play.Play.langCookieName(), lang)
+      if (refererUrl.nonEmpty) {
+        Redirect(refererUrl.get, 303).withCookies(cookie)
+      } else {
+        Redirect(org.ieee_passau.controllers.routes.MainController.calendar()).withCookies(cookie)
+      }
     }
   }
 
