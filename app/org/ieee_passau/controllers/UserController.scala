@@ -57,7 +57,14 @@ object UserController extends Controller with PermissionCheck {
 
     UserForms.loginForm.bindFromRequest.fold(
       errorForm => {
-        BadRequest(org.ieee_passau.views.html.user.login(errorForm))
+        // Hack to clear the password field
+        // set the old username
+        val tmp1 = UserForms.loginForm.bind(Map("username" -> errorForm("username").value.getOrElse("")))
+        val tmp2 = if (errorForm.hasGlobalErrors)
+          // if global error -> login failed due to failed auth, clear the pass to short error
+          tmp1.discardingErrors.withGlobalError(Messages("user.login.error"))
+        else tmp1
+        BadRequest(org.ieee_passau.views.html.user.login(tmp2))
       },
 
       userLogin => {
