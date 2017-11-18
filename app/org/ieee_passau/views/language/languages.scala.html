@@ -33,7 +33,7 @@
 
     @if(sessionUser.isDefined && sessionUser.get.admin) {
         <p class="text-right">
-            <a class="btn btn-default" href="@org.ieee_passau.controllers.routes.LanguageController.index"><span class="glyphicon glyphicon-user"></span> @Messages("general.edit")</a>
+            <a class="btn btn-default" href="@org.ieee_passau.controllers.routes.LanguageController.index"><span class="glyphicon glyphicon-pencil"></span> @Messages("general.edit")</a>
         </p>
     }
 }

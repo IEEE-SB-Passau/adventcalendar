@@ -1,6 +1,6 @@
 @import helper._
 @import org.ieee_passau.models.{Language, User}
-@import org.ieee_passau.views.html.bootstrap3.{buttonSave, number, text}
+@import org.ieee_passau.views.html.bootstrap3.{buttonSave, number, text, textareaBs}
 @import org.ieee_passau.views.html.main
 @import play.api.data.Form
 @import play.api.i18n.{Lang, Messages}
@@ -21,7 +21,7 @@
                 @text(language("name"), label = Messages("codelang.name") , placeholder = "C, gcc")
                 @number(language("cpuFactor"), label = Messages("codelang.cpufactor"), step=0.1f)
                 @number(language("memFactor"), label = Messages("codelang.memfactor"), step=0.1f)
-                @text(language("comment"), label = Messages("codelang.comment"))
+                @textareaBs(language("comment"), label = Messages("codelang.comment"), wysiwyg = true)
 
                 @buttonSave()
             </div>

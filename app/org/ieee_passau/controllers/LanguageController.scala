@@ -57,7 +57,8 @@ object LanguageController extends Controller with PermissionCheck {
         },
 
         codelang => {
-          Languages.update(language, lng.copy(name = codelang.name, cpuFactor = codelang.cpuFactor, memFactor = codelang.memFactor))
+          Languages.update(language, lng.copy(name = codelang.name, cpuFactor = codelang.cpuFactor,
+            memFactor = codelang.memFactor, comment = codelang.comment))
           Redirect(org.ieee_passau.controllers.routes.LanguageController.edit(language))
             .flashing("success" -> Messages("codelang.update.message", codelang.id))
         }
