@@ -1,8 +1,9 @@
 package org.ieee_passau.controllers
 
+import org.apache.commons.mail.EmailException
 import org.ieee_passau.forms.UserForms
 import org.ieee_passau.models.{User, Users}
-import org.ieee_passau.utils.{PasswordHasher, PermissionCheck}
+import org.ieee_passau.utils.{CausedBy, PasswordHasher, PermissionCheck}
 import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
 import play.api.db.slick._
@@ -104,7 +105,6 @@ object UserController extends Controller with PermissionCheck {
 
       registration => {
         val createdUser: User = registration.makeUser(request2lang)
-        Users += createdUser
         val link = org.ieee_passau.controllers.routes.UserController.activate(createdUser.activationToken.get)
           .absoluteURL(secure = play.Configuration.root().getBoolean("application.https", false))
         val regMail = Email(
@@ -113,9 +113,22 @@ object UserController extends Controller with PermissionCheck {
           to = List(createdUser.email),
           bodyText = Some(Messages("email.register.body", createdUser.username, link))
         )
-        MailerPlugin.send(regMail)
-        Redirect(org.ieee_passau.controllers.routes.UserController.login())
-          .flashing("success" -> Messages("user.register.error.existing", createdUser.username))
+        var id = -1
+        try {
+          id = (Users returning Users.map(_.id)) += createdUser
+          MailerPlugin.send(regMail)
+
+          Redirect(org.ieee_passau.controllers.routes.UserController.login())
+            .flashing("success" -> Messages("user.register.error.existing", createdUser.username))
+        } catch {
+          case e: EmailException =>
+            Users.filter(_.id === id).delete
+            BadRequest(org.ieee_passau.views.html.user.register(UserForms.registrationForm.fill(registration).withError("invalidEmail", "error.email")))
+
+          case e: Throwable =>
+            Users.filter(_.id === id).delete
+            throw e
+        }
       }
     )
   }}
