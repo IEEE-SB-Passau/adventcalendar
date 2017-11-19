@@ -21,7 +21,7 @@ object UserForms {
     )
     ((id: Option[Int], username: String, password: Option[String], email: String, active: Boolean, admin: Boolean,
         hidden: Boolean, semester: Option[Int], studySubject: Option[String], school: Option[String]) =>
-      User(id, username, password.getOrElse(""), email, active, admin, hidden, semester, studySubject, school, None, None))
+      User(id, username, password.getOrElse(""), email, active, admin, hidden, false, semester, studySubject, school, None, None))
     ((user: User) => Some(user.id, user.username, Some(""), user.email, user.active, user.admin, user.hidden, user.semester, user.studySubject, user.school))
   )
 

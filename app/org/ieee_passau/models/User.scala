@@ -9,7 +9,7 @@ import play.api.i18n.Lang
 import scala.slick.lifted.{CompiledFunction, ProvenShape}
 
 case class User(id: Option[Int], username: String, password: String, email: String, active: Boolean, admin: Boolean,
-                hidden: Boolean, semester: Option[Int], studySubject: Option[String], school: Option[String],
+                hidden: Boolean, system: Boolean, semester: Option[Int], studySubject: Option[String], school: Option[String],
                 lang: Option[String], activationToken: Option[String]) extends Entity[User] {
   override def withId(id: Int): User = this.copy(id = Some(id))
 }
@@ -21,13 +21,14 @@ class Users(tag: Tag) extends TableWithId[User](tag, "users") {
   def active: Column[Boolean] = column[Boolean]("is_active")
   def admin: Column[Boolean] = column[Boolean]("is_admin")
   def hidden: Column[Boolean] = column[Boolean]("is_hidden")
+  def system: Column[Boolean] = column[Boolean]("is_system")
   def semester: Column[Int] = column[Int]("semester")
   def school: Column[String] = column[String]("school")
   def studySubject: Column[String] = column[String]("study_subject")
   def activationToken: Column[String] = column[String]("token")
   def lang: Column[String] = column[String]("language")
 
-  override def * : ProvenShape[User] = (id.?, username, password, email, active, admin, hidden, semester.?,
+  override def * : ProvenShape[User] = (id.?, username, password, email, active, admin, hidden, system, semester.?,
     studySubject.?, school.?, lang.?, activationToken.?) <> (User.tupled, User.unapply)
 }
 
@@ -97,6 +98,7 @@ case class UserRegistration(username: String, password: (String, String), email:
       active = false,
       admin = false,
       hidden = false,
+      system = false,
       semester = this.semester,
       studySubject = this.studySubject,
       school = this.school,

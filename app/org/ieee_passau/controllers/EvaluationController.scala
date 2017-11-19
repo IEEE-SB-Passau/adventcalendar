@@ -271,7 +271,7 @@ object EvaluationController extends Controller with PermissionCheck {
 
   def registerVM: Action[NodeSeq] = Action(parse.xml) { implicit rs =>
     implicit val sessionUser = getUserFromSession(request2session)
-    if (sessionUser.isEmpty || !sessionUser.get.admin) {
+    if (sessionUser.isEmpty || !sessionUser.get.system) {
       Unauthorized(org.ieee_passau.views.html.errors.e403())
     }
 
@@ -312,7 +312,7 @@ object EvaluationController extends Controller with PermissionCheck {
     Ok("")
   }
 
-  def removeVM(): Action[AnyContent] = requireAdmin { admin => Action { implicit rs =>
+  def removeVM(): Action[AnyContent] = requireSystem { system => Action { implicit rs =>
     val name = rs.body.asFormUrlEncoded.get("name").head
     Akka.system.actorSelection("user/Evaluator/VMMaster") ! RemoveVM(name)
     Ok("")
