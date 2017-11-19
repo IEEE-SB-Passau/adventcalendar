@@ -171,7 +171,7 @@ object UserController extends Controller with PermissionCheck {
           subject = Messages("email.header") + " " + Messages("email.passwordreset.subject"),
           from = play.Configuration.root().getString("email.from"),
           to = List(user.email),
-          bodyText = Some(Messages("email.passwordreset.body"))
+          bodyText = Some(Messages("email.passwordreset.body", user.username, link))
         )
         MailerPlugin.send(regMail)
         Users.update(user.id.get, user.copy(activationToken = Some(token)))
