@@ -28,9 +28,9 @@
                 <td>@door @title</td>
                 <td>@user</td>
                 <td>@language</td>
-                <td><abbr class="timeago" title="@dateSub.format("yyyy-MM-dd'T'HH:mmZ")">@dateSub.format("dd.MM.yyyy HH:mm")</abbr></td>
+                <td><abbr class="timeago" title="@dateSub.format("yyyy-MM-dd'T'HH:mm:ssZ")">@dateSub.format("dd.MM.yyyy HH:mm:ss")</abbr></td>
                 <td>@if(dateQueued.isDefined) {
-                    @Messages("status.evalstate.assigned") <abbr class="timeago" title="@dateQueued.get.format("yyyy-MM-dd'T'HH:mmZ")">@dateQueued.get.format("dd.MM.yyyy HH:mm")</abbr>
+                    @Messages("status.evalstate.assigned") <abbr class="timeago" title="@dateQueued.get.format("yyyy-MM-dd'T'HH:mm:ssZ")">@dateQueued.get.format("dd.MM.yyyy HH:mm:ss")</abbr>
                 } else {
                     @Messages("status.evalstate.pending")
                 }</td>
