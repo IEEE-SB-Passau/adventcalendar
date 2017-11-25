@@ -133,8 +133,8 @@ object MainController extends Controller with PermissionCheck {
         (Messages("submit.ratelimit.message") + " " + Messages("submit.ratelimit.queue")))
     }
 
-    val lang = rs.body.dataParts("lang").headOption.getOrElse("")
-    if (Languages.byLang(lang).isEmpty) {
+    val maybeCodelang = Languages.byLang(rs.body.dataParts("lang").headOption.getOrElse(""))
+    if (maybeCodelang.isEmpty) {
       return Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door)).flashing("danger" ->
         (Messages("submit.error.message") + " " + Messages("submit.error.invalidlang")))
     }
@@ -143,9 +143,10 @@ object MainController extends Controller with PermissionCheck {
     val remoteAddress = Some(rs.remoteAddress.take(50))
     val userAgent = rs.headers.get("User-Agent").fold(None: Option[String])(ua => Some(ua.take(150)))
 
+    val codelang = maybeCodelang.get
     val fixedFilename =
       // special handling for java and scala
-      if (lang == "JAVA" || lang == "SCALA")
+      if (codelang.id == "JAVA" || codelang.id == "SCALA")
 
       // if we know the filename, use it
         if (!filename.isEmpty) {
@@ -159,14 +160,14 @@ object MainController extends Controller with PermissionCheck {
         } else "Solution"
 
       // otherwise just use "infile", compilers will know how to handle it
-      else "infile"
+      else "infile." + codelang.extension
 
 
     try {
       val pid = Problems.byDoor(door).first.id.get
 
       val solution = (Solutions returning Solutions.map(_.id)) +=
-        Solution(None, sessionUser.get.id.get, pid, lang, sourcecode, fixedFilename, remoteAddress, userAgent, None, now)
+        Solution(None, sessionUser.get.id.get, pid, codelang.id, sourcecode, fixedFilename, remoteAddress, userAgent, None, now)
 
       (for {
         t <- Testcases if t.problemId === pid
