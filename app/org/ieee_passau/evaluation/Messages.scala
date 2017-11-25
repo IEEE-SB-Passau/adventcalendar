@@ -67,10 +67,12 @@ object Messages {
                           progErr: Option[String],
                           progExit: Option[Int],
                           progRuntime: Option[Double],
+                          progMemory: Option[Int],
                           compOut: Option[String],
                           compErr: Option[String],
                           compExit: Option[Int],
                           compRuntime: Option[Double],
+                          compMemory: Option[Int],
                           score: Option[Int],
                           result: Option[Result]) {
 

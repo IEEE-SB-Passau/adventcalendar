@@ -36,7 +36,7 @@ class VMClient(host: String, port: Int, name:String)
   private var timeout = Timeout(MathHelper.makeDuration(play.Configuration.root().getString("evaluator.eval.basetime", "60 seconds")).mul(2))
 
   private case class ExecutionResult(var duration: Duration = 0 seconds,
-                                     var memory: Float = 0,
+                                     var memory: Int = 0,
                                      var terminationResult: Option[String] = None,
                                      var stdout: Option[String] = None,
                                      var stderr: Option[String] = None,
@@ -156,7 +156,7 @@ class VMClient(host: String, port: Int, name:String)
         compilerResult.stdout = Some(base64Decode((resultXml \\ "outputs" \ "compilation" \ "streams" \ "stdOut").text))
         compilerResult.stderr = Some(base64Decode((resultXml \\ "outputs" \ "compilation" \ "streams" \ "stdErr").text))
         compilerResult.duration = Duration((resultXml \\ "utilization" \ "compilation" \ "runtime").text.toFloat, MILLISECONDS)
-        compilerResult.memory = (resultXml \\ "utilization" \ "compilation" \ "memory").text.toFloat
+        compilerResult.memory = (resultXml \\ "utilization" \ "compilation" \ "memory").text.toInt
         compilerResult.terminationResult = Some((resultXml \\ "outputs" \ "compilation" \ "terminationReason").text)
 
         log.info("%s compiled sourcecode for %s with exit code %d in %d millis".format(this, job,
@@ -168,7 +168,7 @@ class VMClient(host: String, port: Int, name:String)
         evaluationResult.stdout = Some(base64Decode((resultXml \\ "outputs" \ "evaluation" \ "streams" \ "stdOut").text))
         evaluationResult.stderr = Some(base64Decode((resultXml \\ "outputs" \ "evaluation" \ "streams" \ "stdErr").text))
         evaluationResult.duration = Duration((resultXml \\ "utilization" \ "evaluation" \ "runtime").text.toFloat, MILLISECONDS)
-        evaluationResult.memory = (resultXml \\ "utilization" \ "evaluation" \ "memory").text.toFloat
+        evaluationResult.memory = (resultXml \\ "utilization" \ "evaluation" \ "memory").text.toInt
         evaluationResult.terminationResult = Some((resultXml \\ "outputs" \ "evaluation" \ "terminationReason").text)
 
         log.info("%s evaluated sourcecode for %s with exit code %d in %d millis".format(this, job,
@@ -285,10 +285,12 @@ class VMClient(host: String, port: Int, name:String)
       progErr = evaluationResult.progErr,
       progExit = evaluationResult.exitCode,
       progRuntime = Some(evaluationResult.duration.toMillis / 1000.0),
+      progMemory = Some(evaluationResult.memory),
       compOut = compilerResult.stdout,
       compErr = compilerResult.stderr,
       compExit = compilerResult.exitCode,
       compRuntime = Some(compilerResult.duration.toMillis / 1000.0),
+      compMemory = Some(compilerResult.memory),
       result = evaluationResult.result,
       score = evaluationResult.score
     )
