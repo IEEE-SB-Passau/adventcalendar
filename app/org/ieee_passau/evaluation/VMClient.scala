@@ -45,7 +45,8 @@ class VMClient(host: String, port: Int, name:String)
                                      var result: Option[Result] = None,
                                      var progErr: Option[String] = None)
 
-  private val connection = context.actorOf(TCPActor.props(host, port))
+  // 10 * base timeout seems to be enough, up if read times out
+  private val connection = context.actorOf(TCPActor.props(host, port, timeout.duration.mul(5).toMillis.toInt))
 
   override def supervisorStrategy: SupervisorStrategy = OneForOneStrategy() {
     case _ => Escalate
@@ -314,11 +315,10 @@ class VMClient(host: String, port: Int, name:String)
 }
 
 object TCPActor {
-  def props(host: String, port: Int): Props = Props(new TCPActor(host, port))
+  def props(host: String, port: Int, timeout: Int): Props = Props(new TCPActor(host, port, timeout))
 }
 
-class TCPActor(host: String, port: Int) extends EvaluationActor {
-  private val timeout = Timeout(MathHelper.makeDuration(play.Configuration.root().getString("evaluator.inputregulator.joblifetime", "90 seconds")) - new FiniteDuration(5, SECONDS)).duration.toSeconds.toInt
+class TCPActor(host: String, port: Int, timeout: Int) extends EvaluationActor {
 
   private var socket: Socket = _
 
