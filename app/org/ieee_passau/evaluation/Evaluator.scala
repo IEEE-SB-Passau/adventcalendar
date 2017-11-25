@@ -21,7 +21,7 @@ class Evaluator extends EvaluationActor {
   private def start = {
     val cfg = play.Configuration.root()
     val jobLimit = cfg.getInt("evaluator.inputregulator.joblimit", 1)
-    val jobLifetime = MathHelper.makeDuration(cfg.getString("evaluator.inputregulator.joblifetime", "10 minutes"))
+    val jobLifetime = MathHelper.makeDuration(play.Configuration.root().getString("evaluator.eval.basetime", "60 seconds")).mul(10)
 
     context.actorOf(Props[DBReader], name = "DBReader")
     context.actorOf(Props[DBWriter], name = "DBWriter")

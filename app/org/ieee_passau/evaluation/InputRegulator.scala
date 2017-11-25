@@ -28,7 +28,7 @@ object InputRegulator {
   * Forwards jobs to the job router.
   */
 class InputRegulator(jobLimit: Int, jobLifetime: Duration) extends EvaluationActor {
-  val STARTUP_DELAY: FiniteDuration = 500 millis
+  val STARTUP_DELAY: FiniteDuration = 2 minutes
   val TICK_INTERVAL: FiniteDuration = 1 second
   val TICK_MSG = "tick"
 
