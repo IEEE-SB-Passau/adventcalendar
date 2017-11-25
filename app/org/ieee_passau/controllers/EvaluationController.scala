@@ -324,7 +324,8 @@ object EvaluationController extends Controller with PermissionCheck {
       r <- Testruns
       s <- r.solution if s.id === id
     } yield r).list.map { testrun =>
-      Testruns.update(testrun.id.get, testrun.copy(result = Queued, stage = Some(0), vm = None))
+      Testruns.update(testrun.id.get, testrun.copy(result = Queued, stage = Some(0), vm = None,
+        progRuntime = Some(0), progMemory = Some(0), compRuntime = Some(0), compMemory = Some(0)))
     }
     Redirect(org.ieee_passau.controllers.routes.EvaluationController.index())
       .flashing("success" -> play.api.i18n.Messages("jobs.control.revaluate.message"))
