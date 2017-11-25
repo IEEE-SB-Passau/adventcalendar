@@ -155,7 +155,7 @@ class VMClient(host: String, port: Int, name:String)
                                   else Some((resultXml \\ "outputs" \ "compilation" \ "returnCode").text.toInt)
         compilerResult.stdout = Some(base64Decode((resultXml \\ "outputs" \ "compilation" \ "streams" \ "stdOut").text))
         compilerResult.stderr = Some(base64Decode((resultXml \\ "outputs" \ "compilation" \ "streams" \ "stdErr").text))
-        compilerResult.duration = Duration((resultXml \\ "utilization" \ "compilation" \ "runtime").text.toFloat, MILLISECONDS)
+        compilerResult.duration = Duration((resultXml \\ "utilization" \ "compilation" \ "runtime").text.toDouble, SECONDS)
         compilerResult.memory = (resultXml \\ "utilization" \ "compilation" \ "memory").text.toInt
         compilerResult.terminationResult = Some((resultXml \\ "outputs" \ "compilation" \ "terminationReason").text)
 
@@ -167,7 +167,7 @@ class VMClient(host: String, port: Int, name:String)
                                     else Some((resultXml \\ "outputs" \ "evaluation" \ "returnCode").text.toInt)
         evaluationResult.stdout = Some(base64Decode((resultXml \\ "outputs" \ "evaluation" \ "streams" \ "stdOut").text))
         evaluationResult.stderr = Some(base64Decode((resultXml \\ "outputs" \ "evaluation" \ "streams" \ "stdErr").text))
-        evaluationResult.duration = Duration((resultXml \\ "utilization" \ "evaluation" \ "runtime").text.toFloat, MILLISECONDS)
+        evaluationResult.duration = Duration((resultXml \\ "utilization" \ "evaluation" \ "runtime").text.toDouble, SECONDS)
         evaluationResult.memory = (resultXml \\ "utilization" \ "evaluation" \ "memory").text.toInt
         evaluationResult.terminationResult = Some((resultXml \\ "outputs" \ "evaluation" \ "terminationReason").text)
 
