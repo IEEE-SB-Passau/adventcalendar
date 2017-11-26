@@ -89,9 +89,14 @@
                                         <pre>@t.testrun.progErr</pre>
                                     }
 
-                                    <p><strong>@Messages("submission.program_return"):</strong> @t.testrun.progExit</p>
-                                    <p><strong>@Messages("submission.program_runtime"):</strong> @t.testrun.progRuntime</p>
-                                    <p><strong>@Messages("submission.program_memory"):</strong> @t.testrun.progMemory</p>
+                                    <p><strong>@Messages("submission.program_return"):</strong> @t.testrun.progExit.getOrElse("/")</p>
+                                    <p><strong>@Messages("submission.program_runtime"):</strong> @t.testrun.progRuntime.getOrElse(0f).formatted("%.2f") @Messages("general.seconds")</p>
+                                    <p><strong>@Messages("submission.program_memory"):</strong> @defining(t.testrun.progMemory.getOrElse(0)) { mem: Int =>
+                                        @if(mem < 1024)               { @mem                     B} else {
+                                        @if(mem < 1024 * 1024)        { @(mem/1024)             kB} else {
+                                        @if(mem < 1024 * 1024 * 1024) { @(mem/(1024*1024))      MB} else {
+                                                                        @(mem/(1024*1024*1024)) GB}}}
+                                    }</p>
                                 }
                             }
                         </div></div>
