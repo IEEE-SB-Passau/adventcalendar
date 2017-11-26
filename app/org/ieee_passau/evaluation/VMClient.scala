@@ -97,12 +97,10 @@ class VMClient(host: String, port: Int, name:String)
         </outputs>
         <utilization>
           <compilation>
-            <cpu>0.0</cpu>
             <memory>0.0</memory>
             <runtime>0.0</runtime>
           </compilation>
           <evaluation>
-            <cpu>0.0</cpu>
             <memory>0.0</memory>
             <runtime>0.0</runtime>
           </evaluation>
@@ -137,7 +135,7 @@ class VMClient(host: String, port: Int, name:String)
               <outputs>
               </outputs>
               <limits>
-                <cpu>{runtimeLimit.toSeconds}</cpu>
+                <runtime>{runtimeLimit.toSeconds}</runtime>
                 <!-- seconds -->
                 <memory>{(lang.memFactor * problem.memFactor * play.Configuration.root().getInt("evaluator.eval.basemem", 100)).floor.toInt}</memory>
                 <!-- MB -->
@@ -245,7 +243,7 @@ class VMClient(host: String, port: Int, name:String)
                 {if (outputStdoutCheck) {<file id="check">{{homedir}}/check</file>}}
               </outputs>
               <limits>
-                <cpu>120</cpu>
+                <runtime>120</runtime>
                 <memory>2048</memory>
               </limits>
             </job>
