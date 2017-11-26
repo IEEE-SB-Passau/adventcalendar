@@ -110,7 +110,7 @@ class VMClient(host: String, port: Int, name:String)
     */
 
     job match {
-      case BaseJob(pid, rid, l, program, programName, stdin, expout) => {
+      case BaseJob(pid, _, l, program, programName, stdin, expout) => {
         val lang = Languages.byLang(l).get
         val problem = DB.withSession { implicit session =>
           Problems.byId(pid).first
@@ -183,7 +183,7 @@ class VMClient(host: String, port: Int, name:String)
         } else {
           // Magic newline handling
           val outLines = evaluationResult.stdout.getOrElse("").split("(\\n|\\r\\n|\\r)")
-          val expLines = job.expectedOut.split("(\\n|\\r\\n|\\r)")
+          val expLines = expout.split("(\\n|\\r\\n|\\r)")
           //noinspection CorrespondsUnsorted
           if (!outLines.sameElements(expLines)) {
             WrongAnswer
@@ -217,7 +217,7 @@ class VMClient(host: String, port: Int, name:String)
         })
       }
 
-      case NextStageJob(rid, stage, program, stdin, progOut, expOut, cmd, input, outputStdoutCheck, outputScore, filename, file) => {
+      case NextStageJob(_, _, program, stdin, progOut, expOut, cmd, input, outputStdoutCheck, outputScore, filename, file) => {
         val lang = Languages.byLang(if (filename.endsWith("jar")) {"JAVAJAR"} else {"BINARY"}).get
         timeout = Timeout(MathHelper.makeDuration("180 seconds"))
         // Deploy binary file
