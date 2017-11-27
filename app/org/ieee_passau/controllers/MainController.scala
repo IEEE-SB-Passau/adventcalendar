@@ -144,24 +144,7 @@ object MainController extends Controller with PermissionCheck {
     val userAgent = rs.headers.get("User-Agent").fold(None: Option[String])(ua => Some(ua.take(150)))
 
     val codelang = maybeCodelang.get
-    val fixedFilename =
-      // special handling for java and scala and c#
-      if (codelang.id == "JAVA" || codelang.id == "SCALA" || codelang.id == "CSHARP" || codelang.id == "VB")
-
-      // if we know the filename, use it
-        if (!filename.isEmpty) {
-          val ext = filename.lastIndexOf(".")
-
-          // but without file extension
-          if (ext != -1) filename.substring(0, ext)
-          else filename
-
-        // else use "Solution" as name
-        } else "Solution"
-
-      // otherwise just use "infile.<ext>", compilers will know how to handle it
-      else "infile." + codelang.extension
-
+    val fixedFilename = if (!filename.isEmpty) filename else "Solution." + codelang.extension
 
     try {
       val pid = Problems.byDoor(door).first.id.get
