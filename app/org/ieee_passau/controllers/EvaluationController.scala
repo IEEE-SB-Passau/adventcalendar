@@ -54,7 +54,7 @@ object EvaluationController extends Controller with PermissionCheck {
     } yield (s.id, s.language, u.username, p.id, p.door, p.title, s.created, tr.result, tr.stage.?)
 
     val solutions = solutionsQuery.list.view.groupBy(_._1).map { case (sid, sols) =>
-      val solvedTestcases = sols.count(_._7 == Passed)
+      val solvedTestcases = sols.count(_._8 == Passed)
       val allTestcases = sols.length
 
       val title = ProblemTranslations.byProblemLang(sols.head._4/*problem*/, lng).firstOption.fold(sols.head._6)(_.title)
