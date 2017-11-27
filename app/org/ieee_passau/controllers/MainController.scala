@@ -146,7 +146,7 @@ object MainController extends Controller with PermissionCheck {
     val codelang = maybeCodelang.get
     val fixedFilename =
       // special handling for java and scala and c#
-      if (codelang.id == "JAVA" || codelang.id == "SCALA" || codelang.id == "CSHARP")
+      if (codelang.id == "JAVA" || codelang.id == "SCALA" || codelang.id == "CSHARP" || codelang.id == "VB")
 
       // if we know the filename, use it
         if (!filename.isEmpty) {
