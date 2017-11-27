@@ -25,9 +25,9 @@ own licence.
 jQuerry             MIT LICENSE             https://jquery.org
 jQuerry Timeago     MIT LICENSE             http://timeago.yarp.com
 moment.js           MIT LICENSE             http://momentjs.com
-Highlight.js        BSD LICENSE             https://highlightjs.org
+Highlight.js        BSD-3-Clause            https://highlightjs.org
 Bootstrap           Apache LICENSE 2.0      http://getbootstrap.com
 summernote          MIT LICENSE             https://summernote.org/
-ACE                 BSD 3-clause            https://ace.c9.io/
+ACE                 BSD 3-Clause            https://ace.c9.io/
 Bootstrap Languages Apache LICENSE 2.0      http://usrz.github.io/bootstrap-languages
                     
