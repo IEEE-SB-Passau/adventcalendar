@@ -12,7 +12,7 @@ Forth            f90       f90                          Gforth 0.7.3
 FreePascal       pas                                    Free Pascal Compiler version 2.6.4
 Go               vb        vb                           Go 1.9.1
 Haskel           vala      vala                         Glasgow Haskell Compiler Version 8.0.2
-INTERCAL         tcl       tcl                          INTERCAL 0.30
+INTERCAL         tcl       tcl                          C-INTERCAL 0.30
 Java             scala     scala                        OracleJDK 1.8.0-152                                            No packages
 JavaScript       rs        rs                           Node v6.11.5
 Lua              rb        rb                           Lua 5.1.5
