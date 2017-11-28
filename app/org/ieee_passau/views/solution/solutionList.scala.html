@@ -1,5 +1,6 @@
 @import org.ieee_passau.controllers.Beans.SolutionListEntry
-@import org.ieee_passau.models.{Canceled, CompileError, Language, Page, Passed, Private, Public, Queued, User, WrongAnswer}
+@import org.ieee_passau.models.{Canceled, CompileError, Language, Page, Passed, Private, Public, Queued, User}
+@import org.ieee_passau.utils.ViewHelper.isErrorResult
 @import play.api.i18n.{Lang, Messages}
 @import play.twirl.api.Html
 @import play.twirl.api.TemplateMagic._
@@ -11,7 +12,7 @@
 @solutions.map { s =>
     <div id="@s.solution.id" data-state="@s.state">
         <div class="panel @if(s.state == Passed) { panel-success } @if(s.state == Queued) { panel-info }
-            @if(s.state == WrongAnswer) { panel-danger } @if(s.state == Canceled) { panel-warning }">
+            @if(isErrorResult(s.state)) { panel-danger } @if(s.state == Canceled) { panel-warning }">
             @* Create an anchor for the first solution *@
             @if(first && solutions.head == s) { <a name="latest"></a> }
 

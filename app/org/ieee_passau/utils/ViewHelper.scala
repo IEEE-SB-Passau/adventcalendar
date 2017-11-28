@@ -1,6 +1,7 @@
 package org.ieee_passau.utils
 
-import org.ieee_passau.models.{User, Users}
+import com.sun.org.apache.xalan.internal.xsltc.compiler.util.ErrorMsg
+import org.ieee_passau.models._
 import play.api.Play.current
 import play.api.data.Form
 import play.api.db.slick.Config.driver.simple._
@@ -47,5 +48,12 @@ object ViewHelper {
       }}
     }
     (hasError, error)
+  }
+
+  def isErrorResult(result: Result): Boolean = {
+    result match {
+      case ProgramError | CompileError | MemoryExceeded | RuntimeExceeded | WrongAnswer => true
+      case _ => false
+    }
   }
 }
