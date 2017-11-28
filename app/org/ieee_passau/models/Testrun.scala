@@ -10,7 +10,7 @@ case class Testrun(id: Option[Int], solutionId: Int, testcaseId: Int, progOut: O
                    progExit: Option[Int], progRuntime: Option[Double], progMemory: Option[Int], compOut: Option[String],
                    compErr: Option[String], compExit: Option[Int], compRuntime: Option[Double], compMemory: Option[Int],
                    result: Result, score: Option[Int], created: Date, stage: Option[Int], vm: Option[String],
-                   completed: Date) extends Entity[Testrun] {
+                   evalId: Option[String], completed: Date) extends Entity[Testrun] {
   override def withId(id: Int): Testrun = this.copy(id = Some(id))
 }
 
@@ -33,6 +33,7 @@ class Testruns(tag: Tag) extends TableWithId[Testrun](tag, "testruns") {
   def vm: Column[String] = column[String]("vm")
   def completed: Column[Date] = column[Date]("completed")
   def score: Column[Int] = column[Int]("score")
+  def evalId: Column[String] = column[String]("eval_id")
 
   def solution: ForeignKeyQuery[Solutions, Solution] = foreignKey("solution_fk", solutionId, Solutions)(_.id)
   def testcase: ForeignKeyQuery[Testcases, Testcase] = foreignKey("testcase_fk", testcaseId, Testcases)(_.id)
@@ -40,7 +41,7 @@ class Testruns(tag: Tag) extends TableWithId[Testrun](tag, "testruns") {
   override def * : ProvenShape[Testrun] = (id.?, solutionId, testcaseId,
     progOut.?, progErr.?, progExit.?, progRuntime.?, progMemory.?,
     compOut.?, compErr.?, compExit.?, compRuntime.?, compMemory.?,
-    result, score.?, created, stage.?, vm.?, completed) <> (Testrun.tupled, Testrun.unapply)
+    result, score.?, created, stage.?, vm.?, evalId.?, completed) <> (Testrun.tupled, Testrun.unapply)
 }
 
 object Testruns extends TableQuery(new Testruns(_)) {

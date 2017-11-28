@@ -155,7 +155,7 @@ object MainController extends Controller with PermissionCheck {
       (for {
         t <- Testcases if t.problemId === pid
       } yield t.id).foreach(t =>
-        Testruns += Testrun(None, solution, t, None, None, None, None, None, None, None, None, None, None, Queued, None, now, Some(0), None, now)
+        Testruns += Testrun(None, solution, t, None, None, None, None, None, None, None, None, None, None, Queued, None, now, Some(0), None, None, now)
       )
 
     } catch {

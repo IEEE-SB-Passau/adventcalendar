@@ -3,6 +3,7 @@
 @import org.ieee_passau.views.html.main
 @import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.RequestHeader
+@import play.twirl.api.TemplateMagic._
 @(languages: List[Language])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main(Messages("codelang.list.title") + " ") {

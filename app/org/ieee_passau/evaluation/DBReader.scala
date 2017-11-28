@@ -1,5 +1,7 @@
 package org.ieee_passau.evaluation
 
+import java.util.UUID
+
 import org.ieee_passau.evaluation.Messages._
 import org.ieee_passau.models._
 import org.ieee_passau.utils.StringHelper._
@@ -27,10 +29,12 @@ class DBReader extends EvaluationActor {
         val rawJobs = q.sortBy(_._1.asc).take(count).list
         val jobs = rawJobs.map { rawJob =>
           val stage = rawJob._8/*testrun*/.stage.get
+          val uuid = UUID.randomUUID().toString
           if (stage == 0) { // normal evaluation job
             Messages.BaseJob(
               problemId = rawJob._7,
               testrunId = rawJob._2,
+              evalId = uuid,
               language = rawJob._3,
               program = rawJob._4,
               programName = rawJob._9,
@@ -42,6 +46,7 @@ class DBReader extends EvaluationActor {
             Messages.NextStageJob(
               testrunId = rawJob._2,
               stage = stage,
+              evalId = uuid,
               program = rawJob._4,
               stdin = cleanNewlines(rawJob._5),
               expectedOut = cleanNewlines(rawJob._6),

@@ -5,6 +5,7 @@
 @import play.api.data.Form
 @import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.{Flash, RequestHeader}
+@import play.twirl.api.TemplateMagic._
 @import views.html.helper.{CSRF, form}
 @(ticket: (Ticket, User, Problem), answers: List[(Ticket, String)], ticketForm: Form[TicketText])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 

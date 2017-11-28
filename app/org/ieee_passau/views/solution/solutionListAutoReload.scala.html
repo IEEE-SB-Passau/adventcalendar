@@ -1,8 +1,7 @@
 @import org.ieee_passau.controllers.Beans.SolutionListEntry
-@import org.ieee_passau.models.Language
+@import org.ieee_passau.models.{Language, Queued, User}
 @import play.api.i18n.Lang
-@import org.ieee_passau.models.Queued
-@(solutions: List[SolutionListEntry], languages: List[Language], door: Int, showAll: Boolean = false)(implicit lang: Lang)
+@(solutions: List[SolutionListEntry], languages: List[Language], door: Int, showAll: Boolean = false)(implicit lang: Lang, sessionUser: Option[User])
 
 <div id="solutionlist">
     @solutionList(solutions, languages)

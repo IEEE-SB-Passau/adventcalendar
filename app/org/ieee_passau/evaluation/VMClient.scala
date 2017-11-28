@@ -70,7 +70,7 @@ class VMClient(host: String, port: Int, name:String)
     /*
     <ieee-advent-calendar>
       <run>
-        <backendId>b6177f18-4ed7-453e-b1c1-d9679daac2a7</backendId>
+        <evalId>b6177f18-4ed7-453e-b1c1-d9679daac2a7</evalId>
         <successful>True</successful>
         <message></message>
         <outputs>
@@ -110,7 +110,7 @@ class VMClient(host: String, port: Int, name:String)
     */
 
     job match {
-      case BaseJob(pid, _, l, program, programName, stdin, expout) => {
+      case BaseJob(pid, _, evalId, l, program, programName, stdin, expout) => {
         val lang = Languages.byLang(l).get
         val problem = DB.withSession { implicit session =>
           Problems.byId(pid).first
@@ -121,6 +121,7 @@ class VMClient(host: String, port: Int, name:String)
         val data =
           <ieee-advent-calendar>
             <job>
+              <evalId>{evalId}</evalId>
               <program>
                 <filename>{programName}</filename>
                 <content>{base64Encode(program)}</content>
@@ -217,13 +218,14 @@ class VMClient(host: String, port: Int, name:String)
         })
       }
 
-      case NextStageJob(_, _, program, stdin, progOut, expOut, cmd, input, outputStdoutCheck, outputScore, filename, file) => {
+      case NextStageJob(_, _, evalId, program, stdin, progOut, expOut, cmd, input, outputStdoutCheck, outputScore, filename, file) => {
         val lang = Languages.byLang(if (filename.endsWith("jar")) {"JAVAJAR"} else {"BINARY"}).get
         timeout = Timeout(MathHelper.makeDuration("180 seconds"))
         // Deploy binary file
         val data =
           <ieee-advent-calendar>
             <job>
+              <evalId>{evalId}</evalId>
               <program>
                 <filename>{filename}</filename>
                 <content>{Base64.getEncoder.encodeToString(file)}</content>

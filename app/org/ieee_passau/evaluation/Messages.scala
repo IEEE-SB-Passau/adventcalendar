@@ -12,6 +12,7 @@ object Messages {
 
   trait Job {
     val testrunId: Int
+    val evalId: String
     val stage: Int
     val program: String
     val programName: String
@@ -19,10 +20,10 @@ object Messages {
     val expectedOut: String
 
     override def toString: String = {
-      "Job[id=%d]".format(this.testrunId)
+      "Job[id=%s]".format(this.testrunId)
     }
 
-    override def hashCode(): Int = testrunId
+    override def hashCode(): Int = testrunId.hashCode
 
     override def equals(obj: scala.Any): Boolean = {
       obj match {
@@ -34,6 +35,7 @@ object Messages {
 
   case class BaseJob(problemId: Int,
                      testrunId: Int,
+                     evalId: String,
                      language: String,
                      program: String,
                      programName: String,
@@ -44,6 +46,7 @@ object Messages {
 
   case class NextStageJob(testrunId: Int,
                           stage: Int,
+                          evalId: String,
                           program: String,
                           stdin: String,
                           progOut: String,
@@ -77,7 +80,7 @@ object Messages {
                           result: Option[Result]) {
 
     override def toString: String = {
-      "EvaluatedJob[jobid=%d;result=%s]".format(this.job.testrunId, this.result)
+      "EvaluatedJob[jobid=%s;result=%s]".format(this.job.evalId, this.result)
     }
   }
 

@@ -54,7 +54,8 @@ class DBWriter extends EvaluationActor {
             stage     = nextStage,
             completed = new Date(),
 
-            vm = Some((oldTr.vm match { case Some(vms) => vms + " " case None => ""}) + sender.path.name)
+            evalId = Some(eJob.job.evalId),
+            vm     = Some((oldTr.vm match { case Some(vms) => vms + " " case None => ""}) + sender.path.name)
           ))
         }
 
