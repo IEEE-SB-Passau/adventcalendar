@@ -144,7 +144,12 @@ object MainController extends Controller with PermissionCheck {
     val userAgent = rs.headers.get("User-Agent").fold(None: Option[String])(ua => Some(ua.take(150)))
 
     val codelang = maybeCodelang.get
-    val fixedFilename = if (!filename.isEmpty) filename else "Solution." + codelang.extension
+
+    val fixedFilename =
+      // if it's jvm then that matches at least every valid classname and therefore filename, and all others don't matter that much anyway
+      if (!filename.isEmpty) filename.replaceAll("[^\\p{javaJavaIdentifierPart}.-]", "_")
+      // when using the editor, use "Solution.<ext>" as default, fixes jvm and every one else dosen't care
+      else "Solution." + codelang.extension
 
     try {
       val pid = Problems.byDoor(door).first.id.get
