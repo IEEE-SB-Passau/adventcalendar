@@ -214,7 +214,7 @@ object UserController extends Controller with PermissionCheck {
           Users.update(user.id.get, user.copy(password = pwh, activationToken = None, lang = lng))
 
           Redirect(org.ieee_passau.controllers.routes.MainController.calendar())
-            .flashing("success" -> Messages("user.login.messeage"))
+            .flashing("success" -> Messages("user.login.message"))
         }
       )
     }
