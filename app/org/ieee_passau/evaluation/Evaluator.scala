@@ -6,7 +6,7 @@ import play.api.Play.current
 import play.api.libs.concurrent.Akka
 
 object Evaluator {
-  def start = {
+  def start(): Unit = {
     if (play.Configuration.root().getBoolean("evaluator.run", false)) {
       Akka.system.actorOf(Props[Evaluator], name = "Evaluator")
     }

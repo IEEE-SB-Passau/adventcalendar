@@ -67,7 +67,7 @@ object Global extends WithFilters(CSRFFilter(errorHandler = new CSRFFilterError(
     super.onStart(app)
 
     // Start evaluator
-    Evaluator.start
+    Evaluator.start()
   }
 }
 
