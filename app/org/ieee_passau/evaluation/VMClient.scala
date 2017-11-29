@@ -33,7 +33,9 @@ object VMClient {
 class VMClient(host: String, port: Int, name:String)
   extends EvaluationActor {
 
-  private var timeout = Timeout(MathHelper.makeDuration(play.Configuration.root().getString("evaluator.eval.basetime", "60 seconds")).mul(2))
+  private val TIMEOUT_FACTOR = 4 + 1 // wall time to cpu time factor for waiting on a response form the backend
+
+  private var timeout = Timeout(MathHelper.makeDuration(play.Configuration.root().getString("evaluator.eval.basetime", "60 seconds")).mul(TIMEOUT_FACTOR))
 
   private case class ExecutionResult(var duration: Duration = 0 seconds,
                                      var memory: Int = 0,
@@ -45,7 +47,7 @@ class VMClient(host: String, port: Int, name:String)
                                      var result: Option[Result] = None,
                                      var progErr: Option[String] = None)
 
-  // 10 * base timeout seems to be enough, up if read times out
+  // 5 (= max language factor) * wall time timeout seems to be enough, up if read times out
   private val connection = context.actorOf(TCPActor.props(host, port, timeout.duration.mul(5).toMillis.toInt))
 
   override def supervisorStrategy: SupervisorStrategy = OneForOneStrategy() {
@@ -116,7 +118,7 @@ class VMClient(host: String, port: Int, name:String)
           Problems.byId(pid).first
         }
         val runtimeLimit = MathHelper.makeDuration(play.Configuration.root().getString("evaluator.eval.basetime")).mul(lang.cpuFactor * problem.cpuFactor)
-        timeout = Timeout(FiniteDuration(runtimeLimit.mul(2).toMillis, "milliseconds"))
+        timeout = Timeout(FiniteDuration(runtimeLimit.mul(TIMEOUT_FACTOR).toMillis, "milliseconds"))
         // Deploy Job
         val data =
           <ieee-advent-calendar>
@@ -220,7 +222,7 @@ class VMClient(host: String, port: Int, name:String)
 
       case NextStageJob(_, _, evalId, program, stdin, progOut, expOut, cmd, input, outputStdoutCheck, outputScore, filename, file) => {
         val lang = Languages.byLang(if (filename.endsWith("jar")) {"JAVAJAR"} else {"BINARY"}).get
-        timeout = Timeout(MathHelper.makeDuration("180 seconds"))
+        timeout = Timeout(MathHelper.makeDuration("300 seconds"))
         // Deploy binary file
         val data =
           <ieee-advent-calendar>
