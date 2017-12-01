@@ -49,7 +49,7 @@ object ProblemForms {
 
   val ticketForm = Form(
     mapping(
-      "text" -> text,
+      "text" -> nonEmptyText,
       "public" -> boolean
     )(TicketText.apply)(TicketText.unapply)
   )
