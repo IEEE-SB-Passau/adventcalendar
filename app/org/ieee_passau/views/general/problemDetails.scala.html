@@ -21,7 +21,7 @@
         @form(org.ieee_passau.controllers.routes.TicketController.submitTicket(problem.door), 'class -> "form-horizontal") {
             @CSRF.formField
             <div class="well">
-                @textareaBs(ticketForm("text"), label = Messages("ticket.title"))
+                @textareaBs(ticketForm("text"), label = Messages("ticket.title"), required = true)
                 @buttonSave()
             </div>
         }

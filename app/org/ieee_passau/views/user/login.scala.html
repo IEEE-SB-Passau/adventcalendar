@@ -21,7 +21,7 @@
         @form(org.ieee_passau.controllers.routes.UserController.authenticate, 'class -> "form-horizontal") {
             @CSRF.formField
             <fieldset>
-                @text(loginForm("username"), label = Messages("user.username"), offset = "col-sm-3", width = "col-sm-9")
+                @text(loginForm("username"), label = Messages("user.username"), offset = "col-sm-3", width = "col-sm-9", required = true)
                 @password(loginForm("password"), label = Messages("user.password"), offset = "col-sm-3", width = "col-sm-9")
 
                 <div class="form-group">

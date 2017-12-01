@@ -1,5 +1,6 @@
 @import play.api.i18n.{Lang, Messages}
-@(field: Field, rows: Int = 3, label: String = "CHANGEME", placeholder: String = "", help: String = "", wysiwyg: Boolean = false)(implicit lang: Lang)
+@(field: Field, rows: Int = 3, label: String = "CHANGEME", placeholder: String = "", help: String = "",
+        wysiwyg: Boolean = false, required: Boolean = false)(implicit lang: Lang)
 
 <div class="form-group @if(field.hasErrors) { has-error }">
     <label class="col-sm-2 control-label">@label</label>
@@ -8,7 +9,8 @@
                   rows="@rows"
                   id="@field.id"
                   name="@field.name"
-                  placeholder="@placeholder">@field.value.getOrElse("")</textarea>
+                  placeholder="@placeholder"
+                  @if(required) { required }>@field.value.getOrElse("")</textarea>
         <span class="help-block">@help</span>
         <span class="help-block">@{field.error.map { error => Messages(error.message) }}</span>
     </div>
