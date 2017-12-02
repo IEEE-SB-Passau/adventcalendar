@@ -120,7 +120,7 @@ object ProblemController extends Controller with PermissionCheck {
 
       trans => {
         ProblemTranslations.update(lang, trans)
-        Redirect(org.ieee_passau.controllers.routes.ProblemController.edit(problemId))
+        Redirect(org.ieee_passau.controllers.routes.ProblemController.editTranslation(problemId, lang))
           .flashing("success" ->  Messages("problem.translation.update.message", trans.title, trans.language.code))
       }
     )
