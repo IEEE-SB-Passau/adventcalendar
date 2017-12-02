@@ -101,16 +101,19 @@
 
             @* Flash messages *@
             @if(flash.get("success").isDefined) {
-                <div class="alert alert-success">@Html(flash.get("success").get)</div>
+                <div class="alert alert-success">@flash.get("success").get</div>
             }
             @if(flash.get("info").isDefined) {
-                <div class="alert alert-info">@Html(flash.get("info").get)</div>
+                <div class="alert alert-info">@flash.get("info").get</div>
             }
             @if(flash.get("warning").isDefined) {
-                <div class="alert alert-warning">@Html(flash.get("warning").get)</div>
+                <div class="alert alert-warning">@flash.get("warning").get</div>
             }
             @if(flash.get("danger").isDefined) {
-                <div class="alert alert-danger">@Html(flash.get("danger").get)</div>
+                <div class="alert alert-danger">@flash.get("danger").get</div>
+            }
+            @if(flash.get("system").isDefined) {
+                <div class="alert alert-warning">@Html(flash.get("system").get)</div>
             }
 
             @if(hasTitle) {

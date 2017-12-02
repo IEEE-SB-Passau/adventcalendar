@@ -51,7 +51,7 @@ object TestcaseController extends Controller with PermissionCheck {
           Testruns += Testrun(None, s, id, None, None, None, None, None, None, None, None, None, None, Queued, None, now, Some(0), None, None, now)
         )
         Redirect(org.ieee_passau.controllers.routes.TestcaseController.edit(pid, id))
-          .flashing("success" -> Messages("testcase.create.message", newTestcase.position.toString))
+          .flashing("success" -> Messages("testcase.create.message", newTestcase.position))
       }
     )
   }}
@@ -79,7 +79,7 @@ object TestcaseController extends Controller with PermissionCheck {
           }
         })
         Redirect(org.ieee_passau.controllers.routes.TestcaseController.edit(pid, id))
-          .flashing("success" -> Messages("testcase.update.message", testcase.position.toString))
+          .flashing("success" -> Messages("testcase.update.message", testcase.position))
       }
     )
   }}

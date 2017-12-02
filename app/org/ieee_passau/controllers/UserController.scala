@@ -3,7 +3,7 @@ package org.ieee_passau.controllers
 import org.apache.commons.mail.EmailException
 import org.ieee_passau.forms.UserForms
 import org.ieee_passau.models.{User, Users}
-import org.ieee_passau.utils.{CausedBy, PasswordHasher, PermissionCheck}
+import org.ieee_passau.utils.{PasswordHasher, PermissionCheck}
 import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
 import play.api.db.slick._

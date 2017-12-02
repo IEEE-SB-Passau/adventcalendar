@@ -40,10 +40,10 @@ object LanguageController extends Controller with PermissionCheck {
         BadRequest(org.ieee_passau.views.html.language.insert(errorForm))
       },
 
-      newTestcase => {
-        Languages += newTestcase
-        Redirect(org.ieee_passau.controllers.routes.LanguageController.edit(newTestcase.id))
-          .flashing("success" -> Messages("codelang.create.message", newTestcase.id))
+      newCodelang => {
+        Languages += newCodelang
+        Redirect(org.ieee_passau.controllers.routes.LanguageController.edit(newCodelang.id))
+          .flashing("success" -> Messages("codelang.create.message", newCodelang.id))
       }
     )
   }}

@@ -45,7 +45,7 @@ object EvalTaskController extends Controller with PermissionCheck {
             val newTask: EvalTask = newTaskRaw.copy(filename = program.filename, file = new File(program.ref.file).toByteArray())
             val id = (EvalTasks returning EvalTasks.map(_.id)) += newTask
             Redirect(org.ieee_passau.controllers.routes.EvalTaskController.edit(pid, id))
-              .flashing("success" -> Messages("evaltask.create.message", newTaskRaw.position.toString))
+              .flashing("success" -> Messages("evaltask.create.message", newTaskRaw.position))
           } getOrElse {
             BadRequest(org.ieee_passau.views.html.evaltask.insert(pid,
               TestcaseForms.evalTaskForm.fill(newTaskRaw).withError("program", Messages("evaltask.create.error.filemissing"))))
@@ -68,13 +68,13 @@ object EvalTaskController extends Controller with PermissionCheck {
             val newTask = task.copy(filename = program.filename, file = new File(program.ref.file).toByteArray())
             EvalTasks.update(id, newTask)
             Redirect(org.ieee_passau.controllers.routes.EvalTaskController.edit(pid, id))
-              .flashing("success" -> Messages("evaltask.update.message", task.position.toString))
+              .flashing("success" -> Messages("evaltask.update.message", task.position))
           } getOrElse {
             val oldTask = EvalTasks.byId(id).first
             val newTask = task.copy(filename = oldTask.filename, file = oldTask.file)
             EvalTasks.update(id, newTask)
             Redirect(org.ieee_passau.controllers.routes.EvalTaskController.edit(pid, id))
-              .flashing("success" -> Messages("evaltask.update.message", task.position.toString))
+              .flashing("success" -> Messages("evaltask.update.message", task.position))
           }
         }
       )

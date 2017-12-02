@@ -270,7 +270,7 @@ object MainController extends Controller with PermissionCheck {
           val trans = ProblemTranslations.byProblemLang(problem.id.get, displayLang.code).firstOption
           val transProblem = if (trans.nonEmpty) problem.copy(title=trans.get.title, description=trans.get.description) else problem
           val posting = Postings.byIdLang(Page.status.id, displayLang.code).firstOption
-          val flash = if (!running.run) "warning" -> (if (posting.nonEmpty) posting.get.content else Messages("status.messages.message")) else "" -> ""
+          val flash = if (!running.run) "system" -> (if (posting.nonEmpty) posting.get.content else Messages("status.messages.message")) else "" -> ""
           Ok(org.ieee_passau.views.html.general.problemDetails(transProblem, langs, lastLang, solutions, tickets, ProblemForms.ticketForm, flash))
         }
     }
