@@ -1,5 +1,6 @@
 package org.ieee_passau.controllers
 
+import java.nio.charset.MalformedInputException
 import java.util.Date
 
 import akka.actor.{ActorRef, Props}
@@ -185,7 +186,13 @@ object MainController extends Controller with PermissionCheck {
         Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
           .flashing("danger" -> (Messages("submit.error.message") + " " + Messages("submit.error.filesize")))
       } else {
-        handleSubmission(door, File(sourceFile).slurp, submission.filename)
+        try {
+          handleSubmission(door, File(sourceFile).slurp, submission.filename)
+        } catch {
+          case _: MalformedInputException =>
+            Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
+              .flashing("danger" -> (Messages("submit.error.message") + " " + Messages("submit.error.fileformat")))
+        }
       }
     } getOrElse {
       Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
