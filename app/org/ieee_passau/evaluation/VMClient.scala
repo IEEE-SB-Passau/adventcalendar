@@ -46,7 +46,7 @@ class VMClient(host: String, port: Int, name:String)
                                      var progErr: Option[String] = None)
 
   // read timeout should be smaller than await timeout so the socket closes first
-  private val connection = context.actorOf(TCPActor.props(host, port, timeout.duration.min(MathHelper.makeDuration("5 seconds")).toMillis.toInt))
+  private val connection = context.actorOf(TCPActor.props(host, port, timeout.duration.minus(MathHelper.makeDuration("5 seconds")).toMillis.toInt))
 
   override def supervisorStrategy: SupervisorStrategy = OneForOneStrategy() {
     case _ => Escalate
