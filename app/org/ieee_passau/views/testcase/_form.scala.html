@@ -23,7 +23,8 @@
 
     @textareaBs(testcase("input"), label = Messages("testcase.input"), placeholder = Messages("testcase.input"))
     @fileloader("input")
-    @textareaBs(testcase("output"), label = Messages("testcase.output"), placeholder = Messages("testcase.output"))
+    @textareaBs(testcase("output"), label = Messages("testcase.output"), placeholder = Messages("testcase.output"),
+        help = Messages("testcase.output.limitnote"))
     @fileloader("output")
     @number(testcase("points"), label = Messages("testcase.points"), placeholder = Messages("testcase.points"))
 
