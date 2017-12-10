@@ -37,6 +37,12 @@
 
                             if (solution.element.html() !== solutionInfo.html) {
                                 solution.element.html(solutionInfo.html);
+
+                                var expected = solution.element.find(".expected-output")[0];
+                                var actual = solution.element.find(".actual-output")[0];
+                                if (actual != null && expected != null) {
+                                    diffNodes(expected, actual);
+                                }
                             }
 
                             if (solution.status === '@Queued.name') {

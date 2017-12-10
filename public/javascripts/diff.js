@@ -11,7 +11,6 @@ function diffNodes(nodeA, nodeB) {
 
     var result = [];
     for (var i = 0; i < linesB.length; i++) {
-        var lineB = linesB[i];
         var lineA = null;
         if (i < linesA.length) {
             lineA = linesA[i];
@@ -26,14 +25,14 @@ function diffNodes(nodeA, nodeB) {
             wrapper.appendChild(text);
             result = result.concat(wrapper);
         }
-        if (i != linesB.length-1) {
+        if (i !== linesB.length-1) {
             result = result.concat(document.createTextNode("\n"));
         }
     }
 
     nodeB.removeChild(nodeB.firstChild);
-    for (var i = 0; i < result.length; i++) {
-        nodeB.appendChild(result[i]);
+    for (var j = 0; j < result.length; j++) {
+        nodeB.appendChild(result[j]);
     }
 }
 
