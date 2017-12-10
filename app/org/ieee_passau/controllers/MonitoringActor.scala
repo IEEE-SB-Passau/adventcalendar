@@ -6,6 +6,7 @@ import akka.actor.Actor
 import akka.pattern.{ask, pipe}
 import akka.util.Timeout
 import org.ieee_passau.controllers.Beans._
+import org.ieee_passau.evaluation.Messages.JobFinished
 
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -34,5 +35,6 @@ class MonitoringActor extends Actor {
       }
     }) to sender
     case VMStatusM(state) => nodes += ((state.actorName, state))
+    case JobFinished(job) => context.actorSelection("../Evaluator/InputRegulator") ! JobFinished(job)
   }
 }
