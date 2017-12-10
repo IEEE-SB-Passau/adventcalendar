@@ -121,7 +121,7 @@ object UserController extends Controller with PermissionCheck {
           Redirect(org.ieee_passau.controllers.routes.UserController.login())
             .flashing("success" -> Messages("user.register.error.existing", createdUser.username))
         } catch {
-          case e: EmailException =>
+          case _: EmailException =>
             Users.filter(_.id === id).delete
             BadRequest(org.ieee_passau.views.html.user.register(UserForms.registrationForm.fill(registration).withError("invalidEmail", "error.email")))
 
@@ -187,6 +187,7 @@ object UserController extends Controller with PermissionCheck {
     implicit val sessionUser = maybeUser
     maybeUser match {
       case Some(user) =>
+        Users.update(user.id.get, user.copy(active = true))
         Ok(org.ieee_passau.views.html.user.resetPassword(token, UserForms.passwordForm.fill("")))
           .addingToSession("user" -> user.id.get.toString)
 
