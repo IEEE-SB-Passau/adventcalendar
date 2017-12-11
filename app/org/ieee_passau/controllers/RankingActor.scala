@@ -60,6 +60,18 @@ class RankingActor extends Actor {
   private def calcRanking(showAll: Boolean): List[(Int, User, Double, Int)] = { DB.withSession { implicit session =>
     var userProblemPoints = calcUserPointsMap(showAll)
 
+    val uids = userProblemPoints.map(_._1.id.get)
+
+    val noPassedTCActives = (for {
+      r <- Testruns       if r.result =!= (Passed: Result)
+      c <- r.testcase     if c.visibility =!= (Hidden: Visibility)
+      s <- r.solution
+      u <- s.user         if u.hidden === false || (showAll: Boolean)
+      p <- s.problem
+    } yield (u, p)).filterNot(_._1.id inSet uids).list.groupBy(_._1).map { case (u, l) => (u, (l.map { case (_, p) => (p.id.get, 0d) }.toMap, 0)) }.toMap
+
+    userProblemPoints = userProblemPoints ++ noPassedTCActives
+
     if (showAll)
       userProblemPointsAll = userProblemPoints
     else
