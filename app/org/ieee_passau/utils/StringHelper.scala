@@ -24,4 +24,8 @@ object StringHelper {
   def cleanNewlines(data: String): String = {
     data.replace("\r\n", "\n").replace("\r", "\n")
   }
+
+  def encodeEmailName(name: String): String = {
+    name.replace("<", "〈").replace(">", "〉")
+  }
 }

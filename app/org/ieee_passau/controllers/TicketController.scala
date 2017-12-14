@@ -5,6 +5,7 @@ import java.util.Date
 import org.ieee_passau.forms.ProblemForms
 import org.ieee_passau.models._
 import org.ieee_passau.utils.PermissionCheck
+import org.ieee_passau.utils.StringHelper.encodeEmailName
 import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
 import play.api.db.slick._
@@ -65,7 +66,7 @@ object TicketController extends Controller with PermissionCheck {
 
           val email = Email(
             subject = Messages("email.header")(language) + " " +  Messages("ticket.title")(language) + " zu " + Messages("problem.title")(language) + " " + problem.get.door + ": " + problemTitle,
-            from = sessionUser.get.username + " @ " + play.Configuration.root().getString("email.from"),
+            from = encodeEmailName(sessionUser.get.username) + " @ " + play.Configuration.root().getString("email.from"),
             to = List(play.Configuration.root().getString("email.from")),
             bodyText = Some(ticket.text + "\n\n" + Messages("ticket.answer")(language) + ": " + org.ieee_passau.controllers.routes.TicketController.view(id).absoluteURL(play.Configuration.root().getBoolean("application.https", false)))
           )
@@ -104,7 +105,7 @@ object TicketController extends Controller with PermissionCheck {
             val problemTitle = ProblemTranslations.byProblemLang(problem.get.id.get, msgLang).firstOption.fold(problem.get.title)(_.title)
             val email = Email(
               subject = Messages("email.header")(msgLang) + " " + Messages("email.answer.subject", Messages("ticket.title")(msgLang) +  " zu " + Messages("problem.title")(msgLang) + " " + problem.get.door + ": " + problemTitle)(msgLang),
-              from = sessionUser.get.username + " @ " + play.Configuration.root().getString("email.from"),
+              from = encodeEmailName(sessionUser.get.username) + " @ " + play.Configuration.root().getString("email.from"),
               to = List(recipient.get.email),
               cc = List(play.Configuration.root().getString("email.from")),
               bodyText = Some(ticket.text)
