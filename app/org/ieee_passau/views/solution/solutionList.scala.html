@@ -78,11 +78,14 @@
                                     <div class="row">
                                         <div  class="col-sm-6">
                                             @Messages("submission.expected_output"):
-                                            <pre class="expected-output">@t.testcase.expectedOutput</pre>
+@* keep newlines and formatting: https://www.w3.org/TR/html5/syntax.html#restrictions-on-content-models *@
+                                            <pre class="expected-output">
+@t.testcase.expectedOutput</pre>
                                         </div>
                                         <div class="col-sm-6">
                                             @Messages("submission.program_output"):
-                                            <pre class="actual-output">@t.testrun.progOut</pre>
+                                            <pre class="actual-output">
+@t.testrun.progOut</pre>
                                         </div>
                                     </div>
 
