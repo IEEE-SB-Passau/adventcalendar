@@ -13,7 +13,7 @@
         <fieldset>
             <div class="well">
                 @text(user("username"), label = Messages("user.username"), placeholder = Messages("user.username"))
-                @password(user("password"), label = Messages("user.password"), placeholder = Messages("user.password"))
+                @password(user("password"), label = Messages("user.password"), placeholder = Messages("user.password"), required = false, help = Messages("user.update.password"))
                 @text(user("email"), label = Messages("user.email"), placeholder = Messages("user.email"))
                 @checkboxBs(user("active"), label = Messages("user.active"))
                 @checkboxBs(user("admin"), label = Messages("user.admin"))
