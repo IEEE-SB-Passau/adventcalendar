@@ -218,7 +218,7 @@ class VMClient(host: String, port: Int, name:String)
       }
 
       case NextStageJob(_, _, evalId, program, stdin, progOut, expOut, cmd, input, outputStdoutCheck, outputScore, filename, file) => {
-        val lang = Languages.byLang(if (filename.endsWith("jar")) {"JAVAJAR"} else {"BINARY"}).get
+        val lang = if (filename.endsWith("jar")) "JAVAJAR" else "BINARY"
         // Deploy binary file
         val data =
           <ieee-advent-calendar>
@@ -227,7 +227,7 @@ class VMClient(host: String, port: Int, name:String)
               <program>
                 <filename>{filename}</filename>
                 <content>{Base64.getEncoder.encodeToString(file)}</content>
-                <language>{lang.id}</language>
+                <language>{lang}</language>
               </program>
               <inputs>
                 <streams>
@@ -252,7 +252,7 @@ class VMClient(host: String, port: Int, name:String)
         val resultXml = Await.result((connection ? data) (timeout).mapTo[Elem], timeout.duration)
         log.debug("%s successfully deployed binary file for %s".format(this, job))
 
-        if ((resultXml \\ "successfull").text.toBoolean) throw new RuntimeException("Received no valid result from eval.")
+        if (!(resultXml \\ "successful").text.toBoolean) throw new RuntimeException("Received no valid result from eval. " + (resultXml \\ "reason").text + "\n" + (resultXml \\ "message").text)
 
         // Evaluation result
         evaluationResult.exitCode = if ((resultXml \\ "outputs" \ "evaluation" \ "returnCode").text.isEmpty) None
