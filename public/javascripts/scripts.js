@@ -51,3 +51,25 @@ $('.wysiwyg').summernote({
         return url;
     }
 });
+
+window.addEventListener("load", function(){
+    window.cookieconsent.initialise({
+        "palette": {
+            "popup": {
+                "background": "#c9d9e5",
+                "text": "#000000"
+            },
+            "button": {
+                "background": "#ffffff",
+                "text": "#000000"
+            }
+        },
+        "theme": "classic",
+        "content": {
+            "message": cookietext,
+            "dismiss": cookiebutton,
+            "link": cookielink,
+            "href": jsRoutes.org.ieee_passau.controllers.MainController.content("contact").url
+        }
+    })
+});
