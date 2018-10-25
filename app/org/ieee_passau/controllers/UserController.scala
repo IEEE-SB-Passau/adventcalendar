@@ -13,26 +13,22 @@ import play.api.mvc._
 
 object UserController extends Controller with PermissionCheck {
 
-  def index: Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
-    implicit val sessionUser = Some(admin)
+  def index: Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
     Ok(org.ieee_passau.views.html.user.index(Users.sortBy(_.id).list))
   }}
 
-  def edit(id: Int): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
-    implicit val sessionUser = Some(admin)
+  def edit(id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
     Users.byId(id).firstOption.map { user =>
       Ok(org.ieee_passau.views.html.user.edit(id, UserForms.userForm.fill(user), Permissions.list))
     }.getOrElse(NotFound(org.ieee_passau.views.html.errors.e404()))
   }}
 
-  def delete(id: Int): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
-    implicit val sessionUser = Some(admin)
+  def delete(id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
     Users.filter(_.id === id).delete
     Redirect(org.ieee_passau.controllers.routes.UserController.index())
   }}
 
-  def impersonate(id: Int): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
-    implicit val sessionUser = Some(admin)
+  def impersonate(id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
     val maybeUser = Users.byId(id).firstOption
 
     if (maybeUser.isDefined) {
@@ -46,16 +42,12 @@ object UserController extends Controller with PermissionCheck {
     }
   }}
 
-  def login: Action[AnyContent] = requirePermission(Guest) { _ => Action { implicit rs =>
-    implicit val sessionUser = None
-
+  def login: Action[AnyContent] = requirePermission(Guest) { implicit guest => Action { implicit rs =>
     // if no post data, display empty form
     Ok(org.ieee_passau.views.html.user.login(UserForms.loginForm))
   }}
 
-  def authenticate: Action[AnyContent] = requirePermission(Guest) { _ => Action { implicit rs =>
-    implicit val sessionUser = None
-
+  def authenticate: Action[AnyContent] = requirePermission(Guest) { implicit guest => Action { implicit rs =>
     UserForms.loginForm.bindFromRequest.fold(
       errorForm => {
         // Hack to clear the password field
@@ -83,21 +75,17 @@ object UserController extends Controller with PermissionCheck {
     )
   }}
 
-  def logout: Action[AnyContent] = requirePermission(Contestant) { user => Action { implicit rs =>
-    implicit val sessionUser = Some(user)
+  def logout: Action[AnyContent] = requirePermission(Contestant) { implicit user => Action { implicit rs =>
     Redirect(org.ieee_passau.controllers.routes.MainController.calendar())
-      .flashing("success" -> Messages("user.logout.message", user.username))
+      .flashing("success" -> Messages("user.logout.message", user.get.username))
       .withNewSession;
   }}
 
-  def register: Action[AnyContent] = requirePermission(Guest) { _ => Action { implicit rs =>
-    implicit val sessionUser = None
+  def register: Action[AnyContent] = requirePermission(Guest) { implicit guest => Action { implicit rs =>
     Ok(org.ieee_passau.views.html.user.register(UserForms.registrationForm, play.Configuration.root().getBoolean("captcha.active")))
   }}
 
-  def create: Action[AnyContent] = requirePermission(Guest) { _ => DBAction { implicit rs =>
-    implicit val sessionUser = None
-
+  def create: Action[AnyContent] = requirePermission(Guest) { implicit guest => DBAction { implicit rs =>
     UserForms.registrationForm.bindFromRequest.fold(
       errorForm => {
         BadRequest(org.ieee_passau.views.html.user.register(errorForm, play.Configuration.root().getBoolean("captcha.active")))
@@ -152,14 +140,11 @@ object UserController extends Controller with PermissionCheck {
     }
   }}
 
-  def resetPassword: Action[AnyContent] = requirePermission(Guest) { _ =>  Action { implicit rs =>
-    implicit val sessionUser = None
+  def resetPassword: Action[AnyContent] = requirePermission(Guest) { implicit guest =>  Action { implicit rs =>
     Ok(org.ieee_passau.views.html.user.requestPassword(UserForms.usernameForm.fill("")))
   }}
 
-  def requestPassword: Action[AnyContent] = requirePermission(Guest) { _ => DBAction { implicit rs =>
-    implicit val sessionUser = None
-
+  def requestPassword: Action[AnyContent] = requirePermission(Guest) { implicit guest => DBAction { implicit rs =>
     UserForms.usernameForm.bindFromRequest.fold(
       errorForm => {
         BadRequest(org.ieee_passau.views.html.user.requestPassword(errorForm))
@@ -200,10 +185,9 @@ object UserController extends Controller with PermissionCheck {
     }
   }}
 
-  def updatePassword(token: String): Action[AnyContent] = requirePermission(Contestant) { user => DBAction { implicit rs =>
-    implicit val sessionUser = Some(user)
-
-    if (sessionUser.get.activationToken.getOrElse("") != token) {
+  def updatePassword(token: String): Action[AnyContent] = requirePermission(Contestant) { implicit user => DBAction { implicit rs =>
+    val sessionUser = user.get
+    if (sessionUser.activationToken.getOrElse("") != token) {
       Unauthorized(org.ieee_passau.views.html.errors.e403())
     } else {
 
@@ -214,8 +198,8 @@ object UserController extends Controller with PermissionCheck {
 
         password => {
           val pwh = PasswordHasher.hashPassword(password)
-          val lng = Users.byId(user.id.get).firstOption.get.lang
-          Users.update(user.id.get, user.copy(password = pwh, activationToken = None, lang = lng))
+          val lng = Users.byId(sessionUser.id.get).firstOption.get.lang
+          Users.update(sessionUser.id.get, sessionUser.copy(password = pwh, activationToken = None, lang = lng))
 
           Redirect(org.ieee_passau.controllers.routes.MainController.calendar())
             .flashing("success" -> Messages("user.login.message"))
@@ -225,7 +209,7 @@ object UserController extends Controller with PermissionCheck {
   }}
 
   def updateLang(lang: String): Action[AnyContent] = DBAction { implicit rs =>
-    implicit val sessionUser = getUserFromSession(request2session)
+    implicit val sessionUser = getUserFromRequest(rs)
 
     val maybeLang = Lang.get(lang)
     if (maybeLang.isEmpty || !Lang.availables.contains(maybeLang.get)) {
@@ -248,8 +232,7 @@ object UserController extends Controller with PermissionCheck {
     }
   }
 
-  def update(id: Int): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
-    implicit val sessionUser = Some(admin)
+  def update(id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
     UserForms.userForm.bindFromRequest.fold(
       errorForm => {
         BadRequest(org.ieee_passau.views.html.user.edit(id, errorForm, Permissions.list))

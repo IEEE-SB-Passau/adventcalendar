@@ -40,8 +40,7 @@ object EvaluationController extends Controller with PermissionCheck {
     }
   }
 
-  def index(page: Int, ordering: String): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
-    implicit val sessionUser = Some(admin)
+  def index(page: Int, ordering: String): Action[AnyContent] = requirePermission(Moderator) { implicit admin => DBAction { implicit rs =>
     val lng = request2lang
 
     val subsPerPage = 50
@@ -80,9 +79,7 @@ object EvaluationController extends Controller with PermissionCheck {
       (page - 1) * subsPerPage + subsPerPage), (sorted.length / subsPerPage) + 1, page, ordering))
   }}
 
-  def indexQueued: Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
-    implicit val sessionUser = Some(admin)
-
+  def indexQueued: Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
     val jobs = Await.result((monitoringActor ? RunningJobsQ).mapTo[List[(Job, Date)]], 10 seconds)
 
     val testruns = (for {
@@ -106,9 +103,7 @@ object EvaluationController extends Controller with PermissionCheck {
     Ok(org.ieee_passau.views.html.monitoring.indexQueued(list.sortBy(_._9)(Ordering[Date]).sortBy(_._10)(Ordering[Option[Date]].reverse)))
   }}
 
-  def details(id: Int): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
-    implicit val sessionUser = Some(admin)
-
+  def details(id: Int): Action[AnyContent] = requirePermission(Moderator) { implicit admin => DBAction { implicit rs =>
     val solutionsQuery = for {
       s <- Solutions if s.id === id
       tr <- Testruns if tr.solutionId === s.id
@@ -124,17 +119,14 @@ object EvaluationController extends Controller with PermissionCheck {
     Ok(org.ieee_passau.views.html.solution.solutionDetail(sol, Languages.list, user, problem))
   }}
 
-  def vms: Action[AnyContent] = requirePermission(Admin){ admin => Action.async { implicit rs =>
-    implicit val sessionUser = Some(admin)
+  def vms: Action[AnyContent] = requirePermission(Admin){ implicit admin => Action.async { implicit rs =>
     val list = Await.result((monitoringActor ? RunningVMsQ).mapTo[List[(String, Int, VMStatus)]], 10 seconds)
 
     val state = (monitoringActor ? StatusQ).mapTo[StatusM]
     state.map(running => Ok(org.ieee_passau.views.html.monitoring.vms(running.run, list.sortBy(_._1))))
   }}
 
-  def stats: Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
-    implicit val sessionUser = Some(admin)
-
+  def stats: Action[AnyContent] = requirePermission(Moderator) { implicit admin => DBAction { implicit rs =>
     val jobs = (for {
       r <- Testruns if r.result =!= (Queued: ieee_passau.models.Result)
       s <- r.solution
@@ -170,9 +162,7 @@ object EvaluationController extends Controller with PermissionCheck {
     Ok(org.ieee_passau.views.html.monitoring.statistics(numJobs1H, vmRank1H, langRank1H, numJobsFull, vmRankFull, langRankFull))
   }}
 
-  def maintenance: Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
-    implicit val sessionUser = Some(admin)
-
+  def maintenance: Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
     val displayLang = request2lang
     val state = Await.result((monitoringActor ? StatusQ).mapTo[StatusM], 50 millis)
     Postings.byIdLang(Page.status.id, displayLang.code).firstOption.map { post =>
@@ -183,12 +173,9 @@ object EvaluationController extends Controller with PermissionCheck {
     }
   }}
 
-  def playPause: Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
-    implicit val sessionUser = Some(admin)
-
-    val state = Await.result((monitoringActor ? StatusQ).mapTo[StatusM], 50 millis)
+  def playPause: Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
     MaintenanceForms.statusForm.bindFromRequest.fold(
-      errorForm => {
+      _ => {
         Redirect(org.ieee_passau.controllers.routes.EvaluationController.maintenance())
           .flashing("warning" -> play.api.i18n.Messages("status.update.error"))
       },
@@ -200,15 +187,12 @@ object EvaluationController extends Controller with PermissionCheck {
     )
   }}
 
-  def createPage(id: Int): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
-    implicit val sessionUser = Some(admin)
+  def createPage(id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
     val title = Postings.byId(id, LanguageHelper.defaultLanguage).head.title
     Ok(org.ieee_passau.views.html.monitoring.pageEditor(id, "", MaintenanceForms.postingForm, title))
   }}
 
-  def editPage(id: Int, lang: String): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
-    implicit val sessionUser = Some(admin)
-
+  def editPage(id: Int, lang: String): Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
     Postings.byIdLang(id, lang).firstOption.map { post =>
       Ok(org.ieee_passau.views.html.monitoring.pageEditor(id, lang, MaintenanceForms.postingForm.fill(post)))
     } getOrElse {
@@ -218,9 +202,7 @@ object EvaluationController extends Controller with PermissionCheck {
     }
   }}
 
-  def addPage(id: Int): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
-    implicit val sessionUser = Some(admin)
-
+  def addPage(id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
     MaintenanceForms.postingForm.bindFromRequest.fold(
       errorForm => {
         BadRequest(org.ieee_passau.views.html.monitoring.pageEditor(id, "", errorForm))
@@ -237,9 +219,7 @@ object EvaluationController extends Controller with PermissionCheck {
     )
   }}
 
-  def changePage(id: Int, lang: String): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
-    implicit val sessionUser = Some(admin)
-
+  def changePage(id: Int, lang: String): Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
     MaintenanceForms.postingForm.bindFromRequest.fold(
       errorForm => {
           BadRequest(org.ieee_passau.views.html.monitoring.pageEditor(id, lang, errorForm))
@@ -252,9 +232,7 @@ object EvaluationController extends Controller with PermissionCheck {
     )
   }}
 
-  def cancel(id: Int): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
-    implicit val sessionUser = Some(admin)
-
+  def cancel(id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
     val maybeJob = Testruns.byId(id).firstOption
     maybeJob match {
       case None =>
@@ -268,11 +246,19 @@ object EvaluationController extends Controller with PermissionCheck {
     }
   }}
 
-  def registerVM: Action[NodeSeq] = Action(parse.xml) { implicit rs =>
-    implicit val sessionUser = getUserFromSession(request2session)
-    if (sessionUser.isEmpty || !sessionUser.get.permission.includes(Internal)) {
-      Unauthorized(org.ieee_passau.views.html.errors.e403())
+  def reEval(id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
+    (for {
+      r <- Testruns
+      s <- r.solution if s.id === id
+    } yield r).list.map { testrun =>
+      Testruns.update(testrun.id.get, testrun.copy(result = Queued, stage = Some(0), vm = None,
+        progRuntime = Some(0), progMemory = Some(0), compRuntime = Some(0), compMemory = Some(0)))
     }
+    Redirect(org.ieee_passau.controllers.routes.EvaluationController.index())
+      .flashing("success" -> play.api.i18n.Messages("jobs.control.revaluate.message"))
+  }}
+
+  def registerVM: Action[NodeSeq] = requirePermission(Internal, parse.xml) { _ => Action[NodeSeq](parse.xml) { implicit rs =>
 
     /*
     <ieee-advent-calendar>
@@ -309,24 +295,11 @@ object EvaluationController extends Controller with PermissionCheck {
     monitoringActor ! VMStatusM(VMStatus(actorName, uri, numUser, load, mem, swap, new Date()))
 
     Ok("")
-  }
+  }}
 
-  def removeVM(): Action[AnyContent] = requirePermission(Internal) { system => Action { implicit rs =>
+  def removeVM(): Action[AnyContent] = requirePermission(Internal) { _ => Action { implicit rs =>
     val name = rs.body.asFormUrlEncoded.get("name").head
     Akka.system.actorSelection("user/Evaluator/VMMaster") ! RemoveVM(name)
     Ok("")
-  }}
-
-  def reEval(id: Int): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
-    implicit val sessionUser = Some(admin)
-    (for {
-      r <- Testruns
-      s <- r.solution if s.id === id
-    } yield r).list.map { testrun =>
-      Testruns.update(testrun.id.get, testrun.copy(result = Queued, stage = Some(0), vm = None,
-        progRuntime = Some(0), progMemory = Some(0), compRuntime = Some(0), compMemory = Some(0)))
-    }
-    Redirect(org.ieee_passau.controllers.routes.EvaluationController.index())
-      .flashing("success" -> play.api.i18n.Messages("jobs.control.revaluate.message"))
   }}
 }

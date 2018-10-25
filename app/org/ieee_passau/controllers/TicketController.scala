@@ -15,8 +15,7 @@ import play.api.mvc._
 
 object TicketController extends Controller with PermissionCheck {
 
-  def index: Action[AnyContent] = requirePermission(Moderator) { admin => DBAction { implicit rs =>
-    implicit val sessionUser = Some(admin)
+  def index: Action[AnyContent] = requirePermission(Moderator) { implicit admin => DBAction { implicit rs =>
     val responses = for {
       t <- Tickets if t.responseTo.?.isDefined
     } yield t.responseTo
@@ -31,8 +30,7 @@ object TicketController extends Controller with PermissionCheck {
     Ok(org.ieee_passau.views.html.ticket.index(list))
   }}
 
-  def view(id: Int): Action[AnyContent] = requirePermission(Moderator) { admin => DBAction { implicit rs =>
-    implicit val sessionUser = Some(admin)
+  def view(id: Int): Action[AnyContent] = requirePermission(Moderator) { implicit admin => DBAction { implicit rs =>
     Tickets.byId(id).firstOption.map { ticket =>
       val user = Users.byId(ticket.userId.getOrElse(-1)).firstOption
       val problem = Problems.byId(ticket.problemId.getOrElse(-1)).firstOption
@@ -46,11 +44,10 @@ object TicketController extends Controller with PermissionCheck {
     }.getOrElse(NotFound(org.ieee_passau.views.html.errors.e404()))
   }}
 
-  def submitTicket(door: Int): Action[AnyContent] = requirePermission(Contestant) { user => DBAction { implicit rs =>
-    implicit val sessionUser = Some(user)
+  def submitTicket(door: Int): Action[AnyContent] = requirePermission(Contestant) { implicit user => DBAction { implicit rs =>
     val now = new Date()
     ProblemForms.ticketForm.bindFromRequest.fold(
-      errorForm => {
+      _ => {
         Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
           .flashing("danger" -> Messages("ticket.create.error"))
       },
@@ -62,11 +59,11 @@ object TicketController extends Controller with PermissionCheck {
           val problemTitle = ProblemTranslations.byProblemLang(problem.get.id.get, language).firstOption.fold(problem.get.title)(_.title)
 
           val id = (Tickets returning Tickets.map(_.id)) +=
-            Ticket(None, problem.get.id, sessionUser.get.id, None, ticket.text, public = false, now, language)
+            Ticket(None, problem.get.id, user.get.id, None, ticket.text, public = false, now, language)
 
           val email = Email(
             subject = Messages("email.header")(language) + " " +  Messages("ticket.title")(language) + " zu " + Messages("problem.title")(language) + " " + problem.get.door + ": " + problemTitle,
-            from = encodeEmailName(sessionUser.get.username) + " @ " + play.Configuration.root().getString("email.from"),
+            from = encodeEmailName(user.get.username) + " @ " + play.Configuration.root().getString("email.from"),
             to = List(play.Configuration.root().getString("email.from")),
             bodyText = Some(ticket.text + "\n\n" + Messages("ticket.answer")(language) + ": " + org.ieee_passau.controllers.routes.TicketController.view(id).absoluteURL(play.Configuration.root().getBoolean("application.https", false)))
           )
@@ -82,11 +79,10 @@ object TicketController extends Controller with PermissionCheck {
     )
   }}
 
-  def answerTicket(id: Int): Action[AnyContent] = requirePermission(Moderator) { admin => DBAction { implicit rs =>
-    implicit val sessionUser = Some(admin)
+  def answerTicket(id: Int): Action[AnyContent] = requirePermission(Moderator) { implicit mod => DBAction { implicit rs =>
     val now = new Date()
     ProblemForms.ticketForm.bindFromRequest.fold(
-      errorForm => {
+      _ => {
         Redirect(org.ieee_passau.controllers.routes.TicketController.index())
           .flashing("danger" -> Messages("ticket.answer.error"))
       },
@@ -97,7 +93,7 @@ object TicketController extends Controller with PermissionCheck {
           val recipient = Users.byId(parent.get.userId.get).firstOption
           if (problem.isDefined && recipient.isDefined) {
 
-            Tickets += Ticket(None, parent.get.problemId, sessionUser.get.id, Some(id), ticket.text, public = ticket.public, now, parent.get.language)
+            Tickets += Ticket(None, parent.get.problemId, mod.get.id, Some(id), ticket.text, public = ticket.public, now, parent.get.language)
             val updated = parent.get.copy(public = ticket.public)
             Tickets.update(id, updated)
 
@@ -105,7 +101,7 @@ object TicketController extends Controller with PermissionCheck {
             val problemTitle = ProblemTranslations.byProblemLang(problem.get.id.get, msgLang).firstOption.fold(problem.get.title)(_.title)
             val email = Email(
               subject = Messages("email.header")(msgLang) + " " + Messages("email.answer.subject", Messages("ticket.title")(msgLang) +  " zu " + Messages("problem.title")(msgLang) + " " + problem.get.door + ": " + problemTitle)(msgLang),
-              from = encodeEmailName(sessionUser.get.username) + " @ " + play.Configuration.root().getString("email.from"),
+              from = encodeEmailName(mod.get.username) + " @ " + play.Configuration.root().getString("email.from"),
               to = List(recipient.get.email),
               cc = List(play.Configuration.root().getString("email.from")),
               bodyText = Some(ticket.text)
@@ -126,8 +122,7 @@ object TicketController extends Controller with PermissionCheck {
     )
   }}
 
-  def delete(id: Int): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
-    implicit val sessionUser = Some(admin)
+  def delete(id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
     Tickets.filter(_.id === id).delete
     Redirect(org.ieee_passau.controllers.routes.TicketController.index())
   }}

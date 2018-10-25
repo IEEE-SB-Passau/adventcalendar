@@ -2,7 +2,8 @@ package org.ieee_passau
 
 import java.io.{PrintWriter, StringWriter}
 
-import evaluation.Evaluator
+import org.ieee_passau.evaluation.Evaluator
+import org.ieee_passau.utils.PermissionCheck
 import play.api.Play.current
 import play.api._
 import play.api.i18n.Messages
@@ -10,7 +11,6 @@ import play.api.libs.mailer._
 import play.api.mvc._
 import play.filters.csrf.CSRF.ErrorHandler
 import play.filters.csrf._
-import utils.PermissionCheck
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
@@ -18,13 +18,13 @@ import scala.concurrent.Future
 object Global extends WithFilters(CSRFFilter(errorHandler = new CSRFFilterError())) with GlobalSettings with PermissionCheck {
 
   override def onHandlerNotFound(request: RequestHeader): Future[Result] = {
-    implicit val sessionUser = getUserFromSession(request.session)
+    implicit val sessionUser = getUserFromRequest(request)
     implicit val rs = request
     Future.successful(NotFound(views.html.errors.e404()))
   }
 
   override def onError(request: RequestHeader, ex: Throwable): Future[Result] = {
-    implicit val sessionUser = getUserFromSession(request.session)
+    implicit val sessionUser = getUserFromRequest(request)
     implicit val rs = request
     val id = ex match {
       case pex: PlayException =>
@@ -57,7 +57,7 @@ object Global extends WithFilters(CSRFFilter(errorHandler = new CSRFFilterError(
   }
 
   override def onBadRequest(request: RequestHeader, error: String): Future[Result] = {
-    implicit val sessionUser = getUserFromSession(request.session)
+    implicit val sessionUser = getUserFromRequest(request)
     implicit val rs = request
 
     Future.successful(InternalServerError(views.html.errors.e404()))
@@ -72,10 +72,10 @@ object Global extends WithFilters(CSRFFilter(errorHandler = new CSRFFilterError(
 }
 
 class CSRFFilterError extends ErrorHandler with PermissionCheck {
-  override def handle(req: RequestHeader, msg: String): Result = {
-    implicit val sessionUser = getUserFromSession(req.session)
+  override def handle(request: RequestHeader, msg: String): Result = {
+    implicit val sessionUser = getUserFromRequest(request)
     implicit val flash = Flash()
-    implicit val rs = req
+    implicit val rs = request
     BadRequest(views.html.errors.eText(Messages("error.csrf"))(flash, sessionUser, rs, request2lang))
   }
 }

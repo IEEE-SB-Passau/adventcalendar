@@ -1,6 +1,6 @@
 package org.ieee_passau.utils
 
-import org.ieee_passau.models.{Guest, Permission, User, Users}
+import org.ieee_passau.models._
 import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
 import play.api.db.slick.DB
@@ -13,46 +13,61 @@ import scala.concurrent.Future
   */
 trait PermissionCheck extends Controller {
 
-  def getUserFromSession(session: play.api.mvc.Session): Option[User] = {
-    val maybeUid = session.get("user")
-    if (maybeUid.isEmpty) {
-      return None
-    }
-
-    val uid = maybeUid.get.toInt
-
-    DB.withSession[Option[User]] { implicit s: play.api.db.slick.Session =>
-      Users.byId(uid).firstOption;
+  /**
+    * Get a user based on the given request. First tries to get a user from the session, if no user (valid or invalid)
+    * is present, tries to use a given access token to identify the user, internal users only.
+    *
+    * @param request the request
+    * @return optionally the user in the session ot specified by the token
+    */
+  def getUserFromRequest(request: RequestHeader): Option[User] = {
+    request2session(request).get("user").map { uid =>
+      DB.withSession[Option[User]] { implicit s: play.api.db.slick.Session =>
+        Users.byId(uid.toInt).firstOption;
+      }
+    } getOrElse {
+      request.getQueryString("token").flatMap { token =>
+        DB.withSession[Option[User]] { implicit s: play.api.db.slick.Session =>
+          Users.byToken(token).list.headOption
+          // only internal aka backend users can authenticate with a token
+        }
+      } filter { maybeUser => maybeUser.permission == Internal }
     }
   }
 
   /**
-    * The action can only be accessed by an authenticated, active administrator.
+    * Requires the given permission level to execute the given action
     *
-    * @param f action to carry out.
+    * @param level the permission level
+    * @param f     the action to carry out
+    * @return an asynchronous action
     */
-  def requirePermission(level: Permission)(f: => User => Action[AnyContent]): Action[AnyContent] = Action.async { implicit rs =>
-    implicit val user = getUserFromSession(rs.session)
+  def requirePermission(level: Permission)(f: => Option[User] => Action[AnyContent]): Action[AnyContent] = Action.async { implicit rs =>
+    implicit val user = getUserFromRequest(rs)
     if (user.isEmpty && level == Guest) {
-      f(null)(rs)
+      f(None)(rs)
     } else if (user.isEmpty) {
       Future.successful(Unauthorized(org.ieee_passau.views.html.errors.e403()))
     } else if (user.get.active && user.get.permission.includes(level)) {
-      f(user.get)(rs)
+      f(user)(rs)
     } else {
       Future.successful(Unauthorized(org.ieee_passau.views.html.errors.e403()))
     }
   }
 
   /**
-    * The action can only be accessed by an authenticated, active administrator.
+    * Requires the given permission level to execute the given action
     *
-    * @param f action to carry out.
+    * @param level the permission level
+    * @param bp    the content handler type
+    * @param f     the action to carry out
+    * @tparam A the action type
+    * @return an asynchronous action
     */
-  def requirePermission[A](level: Permission, bp: BodyParser[A])(f: => User => Action[A]): Action[A] = Action.async(bp) { implicit rs =>
-    implicit val user = getUserFromSession(rs.session)
-    if ((user.isEmpty && level == Guest) || (user.get.active && user.get.permission == level)) {
-      f(user.get)(rs)
+  def requirePermission[A](level: Permission, bp: BodyParser[A])(f: => Option[User] => Action[A]): Action[A] = Action.async(bp) { implicit rs =>
+    implicit val user = getUserFromRequest(rs)
+    if ((user.isEmpty && level == Guest) || (user.isDefined && user.get.active && user.get.permission == level)) {
+      f(user)(rs)
     } else {
       Future.successful(Unauthorized(org.ieee_passau.views.html.errors.e403()))
     }

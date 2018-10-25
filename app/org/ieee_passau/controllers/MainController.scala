@@ -7,7 +7,6 @@ import akka.actor.{ActorRef, Props}
 import akka.pattern.ask
 import akka.util.Timeout
 import org.ieee_passau.controllers.Beans._
-import org.ieee_passau.controllers.EvaluationController.requirePermission
 import org.ieee_passau.forms.{ProblemForms, UserForms}
 import org.ieee_passau.models.DateSupport._
 import org.ieee_passau.models.{Postings, _}
@@ -49,7 +48,7 @@ object MainController extends Controller with PermissionCheck {
   }
 
   def problems: Action[AnyContent] = Action.async { implicit rs =>
-    implicit val sessionUser = getUserFromSession(request2session)
+    implicit val sessionUser = getUserFromRequest(rs)
     val suid = if (sessionUser.isDefined) sessionUser.get.id.get else -1
     val unHide = sessionUser.isDefined && sessionUser.get.hidden
     val problems = (rankingActor ? ProblemsQ(suid, request2lang, unHide)).mapTo[List[ProblemInfo]]
@@ -57,15 +56,15 @@ object MainController extends Controller with PermissionCheck {
   }
 
   def ranking: Action[AnyContent] = Action.async { implicit rs =>
-    implicit val sessionUser = getUserFromSession(request2session)
+    implicit val sessionUser = getUserFromRequest(rs)
     val suid = if (sessionUser.isDefined) sessionUser.get.id.get else -1
     val unHide = sessionUser.isDefined && sessionUser.get.hidden
     val ranking = (rankingActor ? RankingQ(suid, displayHiddenUsers = unHide)).mapTo[List[(Int, String, Boolean, Int, Int, Int)]]
     ranking.map(list => Ok(org.ieee_passau.views.html.general.ranking(list)))
   }
 
-  def calendar = DBAction { implicit rs =>
-    implicit val sessionUser = getUserFromSession(request2session)
+  def calendar: Action[AnyContent] = DBAction { implicit rs =>
+    implicit val sessionUser = getUserFromRequest(rs)
     val displayLang = request2lang
 
     val now = new Date()
@@ -83,8 +82,8 @@ object MainController extends Controller with PermissionCheck {
     *
     * @param page the page to display
     */
-  def content(page: String) = DBAction { implicit rs =>
-    implicit val sessionUser = getUserFromSession(request2session)
+  def content(page: String): Action[AnyContent] = DBAction { implicit rs =>
+    implicit val sessionUser = getUserFromRequest(rs)
     val displayLang = request2lang
 
     val pageId = Page.withName(page).id
@@ -101,8 +100,7 @@ object MainController extends Controller with PermissionCheck {
     * @param filename   the file name of the source file, default: "", we will guess a proper name based on the language
     */
   def handleSubmission(door: Int, sourcecode: String, filename: String = "")(implicit rs: DBSessionRequest[MultipartFormData[Files.TemporaryFile]]): Result = {
-
-    implicit val sessionUser = getUserFromSession(request2session)
+    implicit val sessionUser = getUserFromRequest(rs)
     if (sessionUser.isEmpty) {
       return Unauthorized(org.ieee_passau.views.html.errors.e403())
     }
@@ -231,8 +229,8 @@ object MainController extends Controller with PermissionCheck {
     *
     * @param door the number of the calendar door this task is behind
     */
-  def problemDetails(door: Int) = DBAction { implicit rs =>
-    implicit val sessionUser = getUserFromSession(request2session)
+  def problemDetails(door: Int): Action[AnyContent] = DBAction { implicit rs =>
+    implicit val sessionUser = getUserFromRequest(rs)
 
     Problems.byDoor(door).firstOption match {
       case None => NotFound(org.ieee_passau.views.html.errors.e404())
@@ -281,14 +279,13 @@ object MainController extends Controller with PermissionCheck {
     }
   }
 
-  def getUserProblemSolutions(door: Int): Action[AnyContent] = requirePermission(Contestant) { user => DBAction { implicit rs =>
-    implicit val sessionUser = Some(user)
+  def getUserProblemSolutions(door: Int): Action[AnyContent] = requirePermission(Contestant) { implicit user => DBAction { implicit rs =>
     Problems.byDoor(door).firstOption match {
       case None => NotFound(org.ieee_passau.views.html.errors.e404())
       case Some(problem) =>
         val langs = Languages.list
 
-        val solutionList= buildSolutionList(problem, user.id.get)
+        val solutionList= buildSolutionList(problem, user.get.id.get)
         val responseList = solutionList.take(1)
             .map(e => (e.solution.id.get, e.state.name, org.ieee_passau.views.html.solution.solutionList(List(e), langs).toString())) ++
           solutionList.drop(1)
@@ -299,19 +296,17 @@ object MainController extends Controller with PermissionCheck {
     }
   }}
 
-  def feedback: Action[AnyContent] = requirePermission(Contestant) { user => Action { implicit rs =>
-    implicit val sessionUser = Some(user)
+  def feedback: Action[AnyContent] = requirePermission(Contestant) { implicit user => Action { implicit rs =>
     Ok(org.ieee_passau.views.html.general.feedback(UserForms.feedbackForm))
   }}
 
-  def submitFeedback: Action[AnyContent] = requirePermission(Contestant) { user => DBAction { implicit rs =>
-    implicit val sessionUser = Some(user)
+  def submitFeedback: Action[AnyContent] = requirePermission(Contestant) { implicit user => DBAction { implicit rs =>
     UserForms.feedbackForm.bindFromRequest.fold(
       errorForm => {
         BadRequest(org.ieee_passau.views.html.general.feedback(errorForm))
       },
       fb => {
-        Feedbacks += Feedback(None, sessionUser.get.id.get, fb.rating, fb.pro, fb.con, fb.freetext)
+        Feedbacks += Feedback(None, user.get.id.get, fb.rating, fb.pro, fb.con, fb.freetext)
         Redirect(org.ieee_passau.controllers.routes.MainController.calendar())
           .flashing("success" -> Messages("feedback.submit.message"))
       }
