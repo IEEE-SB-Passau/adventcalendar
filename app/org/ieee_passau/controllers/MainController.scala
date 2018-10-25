@@ -49,32 +49,38 @@ object MainController extends Controller with PermissionCheck {
 
   def problems: Action[AnyContent] = Action.async { implicit rs =>
     implicit val sessionUser = getUserFromRequest(rs)
+
+    val displayLang = request2lang
     val suid = if (sessionUser.isDefined) sessionUser.get.id.get else -1
     val unHide = sessionUser.isDefined && sessionUser.get.hidden
-    val problems = (rankingActor ? ProblemsQ(suid, request2lang, unHide)).mapTo[List[ProblemInfo]]
-    problems.map(list => Ok(org.ieee_passau.views.html.general.problemList(list)))
+    val problems = (rankingActor ? ProblemsQ(suid, displayLang, unHide)).mapTo[List[ProblemInfo]]
+    val notification = "notification" -> Postings.byId(Page.notification.id, displayLang).headOption.map(p => p.content).getOrElse("")
+    problems.map(list => Ok(org.ieee_passau.views.html.general.problemList(list, notification)))
   }
 
   def ranking: Action[AnyContent] = Action.async { implicit rs =>
     implicit val sessionUser = getUserFromRequest(rs)
+
     val suid = if (sessionUser.isDefined) sessionUser.get.id.get else -1
     val unHide = sessionUser.isDefined && sessionUser.get.hidden
     val ranking = (rankingActor ? RankingQ(suid, displayHiddenUsers = unHide)).mapTo[List[(Int, String, Boolean, Int, Int, Int)]]
-    ranking.map(list => Ok(org.ieee_passau.views.html.general.ranking(list)))
+    val notification = "notification" -> Postings.byId(Page.notification.id, request2lang).headOption.map(p => p.content).getOrElse("")
+    ranking.map(list => Ok(org.ieee_passau.views.html.general.ranking(list, notification)))
   }
 
   def calendar: Action[AnyContent] = DBAction { implicit rs =>
     implicit val sessionUser = getUserFromRequest(rs)
-    val displayLang = request2lang
 
+    val displayLang = request2lang
     val now = new Date()
     val problems = Problems.filter(_.readableStart <= now).filter(_.readableStop > now).sortBy(_.door.asc).list
     val posting = Postings.byId(Page.calendar.id, displayLang).head
+    val notification = "notification" -> Postings.byId(Page.notification.id, displayLang).headOption.map(p => p.content).getOrElse("")
 
     // show all problems for debugging:
     //val problems = Query(Problems).sortBy(_.door.asc).list;
 
-    Ok(org.ieee_passau.views.html.general.calendar(posting, problems))
+    Ok(org.ieee_passau.views.html.general.calendar(posting, problems, notification))
   }
 
   /**
@@ -84,10 +90,9 @@ object MainController extends Controller with PermissionCheck {
     */
   def content(page: String): Action[AnyContent] = DBAction { implicit rs =>
     implicit val sessionUser = getUserFromRequest(rs)
-    val displayLang = request2lang
 
     val pageId = Page.withName(page).id
-    val posting = Postings.byId(pageId, displayLang).head
+    val posting = Postings.byId(pageId, request2lang).head
 
     Ok(org.ieee_passau.views.html.general.content(posting))
   }
@@ -179,6 +184,7 @@ object MainController extends Controller with PermissionCheck {
     * @param door the number of the calendar door this task is behind
     */
   def solveFile(door: Int): Action[MultipartFormData[TemporaryFile]] = DBAction(parse.multipartFormData) { implicit rs =>
+    val notification = "notification" -> Postings.byId(Page.notification.id, request2lang).headOption.map(p => p.content).getOrElse("")
     rs.body.file("solution").map { submission =>
       val sourceFile = submission.ref.file
       if (sourceFile.length > 262144) {
@@ -273,7 +279,11 @@ object MainController extends Controller with PermissionCheck {
           val trans = ProblemTranslations.byProblemLang(problem.id.get, displayLang.code).firstOption
           val transProblem = if (trans.nonEmpty) problem.copy(title=trans.get.title, description=trans.get.description) else problem
           val posting = Postings.byIdLang(Page.status.id, displayLang.code).firstOption
-          val flash = if (!running.run) "system" -> (if (posting.nonEmpty) posting.get.content else Messages("status.messages.message")) else "" -> ""
+          val flash = Map(
+            if (!running.run) "system" -> (if (posting.nonEmpty) posting.get.content else Messages("status.messages.message"))
+            else "" -> "",
+            "notification" -> Postings.byId(Page.notification.id, displayLang).headOption.map(p => p.content).getOrElse("")
+          )
           Ok(org.ieee_passau.views.html.general.problemDetails(transProblem, langs, lastLang, solutions, tickets, ProblemForms.ticketForm, flash))
         }
     }

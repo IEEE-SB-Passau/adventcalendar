@@ -4,7 +4,7 @@
 @import org.ieee_passau.views.html.main
 @import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.Flash
-@(problems: List[ProblemInfo])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
+@(problems: List[ProblemInfo], notification: (String, String))(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main(Messages("nav.problems")) {
     <table class="table table-striped">
@@ -38,4 +38,4 @@
         </tbody>
     </table>
     <p>@if(problems.isEmpty) { @Html(Messages("problem.list.empty")) }</p>
-}
+}(flash = (flash + notification), sessionUser, requestHeader, lang)

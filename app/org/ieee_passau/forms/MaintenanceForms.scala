@@ -12,7 +12,7 @@ object MaintenanceForms {
   val statusForm = Form(
     mapping(
       "state" -> text
-    )((state: String) => state == "true")((status: (Boolean)) => Some(status.toString))
+    )((state: String) => state == "true")((status: Boolean) => Some(status.toString))
   )
 
   val postingForm = Form(

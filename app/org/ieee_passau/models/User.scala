@@ -10,7 +10,7 @@ import scala.slick.lifted.{CompiledFunction, ProvenShape}
 
 case class User(id: Option[Int], username: String, password: String, email: String, active: Boolean, hidden: Boolean,
                 semester: Option[Int], studySubject: Option[String], school: Option[String],
-                lang: Option[String], activationToken: Option[String], permission: Permission) extends Entity[User] {
+                lang: Option[String], activationToken: Option[String], permission: Permission,  notificationDismissed: Boolean) extends Entity[User] {
   override def withId(id: Int): User = this.copy(id = Some(id))
 }
 
@@ -26,9 +26,10 @@ class Users(tag: Tag) extends TableWithId[User](tag, "users") {
   def activationToken: Column[String] = column[String]("token")
   def lang: Column[String] = column[String]("language")
   def permission: Column[Permission] = column[Permission]("permission") (Permission.permissionTypeMapper)
+  def notificationDismissed: Column[Boolean] = column[Boolean]("notification_dismissed")
 
   override def * : ProvenShape[User] = (id.?, username, password, email, active, hidden, semester.?,
-    studySubject.?, school.?, lang.?, activationToken.?, permission) <> (User.tupled, User.unapply)
+    studySubject.?, school.?, lang.?, activationToken.?, permission, notificationDismissed) <> (User.tupled, User.unapply)
 }
 
 object Users extends TableQuery(new Users(_)) {
@@ -101,7 +102,8 @@ case class UserRegistration(username: String, password: (String, String), email:
       school = this.school,
       lang = Some(lang.code),
       activationToken = Some(link),
-      permission = Contestant
+      permission = Contestant,
+      notificationDismissed= false
     )
   }
 }

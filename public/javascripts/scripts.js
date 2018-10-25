@@ -26,7 +26,7 @@ $(document).ready(function() {
     $('textarea.wysiwyg').summernote();
 });
 
-// file loader for loading text files into textareas
+// file loader for loading text files into text areas
 function loadFileAsText(input, textarea) {
     var fileToLoad = input.files[0];
 
@@ -52,6 +52,7 @@ $('.wysiwyg').summernote({
     }
 });
 
+// activate cookie notice
 window.addEventListener("load", function(){
     window.cookieconsent.initialise({
         "palette": {
@@ -66,10 +67,15 @@ window.addEventListener("load", function(){
         },
         "theme": "classic",
         "content": {
-            "message": cookietext,
-            "dismiss": cookiebutton,
-            "link": cookielink,
+            "message": cookieText,
+            "dismiss": cookieButton,
+            "link": cookieLink,
             "href": jsRoutes.org.ieee_passau.controllers.MainController.content("contact").url
         }
     })
+});
+
+// activate notification dismissal
+$('#flash-notification').on('close.bs.alert', function () {
+    $.post(jsRoutes.org.ieee_passau.controllers.UserController.dismissNotification().url)
 });

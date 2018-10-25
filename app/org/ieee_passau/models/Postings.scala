@@ -36,6 +36,7 @@ object Page extends Enumeration {
   val rules = Value(5, "rules")
   val examples = Value(6, "examples")
   val contact = Value(7, "contact")
+  val notification = Value(8, "notification")
 }
 
 object Postings extends TableQuery(new Postings(_)) {

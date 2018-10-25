@@ -45,6 +45,7 @@ object TicketController extends Controller with PermissionCheck {
   }}
 
   def submitTicket(door: Int): Action[AnyContent] = requirePermission(Contestant) { implicit user => DBAction { implicit rs =>
+    val displayLang = request2lang
     val now = new Date()
     ProblemForms.ticketForm.bindFromRequest.fold(
       _ => {
@@ -53,19 +54,18 @@ object TicketController extends Controller with PermissionCheck {
       },
       ticket => {
         val problem = Problems.byDoor(door).firstOption
-        val language = request2lang
         if (problem.isDefined) {
 
-          val problemTitle = ProblemTranslations.byProblemLang(problem.get.id.get, language).firstOption.fold(problem.get.title)(_.title)
+          val problemTitle = ProblemTranslations.byProblemLang(problem.get.id.get, displayLang).firstOption.fold(problem.get.title)(_.title)
 
           val id = (Tickets returning Tickets.map(_.id)) +=
-            Ticket(None, problem.get.id, user.get.id, None, ticket.text, public = false, now, language)
+            Ticket(None, problem.get.id, user.get.id, None, ticket.text, public = false, now, displayLang)
 
           val email = Email(
-            subject = Messages("email.header")(language) + " " +  Messages("ticket.title")(language) + " zu " + Messages("problem.title")(language) + " " + problem.get.door + ": " + problemTitle,
+            subject = Messages("email.header")(displayLang) + " " +  Messages("ticket.title")(displayLang) + " zu " + Messages("problem.title")(displayLang) + " " + problem.get.door + ": " + problemTitle,
             from = encodeEmailName(user.get.username) + " @ " + play.Configuration.root().getString("email.from"),
             to = List(play.Configuration.root().getString("email.from")),
-            bodyText = Some(ticket.text + "\n\n" + Messages("ticket.answer")(language) + ": " + org.ieee_passau.controllers.routes.TicketController.view(id).absoluteURL(play.Configuration.root().getBoolean("application.https", false)))
+            bodyText = Some(ticket.text + "\n\n" + Messages("ticket.answer")(displayLang) + ": " + org.ieee_passau.controllers.routes.TicketController.view(id).absoluteURL(play.Configuration.root().getBoolean("application.https", false)))
           )
           MailerPlugin.send(email)
 

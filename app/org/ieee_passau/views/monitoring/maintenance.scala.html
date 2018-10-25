@@ -5,7 +5,8 @@
 @import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.{Flash, RequestHeader}
 @import play.twirl.api.Html
-@(running: Boolean, statusMessage: String, postings: Map[Int, List[Posting]])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
+@(running: Boolean, statusMessage: String, notificationActive: Boolean, notificationMessage: String,
+        postings: Map[Int, List[Posting]])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main(Messages("nav.admin.postings")) {
     <h3>@Messages("status.title")</h3>
@@ -30,6 +31,32 @@
                     @Html(statusMessage)
                     <div class="form-group"><div class="col-sm-offset-2 col-sm-10">
                         <button type="submit" class="btn btn-success pull-right"><span class="glyphicon glyphicon-play"></span> @Messages("status.eval.start")</button>
+                    </div></div>
+                </fieldset>
+            </div>
+        </form>
+    }
+
+    @if(notificationActive) {
+        <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.EvaluationController.toggleNotification">
+            @CSRF.formField
+            <div class="well">
+                <fieldset>
+                    @Html(notificationMessage)
+                    <div class="form-group"><div class="col-sm-offset-2 col-sm-10">
+                        <button type="submit" class="btn btn-danger pull-right"><span class="glyphicon glyphicon-pause"></span> @Messages("status.notification.stop")</button>
+                    </div></div>
+                </fieldset>
+            </div>
+        </form>
+    } else {
+        <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.EvaluationController.toggleNotification">
+            @CSRF.formField
+            <div class="well alert-danger">
+                <fieldset>
+                    @Html(notificationMessage)
+                    <div class="form-group"><div class="col-sm-offset-2 col-sm-10">
+                        <button type="submit" class="btn btn-success pull-right"><span class="glyphicon glyphicon-play"></span> @Messages("status.notification.start")</button>
                     </div></div>
                 </fieldset>
             </div>

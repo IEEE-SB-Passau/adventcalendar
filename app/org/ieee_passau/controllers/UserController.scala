@@ -247,4 +247,9 @@ object UserController extends Controller with PermissionCheck {
       }
     )
   }}
+
+  def dismissNotification: Action[AnyContent] = requirePermission(Contestant) { implicit user => DBAction { implicit rs =>
+    Users.update(user.get.id.get, user.get.copy(notificationDismissed = true))
+    Ok("")
+  }}
 }

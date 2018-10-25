@@ -6,7 +6,8 @@
 @import org.ieee_passau.utils.LanguageHelper
 @import org.ieee_passau.models.Page
 @import org.ieee_passau.models.Admin
-@(title: String, isFullPage: Boolean = false, hasTitle: Boolean = false)(content: Html)(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
+@(title: String, isFullPage: Boolean = false, hasTitle: Boolean = false)(content: Html)(implicit flash: Flash,
+        sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 <!DOCTYPE html>
 
 <html lang="@lang.code">
@@ -115,7 +116,15 @@
                 <div class="alert alert-danger">@flash.get("danger").get</div>
             }
             @if(flash.get("system").isDefined) {
-                <div class="alert alert-warning">@Html(flash.get("system").get)</div>
+                <div class="alert alert-info">@Html(flash.get("system").get)</div>
+            }
+            @if(flash.get("notification").isDefined && (sessionUser.isEmpty || !sessionUser.get.notificationDismissed)) {
+                <div class="alert alert-info @if(sessionUser.isDefined) { alert-dismissible }" id="flash-notification">
+                    @if(sessionUser.isDefined) {
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    }
+                    @Html(flash.get("notification").get)
+                </div>
             }
 
             @if(hasTitle) {
@@ -145,14 +154,16 @@
         @helper.javascriptRouter("jsRoutes")(
             org.ieee_passau.controllers.routes.javascript.MainController.codeEditor,
             org.ieee_passau.controllers.routes.javascript.MainController.calendar,
-            org.ieee_passau.controllers.routes.javascript.MainController.content
+            org.ieee_passau.controllers.routes.javascript.MainController.content,
+            org.ieee_passau.controllers.routes.javascript.UserController.dismissNotification
         )
-        @* This should always be the last import *@
+        @* <!--suppress JSUnusedLocalSymbols --> *@
         <script type="text/javascript">
-            var cookietext = "@Messages("notification.cookie.text")";
-            var cookielink = "@Messages("notification.cookie.link")";
-            var cookiebutton = "@Messages("notification.cookie.button")";
+            var cookieText = "@Messages("notification.cookie.text")";
+            var cookieLink = "@Messages("notification.cookie.link")";
+            var cookieButton = "@Messages("notification.cookie.button")";
         </script>
+        @* This should always be the last import *@
         <script src="@routes.Assets.at("javascripts/scripts.js")" type="text/javascript"></script>
     </body>
 </html>

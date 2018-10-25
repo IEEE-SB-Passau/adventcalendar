@@ -9,8 +9,7 @@
 @import play.api.mvc.{Flash, RequestHeader}
 @import play.twirl.api.Html
 @import views.html.helper.{CSRF, form}
-@(problem: Problem, languages: List[Language], lastLang: String, solutions: List[SolutionListEntry], tickets: List[(Ticket, String)], ticketForm: Form[TicketText], message: (String, String))(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
-
+@(problem: Problem, languages: List[Language], lastLang: String, solutions: List[SolutionListEntry], tickets: List[(Ticket, String)], ticketForm: Form[TicketText], notifications: Map[String, String])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 @main(Messages("problem.title") + " " + problem.door + ": " + problem.title, hasTitle = true) {
     @Html(problem.description)
 
@@ -48,4 +47,4 @@
 
         @solutionListAutoReload(solutions, languages, problem.door)
     }
-}(flash = (flash + message), sessionUser, requestHeader, lang)
+}(flash.copy(flash.data++notifications), sessionUser, requestHeader, lang)

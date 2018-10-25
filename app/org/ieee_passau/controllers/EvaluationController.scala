@@ -28,6 +28,7 @@ import scala.xml.NodeSeq
 
 object EvaluationController extends Controller with PermissionCheck {
 
+  var notification = false
   val monitoringActor: ActorRef = Akka.system.actorOf(Props[MonitoringActor], "MonitoringActor")
   implicit val timeout = Timeout(5000 milliseconds)
 
@@ -41,8 +42,6 @@ object EvaluationController extends Controller with PermissionCheck {
   }
 
   def index(page: Int, ordering: String): Action[AnyContent] = requirePermission(Moderator) { implicit admin => DBAction { implicit rs =>
-    val lng = request2lang
-
     val subsPerPage = 50
 
     val solutionsQuery = for {
@@ -56,7 +55,7 @@ object EvaluationController extends Controller with PermissionCheck {
       val solvedTestcases = sols.count(_._8 == Passed)
       val allTestcases = sols.length
 
-      val title = ProblemTranslations.byProblemLang(sols.head._4/*problem*/, lng).firstOption.fold(sols.head._6)(_.title)
+      val title = ProblemTranslations.byProblemLang(sols.head._4/*problem*/, request2lang).firstOption.fold(sols.head._6)(_.title)
 
       val solved = sols.forall { case (_, _, _, _, _, _, _, r, _) => r == Passed }
       val failed = sols.exists { case (_, _, _, _, _, _, _, r, _) => r != Passed && r != Queued }
@@ -165,8 +164,9 @@ object EvaluationController extends Controller with PermissionCheck {
   def maintenance: Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
     val displayLang = request2lang
     val state = Await.result((monitoringActor ? StatusQ).mapTo[StatusM], 50 millis)
+    val notificationMessage = Postings.byId(Page.notification.id, displayLang).headOption.map(p => p.content).getOrElse("")
     Postings.byIdLang(Page.status.id, displayLang.code).firstOption.map { post =>
-      Ok(org.ieee_passau.views.html.monitoring.maintenance(state.run, post.content, Postings.list(LanguageHelper.defaultLanguage)))
+      Ok(org.ieee_passau.views.html.monitoring.maintenance(state.run, post.content, notification, notificationMessage, Postings.list(LanguageHelper.defaultLanguage)))
     } getOrElse {
       Redirect(org.ieee_passau.controllers.routes.EvaluationController.editPage(Page.status.id, displayLang.code))
         .flashing("waring" -> play.api.i18n.Messages("posting.post.missing"))
@@ -185,6 +185,13 @@ object EvaluationController extends Controller with PermissionCheck {
           .flashing("success" -> play.api.i18n.Messages("status.update.message"))
       }
     )
+  }}
+
+  def toggleNotification: Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
+    notification = !notification
+    (for { u <- Users } yield u.notificationDismissed).update(false)
+    Redirect(org.ieee_passau.controllers.routes.EvaluationController.maintenance())
+      .flashing("success" -> play.api.i18n.Messages("status.notification.state." + (if (notification) "on" else "off")))
   }}
 
   def createPage(id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
