@@ -6,9 +6,12 @@
 @import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.{Flash, RequestHeader}
 @import  play.twirl.api.Html
-@(registrationForm: Form[UserRegistration])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
+@(registrationForm: Form[UserRegistration], useCaptcha: Boolean)(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main(Messages("nav.user.register")) {
+    @if(useCaptcha) {
+        <script src='https://www.google.com/recaptcha/api.js'></script>
+    }
     <div class="well col-md-8 col-md-offset-2">
         @form(org.ieee_passau.controllers.routes.UserController.create, 'class -> "form-horizontal") {
             @CSRF.formField
@@ -38,11 +41,25 @@
                 @text(registrationForm("studySubject"), label = Messages("user.studysubject"), placeholder = Messages("user.studysubject"), offset = "col-sm-3", width = "col-sm-9")
 
                 <div class="form-group">
-                    <div class="col-sm-offset-3 col-sm-9">
-                        <button id="submit" type="submit" value="Submit" class="btn btn-primary">@Messages("nav.user.register")</button>
-                    </div>
+                    @if(useCaptcha) {
+                        <div class="col-sm-offset-3 col-sm-6" style="padding-left: 30px;">
+                            <div class="form-group @if(registrationForm("g-recaptcha-response").hasErrors || registrationForm.errors("g-recaptcha-response").nonEmpty ) { has-error }">
+                                <div class="g-recaptcha" data-sitekey="@play.Configuration.root().getString("captcha.sitekey")"></div>
+                                <span class="help-block">@{ registrationForm("g-recaptcha-response").error.map { error => Messages(error.message) }}</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <button id="submit" type="submit" value="Submit" class="btn btn-primary">@Messages("nav.user.register")</button>
+                        </div>
+                    } else {
+                        <input type="hidden" name="g-recaptcha-response" value="" />
+                        <div class="col-sm-offset-3 col-sm-9">
+                            <button id="submit" type="submit" value="Submit" class="btn btn-primary">@Messages("nav.user.register")</button>
+                        </div>
+                    }
                 </div>
             </fieldset>
+
         }
         <div class="pull-right">
             <small>@Html(Messages("user.help.register"))</small>

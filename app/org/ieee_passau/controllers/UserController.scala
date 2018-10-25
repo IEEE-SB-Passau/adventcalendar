@@ -92,7 +92,7 @@ object UserController extends Controller with PermissionCheck {
 
   def register: Action[AnyContent] = requirePermission(Guest) { _ => Action { implicit rs =>
     implicit val sessionUser = None
-    Ok(org.ieee_passau.views.html.user.register(UserForms.registrationForm))
+    Ok(org.ieee_passau.views.html.user.register(UserForms.registrationForm, play.Configuration.root().getBoolean("captcha.active")))
   }}
 
   def create: Action[AnyContent] = requirePermission(Guest) { _ => DBAction { implicit rs =>
@@ -100,7 +100,7 @@ object UserController extends Controller with PermissionCheck {
 
     UserForms.registrationForm.bindFromRequest.fold(
       errorForm => {
-        BadRequest(org.ieee_passau.views.html.user.register(errorForm))
+        BadRequest(org.ieee_passau.views.html.user.register(errorForm, play.Configuration.root().getBoolean("captcha.active")))
       },
 
       registration => {
@@ -123,7 +123,10 @@ object UserController extends Controller with PermissionCheck {
         } catch {
           case _: EmailException =>
             Users.filter(_.id === id).delete
-            BadRequest(org.ieee_passau.views.html.user.register(UserForms.registrationForm.fill(registration).withError("invalidEmail", "error.email")))
+            BadRequest(org.ieee_passau.views.html.user.register(
+              UserForms.registrationForm.fill(registration).withError("invalidEmail", "error.email"),
+              play.Configuration.root().getBoolean("captcha.active"))
+            )
 
           case e: Throwable =>
             Users.filter(_.id === id).delete

@@ -33,7 +33,11 @@ trait PermissionCheck extends Controller {
     */
   def requirePermission(level: Permission)(f: => User => Action[AnyContent]): Action[AnyContent] = Action.async { implicit rs =>
     implicit val user = getUserFromSession(rs.session)
-    if ((user.isEmpty && level == Guest) || (user.get.active && user.get.permission.includes(level))) {
+    if (user.isEmpty && level == Guest) {
+      f(null)(rs)
+    } else if (user.isEmpty) {
+      Future.successful(Unauthorized(org.ieee_passau.views.html.errors.e403()))
+    } else if (user.get.active && user.get.permission.includes(level)) {
       f(user.get)(rs)
     } else {
       Future.successful(Unauthorized(org.ieee_passau.views.html.errors.e403()))

@@ -1,6 +1,7 @@
 package org.ieee_passau.forms
 
 import org.ieee_passau.models._
+import org.ieee_passau.utils.CaptchaHelper
 import play.api.data.Forms._
 import play.api.data._
 import play.api.i18n.Messages
@@ -35,8 +36,13 @@ object UserForms {
       "email" -> email.verifying(Messages("user.error.emailtaken"), e => Users.emailAvailable(e)),
       "semester" -> optional(number),
       "studySubject" -> optional(nonEmptyText),
-      "school" -> optional(nonEmptyText)
-    )(UserRegistration.apply)(UserRegistration.unapply)
+      "school" -> optional(nonEmptyText),
+      "g-recaptcha-response" -> text.verifying(Messages("user.error.captcha"), value => CaptchaHelper.check(value))
+    )
+    ((username: String, password: (String, String), email: String, semester: Option[Int], studySubject: Option[String],
+       school: Option[String], _: String ) => UserRegistration(username, password, email, semester, studySubject, school))
+    ((user: UserRegistration) => Some(user.username, ("", ""), user.email, user.semester, user.studySubject, user.school, ""))
+
   )
 
   def loginForm = Form(
