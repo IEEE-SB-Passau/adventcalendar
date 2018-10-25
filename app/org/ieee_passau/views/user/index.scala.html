@@ -14,7 +14,7 @@
                 <th>@Messages("user.title")</th>
                 <th>@Messages("user.email")</th>
                 <th>@Messages("user.active")</th>
-                <th>@Messages("user.admin")</th>
+                <th>@Messages("user.permission")</th>
                 <th></th>
             </tr>
         </thead>
@@ -25,7 +25,7 @@
                 <td>@user.username</td>
                 <td>@user.email</td>
                 <td>@showCheckmark(user.active)</td>
-                <td>@showCheckmark(user.admin)</td>
+                <td>@Messages(user.permission.name.toLowerCase)</td>
                 <td>
                     <a href="@org.ieee_passau.controllers.routes.UserController.edit(user.id.get)" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span></a>
                     <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.UserController.delete(user.id.get)">

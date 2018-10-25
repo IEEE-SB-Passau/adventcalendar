@@ -92,3 +92,32 @@ class EvalModes(tag: Tag) extends Table[EvalMode](tag, "e_test_eval_mode") {
   def * : ProvenShape[EvalMode] = mode
 }
 object EvalModes extends TableQuery(new EvalModes(_))
+
+object Permission {
+  implicit val permissionTypeMapper: JdbcType[Permission] with BaseTypedType[Permission] = MappedColumnType.base[Permission, String] (
+    r => r.name,
+    s => Permission(s)
+  )
+}
+case class Permission(name: String) {
+  override def toString: String = name.toLowerCase
+  def includes(level: Permission): Boolean = {
+    if (level == Everyone) return true
+    if (this == level) return true
+    if (this == Moderator && level == Contestant) return true
+    if (this == Admin && (level == Contestant || level == Moderator)) return true
+    false
+  }
+}
+object Everyone extends Permission("EVERYONE")
+object Guest extends Permission("GUEST")
+object Contestant extends Permission("CONTESTANT")
+object Moderator extends Permission("MODERATOR")
+object Admin extends Permission("ADMIN")
+object Internal extends Permission("INTERNAL")
+
+class Permissions(tag: Tag) extends Table[Permission](tag, "e_permission") {
+  def name: Column[Permission] = column[Permission]("name")
+  def * : ProvenShape[Permission] = name
+}
+object Permissions extends TableQuery(new Permissions(_))

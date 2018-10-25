@@ -4,6 +4,7 @@
 @import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.RequestHeader
 @import play.twirl.api.TemplateMagic._
+@import org.ieee_passau.models.Admin
 @(languages: List[Language])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main(Messages("codelang.list.title") + " ") {
@@ -32,7 +33,7 @@
         </tbody>
     </table>
 
-    @if(sessionUser.isDefined && sessionUser.get.admin) {
+    @if(sessionUser.isDefined && sessionUser.get.permission.includes(Admin)) {
         <p class="text-right">
             <a class="btn btn-default" href="@org.ieee_passau.controllers.routes.LanguageController.index"><span class="glyphicon glyphicon-pencil"></span> @Messages("general.edit")</a>
         </p>

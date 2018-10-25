@@ -1,7 +1,7 @@
 package org.ieee_passau.controllers
 
 import org.ieee_passau.forms.TestcaseForms
-import org.ieee_passau.models.{EvalTask, EvalTasks}
+import org.ieee_passau.models.{Admin, EvalTask, EvalTasks}
 import org.ieee_passau.utils.PermissionCheck
 import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
@@ -14,25 +14,25 @@ import scala.reflect.io.File
 
 object EvalTaskController extends Controller with PermissionCheck {
 
-  def edit(pid: Int, id: Int): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+  def edit(pid: Int, id: Int): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
     EvalTasks.byId(id).firstOption.map { task =>
       Ok(org.ieee_passau.views.html.evaltask.edit(pid, id, TestcaseForms.evalTaskForm.fill(task)))
     }.getOrElse(NotFound(org.ieee_passau.views.html.errors.e404()))
   }}
 
-  def delete(pid: Int, id: Int): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+  def delete(pid: Int, id: Int): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
     EvalTasks.filter(_.id === id).delete
     Redirect(org.ieee_passau.controllers.routes.ProblemController.edit(pid))
   }}
 
-  def insert(pid: Int): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+  def insert(pid: Int): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
     Ok(org.ieee_passau.views.html.evaltask.insert(pid, TestcaseForms.evalTaskForm))
   }}
 
-  def save(pid: Int): Action[MultipartFormData[TemporaryFile]] = requireAdmin(parse.multipartFormData) { admin =>
+  def save(pid: Int): Action[MultipartFormData[TemporaryFile]] = requirePermission(Admin, parse.multipartFormData) { admin =>
     DBAction(parse.multipartFormData) { implicit rs =>
       implicit val sessionUser = Some(admin)
       TestcaseForms.evalTaskForm.bindFromRequest.fold(
@@ -55,7 +55,7 @@ object EvalTaskController extends Controller with PermissionCheck {
     }
   }
 
-  def update(pid: Int, id: Int): Action[MultipartFormData[TemporaryFile]] = requireAdmin(parse.multipartFormData) { admin =>
+  def update(pid: Int, id: Int): Action[MultipartFormData[TemporaryFile]] = requirePermission(Admin, parse.multipartFormData) { admin =>
     DBAction(parse.multipartFormData) { implicit rs =>
       implicit val sessionUser = Some(admin)
       TestcaseForms.evalTaskForm.bindFromRequest.fold(

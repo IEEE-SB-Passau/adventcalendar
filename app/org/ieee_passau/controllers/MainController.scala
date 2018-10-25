@@ -7,6 +7,7 @@ import akka.actor.{ActorRef, Props}
 import akka.pattern.ask
 import akka.util.Timeout
 import org.ieee_passau.controllers.Beans._
+import org.ieee_passau.controllers.EvaluationController.requirePermission
 import org.ieee_passau.forms.{ProblemForms, UserForms}
 import org.ieee_passau.models.DateSupport._
 import org.ieee_passau.models.{Postings, _}
@@ -120,7 +121,7 @@ object MainController extends Controller with PermissionCheck {
     val lastLocalSolution = lastSolutions.filter(_.problemId === problem.get.id).sortBy(_.created.desc).firstOption
     val sid: Int = lastLocalSolution.fold(-1)(s => s.id.get)
 
-    if (lastSolutions.firstOption.nonEmpty && lastSolutions.first.created.after(new Date(now.getTime - 60000)) && !sessionUser.get.admin) {
+    if (lastSolutions.firstOption.nonEmpty && lastSolutions.first.created.after(new Date(now.getTime - 60000)) && !sessionUser.get.permission.includes(Moderator)) {
       return Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door)).flashing("danger" ->
         (Messages("submit.ratelimit.message") + " " + Messages("submit.ratelimit.timer")))
     }
@@ -129,7 +130,7 @@ object MainController extends Controller with PermissionCheck {
       t <- Testruns if t.solutionId === sid && t.result === (Queued: org.ieee_passau.models.Result)
     } yield t.created).sortBy(_.desc).list
 
-    if (trs.nonEmpty && trs.head.after(new Date(now.getTime - 900000)) && !sessionUser.get.admin) {
+    if (trs.nonEmpty && trs.head.after(new Date(now.getTime - 900000)) && !sessionUser.get.permission.includes(Moderator)) {
       return Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door)).flashing("danger" ->
         (Messages("submit.ratelimit.message") + " " + Messages("submit.ratelimit.queue")))
     }
@@ -245,20 +246,17 @@ object MainController extends Controller with PermissionCheck {
             case None => -1
             case Some(u) => u.id.get
           }
-          val uAdmin = sessionUser match {
-            case None => false
-            case Some(u) => u.admin
-          }
+          val isMod = sessionUser.get.permission.includes(Moderator)
 
           // unanswered tickets
           var tickets = (for {
-            t <- Tickets if t.problemId === problem.id && t.responseTo.?.isEmpty && (t.public === true || t.userId === uid || uAdmin)
+            t <- Tickets if t.problemId === problem.id && t.responseTo.?.isEmpty && (t.public === true || t.userId === uid || isMod)
             u <- Users if u.id === t.userId
           } yield (t, u.username)).list
 
           // answered tickets + answers
           tickets = tickets ++ (for {
-            pt <- Tickets if pt.problemId === problem.id && (pt.public === true || pt.userId === uid || uAdmin)
+            pt <- Tickets if pt.problemId === problem.id && (pt.public === true || pt.userId === uid || isMod)
             t <- Tickets if t.responseTo === pt.id
             u <- Users if u.id === t.userId
           } yield (t, u.username)).list
@@ -283,7 +281,7 @@ object MainController extends Controller with PermissionCheck {
     }
   }
 
-  def getUserProblemSolutions(door: Int): Action[AnyContent] = requireLogin { user => DBAction { implicit rs =>
+  def getUserProblemSolutions(door: Int): Action[AnyContent] = requirePermission(Contestant) { user => DBAction { implicit rs =>
     implicit val sessionUser = Some(user)
     Problems.byDoor(door).firstOption match {
       case None => NotFound(org.ieee_passau.views.html.errors.e404())
@@ -301,12 +299,12 @@ object MainController extends Controller with PermissionCheck {
     }
   }}
 
-  def feedback: Action[AnyContent] = requireLogin { user => Action { implicit rs =>
+  def feedback: Action[AnyContent] = requirePermission(Contestant) { user => Action { implicit rs =>
     implicit val sessionUser = Some(user)
     Ok(org.ieee_passau.views.html.general.feedback(UserForms.feedbackForm))
   }}
 
-  def submitFeedback: Action[AnyContent] = requireLogin { user => DBAction { implicit rs =>
+  def submitFeedback: Action[AnyContent] = requirePermission(Contestant) { user => DBAction { implicit rs =>
     implicit val sessionUser = Some(user)
     UserForms.feedbackForm.bindFromRequest.fold(
       errorForm => {

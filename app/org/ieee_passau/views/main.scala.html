@@ -5,6 +5,7 @@
 @import play.twirl.api.Html
 @import org.ieee_passau.utils.LanguageHelper
 @import org.ieee_passau.models.Page
+@import org.ieee_passau.models.Admin
 @(title: String, isFullPage: Boolean = false, hasTitle: Boolean = false)(content: Html)(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 <!DOCTYPE html>
 
@@ -50,7 +51,7 @@
                                     <li @if(title == Messages(Page.rules.toString)) { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.content(Page.rules.toString)">@Messages(Page.rules.toString)</a></li>
                                 </ul>
                             </li>
-                            @if(sessionUser.isDefined && sessionUser.get.admin) {
+                            @if(sessionUser.isDefined && sessionUser.get.permission.includes(Admin)) {
                                 <li class="dropdown
                                     @if(List(
                                         Messages("user.list.title"), Messages("problem.list.title"), Messages("ticket.list.title"),
@@ -82,7 +83,7 @@
                                 <li @if(title == Messages("nav.user.login"))    { class="active" }><a href="@org.ieee_passau.controllers.routes.UserController.login"   >@Messages("nav.user.login")</a></li>
                             } else {
                                 <li @if(title == Messages("nav.user.logout")) { class="active" }><a href="@org.ieee_passau.controllers.routes.UserController.logout">@Messages("nav.user.logout")</a></li>
-                                <li class="navbar-text">@Messages("nav.user.greeting", sessionUser.get.username, if(sessionUser.get.admin) Messages("nav.admin.message") else "")</li>
+                                <li class="navbar-text">@Messages("nav.user.greeting", sessionUser.get.username, if(sessionUser.get.permission.includes(Admin)) Messages("nav.admin.message") else "")</li>
                             }
                             <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="lang-xs" lang="@lang.code"></span> <b class="caret"></b></a>

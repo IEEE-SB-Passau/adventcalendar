@@ -2,6 +2,7 @@ package org.ieee_passau.controllers
 
 import java.util.Date
 
+import org.ieee_passau.controllers.EvaluationController.requirePermission
 import org.ieee_passau.forms.TestcaseForms
 import org.ieee_passau.models._
 import org.ieee_passau.utils.PermissionCheck
@@ -13,7 +14,7 @@ import play.api.mvc._
 
 object TestcaseController extends Controller with PermissionCheck {
 
-  def edit(pid: Int, id: Int): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+  def edit(pid: Int, id: Int): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
     Testcases.byId(id).firstOption.map { testcase =>
       val visibilities = Visibilities.list
@@ -21,19 +22,19 @@ object TestcaseController extends Controller with PermissionCheck {
     }.getOrElse(NotFound(org.ieee_passau.views.html.errors.e404()))
   }}
 
-  def delete(pid: Int, id: Int): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+  def delete(pid: Int, id: Int): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
     Testcases.filter(_.id === id).delete
     Redirect(org.ieee_passau.controllers.routes.ProblemController.edit(pid))
   }}
 
-  def insert(pid: Int): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+  def insert(pid: Int): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
     val visibilities = Visibilities.list
     Ok(org.ieee_passau.views.html.testcase.insert(pid, visibilities, TestcaseForms.testcaseForm))
   }}
 
-  def save(pid: Int): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+  def save(pid: Int): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
     TestcaseForms.testcaseForm.bindFromRequest.fold(
       errorForm => {
@@ -56,7 +57,7 @@ object TestcaseController extends Controller with PermissionCheck {
     )
   }}
 
-  def update(pid: Int, id: Int): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+  def update(pid: Int, id: Int): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
     TestcaseForms.testcaseForm.bindFromRequest.fold(
       errorForm => {

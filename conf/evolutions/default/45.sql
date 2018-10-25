@@ -1,0 +1,20 @@
+# DEFAULT SCHEMA
+
+# --- !Ups
+CREATE TABLE e_permission (
+  name CHARACTER VARYING(30) PRIMARY KEY
+);
+
+INSERT INTO e_permission VALUES ('GUEST');
+INSERT INTO e_permission VALUES ('CONTESTANT');
+INSERT INTO e_permission VALUES ('MODERATOR');
+INSERT INTO e_permission VALUES ('ADMIN');
+INSERT INTO e_permission VALUES ('INTERNAL');
+
+ALTER TABLE users ADD COLUMN permission CHARACTER VARYING(30) DEFAULT 'CONTESTANT' :: CHARACTER VARYING REFERENCES e_permission (name);
+
+# --- !Downs
+
+ALTER TABLE users DROP COLUMN permission;
+
+DROP TABLE IF EXISTS e_permission;

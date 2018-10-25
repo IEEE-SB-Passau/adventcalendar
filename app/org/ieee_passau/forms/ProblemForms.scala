@@ -5,7 +5,7 @@ import org.ieee_passau.models.{EvalMode, Problem, ProblemTranslation, Problems}
 import play.api.data.Forms._
 import play.api.data._
 import play.api.data.format.Formats._
-import play.api.i18n.{Lang, Messages}
+import play.api.i18n.Lang
 
 object ProblemForms {
   val problemForm = Form(
@@ -18,7 +18,7 @@ object ProblemForms {
       "readableStop" -> date("dd.MM.yyyy HH:mm"),
       "solvableStart" -> date("dd.MM.yyyy HH:mm"),
       "solvableStop" -> date("dd.MM.yyyy HH:mm"),
-      "evalMode" -> text,
+      "evalMode" -> nonEmptyText,
       "cpuFactor" -> of[Float],
       "memFactor" -> of[Float]
     )

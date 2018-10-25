@@ -11,29 +11,29 @@ import play.api.mvc._
 
 object LanguageController extends Controller with PermissionCheck {
 
-  def index: Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+  def index: Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
     Ok(org.ieee_passau.views.html.language.index(Languages.sortBy(_.id.asc).list))
   }}
 
-  def list: Action[AnyContent] = DBAction { implicit rs =>
+  def list: Action[AnyContent] =  DBAction { implicit rs =>
     implicit val sessionUser = getUserFromSession(request2session)
     Ok(org.ieee_passau.views.html.language.languages(Languages.sortBy(_.id.asc).list))
   }
 
-  def edit(language: String): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+  def edit(language: String): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
     Languages.byLang(language).map { lng =>
       Ok(org.ieee_passau.views.html.language.edit(lng.id, MaintenanceForms.languageUpdateForm.fill(lng)))
     }.getOrElse(NotFound(org.ieee_passau.views.html.errors.e404()))
   }}
 
-  def insert: Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+  def insert: Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
     Ok(org.ieee_passau.views.html.language.insert(MaintenanceForms.languageNewForm))
   }}
 
-  def save: Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+  def save: Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
     MaintenanceForms.languageNewForm.bindFromRequest.fold(
       errorForm => {
@@ -48,7 +48,7 @@ object LanguageController extends Controller with PermissionCheck {
     )
   }}
 
-  def update(language: String): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+  def update(language: String): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
     Languages.byLang(language).fold(NotFound(org.ieee_passau.views.html.errors.e404()))(lng => {
       MaintenanceForms.languageUpdateForm.bindFromRequest.fold(

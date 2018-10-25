@@ -1,7 +1,6 @@
 package org.ieee_passau.controllers
 
 import org.ieee_passau.controllers.Beans.UpdateRankingM
-import org.ieee_passau.controllers.EvaluationController.Redirect
 import org.ieee_passau.forms.ProblemForms
 import org.ieee_passau.models._
 import org.ieee_passau.utils.PermissionCheck
@@ -14,12 +13,12 @@ import play.api.mvc._
 
 object ProblemController extends Controller with PermissionCheck {
 
-  def index: Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+  def index: Action[AnyContent] = requirePermission(Moderator) { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
     Ok(org.ieee_passau.views.html.problem.index(Problems.sortBy(_.door.asc).list))
   }}
 
-  def edit(id: Int): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+  def edit(id: Int): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
     Problems.byId(id).firstOption.map { problem =>
       Ok(org.ieee_passau.views.html.problem.edit(id,
@@ -30,19 +29,19 @@ object ProblemController extends Controller with PermissionCheck {
     }.getOrElse(NotFound(org.ieee_passau.views.html.errors.e404()))
   }}
 
-  def delete(id: Int): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+  def delete(id: Int): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
     Problems.filter(_.id === id).delete
     Akka.system.actorSelection("user/RankingActor") ! UpdateRankingM
     Redirect(org.ieee_passau.controllers.routes.ProblemController.index())
   }}
 
-  def insert: Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+  def insert: Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
     Ok(org.ieee_passau.views.html.problem.insert(ProblemForms.problemForm, EvalModes.list))
   }}
 
-  def save: Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+  def save: Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
     ProblemForms.problemForm.bindFromRequest.fold(
       errorForm => {
@@ -59,7 +58,7 @@ object ProblemController extends Controller with PermissionCheck {
     )
   }}
 
-  def update(id: Int): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+  def update(id: Int): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
     ProblemForms.problemForm.bindFromRequest.fold(
       errorForm => {
@@ -78,12 +77,12 @@ object ProblemController extends Controller with PermissionCheck {
     )
   }}
 
-  def addTranslation(problemId: Int): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+  def addTranslation(problemId: Int): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
     Ok(org.ieee_passau.views.html.problemTranslation.insert(problemId, ProblemForms.problemTranslationForm))
   }}
 
-  def saveTranslation(problemId: Int): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+  def saveTranslation(problemId: Int): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
     ProblemForms.problemTranslationForm.bindFromRequest.fold(
       errorForm => {
@@ -103,7 +102,7 @@ object ProblemController extends Controller with PermissionCheck {
     )
   }}
 
-  def editTranslation(problemId: Int, lang: String): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+  def editTranslation(problemId: Int, lang: String): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
     ProblemTranslations.byProblemLang(problemId, lang).firstOption.map { trans =>
       Ok(org.ieee_passau.views.html.problemTranslation.edit(problemId, ProblemForms.problemTranslationForm.fill(trans)))
@@ -111,7 +110,7 @@ object ProblemController extends Controller with PermissionCheck {
   }}
 
 
-  def updateTranslation(problemId: Int, lang: String): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+  def updateTranslation(problemId: Int, lang: String): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
     ProblemForms.problemTranslationForm.bindFromRequest.fold(
       errorForm => {
@@ -126,7 +125,7 @@ object ProblemController extends Controller with PermissionCheck {
     )
   }}
 
-  def deleteTranslation(problemId: Int, lang: String): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+  def deleteTranslation(problemId: Int, lang: String): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
     ProblemTranslations.byProblemLang(problemId, lang).delete
     Redirect(org.ieee_passau.controllers.routes.ProblemController.edit(problemId))

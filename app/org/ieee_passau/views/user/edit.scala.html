@@ -5,7 +5,8 @@
 @import play.api.data.Form
 @import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.{Flash, RequestHeader}
-@(id: Int, user: Form[User])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
+@import org.ieee_passau.models.Permission
+@(id: Int, user: Form[User], permissions: List[Permission])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
 
 @main(Messages("user.edit")) {
     @form(org.ieee_passau.controllers.routes.UserController.update(id), 'class -> "form-horizontal") {
@@ -16,11 +17,21 @@
                 @password(user("password"), label = Messages("user.password"), placeholder = Messages("user.password"), required = false, help = Messages("user.update.password"))
                 @text(user("email"), label = Messages("user.email"), placeholder = Messages("user.email"))
                 @checkboxBs(user("active"), label = Messages("user.active"))
-                @checkboxBs(user("admin"), label = Messages("user.admin"))
                 @checkboxBs(user("hidden"), label = Messages("user.hidden"))
                 @text(user("school"), label = Messages("user.school"), placeholder = Messages("user.school"))
                 @text(user("semester"), label = Messages("user.semester"), placeholder = Messages("user.semester"))
                 @text(user("studySubject"), label = Messages("user.studysubject"), placeholder = Messages("user.studysubject"))
+
+                <div class="form-group">
+                    <label for="evalMode" class="col-sm-2 control-label">@Messages("user.permission")</label>
+                    <div class="col-sm-10">
+                        <select id="evalMode" size="1" name="permission" class="col-sm-10 form-control">
+                        @permissions.map { mode =>
+                            <option value="@mode.name" @{if(user.value.isDefined && mode == user.get.permission) "selected" }>@Messages(mode.toString)</option>
+                        }
+                        </select>
+                    </div>
+                </div>
 
                 @buttonSave()
             </div>

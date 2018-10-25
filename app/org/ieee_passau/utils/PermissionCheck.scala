@@ -1,6 +1,6 @@
 package org.ieee_passau.utils
 
-import org.ieee_passau.models.{User, Users}
+import org.ieee_passau.models.{Guest, Permission, User, Users}
 import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
 import play.api.db.slick.DB
@@ -27,16 +27,16 @@ trait PermissionCheck extends Controller {
   }
 
   /**
-    * The action can only be accessed by a guest.
+    * The action can only be accessed by an authenticated, active administrator.
     *
     * @param f action to carry out.
     */
-  def requireGuest(f: => Action[AnyContent]): Action[AnyContent] = Action.async { implicit rs =>
+  def requirePermission(level: Permission)(f: => User => Action[AnyContent]): Action[AnyContent] = Action.async { implicit rs =>
     implicit val user = getUserFromSession(rs.session)
-    if (user.isDefined) {
-      Future.successful(Unauthorized(org.ieee_passau.views.html.errors.e403()))
+    if ((user.isEmpty && level == Guest) || (user.get.active && user.get.permission.includes(level))) {
+      f(user.get)(rs)
     } else {
-      f(rs)
+      Future.successful(Unauthorized(org.ieee_passau.views.html.errors.e403()))
     }
   }
 
@@ -45,54 +45,12 @@ trait PermissionCheck extends Controller {
     *
     * @param f action to carry out.
     */
-  def requireAdmin(f: => User => Action[AnyContent]): Action[AnyContent] = Action.async { implicit rs =>
+  def requirePermission[A](level: Permission, bp: BodyParser[A])(f: => User => Action[A]): Action[A] = Action.async(bp) { implicit rs =>
     implicit val user = getUserFromSession(rs.session)
-    if (user.isEmpty || !user.get.active || !user.get.admin) {
-      Future.successful(Unauthorized(org.ieee_passau.views.html.errors.e403()))
-    } else {
+    if ((user.isEmpty && level == Guest) || (user.get.active && user.get.permission == level)) {
       f(user.get)(rs)
-    }
-  }
-
-  /**
-    * The action can only be accessed by an authenticated, active administrator.
-    *
-    * @param f action to carry out.
-    */
-  def requireAdmin[A](bp: BodyParser[A])(f: => User => Action[A]): Action[A] = Action.async(bp) { implicit rs =>
-    implicit val user = getUserFromSession(rs.session)
-    if (user.isEmpty || !user.get.active || !user.get.admin) {
-      Future.successful(Unauthorized(org.ieee_passau.views.html.errors.e403()))
     } else {
-      f(user.get)(rs)
-    }
-  }
-
-  /**
-    * The action can only be accessed by an authenticated, active system user (i.e the evaluation system).
-    *
-    * @param f action to carry out.
-    */
-  def requireSystem(f: => User => Action[AnyContent]): Action[AnyContent] = Action.async { implicit rs =>
-    implicit val user = getUserFromSession(rs.session)
-    if (user.isEmpty || !user.get.active || !user.get.system) {
       Future.successful(Unauthorized(org.ieee_passau.views.html.errors.e403()))
-    } else {
-      f(user.get)(rs)
-    }
-  }
-
-  /**
-    * The action can only be accessed by an authenticated, active user.
-    *
-    * @param f action to carry out.
-    */
-  def requireLogin(f: => User => Action[AnyContent]): Action[AnyContent] = Action.async { implicit rs =>
-    implicit val user = getUserFromSession(rs.session)
-    if (user.isEmpty || !user.get.active) {
-      Future.successful(Unauthorized(org.ieee_passau.views.html.errors.e403()))
-    } else {
-      f(user.get)(rs)
     }
   }
 }

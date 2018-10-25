@@ -13,16 +13,16 @@ object UserForms {
     "password" -> optional(nonEmptyText(6, 128)),
     "email" -> email,
     "active" -> boolean,
-    "admin" -> boolean,
     "hidden" -> boolean,
     "semester" -> optional(number),
     "studySubject" -> optional(nonEmptyText),
-    "school" -> optional(nonEmptyText)
+    "school" -> optional(nonEmptyText),
+    "permission" -> nonEmptyText
     )
-    ((id: Option[Int], username: String, password: Option[String], email: String, active: Boolean, admin: Boolean,
-        hidden: Boolean, semester: Option[Int], studySubject: Option[String], school: Option[String]) =>
-      User(id, username, password.getOrElse(""), email, active, admin, hidden, false, semester, studySubject, school, None, None))
-    ((user: User) => Some(user.id, user.username, Some(""), user.email, user.active, user.admin, user.hidden, user.semester, user.studySubject, user.school))
+    ((id: Option[Int], username: String, password: Option[String], email: String, active: Boolean, hidden: Boolean,
+      semester: Option[Int], studySubject: Option[String], school: Option[String], permission: String) =>
+      User(id, username, password.getOrElse(""), email, active, hidden, semester, studySubject, school, None, None, Permission(permission)))
+    ((user: User) => Some(user.id, user.username, Some(""), user.email, user.active, user.hidden, user.semester, user.studySubject, user.school, user.permission.name))
   )
 
   def registrationForm = Form(
@@ -53,7 +53,7 @@ object UserForms {
         "main" -> nonEmptyText(6, 128),
         "repeat" -> text
       ).verifying(Messages("user.error.passwordsnomatch"), pw => pw._1 == pw._2)
-    )((password: (String, String)) => password._1)((password: String) => Some("",""))
+    )((password: (String, String)) => password._1)((_: String) => Some("",""))
   )
 
   def usernameForm = Form(

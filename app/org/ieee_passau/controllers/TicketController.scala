@@ -15,7 +15,7 @@ import play.api.mvc._
 
 object TicketController extends Controller with PermissionCheck {
 
-  def index: Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+  def index: Action[AnyContent] = requirePermission(Moderator) { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
     val responses = for {
       t <- Tickets if t.responseTo.?.isDefined
@@ -31,7 +31,7 @@ object TicketController extends Controller with PermissionCheck {
     Ok(org.ieee_passau.views.html.ticket.index(list))
   }}
 
-  def view(id: Int): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+  def view(id: Int): Action[AnyContent] = requirePermission(Moderator) { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
     Tickets.byId(id).firstOption.map { ticket =>
       val user = Users.byId(ticket.userId.getOrElse(-1)).firstOption
@@ -46,7 +46,7 @@ object TicketController extends Controller with PermissionCheck {
     }.getOrElse(NotFound(org.ieee_passau.views.html.errors.e404()))
   }}
 
-  def submitTicket(door: Int): Action[AnyContent] = requireLogin { user => DBAction { implicit rs =>
+  def submitTicket(door: Int): Action[AnyContent] = requirePermission(Contestant) { user => DBAction { implicit rs =>
     implicit val sessionUser = Some(user)
     val now = new Date()
     ProblemForms.ticketForm.bindFromRequest.fold(
@@ -82,7 +82,7 @@ object TicketController extends Controller with PermissionCheck {
     )
   }}
 
-  def answerTicket(id: Int): Action[AnyContent] = requireAdmin{ admin => DBAction { implicit rs =>
+  def answerTicket(id: Int): Action[AnyContent] = requirePermission(Moderator) { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
     val now = new Date()
     ProblemForms.ticketForm.bindFromRequest.fold(
@@ -126,7 +126,7 @@ object TicketController extends Controller with PermissionCheck {
     )
   }}
 
-  def delete(id: Int): Action[AnyContent] = requireAdmin { admin => DBAction { implicit rs =>
+  def delete(id: Int): Action[AnyContent] = requirePermission(Admin) { admin => DBAction { implicit rs =>
     implicit val sessionUser = Some(admin)
     Tickets.filter(_.id === id).delete
     Redirect(org.ieee_passau.controllers.routes.TicketController.index())
