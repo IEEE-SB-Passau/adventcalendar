@@ -6,6 +6,7 @@
 @import org.ieee_passau.utils.LanguageHelper
 @import org.ieee_passau.models.Page
 @import org.ieee_passau.models.Admin
+@import org.ieee_passau.models.Moderator
 @(title: String, isFullPage: Boolean = false, hasTitle: Boolean = false)(content: Html)(implicit flash: Flash,
         sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
 <!DOCTYPE html>
@@ -74,6 +75,22 @@
                                         <li @if(title == messagesApi("codelang.list.title"))   { class="active" }><a href="@org.ieee_passau.controllers.routes.LanguageController.index"        >@messagesApi("codelang.list.title")</a></li>
                                     </ul>
                                 </li>
+                            } else {
+                                @if(sessionUser.isDefined && sessionUser.get.permission.includes(Moderator)) {
+                                    <li class="dropdown
+                                    @if(List(
+                                        messagesApi("problem.list.title"), messagesApi("ticket.list.title")
+                                    ).contains(title)) { active }" >
+                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">@messagesApi("nav.moderator.message") <b class="caret"></b></a>
+                                        <ul class="dropdown-menu">
+                                            <li @if(title == messagesApi("problem.list.title")) { class="active" }><a href="@org.ieee_passau.controllers.routes.ProblemController.index">@messagesApi("problem.list.title")</a></li>
+                                            <li @if(title == messagesApi("ticket.list.title"))  { class="active" }><a href="@org.ieee_passau.controllers.routes.TicketController.index" >@messagesApi("ticket.list.title")</a></li>
+                                            <li role="separator" class="divider"></li>
+                                            <li @if(title == messagesApi("submission.list.title")) { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.index()"    >@messagesApi("submission.list.title")</a></li>
+                                            <li @if(title == messagesApi("nav.admin.stats"))       { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.stats"      >@messagesApi("nav.admin.stats")</a></li>
+                                        </ul>
+                                    </li>
+                                }
                             }
                             <li @if(title == messagesApi(Page.contact.toString)) { class="active" }><a href="@org.ieee_passau.controllers.routes.CmsController.content(Page.contact.toString)" >@messagesApi(Page.contact.toString)</a></li>
                             @*<li @if(title == messagesApi("feedback.title")) { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.feedback">@messagesApi("feedback.title")</a></li>*@

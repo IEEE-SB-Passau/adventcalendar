@@ -1,10 +1,9 @@
 @import org.ieee_passau.controllers.Beans.SolutionListEntry
-@import org.ieee_passau.models.{Canceled, CompileError, Language, Page, Passed, Private, Public, Queued, User}
+@import org.ieee_passau.models.{Canceled, CompileError, Language, Moderator, Page, Passed, Private, Public, Queued, User}
 @import org.ieee_passau.utils.ViewHelper.isErrorResult
 @import play.api.i18n.{Lang, MessagesApi}
 @import play.twirl.api.Html
 @import play.twirl.api.TemplateMagic._
-@import org.ieee_passau.models.Admin
 @(solutions: List[SolutionListEntry], languages: List[Language], showAll: Boolean = false, first: Boolean = true)(implicit sessionUser: Option[User], messagesApi: MessagesApi, lang: Lang)
 @* @param showAll: show also details for private testcases
  * @param first:   special handling first element in solution list if true (default)
@@ -104,7 +103,7 @@
                                                                         @(mem/(1024*1024*1024)) GB}}}
                                     }</p>
                                 }
-                                @if(sessionUser.isDefined && sessionUser.get.permission.includes(Admin)) {
+                                @if(sessionUser.isDefined && sessionUser.get.permission.includes(Moderator)) {
                                     <p><strong>@messagesApi("submission.evalid"):</strong> @t.testrun.evalId</p>
                                     <p><strong>@messagesApi("submission.completed"):</strong> <abbr class="timeago" title="@t.testrun.completed.format("yyyy-MM-dd'T'HH:mm:ssZ")">@t.testrun.completed.format("dd.MM.yyyy HH:mm:ss")</abbr></p>
                                 }

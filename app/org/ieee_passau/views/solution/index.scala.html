@@ -6,6 +6,7 @@
 @import play.api.mvc.Flash
 @import play.twirl.api.TemplateMagic._
 @import scala.language.implicitConversions
+@import org.ieee_passau.models.Admin
 @(list: List[SubmissionListEntry], pages: Int, page: Int, ordering: String)(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
 
 @main(messagesApi("submission.list.title")) {
@@ -18,7 +19,9 @@
                 <th><a href="@org.ieee_passau.controllers.routes.EvaluationController.index(1, "lang")">@messagesApi("codelang.title")</a></th>
                 <th>@messagesApi("testcase.title")</th>
                 <th>@messagesApi("general.createdate")</th>
-                <th></th>
+                @if(sessionUser.isDefined && sessionUser.get.permission.includes(Admin)) {
+                    <th></th>
+                }
             </tr>
         </thead>
         <tbody>
@@ -32,12 +35,14 @@
                 <td>@s.lang</td>
                 <td>@s.passedTC / @s.allTC</td>
                 <td>@s.date.format("dd.MM.yyyy HH:mm")</td>
+                @if(sessionUser.isDefined && sessionUser.get.permission.includes(Admin)) {
                 <td>
                     <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.EvaluationController.reEval(s.id)">
                         @CSRF.formField
                         <button type="submit" onclick="return(window.confirm('@messagesApi("status.resubmit.warning")'))" class="btn btn-danger"><span class="glyphicon glyphicon-repeat"></span></button>
                     </form>
                 </td>
+                }
             </tr>
         }
         </tbody>

@@ -121,11 +121,11 @@ class ProblemController @Inject()(val messagesApi: MessagesApi,
     )
   }}
 
-  def addTranslation(problemId: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action { implicit rs =>
+  def addTranslation(problemId: Int): Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action { implicit rs =>
     Ok(org.ieee_passau.views.html.problemTranslation.insert(problemId, problemTranslationForm))
   }}
 
-  def saveTranslation(problemId: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
+  def saveTranslation(problemId: Int): Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
     problemTranslationForm.bindFromRequest.fold(
       errorForm => {
         Future.successful(BadRequest(org.ieee_passau.views.html.problemTranslation.insert(problemId, errorForm)))
@@ -155,7 +155,7 @@ class ProblemController @Inject()(val messagesApi: MessagesApi,
     }
   }}
 
-  def updateTranslation(problemId: Int, lang: String): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
+  def updateTranslation(problemId: Int, lang: String): Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
     problemTranslationForm.bindFromRequest.fold(
       errorForm => {
         Future.successful(BadRequest(org.ieee_passau.views.html.problemTranslation.edit(problemId, errorForm)))
@@ -170,7 +170,7 @@ class ProblemController @Inject()(val messagesApi: MessagesApi,
     )
   }}
 
-  def deleteTranslation(problemId: Int, lang: String): Action[AnyContent] = requirePermission(Admin) { implicit admin =>Action.async { implicit rs =>
+  def deleteTranslation(problemId: Int, lang: String): Action[AnyContent] = requirePermission(Moderator) { implicit admin =>Action.async { implicit rs =>
     db.run(ProblemTranslations.byProblemLang(problemId, lang).delete).map(_ =>
       Redirect(org.ieee_passau.controllers.routes.ProblemController.edit(problemId))
     )

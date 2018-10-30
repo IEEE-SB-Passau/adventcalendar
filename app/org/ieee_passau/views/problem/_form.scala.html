@@ -9,7 +9,6 @@
     @if(problem.value.isDefined) {
         <input type="hidden" name="id" value="@problem.value.get.id.get" />
     }
-    @text(problem("title"), label = messagesApi("problem.name"), placeholder = messagesApi("problem.name"))
     <div class="form-group @if(problem.errors.nonEmpty) {
         @problem.errors.map { e => @if(e.message == "problem.create.error.door") { has-error } }
     } @if(problem("door").hasErrors) { has-error }">
@@ -24,9 +23,6 @@
             <span class="help-block">@{ problem("door").error.map { error => messagesApi(error.message) }}</span>
         </div>
     </div>
-    @textareaBs(problem("description"), label = messagesApi("problem.description.lang", messagesApi("language.name")(LanguageHelper.defaultLanguage)), placeholder =  messagesApi("problem.description"), wysiwyg = true)
-    @fileloader("description")
-
     @dateManualError(problem("readableStart"), label =  messagesApi("problem.readablestart"), placeholder = "01.12.2013")
     @{
         val (hasError, error) = ViewHelper.checkAmbiguesKey("vis", problem)

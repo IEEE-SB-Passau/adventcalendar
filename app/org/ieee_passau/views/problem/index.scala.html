@@ -3,6 +3,7 @@
 @import org.ieee_passau.views.html.main
 @import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.{Flash, RequestHeader}
+@import org.ieee_passau.models.Admin
 @(problems: List[Problem])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
 
 @main(messagesApi("problem.list.title")) {
@@ -25,13 +26,16 @@
                 <td>@messagesApi(problem.evalMode.toString)</td>
                 <td>
                     <a href="@org.ieee_passau.controllers.routes.ProblemController.edit(problem.id.get)" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span></a>
-                    <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.ProblemController.delete(problem.id.get)">
+                    @if(sessionUser.isDefined && sessionUser.get.permission.includes(Admin)) {
+                        <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.ProblemController.delete(problem.id.get)">
                         @CSRF.formField
                         <button type="submit" onclick="return(window.confirm('@messagesApi("general.delete.confirm")'))" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span></button>
+                    }
                     </form>
                 </td>
             </tr>
         }
+        @if(sessionUser.isDefined && sessionUser.get.permission.includes(Admin)) {
             <tr>
                 <td></td>
                 <td></td>
@@ -41,6 +45,7 @@
                     <a href="@org.ieee_passau.controllers.routes.ProblemController.insert" class="btn btn-default"><span class="glyphicon glyphicon-plus"></span></a>
                 </td>
             </tr>
+        }
         </tbody>
     </table>
 }
