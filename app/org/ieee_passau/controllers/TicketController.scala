@@ -141,24 +141,26 @@ class TicketController @Inject()(val messagesApi: MessagesApi, dbConfigProvider:
     )
   }}
 
-  def delete(id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action { implicit rs =>
-    db.run(Tickets.filter(_.id === id).delete)
-    Redirect(org.ieee_passau.controllers.routes.TicketController.index())
+  def delete(id: Int): Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
+    db.run(Tickets.filter(_.id === id).delete).map(_ =>
+      Redirect(org.ieee_passau.controllers.routes.TicketController.index())
+    )
   }}
 
   def feedback: Action[AnyContent] = requirePermission(Contestant) { implicit user => Action { implicit rs =>
     Ok(org.ieee_passau.views.html.general.feedback(feedbackForm))
   }}
 
-  def submitFeedback: Action[AnyContent] = requirePermission(Contestant) { implicit user => Action { implicit rs =>
+  def submitFeedback: Action[AnyContent] = requirePermission(Contestant) { implicit user => Action.async { implicit rs =>
     feedbackForm.bindFromRequest.fold(
       errorForm => {
-        BadRequest(org.ieee_passau.views.html.general.feedback(errorForm))
+        Future.successful(BadRequest(org.ieee_passau.views.html.general.feedback(errorForm)))
       },
       fb => {
-        db.run(Feedbacks += Feedback(None, user.get.id.get, fb.rating, fb.pro, fb.con, fb.freetext))
-        Redirect(org.ieee_passau.controllers.routes.CmsController.calendar())
+        db.run(Feedbacks += Feedback(None, user.get.id.get, fb.rating, fb.pro, fb.con, fb.freetext)).map(_ =>
+          Redirect(org.ieee_passau.controllers.routes.CmsController.calendar())
           .flashing("success" -> messagesApi("feedback.submit.message"))
+        )
       }
     )
   }}
