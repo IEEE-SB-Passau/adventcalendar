@@ -3,31 +3,31 @@
 @import org.ieee_passau.views.html.bootstrap3._
 @import org.ieee_passau.views.html.main
 @import play.api.data.Form
-@import play.api.i18n.{Lang, Messages}
+@import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.{Flash, RequestHeader}
 @import org.ieee_passau.models.Permission
-@(id: Int, user: Form[User], permissions: List[Permission])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
+@(id: Int, user: Form[User], permissions: List[Permission])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
 
-@main(Messages("user.edit")) {
+@main(messagesApi("user.edit")) {
     @form(org.ieee_passau.controllers.routes.UserController.update(id), 'class -> "form-horizontal") {
         @CSRF.formField
         <fieldset>
             <div class="well">
-                @text(user("username"), label = Messages("user.username"), placeholder = Messages("user.username"))
-                @password(user("password"), label = Messages("user.password"), placeholder = Messages("user.password"), required = false, help = Messages("user.update.password"))
-                @text(user("email"), label = Messages("user.email"), placeholder = Messages("user.email"))
-                @checkboxBs(user("active"), label = Messages("user.active"))
-                @checkboxBs(user("hidden"), label = Messages("user.hidden"))
-                @text(user("school"), label = Messages("user.school"), placeholder = Messages("user.school"))
-                @text(user("semester"), label = Messages("user.semester"), placeholder = Messages("user.semester"))
-                @text(user("studySubject"), label = Messages("user.studysubject"), placeholder = Messages("user.studysubject"))
+                @text(user("username"), label = messagesApi("user.username"), placeholder = messagesApi("user.username"))
+                @password(user("password"), label = messagesApi("user.password"), placeholder = messagesApi("user.password"), required = false, help = messagesApi("user.update.password"))
+                @text(user("email"), label = messagesApi("user.email"), placeholder = messagesApi("user.email"))
+                @checkboxBs(user("active"), label = messagesApi("user.active"))
+                @checkboxBs(user("hidden"), label = messagesApi("user.hidden"))
+                @text(user("school"), label = messagesApi("user.school"), placeholder = messagesApi("user.school"))
+                @text(user("semester"), label = messagesApi("user.semester"), placeholder = messagesApi("user.semester"))
+                @text(user("studySubject"), label = messagesApi("user.studysubject"), placeholder = messagesApi("user.studysubject"))
 
                 <div class="form-group">
-                    <label for="evalMode" class="col-sm-2 control-label">@Messages("user.permission")</label>
+                    <label for="evalMode" class="col-sm-2 control-label">@messagesApi("user.permission")</label>
                     <div class="col-sm-10">
                         <select id="evalMode" size="1" name="permission" class="col-sm-10 form-control">
                         @permissions.map { mode =>
-                            <option value="@mode.name" @{if(user.value.isDefined && mode == user.get.permission) "selected" }>@Messages(mode.toString)</option>
+                            <option value="@mode.name" @{if(user.value.isDefined && mode == user.get.permission) "selected" }>@messagesApi(mode.toString)</option>
                         }
                         </select>
                     </div>
@@ -38,6 +38,6 @@
         </fieldset>
     }
     <p class="text-right">
-        <a class="btn btn-default" href="@org.ieee_passau.controllers.routes.UserController.impersonate(id)"><span class="glyphicon glyphicon-user"></span> @Messages("user.impersonate")</a>
+        <a class="btn btn-default" href="@org.ieee_passau.controllers.routes.UserController.impersonate(id)"><span class="glyphicon glyphicon-user"></span> @messagesApi("user.impersonate")</a>
     </p>
 }

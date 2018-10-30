@@ -1,5 +1,5 @@
-@import play.api.i18n.{Lang, Messages}
-@(door: Int, langExt: String)(implicit lang: Lang)
+@import play.api.i18n.{Lang, MessagesApi}
+@(door: Int, langExt: String)(implicit messagesApi: MessagesApi, lang: Lang)
 
 <style>#preview {
     position: relative;
@@ -9,7 +9,7 @@
 <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
         <div class="panel panel-default">
-            <div class="panel-heading"><h3 class="panel-title">@Messages("submit.codeeditor")</h3></div>
+            <div class="panel-heading"><h3 class="panel-title">@messagesApi("submit.codeeditor")</h3></div>
             <div class="panel-body">
                 <div id="preview"></div>
             </div>
@@ -20,7 +20,7 @@
 
 <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
-        <input type="submit" value="@Messages("submit.submit")" onmouseover="updateEdits();"
+        <input type="submit" value="@messagesApi("submit.submit")" onmouseover="updateEdits();"
         formaction="@org.ieee_passau.controllers.routes.MainController.solveString(door)" class="btn btn-primary"/>
     </div>
 </div>

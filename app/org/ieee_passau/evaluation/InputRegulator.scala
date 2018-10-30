@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit
 
 import akka.actor.Props
 import org.ieee_passau.controllers.Beans.{RunningJobsQ, StatusM}
+import org.ieee_passau.utils.AkkaHelper
 import play.api.Play.current
 
 import scala.language.postfixOps
@@ -32,7 +33,7 @@ class InputRegulator(jobLimit: Int, jobLifetime: Duration) extends EvaluationAct
   val TICK_INTERVAL: FiniteDuration = 1 second
   val TICK_MSG = "tick"
 
-  var running = true
+  private var running = true
 
   private val fetchedJobs = mutable.HashMap.empty[Job, Date]
   private val tickSchedule = Akka.system.scheduler.schedule(STARTUP_DELAY, TICK_INTERVAL, self, TICK_MSG)
@@ -58,7 +59,7 @@ class InputRegulator(jobLimit: Int, jobLifetime: Duration) extends EvaluationAct
         if (fetchedJobs.size < jobLimit && !fetchedJobs.contains(job)) {
           fetchedJobs.put(job, now)
           // Forward job to router
-          context.actorSelection("../VMMaster") ! JobM(job)
+          context.actorSelection(AkkaHelper.evalPath + classOf[VMMaster].getSimpleName) ! JobM(job)
           log.info("InputRegulator accepted %s".format(job))
         }
       })
@@ -74,7 +75,7 @@ class InputRegulator(jobLimit: Int, jobLifetime: Duration) extends EvaluationAct
         // Request new jobs if job limit is not reached
         if (fetchedJobs.size < jobLimit) {
           // Always request a gratuitous amount of jobs from the DB to avoid receiving only jobs we already know!
-          context.actorSelection("../DBReader") ! ReadJobsDB(jobLimit)
+          context.actorSelection(AkkaHelper.evalPath + classOf[DBReader].getSimpleName) ! ReadJobsDB(jobLimit)
         }
       }
 

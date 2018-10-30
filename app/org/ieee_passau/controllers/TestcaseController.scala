@@ -2,80 +2,113 @@ package org.ieee_passau.controllers
 
 import java.util.Date
 
-import org.ieee_passau.forms.TestcaseForms
+import com.google.inject.Inject
 import org.ieee_passau.models._
 import org.ieee_passau.utils.PermissionCheck
-import play.api.Play.current
-import play.api.db.slick.Config.driver.simple._
-import play.api.db.slick._
-import play.api.i18n.Messages
+import play.api.data.Form
+import play.api.data.Forms.{mapping, number, optional, _}
+import play.api.db.slick.DatabaseConfigProvider
+import play.api.i18n.MessagesApi
 import play.api.mvc._
+import slick.driver.JdbcProfile
+import slick.driver.PostgresDriver.api._
 
-object TestcaseController extends Controller with PermissionCheck {
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-  def edit(pid: Int, id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
-    Testcases.byId(id).firstOption.map { testcase =>
-      val visibilities = Visibilities.list
-      Ok(org.ieee_passau.views.html.testcase.edit(pid, id, visibilities, TestcaseForms.testcaseForm.fill(testcase)))
-    }.getOrElse(NotFound(org.ieee_passau.views.html.errors.e404()))
+class TestcaseController @Inject()(val messagesApi: MessagesApi, dbConfigProvider: DatabaseConfigProvider) extends Controller with PermissionCheck {
+  private implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
+  private implicit val mApi: MessagesApi = messagesApi
+
+  def edit(pid: Int, id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
+    db.run(Testcases.byId(id).result.headOption).flatMap {
+      case Some(testcase) =>
+        db.run(Visibilities.to[List].result).map { visibilities =>
+          Ok(org.ieee_passau.views.html.testcase.edit(pid, id, visibilities, testcaseForm.fill(testcase)))
+        }
+      case None => Future.successful(NotFound(org.ieee_passau.views.html.errors.e404()))
+    }
   }}
 
-  def delete(pid: Int, id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
-    Testcases.filter(_.id === id).delete
-    Redirect(org.ieee_passau.controllers.routes.ProblemController.edit(pid))
+  def delete(pid: Int, id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
+    db.run(Testcases.filter(_.id === id).delete).map { _ =>
+      Redirect(org.ieee_passau.controllers.routes.ProblemController.edit(pid))
+    }
   }}
 
-  def insert(pid: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
-    val visibilities = Visibilities.list
-    Ok(org.ieee_passau.views.html.testcase.insert(pid, visibilities, TestcaseForms.testcaseForm))
+  def insert(pid: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
+    db.run(Visibilities.to[List].result).map { visibilities =>
+      Ok(org.ieee_passau.views.html.testcase.insert(pid, visibilities, testcaseForm))
+    }
   }}
 
-  def save(pid: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
-    TestcaseForms.testcaseForm.bindFromRequest.fold(
+  def save(pid: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
+    testcaseForm.bindFromRequest.fold(
       errorForm => {
-        val visibilities = Visibilities.list
-        BadRequest(org.ieee_passau.views.html.testcase.insert(pid, visibilities, errorForm))
+        db.run(Visibilities.to[List].result).map { visibilities =>
+          BadRequest(org.ieee_passau.views.html.testcase.insert(pid, visibilities, errorForm))
+        }
       },
 
       newTestcase => {
-        val id = (Testcases returning Testcases.map(_.id)) += newTestcase
         val now = new Date()
-        val solutions = for {
+        val solutionsQuery = for {
           s <- Solutions if s.problemId === pid
         } yield s.id
-        solutions.foreach(s =>
-          Testruns += Testrun(None, s, id, None, None, None, None, None, None, None, None, None, None, Queued, None, now, Some(0), None, None, now)
-        )
-        Redirect(org.ieee_passau.controllers.routes.TestcaseController.edit(pid, id))
-          .flashing("success" -> Messages("testcase.create.message", newTestcase.position))
+
+        db.run((Testcases returning Testcases.map(_.id)) += newTestcase).zip(db.run(solutionsQuery.result)).map { tuple =>
+          tuple._2.foreach(s =>
+            db.run(Testruns += Testrun(None, s, tuple._1, None, None, None, None, None, None, None, None, None, None, Queued, None, now, Some(0), None, None, now))
+          )
+          Redirect(org.ieee_passau.controllers.routes.TestcaseController.edit(pid, tuple._1))
+            .flashing("success" -> messagesApi("testcase.create.message", newTestcase.position))
+        }
       }
     )
   }}
 
-  def update(pid: Int, id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
-    TestcaseForms.testcaseForm.bindFromRequest.fold(
+  def update(pid: Int, id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
+    testcaseForm.bindFromRequest.fold(
       errorForm => {
-        val visibilities = Visibilities.list
-        BadRequest(org.ieee_passau.views.html.testcase.edit(pid, id, visibilities, errorForm))
+        db.run(Visibilities.to[List].result).map { visibilities =>
+          BadRequest(org.ieee_passau.views.html.testcase.edit(pid, id, visibilities, errorForm))
+        }
       },
 
       testcase => {
-        Testcases.update(id, testcase)
         val now = new Date()
-        val solutions = for {
+        Testcases.update(id, testcase)
+        val solutionsQuery = for {
           s <- Solutions if s.problemId === pid
         } yield s.id
-        solutions.foreach(s => {
-          val maybeExisting = Testruns.bySolutionIdTestcaseId(s, id).firstOption
-          if (maybeExisting.isDefined) {
-            Testruns.update(maybeExisting.get.id.get, maybeExisting.get.copy(result = Queued, stage = Some(0)))
-          } else {
-            Testruns += Testrun(None, s, id, None, None, None, None, None, None, None, None, None, None, Queued, None, now, Some(0), None, None, now)
-          }
-        })
-        Redirect(org.ieee_passau.controllers.routes.TestcaseController.edit(pid, id))
-          .flashing("success" -> Messages("testcase.update.message", testcase.position))
+        db.run(solutionsQuery.result).map { solutions =>
+          solutions.foreach(s =>
+            db.run(Testruns.bySolutionIdTestcaseId(s, id).result.headOption).map {
+              case Some(existing) =>
+                Testruns.update(id, existing.copy(result = Queued, stage = Some(0)))
+              case _ =>
+                db.run(Testruns += Testrun(None, s, id, None, None, None, None, None, None, None, None, None, None, Queued, None, now, Some(0), None, None, now))
+            }
+          )
+
+          Redirect(org.ieee_passau.controllers.routes.TestcaseController.edit(pid, id))
+            .flashing("success" -> messagesApi("testcase.update.message", testcase.position))
+        }
       }
     )
   }}
+
+  val testcaseForm = Form(
+    mapping(
+      "id" -> optional(number),
+      "problemId" -> number,
+      "position" -> number, // TODO check uniqueness for problem
+      "visibility" -> text,
+      "input" -> text,
+      "output" -> text,
+      "points" -> number
+    )((id: Option[Int], problemId: Int, position: Int, visibility: String, input: String, output: String, points: Int)
+    => Testcase(id, problemId, position, Visibility(visibility), input, output, points))
+    ((t: Testcase) => Some(t.id, t.problemId, t.position, t.visibility.scope, t.input, t.expectedOutput, t.points))
+  )
 }

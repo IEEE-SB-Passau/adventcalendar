@@ -1,12 +1,12 @@
 @import org.ieee_passau.models.{Posting, User}
 @import org.ieee_passau.views.html.main
-@import play.api.i18n.Lang
+@import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.Flash
 @import play.twirl.api.Html
-@(posting: Posting)(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
+@(posting: Posting)(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
 
-@main(Messages(posting.title)) {
-    <h3>@Messages(posting.title)</h3>
+@main(messagesApi(posting.title)) {
+    <h3>@messagesApi(posting.title)</h3>
 
     @Html(posting.content)
 }

@@ -1,28 +1,15 @@
 package org.ieee_passau.utils
 
-import com.sun.org.apache.xalan.internal.xsltc.compiler.util.ErrorMsg
 import org.ieee_passau.models._
-import play.api.Play.current
 import play.api.data.Form
-import play.api.db.slick.Config.driver.simple._
-import play.api.db.slick._
 
 import scala.xml.Elem
 
 object ViewHelper {
 
-  def getUser(session: play.api.mvc.Session): Option[User] = {
-    val maybeUid = session.get("user")
-    if (maybeUid.isEmpty) {
-      return None
-    }
-
-    val uid = maybeUid.get.toInt
-
-    DB.withSession[Option[User]] { implicit s: play.api.db.slick.Session =>
-      Users.byId(uid).firstOption;
-    }
-  }
+  val NoHighlight = 0
+  val Highlight = 1
+  val HighlightSpecial = 2
 
   /**
     * Creates HTML to show a boolean value with a icon

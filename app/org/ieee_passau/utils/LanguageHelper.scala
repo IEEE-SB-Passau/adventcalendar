@@ -1,13 +1,15 @@
 package org.ieee_passau.utils
 
-import play.api.Application
-import play.api.db.slick.Config.driver.simple._
-import play.api.db.slick.{Session => _}
-import play.api.i18n.{DefaultMessagesPlugin, Lang}
+import com.google.inject.AbstractModule
+import javax.inject.Inject
+import play.api.i18n._
+import play.api.{Configuration, Environment}
+import slick.ast.BaseTypedType
+import slick.driver.PostgresDriver.api._
+import slick.jdbc.JdbcType
 
 import scala.language.implicitConversions
-import scala.slick.ast.BaseTypedType
-import scala.slick.jdbc.JdbcType
+import collection.JavaConverters._
 
 object LanguageHelper {
 
@@ -22,13 +24,14 @@ object LanguageHelper {
     }
   }
 
-  val langs: List[Lang] = play.Configuration.root().getString("application.langs").split(",").map(
+  // TODO get a DI version of the config?
+  val langs: List[Lang] = play.Configuration.root().getStringList("play.i18n.langs").asScala.map(
     l => Lang(l)
   ).toList
 
   def orderedLangs(preferredLang: Lang): List[Lang] = langs.sorted(LanguageHelper.ordering(preferredLang))
 
-  val defaultLanguage = Lang(play.Configuration.root().getString("application.langs").split(",")(0))
+  val defaultLanguage = Lang(play.Configuration.root().getStringList("play.i18n.langs").get(0))
 
   implicit val LangTypeMapper: JdbcType[Lang] with BaseTypedType[Lang] = MappedColumnType.base[Lang, String](
     l => l.code,
@@ -36,15 +39,21 @@ object LanguageHelper {
   )
 }
 
-class customMessagePlugin(app: Application) extends DefaultMessagesPlugin(app = app) {
+class MyMessageApi @Inject() (environment: Environment, configuration: Configuration, langs: Langs)
+  extends DefaultMessagesApi(environment, configuration, langs) {
 
-  private lazy val pluginEnabled = app.configuration.getString("custommessagesplugin")
-
-  override protected def messages = {
-    Lang.availables(app).map(_.code).map { lang =>
+  override protected def loadAllMessages: Map[String, Map[String, String]] = {
+    langs.availables.map(_.code).map { lang =>
       (lang, loadMessages("messages_" + lang + ".properties"))
     }.toMap
       .+("default" -> loadMessages("messages"))
       .+("default.play" -> loadMessages("messages.default"))
+  }
+}
+
+class MessageModule extends AbstractModule {
+  def configure(): Unit = {
+    bind(classOf[Langs]).to(classOf[DefaultLangs])
+    bind(classOf[MessagesApi]).to(classOf[MyMessageApi])
   }
 }

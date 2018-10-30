@@ -1,18 +1,18 @@
 @import helper._
 @import org.ieee_passau.models.{Problem, User}
 @import org.ieee_passau.views.html.main
-@import play.api.i18n.{Lang, Messages}
+@import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.{Flash, RequestHeader}
-@(problems: List[Problem])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
+@(problems: List[Problem])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
 
-@main(Messages("problem.list.title")) {
+@main(messagesApi("problem.list.title")) {
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>@Messages("general.id")</th>
-                <th>@Messages("problem.name")</th>
-                <th>@Messages("problem.door")</th>
-                <th>@Messages("problem.evalmode")</th>
+                <th>@messagesApi("general.id")</th>
+                <th>@messagesApi("problem.name")</th>
+                <th>@messagesApi("problem.door")</th>
+                <th>@messagesApi("problem.evalmode")</th>
                 <th></th>
             </tr>
         </thead>
@@ -22,12 +22,12 @@
                 <td>@problem.id</td>
                 <td>@problem.title</td>
                 <td>@problem.door</td>
-                <td>@Messages(problem.evalMode.toString)</td>
+                <td>@messagesApi(problem.evalMode.toString)</td>
                 <td>
                     <a href="@org.ieee_passau.controllers.routes.ProblemController.edit(problem.id.get)" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span></a>
                     <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.ProblemController.delete(problem.id.get)">
                         @CSRF.formField
-                        <button type="submit" onclick="return(window.confirm('@Messages("general.delete.confirm")'))" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span></button>
+                        <button type="submit" onclick="return(window.confirm('@messagesApi("general.delete.confirm")'))" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span></button>
                     </form>
                 </td>
             </tr>

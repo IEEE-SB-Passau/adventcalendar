@@ -1,8 +1,8 @@
 package org.ieee_passau.models
 
-import play.api.db.slick.Config.driver.simple._
-
-import scala.slick.lifted.{CompiledFunction, ForeignKeyQuery, ProvenShape}
+import slick.dbio.Effect
+import slick.driver.PostgresDriver.api._
+import slick.lifted.{CompiledFunction, ForeignKeyQuery, ProvenShape}
 
 case class EvalTask(id: Option[Int], problemId: Int, position: Int, command: String, filename: String, file: Array[Byte],
                     outputCheck: Boolean, scoreCalc: Boolean, useStdin: Boolean, useExpout: Boolean, useProgout: Boolean,
@@ -11,19 +11,19 @@ case class EvalTask(id: Option[Int], problemId: Int, position: Int, command: Str
 }
 
 class EvalTasks(tag: Tag) extends TableWithId[EvalTask](tag, "eval_task") {
-  def problemId: Column[Int] = column[Int]("problem_id")
-  def position: Column[Int] = column[Int]("position")
-  def command: Column[String] = column[String]("command")
-  def filename: Column[String] = column[String]("filename")
-  def file: Column[Array[Byte]] = column[Array[Byte]]("file")
-  def outputCheck: Column[Boolean] = column[Boolean]("output_check")
-  def scoreCalc: Column[Boolean] = column[Boolean]("score_calc")
-  def useStdin: Column[Boolean] = column[Boolean]("use_stdin")
-  def useExpout: Column[Boolean] = column[Boolean]("use_expout")
-  def useProgout: Column[Boolean] = column[Boolean]("use_prevout")
-  def useProgram: Column[Boolean] = column[Boolean]("use_prog")
-  def runCorrect: Column[Boolean] = column[Boolean]("run_on_correct_result")
-  def runWrong: Column[Boolean] = column[Boolean]("run_on_wrong_result")
+  def problemId: Rep[Int] = column[Int]("problem_id")
+  def position: Rep[Int] = column[Int]("position")
+  def command: Rep[String] = column[String]("command")
+  def filename: Rep[String] = column[String]("filename")
+  def file: Rep[Array[Byte]] = column[Array[Byte]]("file")
+  def outputCheck: Rep[Boolean] = column[Boolean]("output_check")
+  def scoreCalc: Rep[Boolean] = column[Boolean]("score_calc")
+  def useStdin: Rep[Boolean] = column[Boolean]("use_stdin")
+  def useExpout: Rep[Boolean] = column[Boolean]("use_expout")
+  def useProgout: Rep[Boolean] = column[Boolean]("use_prevout")
+  def useProgram: Rep[Boolean] = column[Boolean]("use_prog")
+  def runCorrect: Rep[Boolean] = column[Boolean]("run_on_correct_result")
+  def runWrong: Rep[Boolean] = column[Boolean]("run_on_wrong_result")
 
   def problem: ForeignKeyQuery[Problems, Problem] = foreignKey("problem_fk", problemId, Problems)(_.id)
 
@@ -32,10 +32,8 @@ class EvalTasks(tag: Tag) extends TableWithId[EvalTask](tag, "eval_task") {
 }
 
 object EvalTasks extends TableQuery(new EvalTasks(_)) {
-  def byProblemId: CompiledFunction[(Column[Int]) => Query[EvalTasks, EvalTask, Seq], Column[Int], Int, Query[EvalTasks, EvalTask, Seq], Seq[EvalTask]] =
-    this.findBy(_.problemId)
-  def byId: CompiledFunction[(Column[Int]) => Query[EvalTasks, EvalTask, Seq], Column[Int], Int, Query[EvalTasks, EvalTask, Seq], Seq[EvalTask]] =
+  def byId: CompiledFunction[Rep[Int] => Query[EvalTasks, EvalTask, Seq], Rep[Int], Int, Query[EvalTasks, EvalTask, Seq], Seq[EvalTask]] =
     this.findBy(_.id)
-  def update(id: Int, evalTask: EvalTask)(implicit session: Session): Int =
-    this.filter(_.id === id).update(evalTask.withId(id))
+  def update(id: Int, task: EvalTask): DBIOAction[Int, NoStream, Effect.Write] =
+    this.byId(id).update(task.withId(id))
 }

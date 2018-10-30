@@ -3,28 +3,28 @@
 @import org.ieee_passau.views.html.bootstrap3.{buttonSave, number, text}
 @import org.ieee_passau.views.html.main
 @import play.api.data.Form
-@import play.api.i18n.{Lang, Messages}
+@import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.{Flash, RequestHeader}
-@(language: Form[Language])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
+@(language: Form[Language])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
 
-@main(Messages("codelang.create")) {
+@main(messagesApi("codelang.create")) {
 
     <ol class="breadcrumb">
-        <li><a href="@org.ieee_passau.controllers.routes.LanguageController.index">@Messages("general.listoverview")</a></li>
-        <li class="active">@Messages("codelang.title")</li>
+        <li><a href="@org.ieee_passau.controllers.routes.LanguageController.index">@messagesApi("general.listoverview")</a></li>
+        <li class="active">@messagesApi("codelang.title")</li>
     </ol>
 
     @form(org.ieee_passau.controllers.routes.LanguageController.save, 'class -> "form-horizontal") {
         @CSRF.formField
         <fieldset>
             <div class="well">
-                @text(language("id"), label = Messages("general.id"), placeholder = "C")
-                @text(language("name"), label = Messages("codelang.name") , placeholder = "C, gcc")
-                @text(language("extension"), label = Messages("codelang.fileextension"), placeholder = Messages("codelang.fileextension"), help = Messages("codelang.fileextension.help"))
-                @text(language("highlightClass"), label = Messages("codelang.highlightclass"), placeholder = "c")
-                @number(language("cpuFactor"), label = Messages("codelang.cpufactor"), step=0.1f)
-                @number(language("memFactor"), label = Messages("codelang.memfactor"), step=0.1f)
-                @text(language("comment"), label = Messages("codelang.comment"))
+                @text(language("id"), label = messagesApi("general.id"), placeholder = "C")
+                @text(language("name"), label = messagesApi("codelang.name") , placeholder = "C, gcc")
+                @text(language("extension"), label = messagesApi("codelang.fileextension"), placeholder = messagesApi("codelang.fileextension"), help = messagesApi("codelang.fileextension.help"))
+                @text(language("highlightClass"), label = messagesApi("codelang.highlightclass"), placeholder = "c")
+                @number(language("cpuFactor"), label = messagesApi("codelang.cpufactor"), step=0.1f)
+                @number(language("memFactor"), label = messagesApi("codelang.memfactor"), step=0.1f)
+                @text(language("comment"), label = messagesApi("codelang.comment"))
 
                 @buttonSave()
             </div>

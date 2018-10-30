@@ -10,11 +10,8 @@ import akka.pattern.ask
 import akka.util.Timeout
 import org.ieee_passau.evaluation.Messages._
 import org.ieee_passau.models._
-import org.ieee_passau.utils.MathHelper
+import org.ieee_passau.utils.{AkkaHelper, MathHelper}
 import org.ieee_passau.utils.StringHelper._
-import play.api.Play.current
-import play.api.db.slick.Config.driver.simple._
-import play.api.db.slick._
 
 import scala.collection.immutable.StringOps
 import scala.concurrent.Await
@@ -30,8 +27,7 @@ object VMClient {
     Props(new VMClient(host, port, name))
 }
 
-class VMClient(host: String, port: Int, name:String)
-  extends EvaluationActor {
+class VMClient(host: String, port: Int, name:String) extends EvaluationActor {
 
   private val timeout = Timeout(MathHelper.makeDuration("30 minutes"))
 
@@ -110,12 +106,7 @@ class VMClient(host: String, port: Int, name:String)
     */
 
     job match {
-      case BaseJob(pid, _, evalId, l, program, programName, stdin, expout) => {
-        val lang = Languages.byLang(l).get
-        val problem = DB.withSession { implicit session =>
-          Problems.byId(pid).first
-        }
-        val runtimeLimit = MathHelper.makeDuration(play.Configuration.root().getString("evaluator.eval.basetime")).mul(lang.cpuFactor * problem.cpuFactor)
+      case BaseJob(runtimeLimit, memLimit, lang, _, evalId, program, programName, stdin, expout) => {
         // Deploy Job
         val data =
           <ieee-advent-calendar>
@@ -124,7 +115,7 @@ class VMClient(host: String, port: Int, name:String)
               <program>
                 <filename>{programName}</filename>
                 <content>{base64Encode(program)}</content>
-                <language>{lang.id}</language>
+                <language>{lang}</language>
               </program>
               <inputs>
                 <streams>
@@ -135,9 +126,9 @@ class VMClient(host: String, port: Int, name:String)
               <outputs>
               </outputs>
               <limits>
-                <runtime>{runtimeLimit.toSeconds}</runtime>
+                <runtime>{runtimeLimit}</runtime>
                 <!-- seconds -->
-                <memory>{(lang.memFactor * problem.memFactor * play.Configuration.root().getInt("evaluator.eval.basemem", 100)).floor.toInt}</memory>
+                <memory>{memLimit}</memory>
                 <!-- MB -->
               </limits>
             </job>
@@ -310,7 +301,7 @@ class VMClient(host: String, port: Int, name:String)
 
       log.info("%s finished %s".format(this, job))
 
-      context.actorSelection("../../DBWriter") ! EvaluatedJobM(eJob)
+      context.actorSelection(AkkaHelper.evalPath + classOf[DBWriter].getSimpleName) ! EvaluatedJobM(eJob)
   }
 }
 

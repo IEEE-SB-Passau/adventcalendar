@@ -1,12 +1,12 @@
 package org.ieee_passau.models
 
-import org.ieee_passau.utils.PasswordHasher
-import play.api.Play.current
-import play.api.db.slick.Config.driver.simple._
-import play.api.db.slick.{Session => _, _}
+import org.ieee_passau.utils.{FutureHelper, PasswordHasher}
 import play.api.i18n.Lang
+import slick.driver.PostgresDriver.api._
+import slick.lifted.{CompiledFunction, ProvenShape}
 
-import scala.slick.lifted.{CompiledFunction, ProvenShape}
+import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.language.postfixOps
 
 case class User(id: Option[Int], username: String, password: String, email: String, active: Boolean, hidden: Boolean,
                 semester: Option[Int], studySubject: Option[String], school: Option[String],
@@ -15,72 +15,53 @@ case class User(id: Option[Int], username: String, password: String, email: Stri
 }
 
 class Users(tag: Tag) extends TableWithId[User](tag, "users") {
-  def username: Column[String] = column[String]("username")
-  def password: Column[String] = column[String]("password")
-  def email: Column[String] = column[String]("email")
-  def active: Column[Boolean] = column[Boolean]("is_active")
-  def hidden: Column[Boolean] = column[Boolean]("is_hidden")
-  def semester: Column[Int] = column[Int]("semester")
-  def school: Column[String] = column[String]("school")
-  def studySubject: Column[String] = column[String]("study_subject")
-  def activationToken: Column[String] = column[String]("token")
-  def lang: Column[String] = column[String]("language")
-  def permission: Column[Permission] = column[Permission]("permission") (Permission.permissionTypeMapper)
-  def notificationDismissed: Column[Boolean] = column[Boolean]("notification_dismissed")
+  def username: Rep[String] = column[String]("username")
+  def password: Rep[String] = column[String]("password")
+  def email: Rep[String] = column[String]("email")
+  def active: Rep[Boolean] = column[Boolean]("is_active")
+  def hidden: Rep[Boolean] = column[Boolean]("is_hidden")
+  def semester: Rep[Int] = column[Int]("semester")
+  def school: Rep[String] = column[String]("school")
+  def studySubject: Rep[String] = column[String]("study_subject")
+  def activationToken: Rep[String] = column[String]("token")
+  def lang: Rep[String] = column[String]("language")
+  def permission: Rep[Permission] = column[Permission]("permission")(Permission.permissionTypeMapper)
+  def notificationDismissed: Rep[Boolean] = column[Boolean]("notification_dismissed")
 
   override def * : ProvenShape[User] = (id.?, username, password, email, active, hidden, semester.?,
     studySubject.?, school.?, lang.?, activationToken.?, permission, notificationDismissed) <> (User.tupled, User.unapply)
 }
 
 object Users extends TableQuery(new Users(_)) {
-  def byUsername: CompiledFunction[Column[String] => Query[Users, User, Seq], Column[String], String, Query[Users, User, Seq], Seq[User]] =
+  def byUsername: CompiledFunction[Rep[String] => Query[Users, User, Seq], Rep[String], String, Query[Users, User, Seq], Seq[User]] =
     this.findBy(_.username)
-  def byId: CompiledFunction[Column[Int] => Query[Users, User, Seq], Column[Int], Int, Query[Users, User, Seq], Seq[User]] =
+  def byId: CompiledFunction[Rep[Int] => Query[Users, User, Seq], Rep[Int], Int, Query[Users, User, Seq], Seq[User]] =
     this.findBy(_.id)
-  def byToken: CompiledFunction[Column[String] => Query[Users, User, Seq], Column[String], String, Query[Users, User, Seq], Seq[User]] =
+  def byToken: CompiledFunction[Rep[String] => Query[Users, User, Seq], Rep[String], String, Query[Users, User, Seq], Seq[User]] =
     this.findBy(_.activationToken)
-  def update(id: Int, user: User)(implicit session: Session): Int =
-    this.filter(_.id === id).update(user.withId(id))
 
-  def usernameAvailable(username: String): Boolean = {
-    DB.withSession { implicit session: Session =>
-      Query(Users.filter(_.username === username).length).first == 0
-    }
-  }
+  def update(id: Option[Int], user: User)(implicit db: Database): Future[Int] =
+    db.run(this.byId(id.get).update(user.withId(id.get)))
 
-  def emailAvailable(email: String): Boolean = {
-    DB.withSession { implicit session: Session =>
-      Query(Users.filter(_.email === email).length).first == 0
-    }
-  }
+  def usernameAvailable(username: String)(implicit db: Database): Boolean =
+    Await.result(db.run(Query(Users.filter(_.username === username).length).result), FutureHelper.dbTimeout).head == 0
+  def emailAvailable(email: String)(implicit db: Database): Boolean =
+    Await.result(db.run(Query(Users.filter(_.email === email).length).result), FutureHelper.dbTimeout).head == 0
 }
 
 case class UserLogin(username: String, password: String) {
-
   private var _user: Option[User] = None
   def user: Option[User] = _user
 
-  def authenticate(): Option[User] = {
-    DB.withSession { implicit s: Session =>
-      this._user = None
-
-      val maybeUser = Users.filter(_.username === this.username).firstOption
-
-      if (maybeUser.isEmpty) {
-        return None
-      }
-
-      val user = maybeUser.get
-      if (!user.active) {
-        return None
-      }
-      if (!PasswordHasher.verifyPassword(this.password, user.password)) {
-        return None
-      }
-
-      this._user = Some(user)
-      return Some(user);
-    }
+  def authenticate()(implicit db: Database, ex: ExecutionContext): Option[User] = {
+    _user = None
+    Await.result(db.run(Users.filter(_.username === this.username).result.headOption).map {
+      case Some(user) if user.active && PasswordHasher.verifyPassword(this.password, user.password) =>
+        _user = Some(user)
+      case _ =>
+        _user = None
+    }, FutureHelper.dbTimeout)
+    _user
   }
 }
 

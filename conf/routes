@@ -3,7 +3,7 @@
 # ~~~~
 
 # Home page
-GET         /                                          org.ieee_passau.controllers.MainController.calendar
+GET         /                                          org.ieee_passau.controllers.CmsController.calendar
 
 GET         /problems                                  org.ieee_passau.controllers.MainController.problems
 GET         /problem/:door                             org.ieee_passau.controllers.MainController.problemDetails(door: Int)
@@ -15,9 +15,9 @@ POST        /problem/:door/question                    org.ieee_passau.controlle
 
 GET         /ranking                                   org.ieee_passau.controllers.MainController.ranking
 GET         /codelangs                                 org.ieee_passau.controllers.LanguageController.list
-GET         /$page<(contact|faq|examples|rules|news|calendar)> org.ieee_passau.controllers.MainController.content(page)
-GET         /feedback                                  org.ieee_passau.controllers.MainController.feedback
-POST        /feedback                                  org.ieee_passau.controllers.MainController.submitFeedback
+GET         /$page<(contact|faq|examples|rules|news|calendar)> org.ieee_passau.controllers.CmsController.content(page)
+GET         /feedback                                  org.ieee_passau.controllers.TicketController.feedback
+POST        /feedback                                  org.ieee_passau.controllers.TicketController.submitFeedback
 
 GET         /logout                                    org.ieee_passau.controllers.UserController.logout
 GET         /login                                     org.ieee_passau.controllers.UserController.login
@@ -74,14 +74,14 @@ GET         /admin/monitoring/vms                      org.ieee_passau.controlle
 GET         /admin/monitoring/stat                     org.ieee_passau.controllers.EvaluationController.stats
 POST        /admin/monitoring/:id/delete               org.ieee_passau.controllers.EvaluationController.cancel(id: Int)
 
-GET         /admin/maintenance                         org.ieee_passau.controllers.EvaluationController.maintenance
-POST        /admin/maintenance/eval                    org.ieee_passau.controllers.EvaluationController.playPause
-POST        /admin/maintenance/notification            org.ieee_passau.controllers.EvaluationController.toggleNotification
+GET         /admin/maintenance                         org.ieee_passau.controllers.CmsController.maintenance
+POST        /admin/maintenance/eval                    org.ieee_passau.controllers.CmsController.playPause
+POST        /admin/maintenance/notification            org.ieee_passau.controllers.CmsController.toggleNotification
 
-GET         /admin/status/:id                          org.ieee_passau.controllers.EvaluationController.createPage(id: Int)
-POST        /admin/status/:id                          org.ieee_passau.controllers.EvaluationController.addPage(id: Int)
-GET         /admin/status/:id/:lang                    org.ieee_passau.controllers.EvaluationController.editPage(id: Int, lang: String)
-POST        /admin/status/:id/:lang                    org.ieee_passau.controllers.EvaluationController.changePage(id: Int, lang: String)
+GET         /admin/status/:id                          org.ieee_passau.controllers.CmsController.createPage(id: Int)
+POST        /admin/status/:id                          org.ieee_passau.controllers.CmsController.addPage(id: Int)
+GET         /admin/status/:id/:lang                    org.ieee_passau.controllers.CmsController.editPage(id: Int, lang: String)
+POST        /admin/status/:id/:lang                    org.ieee_passau.controllers.CmsController.changePage(id: Int, lang: String)
 
 GET         /admin/codelangs                           org.ieee_passau.controllers.LanguageController.index
 GET         /admin/codelang/insert                     org.ieee_passau.controllers.LanguageController.insert
@@ -97,9 +97,6 @@ POST        /admin/ticket/:id/delete                   org.ieee_passau.controlle
 POST        /admin/vms/register                        org.ieee_passau.controllers.EvaluationController.registerVM
 POST        /admin/vms/registerv2                      org.ieee_passau.controllers.EvaluationController.registerVM
 POST        /admin/vms/remove                          org.ieee_passau.controllers.EvaluationController.removeVM
-
-# js router
-GET         /js/routes                                 org.ieee_passau.controllers.MainController.jsRoutes
 
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                              controllers.Assets.at(path="/public", file)

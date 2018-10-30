@@ -1,11 +1,11 @@
 package org.ieee_passau.utils
 
-import org.ieee_passau.models._
-import play.api.Play.current
-import play.api.db.slick.Config.driver.simple._
-import play.api.db.slick.DB
+import org.ieee_passau.models.{Guest, Permission, User, Users, _}
+import play.api.i18n.MessagesApi
 import play.api.mvc._
+import slick.driver.PostgresDriver.api._
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 /**
@@ -20,19 +20,20 @@ trait PermissionCheck extends Controller {
     * @param request the request
     * @return optionally the user in the session ot specified by the token
     */
-  def getUserFromRequest(request: RequestHeader): Option[User] = {
+  def getUserFromRequest(request: RequestHeader)(implicit db: Database): Future[Option[User]] = {
     request2session(request).get("user").map { uid =>
-      DB.withSession[Option[User]] { implicit s: play.api.db.slick.Session =>
-        Users.byId(uid.toInt).firstOption;
+      db.run(Users.byId(uid.toInt).result.headOption).flatMap {
+        case Some(x) => Future.successful(Some(x))
+        case _ =>
+          request.getQueryString("token").map { token =>
+            db.run(Users.byToken(token).result.headOption).map {
+              // only internal aka backend users can authenticate with a token
+              case Some(u) if u.permission == Internal => Some(u)
+              case _ => None
+            }
+          }.getOrElse(Future.successful(None))
       }
-    } getOrElse {
-      request.getQueryString("token").flatMap { token =>
-        DB.withSession[Option[User]] { implicit s: play.api.db.slick.Session =>
-          Users.byToken(token).list.headOption
-          // only internal aka backend users can authenticate with a token
-        }
-      } filter { maybeUser => maybeUser.permission == Internal }
-    }
+    }.getOrElse(Future.successful(None))
   }
 
   /**
@@ -42,16 +43,12 @@ trait PermissionCheck extends Controller {
     * @param f     the action to carry out
     * @return an asynchronous action
     */
-  def requirePermission(level: Permission)(f: => Option[User] => Action[AnyContent]): Action[AnyContent] = Action.async { implicit rs =>
-    implicit val user = getUserFromRequest(rs)
-    if (user.isEmpty && level == Guest) {
-      f(None)(rs)
-    } else if (user.isEmpty) {
-      Future.successful(Unauthorized(org.ieee_passau.views.html.errors.e403()))
-    } else if (user.get.active && user.get.permission.includes(level)) {
-      f(user)(rs)
-    } else {
-      Future.successful(Unauthorized(org.ieee_passau.views.html.errors.e403()))
+
+  def requirePermission(level: Permission)(f: => Option[User] => Action[AnyContent])(implicit db: Database, messagesApi: MessagesApi): Action[AnyContent] = Action.async { implicit rs =>
+    getUserFromRequest(rs).flatMap {
+      case Some(u) if u.active && u.permission.includes(level) => f(Some(u))(rs)
+      case None if Guest.includes(level) => f(None)(rs)
+      case _ => Future.successful(Unauthorized(org.ieee_passau.views.html.errors.e403()(request2flash, None, rs, messagesApi, request2lang)))
     }
   }
 
@@ -64,12 +61,12 @@ trait PermissionCheck extends Controller {
     * @tparam A the action type
     * @return an asynchronous action
     */
-  def requirePermission[A](level: Permission, bp: BodyParser[A])(f: => Option[User] => Action[A]): Action[A] = Action.async(bp) { implicit rs =>
-    implicit val user = getUserFromRequest(rs)
-    if ((user.isEmpty && level == Guest) || (user.isDefined && user.get.active && user.get.permission == level)) {
-      f(user)(rs)
-    } else {
-      Future.successful(Unauthorized(org.ieee_passau.views.html.errors.e403()))
-    }
+
+  def requirePermission[A](level: Permission, bp: BodyParser[A])(f: => Option[User] => Action[A])(implicit db: Database, messagesApi: MessagesApi): Action[A] = Action.async(bp) { implicit rs =>
+    getUserFromRequest(rs).flatMap({
+      case Some(u) if u.active && u.permission.includes(level) => f(Some(u))(rs)
+      case None if Guest.includes(level) => f(None)(rs)
+      case _ => Future.successful(Unauthorized(org.ieee_passau.views.html.errors.e403()(request2flash, None, rs, messagesApi, request2lang)))
+    })
   }
 }

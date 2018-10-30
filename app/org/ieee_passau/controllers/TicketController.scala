@@ -2,128 +2,175 @@ package org.ieee_passau.controllers
 
 import java.util.Date
 
-import org.ieee_passau.forms.ProblemForms
+import com.google.inject.Inject
+import org.ieee_passau.models.DateSupport.dateMapper
 import org.ieee_passau.models._
-import org.ieee_passau.utils.PermissionCheck
 import org.ieee_passau.utils.StringHelper.encodeEmailName
-import play.api.Play.current
-import play.api.db.slick.Config.driver.simple._
-import play.api.db.slick._
-import play.api.i18n.Messages
-import play.api.libs.mailer.{Email, MailerPlugin}
+import org.ieee_passau.utils.{FormHelper, PermissionCheck}
+import play.api.data.Form
+import play.api.data.Forms.{mapping, number, optional, text}
+import play.api.db.slick.DatabaseConfigProvider
+import play.api.i18n.MessagesApi
+import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc._
+import slick.driver.JdbcProfile
+import slick.driver.PostgresDriver.api._
 
-object TicketController extends Controller with PermissionCheck {
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-  def index: Action[AnyContent] = requirePermission(Moderator) { implicit admin => DBAction { implicit rs =>
-    val responses = for {
+class TicketController @Inject()(val messagesApi: MessagesApi, dbConfigProvider: DatabaseConfigProvider, mailerClient: MailerClient) extends Controller with PermissionCheck {
+  private implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
+  private implicit val mApi: MessagesApi = messagesApi
+
+  def index: Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
+    val responsesQuery = for {
       t <- Tickets if t.responseTo.?.isDefined
-    } yield t.responseTo
+    } yield t.responseTo.?
 
-    val list = (for {
+    val listQuery = (for {
       t <- Tickets if t.responseTo.?.isEmpty
       u <- Users if u.id === t.userId
       p <- Problems if p.id === t.problemId
-    } yield (t, u, p)).sortBy(_._1.created.desc).list
-      .map(q => (q._1, q._2, q._3, responses.filter(_ === q._1.id).firstOption.isDefined))
-
-    Ok(org.ieee_passau.views.html.ticket.index(list))
+    } yield (t, u, p)).sortBy(_._1.created.desc)
+    // TODO join in one query?
+    db.run(responsesQuery.result).zip(db.run(listQuery.to[List].result)).map { tuple =>
+      Ok(org.ieee_passau.views.html.ticket.index(tuple._2.map(q => (q._1, q._2, q._3, tuple._1.contains(q._1.id)))))
+    }
   }}
 
-  def view(id: Int): Action[AnyContent] = requirePermission(Moderator) { implicit admin => DBAction { implicit rs =>
-    Tickets.byId(id).firstOption.map { ticket =>
-      val user = Users.byId(ticket.userId.getOrElse(-1)).firstOption
-      val problem = Problems.byId(ticket.problemId.getOrElse(-1)).firstOption
-      val answers = for {
-        t <- Tickets if t.responseTo === ticket.id
-        u <- Users if u.id === t.userId
-      } yield (t, u.username)
-      // TODO handle no element
-      Ok(org.ieee_passau.views.html.ticket.view((ticket, user.get, problem.get), answers.list,
-        ProblemForms.ticketForm.bind(Map("public" -> "true")).discardingErrors))
-    }.getOrElse(NotFound(org.ieee_passau.views.html.errors.e404()))
-  }}
-
-  def submitTicket(door: Int): Action[AnyContent] = requirePermission(Contestant) { implicit user => DBAction { implicit rs =>
-    val displayLang = request2lang
-    val now = new Date()
-    ProblemForms.ticketForm.bindFromRequest.fold(
-      _ => {
-        Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
-          .flashing("danger" -> Messages("ticket.create.error"))
-      },
-      ticket => {
-        val problem = Problems.byDoor(door).firstOption
-        if (problem.isDefined) {
-
-          val problemTitle = ProblemTranslations.byProblemLang(problem.get.id.get, displayLang).firstOption.fold(problem.get.title)(_.title)
-
-          val id = (Tickets returning Tickets.map(_.id)) +=
-            Ticket(None, problem.get.id, user.get.id, None, ticket.text, public = false, now, displayLang)
-
-          val email = Email(
-            subject = Messages("email.header")(displayLang) + " " +  Messages("ticket.title")(displayLang) + " zu " + Messages("problem.title")(displayLang) + " " + problem.get.door + ": " + problemTitle,
-            from = encodeEmailName(user.get.username) + " @ " + play.Configuration.root().getString("email.from"),
-            to = List(play.Configuration.root().getString("email.from")),
-            bodyText = Some(ticket.text + "\n\n" + Messages("ticket.answer")(displayLang) + ": " + org.ieee_passau.controllers.routes.TicketController.view(id).absoluteURL(play.Configuration.root().getBoolean("application.https", false)))
-          )
-          MailerPlugin.send(email)
-
-          Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
-            .flashing("success" -> Messages("ticket.create.message"))
-        } else {
-          Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
-            .flashing("danger" -> Messages("ticket.create.error"))
-        }
-      }
-    )
-  }}
-
-  def answerTicket(id: Int): Action[AnyContent] = requirePermission(Moderator) { implicit mod => DBAction { implicit rs =>
-    val now = new Date()
-    ProblemForms.ticketForm.bindFromRequest.fold(
-      _ => {
-        Redirect(org.ieee_passau.controllers.routes.TicketController.index())
-          .flashing("danger" -> Messages("ticket.answer.error"))
-      },
-      ticket => {
-        val parent = Tickets.byId(id).firstOption
-        if (parent.isDefined) {
-          val problem = Problems.byId(parent.get.problemId.get).firstOption
-          val recipient = Users.byId(parent.get.userId.get).firstOption
-          if (problem.isDefined && recipient.isDefined) {
-
-            Tickets += Ticket(None, parent.get.problemId, mod.get.id, Some(id), ticket.text, public = ticket.public, now, parent.get.language)
-            val updated = parent.get.copy(public = ticket.public)
-            Tickets.update(id, updated)
-
-            val msgLang = parent.get.language
-            val problemTitle = ProblemTranslations.byProblemLang(problem.get.id.get, msgLang).firstOption.fold(problem.get.title)(_.title)
-            val email = Email(
-              subject = Messages("email.header")(msgLang) + " " + Messages("email.answer.subject", Messages("ticket.title")(msgLang) +  " zu " + Messages("problem.title")(msgLang) + " " + problem.get.door + ": " + problemTitle)(msgLang),
-              from = encodeEmailName(mod.get.username) + " @ " + play.Configuration.root().getString("email.from"),
-              to = List(recipient.get.email),
-              cc = List(play.Configuration.root().getString("email.from")),
-              bodyText = Some(ticket.text)
-            )
-            MailerPlugin.send(email)
-
-            Redirect(org.ieee_passau.controllers.routes.TicketController.index())
-              .flashing("success" -> Messages("ticket.answer.message"))
-          } else {
-            Redirect(org.ieee_passau.controllers.routes.TicketController.index())
-              .flashing("danger" -> Messages("ticket.answer.error"))
+  def view(id: Int): Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
+    db.run(Tickets.byId(id).result.headOption).flatMap {
+      case Some(ticket) =>
+        db.run(Users.byId(ticket.userId.get).result.headOption).flatMap {
+          case Some(user) => db.run(Problems.byId(ticket.problemId.getOrElse(-1)).result.headOption).flatMap {
+            case Some(problem) =>
+              val answersQuery = for {
+                t <- Tickets if t.responseTo === ticket.id
+                u <- Users if u.id === t.userId
+              } yield (t, u.username)
+              db.run(answersQuery.to[List].result).map { answers =>
+                Ok(org.ieee_passau.views.html.ticket.view((ticket, user, problem), answers,
+                  FormHelper.ticketForm.bind(Map("public" -> "true")).discardingErrors))
+              }
+            case _ => Future.successful(NotFound(org.ieee_passau.views.html.errors.e404()))
           }
-        } else {
-          Redirect(org.ieee_passau.controllers.routes.TicketController.index())
-            .flashing("danger" -> Messages("ticket.answer.error"))
+          case _ => Future.successful(NotFound(org.ieee_passau.views.html.errors.e404()))
+        }
+      case _ => Future.successful(NotFound(org.ieee_passau.views.html.errors.e404()))
+    }
+  }}
+
+  def submitTicket(door: Int): Action[AnyContent] = requirePermission(Contestant) { implicit user => Action.async { implicit rs =>
+    FormHelper.ticketForm.bindFromRequest.fold(
+      _ => {
+        Future.successful(Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
+          .flashing("danger" -> messagesApi("ticket.create.error")))
+      },
+      ticket => {
+        val language = request2lang
+
+        db.run(Problems.byDoor(door).result.headOption).flatMap {
+          case Some(problem) =>
+            db.run(ProblemTranslations.byProblemLang(problem.id.get, language).result.headOption).flatMap { maybeProblemTitle =>
+              val problemTitle = maybeProblemTitle.fold(problem.title)(_.title)
+              val now = new Date()
+              db.run((Tickets returning Tickets.map(_.id)) += Ticket(None, problem.id, user.get.id, None, ticket.text, public = false, now, language)).map { id =>
+                val email = Email(
+                  subject = messagesApi("email.header") + " " +  messagesApi("ticket.title") + " zu " + messagesApi("problem.title") + " " + problem.door + ": " + problemTitle,
+                  from = encodeEmailName(user.get.username) + " @ " + play.Configuration.root().getString("email.from"),
+                  to = List(play.Configuration.root().getString("email.from")),
+                  bodyText = Some(ticket.text + "\n\n" + messagesApi("ticket.answer") + ": " + org.ieee_passau.controllers.routes.TicketController.view(id).absoluteURL(play.Configuration.root().getBoolean("application.https", false)))
+                )
+                mailerClient.send(email)
+
+                Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
+                  .flashing("success" -> messagesApi("ticket.create.message"))
+              }
+            }
+
+          case _ =>
+            Future.successful(Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
+              .flashing("danger" -> messagesApi("ticket.create.error")))
         }
       }
     )
   }}
 
-  def delete(id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
-    Tickets.filter(_.id === id).delete
+  def answerTicket(id: Int): Action[AnyContent] = requirePermission(Moderator) { implicit mod => Action.async { implicit rs =>
+    FormHelper.ticketForm.bindFromRequest.fold(
+      _ => {
+        Future.successful(Redirect(org.ieee_passau.controllers.routes.TicketController.index())
+          .flashing("danger" -> messagesApi("ticket.answer.error")))
+      },
+      ticket => {
+        db.run(Tickets.byId(id).result.headOption).flatMap {
+          case Some(parent) =>
+            db.run(Problems.byId(parent.problemId.get).result.headOption).flatMap {
+              case Some(problem) =>
+                db.run(Users.byId(parent.userId.get).result.headOption).flatMap {
+                  case Some(recipient) =>
+                    val msgLang = parent.language
+                    val now = new Date()
+                    db.run(Tickets += Ticket(None, parent.problemId, mod.get.id, Some(id), ticket.text, public = ticket.public, now, parent.language))
+                    val updated = parent.copy(public = ticket.public)
+                    Tickets.update(updated.id.get, updated)
+                    db.run(ProblemTranslations.byProblemLang(problem.id.get, msgLang).result.headOption).map { maybeProblemTitle =>
+                      val problemTitle = maybeProblemTitle.fold(problem.title)(_.title)
+                      val email = Email(
+                        subject = messagesApi("email.header")(msgLang) + " " + messagesApi("email.answer.subject", messagesApi("ticket.title")(msgLang) +  " zu " + messagesApi("problem.title")(msgLang) + " " + problem.door + ": " + problemTitle)(msgLang),
+                        from = encodeEmailName(mod.get.username) + " @ " + play.Configuration.root().getString("email.from"),
+                        to = List(recipient.email),
+                        cc = List(play.Configuration.root().getString("email.from")),
+                        bodyText = Some(ticket.text)
+                      )
+                      mailerClient.send(email)
+                      Redirect(org.ieee_passau.controllers.routes.TicketController.index())
+                        .flashing("success" -> messagesApi("ticket.answer.message"))
+                    }
+                  case _ => Future.successful(Redirect(org.ieee_passau.controllers.routes.TicketController.index())
+                    .flashing("danger" -> messagesApi("ticket.answer.error")))
+                }
+              case _ => Future.successful(Redirect(org.ieee_passau.controllers.routes.TicketController.index())
+                .flashing("danger" -> messagesApi("ticket.answer.error")))
+            }
+          case _ => Future.successful(Redirect(org.ieee_passau.controllers.routes.TicketController.index())
+            .flashing("danger" -> messagesApi("ticket.answer.error")))
+        }
+      }
+    )
+  }}
+
+  def delete(id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action { implicit rs =>
+    db.run(Tickets.filter(_.id === id).delete)
     Redirect(org.ieee_passau.controllers.routes.TicketController.index())
   }}
+
+  def feedback: Action[AnyContent] = requirePermission(Contestant) { implicit user => Action { implicit rs =>
+    Ok(org.ieee_passau.views.html.general.feedback(feedbackForm))
+  }}
+
+  def submitFeedback: Action[AnyContent] = requirePermission(Contestant) { implicit user => Action { implicit rs =>
+    feedbackForm.bindFromRequest.fold(
+      errorForm => {
+        BadRequest(org.ieee_passau.views.html.general.feedback(errorForm))
+      },
+      fb => {
+        db.run(Feedbacks += Feedback(None, user.get.id.get, fb.rating, fb.pro, fb.con, fb.freetext))
+        Redirect(org.ieee_passau.controllers.routes.CmsController.calendar())
+          .flashing("success" -> messagesApi("feedback.submit.message"))
+      }
+    )
+  }}
+
+  def feedbackForm = Form(
+    mapping(
+      "id" -> optional(number),
+      "user_id" -> number,
+      "rating" -> number(1, 5),
+      "pro" -> optional(text),
+      "con" -> optional(text),
+      "freetext" -> optional(text)
+    )(Feedback.apply)(Feedback.unapply)
+  )
 }

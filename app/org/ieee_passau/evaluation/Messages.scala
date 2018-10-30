@@ -33,10 +33,11 @@ object Messages {
     }
   }
 
-  case class BaseJob(problemId: Int,
+  case class BaseJob(cpuFactor: Long,
+                     memFactor: Int,
+                     lang: String,
                      testrunId: Int,
                      evalId: String,
-                     language: String,
                      program: String,
                      programName: String,
                      stdin: String,

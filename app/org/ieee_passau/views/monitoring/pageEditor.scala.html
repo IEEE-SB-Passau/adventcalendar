@@ -4,52 +4,52 @@
 @import org.ieee_passau.views.html.bootstrap3.{buttonSave, fileloader, textareaBs}
 @import org.ieee_passau.views.html.main
 @import play.api.data.Form
-@import play.api.i18n.{Lang, Messages}
+@import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.{Flash, RequestHeader}
-@(id: Int, lng: String, post: Form[Posting], title: String = "")(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
+@(id: Int, lng: String, post: Form[Posting], title: String = "")(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
 
-@main(Messages("nav.admin.postings")) {
+@main(messagesApi("nav.admin.postings")) {
     <ol class="breadcrumb">
-        <li><a href="@org.ieee_passau.controllers.routes.EvaluationController.maintenance">@Messages("nav.admin.postings")</a></li>
-        <li class="active">@Messages("posting.page")</li>
+        <li><a href="@org.ieee_passau.controllers.routes.CmsController.maintenance">@messagesApi("nav.admin.postings")</a></li>
+        <li class="active">@messagesApi("posting.page")</li>
     </ol>
 
     <div class="well">
         <form class="form-horizontal" method="POST" action="@if(lng.isEmpty) {
-            @org.ieee_passau.controllers.routes.EvaluationController.addPage(id) } else {
-            @org.ieee_passau.controllers.routes.EvaluationController.changePage(id, lng)}">
+            @org.ieee_passau.controllers.routes.CmsController.addPage(id) } else {
+            @org.ieee_passau.controllers.routes.CmsController.changePage(id, lng)}">
             <fieldset>
                 @CSRF.formField
                 <input type="hidden" name="id" value="@id" />
 
                 <div class="form-group">
-                    <label for="visibility" class="col-sm-2 control-label">@Messages("general.language")</label>
+                    <label for="visibility" class="col-sm-2 control-label">@messagesApi("general.language")</label>
                     <div class="col-sm-10">
                         <select id="lang" size="1" name="lang" class="col-sm-10 form-control">
                         @LanguageHelper.langs.map { l =>
                             <option value="@l.code"
                                 @{if(Lang.get(lng).isDefined && Lang(lng) == l) "selected"}
-                            >@Messages("language.name")(l)</option>
+                            >@messagesApi("language.name")(l)</option>
                         }
                         </select>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="col-sm-2 control-label">@Messages("posting.post.title")</label>
+                    <label class="col-sm-2 control-label">@messagesApi("posting.post.title")</label>
                     <div class="col-sm-10">
                         <input type="text"
                                class="form-control"
                                id="title"
                                name="title"
-                               value="@if(post("lang").value.isDefined) { @Messages(post("title").value.getOrElse(""))(Lang(post("lang").value.get)) } else { @title }"
+                               value="@if(post("lang").value.isDefined) { @messagesApi(post("title").value.getOrElse(""))(Lang(post("lang").value.get)) } else { @title }"
                                disabled/>
                         <input type="hidden" name="title" value="@post("title").value.getOrElse("")" />
 
                         <span class="help-block"></span>
                     </div>
                 </div>
-                @textareaBs(post("content"),  label = Messages("posting.post.content"), placeholder = Messages("posting.post.content"), wysiwyg = true)
+                @textareaBs(post("content"),  label = messagesApi("posting.post.content"), placeholder = messagesApi("posting.post.content"), wysiwyg = true)
                 @fileloader("content")
 
                 @buttonSave()

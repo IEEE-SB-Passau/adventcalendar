@@ -2,38 +2,48 @@ package org.ieee_passau.controllers
 
 import java.util.Date
 
-import akka.actor.Actor
+import akka.actor.{Actor, ActorSystem, Props}
+import com.google.inject.Inject
 import org.ieee_passau.controllers.Beans._
-import org.ieee_passau.controllers.MainController.{Highlight, HighlightSpecial, NoHighlight}
+import org.ieee_passau.models.DateSupport.dateMapper
+import org.ieee_passau.models.EvalMode.evalModeTypeMapper
+import org.ieee_passau.models.Result.resultTypeMapper
+import org.ieee_passau.models.Visibility.visibilityTypeMapper
 import org.ieee_passau.models._
-import org.ieee_passau.utils.MathHelper
-import play.api.Play.current
-import play.api.db.slick.Config.driver.simple._
-import play.api.db.slick._
-import play.api.libs.concurrent.Akka
+import org.ieee_passau.utils.ViewHelper.{Highlight, HighlightSpecial, NoHighlight}
+import org.ieee_passau.utils.{FutureHelper, MathHelper}
+import play.api.Application
+import play.api.db.slick.DatabaseConfigProvider
+import slick.driver.JdbcProfile
+import slick.driver.PostgresDriver.api._
 
 import scala.collection.SeqView
+import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util.Try
 
-class RankingActor extends Actor {
+object RankingActor {
+  def props(dbConfigProvider: DatabaseConfigProvider, system: ActorSystem, app: Application): Props = Props(new RankingActor(dbConfigProvider, system, app))
+}
+
+class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, system: ActorSystem, app: Application) extends Actor {
+
+  private val dbConfig = dbConfigProvider.get[JdbcProfile]
+  private val db: Database = dbConfig.db
 
   val STARTUP_DELAY: FiniteDuration = 500 millis
   val TICK_INTERVAL: FiniteDuration = 1 minute
 
-  // always calculate this first, so we can use it for the ranking
-  private var problemsAll: List[((Int, Date, Date), Int, String, Double, EvalMode, Int, Int, Int, List[Int])] =
-    calcProblemList(showHiddenUsers = true)
-  private var problemsNormal: List[((Int, Date, Date), Int, String, Double, EvalMode, Int, Int, Int, List[Int])] =
-    calcProblemList(showHiddenUsers = false)
-  private var rankingAll: List[(Int, User, Double, Int)] = calcRanking(showAll = true)
-  private var rankingNormal: List[(Int, User, Double, Int)] = calcRanking(showAll = false)
-  private var userProblemPointsAll: Map[User, (Map[Int, Double], Int)] = calcUserPointsMap(showAll = true)
-  private var userProblemPointsNormal: Map[User, (Map[Int, Double], Int)] = calcUserPointsMap(showAll = false)
+  private var problemsAll: List[((Int, Date, Date), Int, String, Double, EvalMode, Int, Int, Int, List[Int])] = List()
+  private var problemsNormal: List[((Int, Date, Date), Int, String, Double, EvalMode, Int, Int, Int, List[Int])] = List()
+  private var rankingAll: List[(Int, User, Double, Int)] = List()
+  private var rankingNormal: List[(Int, User, Double, Int)] = List()
+  private var userProblemPointsAll: Map[User, (Map[Int, Double], Int)] = Map()
+  private var userProblemPointsNormal: Map[User, (Map[Int, Double], Int)] = Map()
 
-  private val tickSchedule = Akka.system.scheduler.schedule(STARTUP_DELAY, TICK_INTERVAL, self, UpdateRankingM)
+  private val tickSchedule = system.scheduler.schedule(STARTUP_DELAY, TICK_INTERVAL, self, UpdateRankingM)
 
   private def calcUserPoints(userProblemSolutions: Iterable[Map[Int, Seq[UserSolution]]],
                              problemUserBestSubmission: Map[Int, Map[User, (Int, Int)]],
@@ -57,34 +67,40 @@ class RankingActor extends Actor {
     } .toMap
   }
 
-  private def calcRanking(showAll: Boolean): List[(Int, User, Double, Int)] = { DB.withSession { implicit session =>
+  private def calcRanking(showAll: Boolean): List[(Int, User, Double, Int)] = {
     var userProblemPoints = calcUserPointsMap(showAll)
 
     val uids = userProblemPoints.map(_._1.id.get)
 
-    val noPassedTCActives = (for {
-      r <- Testruns       if r.result =!= (Passed: Result)
+    val noPassedTCActivesQuery = for {
+      r <- Testruns       if r.result =!= (Passed: org.ieee_passau.models.Result)
       c <- r.testcase     if c.visibility =!= (Hidden: Visibility)
       s <- r.solution
       u <- s.user         if u.hidden === false || (showAll: Boolean)
       p <- s.problem
-    } yield (u, p)).filterNot(_._1.id inSet uids).list.groupBy(_._1).map { case (u, l) => (u, (l.map { case (_, p) => (p.id.get, 0d) }.toMap, 0)) }.toMap
+    } yield (u, p)
 
-    userProblemPoints = userProblemPoints ++ noPassedTCActives
+    Await.result(db.run(noPassedTCActivesQuery.filterNot(_._1.id inSet uids).result).map { res =>
+      res.groupBy(_._1).map {
+        case (u, l) => (u, (l.map { case (_, p) => (p.id.get, 0d) }.toMap, 0))
+      }
+    } map {noPassedTCActives =>
+      userProblemPoints = userProblemPoints ++ noPassedTCActives
 
-    if (showAll)
-      userProblemPointsAll = userProblemPoints
-    else
-      userProblemPointsNormal = userProblemPoints
+      if (showAll)
+        userProblemPointsAll = userProblemPoints
+      else
+        userProblemPointsNormal = userProblemPoints
 
-    userProblemPoints.map {
-      case (user, (userPoints, solved)) => (user, userPoints.values.sum, solved)
-    }.toList.view.sortBy(-_._2 /*points*/).zipWithIndex.groupBy(_._1._2 /*points*/).toList.flatMap {
-      case (_, rankingPos) => for {
-        ((user, points, solved), index) <- rankingPos
-      } yield (rankingPos.head._2 + 1, user, points, solved)
-    }.sortBy(_._4).sortBy(_._1)
-  }}
+      userProblemPoints.map {
+        case (user, (userPoints, solved)) => (user, userPoints.values.sum, solved)
+      }.toList.view.sortBy(-_._2 /*points*/).zipWithIndex.groupBy(_._1._2 /*points*/).toList.flatMap {
+        case (_, rankingPos) => for {
+          ((user, points, solved), _) <- rankingPos
+        } yield (rankingPos.head._2 + 1, user, points, solved)
+      }.sortBy(_._4).sortBy(_._1)
+    }, FutureHelper.dbTimeout)
+  }
 
   /**
     * We suppose a problem has exactly 100 points, users get between 100 and 50 points for a correct solution.
@@ -122,33 +138,37 @@ class RankingActor extends Actor {
     }
   }
 
-  private def calcUserPointsMap(showAll: Boolean) = { DB.withSession { implicit session =>
-    val solutions = for {
-      r <- Testruns       if r.result === (Passed: Result)
+  private def calcUserPointsMap(showAll: Boolean): Map[User, (Map[Int, Double], Int)] = {
+    val solutionsQuery = for {
+      r <- Testruns       if r.result === (Passed: org.ieee_passau.models.Result)
       c <- r.testcase     if c.visibility =!= (Hidden: Visibility)
       s <- r.solution
       u <- s.user         if u.hidden === false || (showAll: Boolean)
       p <- s.problem      if p.evalMode =!= (NoEval: EvalMode) || (showAll: Boolean)
     } yield (u, c.id, c.points, r.id, p.id, s.id, p.evalMode, r.score.?)
 
-    val numTest: Map[Int, List[Testcase]] = Testcases.filter(t => t.visibility =!= (Hidden: Visibility)).list.groupBy(_.problemId)
-
-    val userSolutions = solutions.list.view.map(x => UserSolution.tupled(x))
-    val users = userSolutions.groupBy(_.user.id.get)
-    val problemUserSolutions = bestProblemUserSolution(userSolutions.groupBy(_.problem))
-    val problemRanking = (for { p <- Problems if p.evalMode === (Best: EvalMode) } yield p.id).list.map(p => (p, calcChallengeRankFactor(problemUserSolutions(p).toList))).toMap
-
-    users.map {
-      case (_, values) =>
-        val user = values.head.user
-        val map = values.view.groupBy(_.problem).map(x => x._2.groupBy(_.solution))
-        (
-          user, (calcUserPoints(map, problemUserSolutions, problemRanking),
-          // for each problem look if a solution exists for witch # of passed testcases equals # of testcases for this problem and count those problems
-          map.filter(problem => problem.head._2.head.evalMode != NoEval).count(problem => problem.exists(solution => solution._2.size == numTest(solution._2.head.problem).size))
-        ))
-    }
-  }}
+    Await.result(db.run(solutionsQuery.to[List].result).flatMap { solutions =>
+      val userSolutions = solutions.view.map(x => UserSolution.tupled(x))
+      val users = userSolutions.groupBy(_.user.id.get)
+      val problemUserSolutions = bestProblemUserSolution(userSolutions.groupBy(_.problem))
+      db.run(Testcases.filter(t => t.visibility =!= (Hidden: Visibility)).to[List].result).flatMap { numTestList =>
+        val numTest = numTestList.groupBy(_.problemId)
+        db.run(Problems.filter(_.evalMode === (Best: EvalMode)).map(_.id).to[List].result).map { problemRankingList =>
+          val problemRanking = problemRankingList.map(p => (p, calcChallengeRankFactor(problemUserSolutions(p).toList))).toMap
+          users.map {
+            case (_, values) =>
+              val user = values.head.user
+              val map = values.view.groupBy(_.problem).map(x => x._2.groupBy(_.solution))
+              (
+                user, (calcUserPoints(map, problemUserSolutions, problemRanking),
+                // for each problem look if a solution exists for witch # of passed testcases equals # of testcases for this problem and count those problems
+                map.filter(problem => problem.head._2.head.evalMode != NoEval).count(problem => problem.exists(solution => solution._2.size == numTest(solution._2.head.problem).size))
+              ))
+          }
+        }
+      }
+    }, FutureHelper.dbTimeout)
+  }
 
   private def calcProblemPoints(mode: EvalMode, problemSolutions: SeqView[ProblemSolution, List[ProblemSolution]], total: Int, correct: Int): Double = {
     mode match {
@@ -161,8 +181,8 @@ class RankingActor extends Actor {
     }
   }
 
-  private def calcProblemList(showHiddenUsers: Boolean) = { DB.withSession { implicit session =>
-    val solutions = for {
+  private def calcProblemList(showHiddenUsers: Boolean): List[((Int, Date, Date), Int, String, Double, EvalMode, Int, Int, Int, List[Int])] = {
+    val solutionsQuery = for {
       r <- Testruns
       c <- r.testcase     if c.visibility =!= (Hidden: Visibility)
       s <- r.solution
@@ -170,44 +190,48 @@ class RankingActor extends Actor {
       p <- s.problem
     } yield (p.door, p.title, c.points, c.id, s.id, s.userId, (p.id, p.readableStart, p.readableStop), r.result, p.evalMode)
 
-    val testcases = for {
-      (p, c) <- Problems leftJoin Testcases.filter(_.visibility =!= (Hidden: Visibility)) on (_.id === _.problemId)
-    } yield (p.door, p.title, c.points.?, c.id.?, (p.id, p.readableStart, p.readableStop), p.evalMode)
+    Await.result(db.run(solutionsQuery.to[List].result).flatMap { solutions =>
+      val solved = solutions.map(x => ProblemSolution.tupled(x)).groupBy(_.door)
 
-    val solved = solutions.list.map(x => ProblemSolution.tupled(x)).groupBy(_.door)
+      val testcasesQuery = for {
+        (p, c) <- Problems joinLeft Testcases.filter(_.visibility =!= (Hidden: Visibility)) on (_.id === _.problemId)
+      } yield (p.door, p.title, c.map(_.points), c.map(_.id), (p.id, p.readableStart, p.readableStop), p.evalMode)
 
-    testcases.list.view.groupBy(_._1 /*door*/).map {
-      case (problem, pInfo) =>
-        if (solved.contains(problem)) {
-          val problemSolutions = solved(problem).view
-          val ps = problemSolutions.head
-          // count number of submitted solutions
-          val total = problemSolutions.groupBy(_.solution).values.size
-          // count users with solutions
-          val distinct = problemSolutions.groupBy(_.user).values.size
-          // count users which have solutions that passed all testcases
-          val correct = problemSolutions.groupBy(_.user).map(x => x._2.groupBy(_.solution))
-            .count(user => user.exists(solution => solution._2.forall(_.result == Passed)))
-          (
-            ps.problem, ps.door, ps.title,
-            calcProblemPoints(ps.evalMode, problemSolutions, distinct, correct),
-            ps.evalMode, total, distinct, correct,
-            // list all used which have passing solutions
-            problemSolutions.groupBy(_.solution).filter(solution => solution._2.forall(_.result == Passed))
-              .values.toList.groupBy(_.head.user).keySet.toList
-          )
-        } else {
-          // problem does not yet have any submissions so we must insert an empty entry
-          val (door, title, _, _, problem, mode) = pInfo.head
-          (
-            problem, door, title,
-            // sum all possible points up
-            pInfo.groupBy(_._4.getOrElse(0) /*testcase*/).map(_._2.head._3.getOrElse(0) /*points*/).sum.toDouble,
-            mode, 0, 0, 0, List()
-          )
-        }
-    }.toList
-  }}
+      db.run(testcasesQuery.to[List].result).map { testcases: List[(Int, String, Option[Int], Option[Int], (Int, Date, Date), EvalMode)] =>
+        testcases.groupBy(_._1 /*door*/).map {
+          case (problem, pInfo) =>
+            if (solved.contains(problem)) {
+              val problemSolutions = solved(problem).view
+              val ps = problemSolutions.head
+              // count number of submitted solutions
+              val total = problemSolutions.groupBy(_.solution).values.size
+              // count users with solutions
+              val distinct = problemSolutions.groupBy(_.user).values.size
+              // count users which have solutions that passed all testcases
+              val correct = problemSolutions.groupBy(_.user).map(x => x._2.groupBy(_.solution))
+                .count(user => user.exists(solution => solution._2.forall(_.result == Passed)))
+              (
+                ps.problem, ps.door, ps.title,
+                calcProblemPoints(ps.evalMode, problemSolutions, distinct, correct),
+                ps.evalMode, total, distinct, correct,
+                // list all used which have passing solutions
+                problemSolutions.groupBy(_.solution).filter(solution => solution._2.forall(_.result == Passed))
+                  .values.toList.groupBy(_.head.user).keySet.toList
+              )
+            } else {
+              // problem does not yet have any submissions so we must insert an empty entry
+              val (door, title, _, _, problem, mode) = pInfo.head
+              (
+                problem, door, title,
+                // sum all possible points up
+                pInfo.groupBy(_._4.getOrElse(0) /*testcase*/).map(_._2.head._3.getOrElse(0) /*points*/).sum.toDouble,
+                mode, 0, 0, 0, List()
+              )
+            }
+        }.toList
+      }
+    }, FutureHelper.dbTimeout)
+  }
 
   override def postStop(): Unit = {
     super.postStop()
@@ -222,26 +246,23 @@ class RankingActor extends Actor {
       rankingNormal = calcRanking(showAll = false)
 
     case ProblemsQ(uid, lang, displayAll) =>
-      DB.withSession { implicit session =>
-        val sessionUser = Users.byId(uid).firstOption
-        val now = new Date()
-        val list = if (displayAll) problemsAll else problemsNormal
-        val list2 = if (displayAll) userProblemPointsAll else userProblemPointsNormal
-
-        val problemList = list.filter(p => p._1._2.before(now) && p._1._3.after(now)).map {
-          case (problem, door, title, points, mode, tries, distinctTries, correctCount, correctList) =>
-            val ownPoints = sessionUser.fold(0)(user => list2.get(user).fold(0)(_._1.get(problem._1).fold(0)(_.floor.toInt)))
-            val problemTrans = ProblemTranslations.byProblemLang(problem._1, lang).firstOption
+      val source = sender
+      val now = new Date()
+      val list = (if (displayAll) problemsAll else problemsNormal).filter(p => p._1._2.before(now) && p._1._3.after(now))
+      val list2 = if (displayAll) userProblemPointsAll else userProblemPointsNormal
+      db.run(Users.byId(uid).result.headOption).map(sessionUser => list.map {
+        case (problem, door, title, points, mode, tries, _, correctCount, correctList) =>
+          val ownPoints = sessionUser.fold(0)(user => list2.get(user).fold(0)(_._1.get(problem._1).fold(0)(_.floor.toInt)))
+          Await.result(db.run(ProblemTranslations.byProblemLang(problem._1, lang).result.headOption).map { problemTrans =>
             val problemTitle = if (problemTrans.isDefined) problemTrans.get.title else title
             ProblemInfo(problem._1, door, problemTitle, points.floor.toInt, ownPoints, mode, tries, correctCount, correctList.contains(uid))
-        }.sortBy(_.door)
-        sender ! problemList
-      }
+          }, FutureHelper.dbTimeout)
+      }).map(problemList => source ! problemList.sortBy(_.door))
 
     case RankingQ(uid, displayAll) =>
-      DB.withSession { implicit session =>
-        val sessionUser = Users.byId(uid).firstOption
-        val list =  if (displayAll) rankingAll else rankingNormal
+      val list =  if (displayAll) rankingAll else rankingNormal
+      val source = sender
+      db.run(Users.byId(uid).result.headOption).map { sessionUser =>
         val ranking: List[(Int, String, Boolean, Int, Int, Int)] = list.map {
           case (index, user: User, points, solved) =>
             (index, user.username, user.hidden, points.floor.toInt, solved,
@@ -255,7 +276,7 @@ class RankingActor extends Actor {
                 NoHighlight
             )
         }
-        sender ! ranking
+        source ! ranking
       }
   }
 }

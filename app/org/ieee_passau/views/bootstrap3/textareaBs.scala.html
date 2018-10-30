@@ -1,6 +1,6 @@
-@import play.api.i18n.{Lang, Messages}
+@import play.api.i18n.{Lang, MessagesApi}
 @(field: Field, rows: Int = 3, label: String = "CHANGEME", placeholder: String = "", help: String = "",
-        wysiwyg: Boolean = false, required: Boolean = false)(implicit lang: Lang)
+        wysiwyg: Boolean = false, required: Boolean = false)(implicit messagesApi: MessagesApi, lang: Lang)
 
 <div class="form-group @if(field.hasErrors) { has-error }">
     <label class="col-sm-2 control-label">@label</label>
@@ -12,6 +12,6 @@
                   placeholder="@placeholder"
                   @if(required) { required }>@field.value.getOrElse("")</textarea>
         <span class="help-block">@help</span>
-        <span class="help-block">@{field.error.map { error => Messages(error.message) }}</span>
+        <span class="help-block">@{field.error.map { error => messagesApi(error.message) }}</span>
     </div>
 </div>

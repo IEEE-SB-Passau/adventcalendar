@@ -2,22 +2,22 @@
 @import org.ieee_passau.models.{Best, Dynamic, Static, User}
 @import org.ieee_passau.utils.ViewHelper.showCheckmark
 @import org.ieee_passau.views.html.main
-@import play.api.i18n.{Lang, Messages}
+@import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.Flash
-@(problems: List[ProblemInfo], notification: (String, String))(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
+@(problems: List[ProblemInfo], notification: (String, String))(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
 
-@main(Messages("nav.problems")) {
+@main(messagesApi("nav.problems")) {
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>@Messages("problem.door")</th>
-                <th>@Messages("problem.name")</th>
-                <th class="text-right">@Messages("testcase.points")</th>
-                <th>@Messages("problem.evalmode")</th>
-                <th>@Messages("submissions.tries")</th>
-                <th>@Messages("submissions.solves")</th>
+                <th>@messagesApi("problem.door")</th>
+                <th>@messagesApi("problem.name")</th>
+                <th class="text-right">@messagesApi("testcase.points")</th>
+                <th>@messagesApi("problem.evalmode")</th>
+                <th>@messagesApi("submissions.tries")</th>
+                <th>@messagesApi("submissions.solves")</th>
                 @if(sessionUser.nonEmpty) {
-                    <th>@Messages("submissions.solved")</th>
+                    <th>@messagesApi("submissions.solved")</th>
                 }
             </tr>
         </thead>
@@ -27,7 +27,7 @@
                 <td>@problem.door</td>
                 <td><a href="@org.ieee_passau.controllers.routes.MainController.problemDetails(problem.door)">@problem.name</a></td>
                 <td class="text-right">@if(sessionUser.nonEmpty) { @problem.ownPoints /} @problem.points</td>
-                <td>@Messages(problem.evalMode.toString)</td>
+                <td>@messagesApi(problem.evalMode.toString)</td>
                 <td>@problem.tries</td>
                 <td>@problem.correctSolutions</td>
                 @if(sessionUser.nonEmpty) {
@@ -37,5 +37,5 @@
         }
         </tbody>
     </table>
-    <p>@if(problems.isEmpty) { @Html(Messages("problem.list.empty")) }</p>
-}(flash = (flash + notification), sessionUser, requestHeader, lang)
+    <p>@if(problems.isEmpty) { @Html(messagesApi("problem.list.empty")) }</p>
+}(flash = (flash + notification), sessionUser, requestHeader, messagesApi, lang)

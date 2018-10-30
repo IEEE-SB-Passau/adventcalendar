@@ -1,27 +1,27 @@
 @import org.ieee_passau.controllers.Beans.VMStatus
 @import org.ieee_passau.models.User
 @import org.ieee_passau.views.html.main
-@import play.api.i18n.{Lang, Messages}
+@import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.Flash
 @import play.twirl.api.TemplateMagic._
 @import scala.language.implicitConversions
-@(running: Boolean, vms: List[(String, Int, VMStatus)])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
+@(running: Boolean, vms: List[(String, Int, VMStatus)])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
 
-@main(Messages("status.vms.title")) {
+@main(messagesApi("status.vms.title")) {
     @if(!running) {
         <div class="well alert-danger">
-            @Messages("status.paused")
+            @messagesApi("status.paused")
         </div>
     }
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>@Messages("status.vm.id")</th>
-                <th>@Messages("status.vms.uri")</th>
-                <th>@Messages("status.vms.numberofusers")</th>
-                <th>@Messages("status.vms.load")</th>
-                <th>@Messages("status.vms.memory")</th>
-                <th>@Messages("status.vms.lastheartbeat")</th>
+                <th>@messagesApi("status.vm.id")</th>
+                <th>@messagesApi("status.vms.uri")</th>
+                <th>@messagesApi("status.vms.numberofusers")</th>
+                <th>@messagesApi("status.vms.load")</th>
+                <th>@messagesApi("status.vms.memory")</th>
+                <th>@messagesApi("status.vms.lastheartbeat")</th>
             </tr>
         </thead>
         <tbody>

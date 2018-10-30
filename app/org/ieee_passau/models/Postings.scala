@@ -2,24 +2,27 @@ package org.ieee_passau.models
 
 import java.util.Date
 
+import org.ieee_passau.models
+import org.ieee_passau.models.DateSupport.dateMapper
 import org.ieee_passau.utils.LanguageHelper
-import play.api.Play.current
-import play.api.db.slick.Config.driver.simple._
-import play.api.db.slick.{DB, Session}
+import org.ieee_passau.utils.LanguageHelper.LangTypeMapper
 import play.api.i18n.Lang
+import slick.driver.PostgresDriver.api._
+import slick.lifted.{ProvenShape, TableQuery}
 
-import scala.slick.lifted.ProvenShape
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-case class Posting(id: Option[Int], lang: Lang, title: String, content:String, date: Date)  extends Entity[Posting] {
+case class Posting(id: Option[Int], lang: Lang, title: String, content: String, date: Date) extends Entity[Posting] {
   override def withId(id: Int): Posting = this.copy(id = Some(id))
 }
 
 class Postings(tag: Tag) extends Table[Posting](tag, "postings") {
-  def id: Column[Int] = column[Int]("id")
-  def lang: Column[Lang] = column[Lang]("lang")(LanguageHelper.LangTypeMapper)
-  def title: Column[String] = column[String]("title")
-  def content: Column[String] = column[String]("content")
-  def date: Column[Date] = column[Date]("date")(DateSupport.dateMapper)
+  def id: Rep[Int] = column[Int]("id")
+  def lang: Rep[Lang] = column[Lang]("lang")(LanguageHelper.LangTypeMapper)
+  def title: Rep[String] = column[String]("title")
+  def content: Rep[String] = column[String]("content")
+  def date: Rep[Date] = column[Date]("date")(DateSupport.dateMapper)
 
   override def * : ProvenShape[Posting] = (id.?, lang, title, content, date) <> (Posting.tupled, Posting.unapply)
 }
@@ -29,44 +32,33 @@ object Page extends Enumeration {
 
   def byId(id: Int): Page = values.filter(_.id == id).head
 
-  val status = Value(1, "status")
-  val calendar = Value(2, "calendar")
-  val news = Value(3, "news")
-  val faq = Value(4, "faq")
-  val rules = Value(5, "rules")
-  val examples = Value(6, "examples")
-  val contact = Value(7, "contact")
-  val notification = Value(8, "notification")
+  val status: models.Page.Value = Value(1, "status")
+  val calendar: models.Page.Value = Value(2, "calendar")
+  val news: models.Page.Value = Value(3, "news")
+  val faq: models.Page.Value = Value(4, "faq")
+  val rules: models.Page.Value = Value(5, "rules")
+  val examples: models.Page.Value = Value(6, "examples")
+  val contact: models.Page.Value = Value(7, "contact")
+  val notification: models.Page.Value = Value(8, "notification")
 }
 
 object Postings extends TableQuery(new Postings(_)) {
-  implicit private def mapper =  LanguageHelper.LangTypeMapper
+  def byId(id: Int, preferredLang: Lang)(implicit db: Database): Future[Posting] = {
+    byIdOption(id, preferredLang).map(_.get)
+  }
 
-  def byId(id: Int, preferredLang: Lang): List[Posting] = DB.withSession { implicit session: Session =>
-    (for {
+  def byIdOption(id: Int, preferredLang: Lang)(implicit db: Database): Future[Option[Posting]] = {
+    // cannot be inlined because type cannot be inferred
+    val query: Query[(Rep[Option[Int]], Rep[Lang], Rep[String], Rep[String], Rep[Date]), (Option[Int], Lang, String, String, Date), Seq] = for {
       p <- Postings if p.id === id
     } yield (p.id.?, p.lang, p.title, p.content, p.date)
-      ).list.sortBy(_._2 /*lang*/)(LanguageHelper.ordering(preferredLang))
-      .map(p => Posting.tupled(p))
-  }
-  def byIdLang(id: Int, lang: String): Query[Postings, Posting, Seq] = {
-    val lng = Lang.get(lang)
-    if(lng.isDefined) this.filter(p => p.id === id && p.lang === lng.get)
-    else Query.empty.asInstanceOf[Query[Postings, Posting, Seq]]
+    db.run(query.result).map { postings =>
+      // TODO: ordering would need to work on Rep[Lang] in order to sort in the database
+      postings.sortBy(x => x._2 /*lang*/)(LanguageHelper.ordering(preferredLang))
+        .map { p => Posting.tupled(p) }
+    }.flatMap { postings => Future.successful(postings.headOption) }
   }
 
-  def list(preferredLang: Lang): Map[Int, List[Posting]] = DB.withSession { implicit session: Session =>
-    (for {
-      p <- Postings
-    } yield (p.id.?, p.lang, p.title, p.content, p.date)
-      ).list.groupBy(_._1 /*id*/).map(l =>
-      (l._1.get,
-        l._2.sortBy(_._2 /*lang*/)(LanguageHelper.ordering(preferredLang))
-          .map(p => Posting.tupled(p))
-      )
-    )
-  }
-
-  def update(id: Int, lang: String, posting: Posting)(implicit session: Session): Int =
-    this.filter(p => p.id === id && p.lang === Lang(lang)).update(posting.withId(id))
+  def update(id: Int, lang: String, post: Posting)(implicit db: Database): Future[Int] =
+    db.run(this.filter(p => p.id === id && p.lang === Lang(lang)).update(post.withId(id)))
 }

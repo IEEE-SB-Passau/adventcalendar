@@ -1,7 +1,7 @@
-@import play.api.i18n.{Lang, Messages}
-@()(implicit lang: Lang)
+@import play.api.i18n.{Lang, MessagesApi}
+@()(implicit messagesApi: MessagesApi, lang: Lang)
 <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
-        <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-save"></span> @Messages("general.save")</button>
+        <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-floppy-save"></span> @messagesApi("general.save")</button>
     </div>
 </div>

@@ -1,17 +1,17 @@
 package org.ieee_passau.models
 
-import play.api.Play.current
-import play.api.db.slick.Config.driver.simple._
-import play.api.db.slick.{Session => _, _}
+import slick.ast.BaseTypedType
+import slick.dbio.Effect
+import slick.driver.PostgresDriver.api._
+import slick.jdbc.JdbcType
+import slick.lifted.ProvenShape
 
-import scala.slick.ast.BaseTypedType
-import scala.slick.jdbc.JdbcType
-import scala.slick.lifted.ProvenShape
+import scala.concurrent.Future
 
 object Result {
   implicit val resultTypeMapper: JdbcType[Result] with BaseTypedType[Result] = MappedColumnType.base[Result, String] (
-    r => r.name,
-    s => Result(s)
+    { r => r.name },
+    { s => Result(s) }
   )
 }
 case class Result(name: String) {
@@ -27,31 +27,28 @@ object CompileError extends Result("COMPILER_ERROR")
 object Canceled extends Result("CANCELED")
 
 class Results(tag: Tag) extends Table[Result](tag, "e_test_result") {
-  def result: Column[Result] = column[Result]("result")
+  def result: Rep[Result] = column[Result]("result")
   def * : ProvenShape[Result] = result
 }
 object Results extends TableQuery(new Results(_))
 
 case class Language(id: String, name: String, highlightClass: String, extension: String, cpuFactor: Float, memFactor: Float, comment: String)
 class Languages(tag: Tag) extends Table[Language](tag, "e_prog_lang") {
-  def id: Column[String] = column[String]("language")
-  def name: Column[String] = column[String]("name")
-  def highlightClass: Column[String] = column[String]("highlight_class")
-  def extension: Column[String] = column[String]("extension")
-  def cpuFactor: Column[Float] = column[Float]("cpu_factor")
-  def memFactor: Column[Float] = column[Float]("mem_factor")
-  def comment: Column[String] = column[String]("comment")
+  def id: Rep[String] = column[String]("language")
+  def name: Rep[String] = column[String]("name")
+  def highlightClass: Rep[String] = column[String]("highlight_class")
+  def extension: Rep[String] = column[String]("extension")
+  def cpuFactor: Rep[Float] = column[Float]("cpu_factor")
+  def memFactor: Rep[Float] = column[Float]("mem_factor")
+  def comment: Rep[String] = column[String]("comment")
 
   def * : ProvenShape[Language] = (id, name, highlightClass, extension, cpuFactor, memFactor, comment) <> (Language.tupled, Language.unapply)
 }
 object Languages extends TableQuery(new Languages(_)) {
-  def byLang(lang: String): Option[Language] = {
-    DB.withSession { implicit session: Session =>
-      this.filter(_.id === lang).firstOption
-    }
-  }
-  def update(id: String, language: Language)(implicit session: Session): Int =
-    this.filter(_.id === id).update(language)
+  def byLang(lang: String)(implicit db: Database): Future[Option[Language]] = db.run(this.filter(_.id === lang).result.headOption)
+
+  def update(id: String, lang: Language): DBIOAction[Int, NoStream, Effect.Write] =
+    this.filter(_.id === id).update(lang)
 }
 
 object Visibility {
@@ -68,7 +65,7 @@ object Private extends Visibility("PRIVATE")
 object Hidden extends Visibility("HIDDEN")
 
 class Visibilities(tag: Tag) extends Table[Visibility](tag, "e_test_visibility") {
-  def scope: Column[Visibility] = column[Visibility]("scope")
+  def scope: Rep[Visibility] = column[Visibility]("scope")
   def * : ProvenShape[Visibility] = scope
 }
 object Visibilities extends TableQuery(new Visibilities(_))
@@ -88,7 +85,7 @@ object Best extends EvalMode("BEST")
 object NoEval extends EvalMode("NO_EVAL")
 
 class EvalModes(tag: Tag) extends Table[EvalMode](tag, "e_test_eval_mode") {
-  def mode: Column[EvalMode] = column[EvalMode]("mode")
+  def mode: Rep[EvalMode] = column[EvalMode]("mode")
   def * : ProvenShape[EvalMode] = mode
 }
 object EvalModes extends TableQuery(new EvalModes(_))
@@ -117,7 +114,7 @@ object Admin extends Permission("ADMIN")
 object Internal extends Permission("INTERNAL")
 
 class Permissions(tag: Tag) extends Table[Permission](tag, "e_permission") {
-  def name: Column[Permission] = column[Permission]("name")
+  def name: Rep[Permission] = column[Permission]("name")
   def * : ProvenShape[Permission] = name
 }
 object Permissions extends TableQuery(new Permissions(_))

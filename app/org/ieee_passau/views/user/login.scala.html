@@ -3,12 +3,12 @@
 @import org.ieee_passau.views.html.bootstrap3.{password, text}
 @import org.ieee_passau.views.html.main
 @import play.api.data.Form
-@import play.api.i18n.{Lang, Messages}
+@import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.{Flash, RequestHeader}
 @import  play.twirl.api.Html
-@(loginForm: Form[UserLogin])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
+@(loginForm: Form[UserLogin])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
 
-@main(Messages("nav.user.login")) {
+@main(messagesApi("nav.user.login")) {
     <div class="well col-md-6 col-md-offset-3">
         @if(loginForm.hasGlobalErrors) {
             <div class="alert alert-danger">
@@ -21,16 +21,16 @@
         @form(org.ieee_passau.controllers.routes.UserController.authenticate, 'class -> "form-horizontal") {
             @CSRF.formField
             <fieldset>
-                @text(loginForm("username"), label = Messages("user.username"), offset = "col-sm-3", width = "col-sm-9", required = true)
-                @password(loginForm("password"), label = Messages("user.password"), offset = "col-sm-3", width = "col-sm-9")
+                @text(loginForm("username"), label = messagesApi("user.username"), offset = "col-sm-3", width = "col-sm-9", required = true)
+                @password(loginForm("password"), label = messagesApi("user.password"), offset = "col-sm-3", width = "col-sm-9")
 
                 <div class="form-group">
                     <div class="col-sm-offset-3 col-sm-9">
-                        <button id="submit" type="submit" value="Submit" class="btn btn-primary">@Messages("nav.user.login")</button>
+                        <button id="submit" type="submit" value="Submit" class="btn btn-primary">@messagesApi("nav.user.login")</button>
                     </div>
                 </div>
                 <div class="pull-right">
-                    <small>@Html(Messages("user.resetpassword.text", org.ieee_passau.controllers.routes.UserController.resetPassword))</small>
+                    <small>@Html(messagesApi("user.resetpassword.text", org.ieee_passau.controllers.routes.UserController.resetPassword))</small>
                 </div>
 
             </fieldset>

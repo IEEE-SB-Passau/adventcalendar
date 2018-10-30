@@ -2,21 +2,21 @@
 @import org.ieee_passau.utils.LanguageHelper
 @import org.ieee_passau.views.html.bootstrap3.{buttonSave, fileloader, text, textareaBs}
 @import play.api.data.Form
-@import play.api.i18n.{Lang, Messages}
-@(pid: Int, trans: Form[ProblemTranslation])(implicit lang: Lang)
+@import play.api.i18n.{Lang, MessagesApi}
+@(pid: Int, trans: Form[ProblemTranslation])(implicit messagesApi: MessagesApi, lang: Lang)
 
 <fieldset>
     <input type="hidden" name="problemId" value="@pid" />
     <div class="form-group @if(trans.errors.nonEmpty) {
             @trans.errors.map { e => @if(e.key == "duplicate_translation") { has-error } }
         }">
-        <label for="visibility" class="col-sm-2 control-label">@Messages("general.language")</label>
+        <label for="visibility" class="col-sm-2 control-label">@messagesApi("general.language")</label>
         <div class="col-sm-10">
             <select id="language" size="1" name="language" class="col-sm-10 form-control">
             @LanguageHelper.langs.map { l =>
                 <option value="@l.code"
                     @{if(Lang.get(trans("language").value.getOrElse("")).isDefined && Lang(trans("language").value.get) == l) "selected"}
-                >@Messages("language.name")(l)</option>
+                >@messagesApi("language.name")(l)</option>
             }
             </select>
             <span class="help-block">
@@ -27,14 +27,14 @@
         </div>
     </div>
 
-    @text(trans("title"), label = Messages("problem.name"), placeholder = Messages("problem.name"))
+    @text(trans("title"), label = messagesApi("problem.name"), placeholder = messagesApi("problem.name"))
     @textareaBs(trans("description"),
-        label = Messages("problem.description.lang",
+        label = messagesApi("problem.description.lang",
             if(trans("language").value.isDefined)
-                Messages("language.name")(trans("language").value.fold(LanguageHelper.defaultLanguage)(c => Lang(c)))
-            else Messages("general.language")
+                messagesApi("language.name")(trans("language").value.fold(LanguageHelper.defaultLanguage)(c => Lang(c)))
+            else messagesApi("general.language")
         ),
-        placeholder = Messages("problem.description"), wysiwyg = true)
+        placeholder = messagesApi("problem.description"), wysiwyg = true)
     @fileloader("description")
 
     @buttonSave()

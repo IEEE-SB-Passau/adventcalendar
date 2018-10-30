@@ -3,15 +3,15 @@
 @import org.ieee_passau.models.{EvalMode, EvalTask, Problem, ProblemTranslation, Testcase, User}
 @import org.ieee_passau.views.html.{evaltask, main, problemTranslation, testcase}
 @import play.api.data.Form
-@import play.api.i18n.{Lang, Messages}
+@import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.{Flash, RequestHeader}
-@(pid: Int, testcases: List[Testcase], evalTasks: List[EvalTask], translations: List[ProblemTranslation], problem: Form[Problem], evalModes: List[EvalMode])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
+@(pid: Int, testcases: List[Testcase], evalTasks: List[EvalTask], translations: List[ProblemTranslation], problem: Form[Problem], evalModes: List[EvalMode])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
 
-@main(Messages("problem.edit")) {
+@main(messagesApi("problem.edit")) {
 
     <ol class="breadcrumb">
-        <li><a href="@routes.ProblemController.index">@Messages("general.listoverview")</a></li>
-        <li class="active">@Messages("problem.title")</li>
+        <li><a href="@routes.ProblemController.index">@messagesApi("general.listoverview")</a></li>
+        <li class="active">@messagesApi("problem.title")</li>
     </ol>
 
     @form(routes.ProblemController.update(pid), 'class -> "form-horizontal") {
@@ -21,12 +21,12 @@
         </div>
     }
 
-    <h3>@Messages("problem.translation.list.title")</h3>
+    <h3>@messagesApi("problem.translation.list.title")</h3>
     @problemTranslation.index(pid, translations)
 
-    <h3>@Messages("testcase.list.title")</h3>
+    <h3>@messagesApi("testcase.list.title")</h3>
     @testcase.index(pid, testcases)
 
-    <h3>@Messages("evaltask.list.title")</h3>
+    <h3>@messagesApi("evaltask.list.title")</h3>
     @evaltask.index(pid, evalTasks)
 }

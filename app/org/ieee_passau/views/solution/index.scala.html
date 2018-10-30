@@ -2,22 +2,22 @@
 @import org.ieee_passau.controllers.Beans.SubmissionListEntry
 @import org.ieee_passau.models.{Canceled, Passed, Queued, User}
 @import org.ieee_passau.views.html.main
-@import play.api.i18n.{Lang, Messages}
+@import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.Flash
 @import play.twirl.api.TemplateMagic._
 @import scala.language.implicitConversions
-@(list: List[SubmissionListEntry], pages: Int, page: Int, ordering: String)(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
+@(list: List[SubmissionListEntry], pages: Int, page: Int, ordering: String)(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
 
-@main(Messages("submission.list.title")) {
+@main(messagesApi("submission.list.title")) {
     <table class="table table-striped">
         <thead>
             <tr>
-                <th><a href="@org.ieee_passau.controllers.routes.EvaluationController.index()">@Messages("submission.title")</a></th>
-                <th><a href="@org.ieee_passau.controllers.routes.EvaluationController.index(1, "problem")">@Messages("problem.title")</a></th>
-                <th><a href="@org.ieee_passau.controllers.routes.EvaluationController.index(1, "user")">@Messages("user.title")</a></th>
-                <th><a href="@org.ieee_passau.controllers.routes.EvaluationController.index(1, "lang")">@Messages("codelang.title")</a></th>
-                <th>@Messages("testcase.title")</th>
-                <th>@Messages("general.createdate")</th>
+                <th><a href="@org.ieee_passau.controllers.routes.EvaluationController.index()">@messagesApi("submission.title")</a></th>
+                <th><a href="@org.ieee_passau.controllers.routes.EvaluationController.index(1, "problem")">@messagesApi("problem.title")</a></th>
+                <th><a href="@org.ieee_passau.controllers.routes.EvaluationController.index(1, "user")">@messagesApi("user.title")</a></th>
+                <th><a href="@org.ieee_passau.controllers.routes.EvaluationController.index(1, "lang")">@messagesApi("codelang.title")</a></th>
+                <th>@messagesApi("testcase.title")</th>
+                <th>@messagesApi("general.createdate")</th>
                 <th></th>
             </tr>
         </thead>
@@ -35,7 +35,7 @@
                 <td>
                     <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.EvaluationController.reEval(s.id)">
                         @CSRF.formField
-                        <button type="submit" onclick="return(window.confirm('@Messages("status.resubmit.warning")'))" class="btn btn-danger"><span class="glyphicon glyphicon-repeat"></span></button>
+                        <button type="submit" onclick="return(window.confirm('@messagesApi("status.resubmit.warning")'))" class="btn btn-danger"><span class="glyphicon glyphicon-repeat"></span></button>
                     </form>
                 </td>
             </tr>
@@ -45,7 +45,7 @@
 
     <nav class="text-center">
         <ul class="pagination">
-            <li @if(page <= 1) {class="disabled"}><a href="@org.ieee_passau.controllers.routes.EvaluationController.index(page - 1, ordering)">@Messages("general.pagination.back")</a></li>
+            <li @if(page <= 1) {class="disabled"}><a href="@org.ieee_passau.controllers.routes.EvaluationController.index(page - 1, ordering)">@messagesApi("general.pagination.back")</a></li>
             @for( i <- 1 to pages) {
                 @if(i == page) {
                     <li class="active"><a href="#">@i</a></li>
@@ -53,7 +53,7 @@
                     <li><a href="@org.ieee_passau.controllers.routes.EvaluationController.index(i, ordering)">@i</a></li>
                 }
             }
-            <li @if(page >= pages) {class="disabled"}><a href="@org.ieee_passau.controllers.routes.EvaluationController.index(page + 1, ordering)">@Messages("general.pagination.forward")</a></li>
+            <li @if(page >= pages) {class="disabled"}><a href="@org.ieee_passau.controllers.routes.EvaluationController.index(page + 1, ordering)">@messagesApi("general.pagination.forward")</a></li>
         </ul>
     </nav>
 }

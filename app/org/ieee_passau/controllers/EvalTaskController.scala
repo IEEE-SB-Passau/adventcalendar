@@ -1,50 +1,58 @@
 package org.ieee_passau.controllers
 
-import org.ieee_passau.forms.TestcaseForms
+import com.google.inject.Inject
 import org.ieee_passau.models.{Admin, EvalTask, EvalTasks}
 import org.ieee_passau.utils.PermissionCheck
-import play.api.Play.current
-import play.api.db.slick.Config.driver.simple._
-import play.api.db.slick._
-import play.api.i18n.Messages
+import play.api.data.Form
+import play.api.data.Forms.{mapping, number, optional, _}
+import play.api.db.slick.DatabaseConfigProvider
+import play.api.i18n.MessagesApi
 import play.api.libs.Files.TemporaryFile
 import play.api.mvc._
+import slick.driver.JdbcProfile
+import slick.driver.PostgresDriver.api._
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.reflect.io.File
 
-object EvalTaskController extends Controller with PermissionCheck {
+class EvalTaskController @Inject()(val messagesApi: MessagesApi, dbConfigProvider: DatabaseConfigProvider) extends Controller with PermissionCheck {
+  private implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
+  private implicit val mApi: MessagesApi = messagesApi
 
-  def edit(pid: Int, id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
-    EvalTasks.byId(id).firstOption.map { task =>
-      Ok(org.ieee_passau.views.html.evaltask.edit(pid, id, TestcaseForms.evalTaskForm.fill(task)))
-    }.getOrElse(NotFound(org.ieee_passau.views.html.errors.e404()))
+  def edit(pid: Int, id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
+    db.run(EvalTasks.byId(id).result.headOption).map {
+      case Some(task) => Ok(org.ieee_passau.views.html.evaltask.edit(pid, id, evalTaskForm.fill(task)))
+      case _ => NotFound(org.ieee_passau.views.html.errors.e404())
+    }
   }}
 
-  def delete(pid: Int, id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
-    EvalTasks.filter(_.id === id).delete
-    Redirect(org.ieee_passau.controllers.routes.ProblemController.edit(pid))
+  def delete(pid: Int, id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
+    db.run(EvalTasks.filter(_.id === id).delete).map { _ =>
+      Redirect(org.ieee_passau.controllers.routes.ProblemController.edit(pid))
+    }
   }}
 
-  def insert(pid: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
-    Ok(org.ieee_passau.views.html.evaltask.insert(pid, TestcaseForms.evalTaskForm))
+  def insert(pid: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
+    Future.successful(Ok(org.ieee_passau.views.html.evaltask.insert(pid, evalTaskForm)))
   }}
 
   def save(pid: Int): Action[MultipartFormData[TemporaryFile]] = requirePermission(Admin, parse.multipartFormData) { implicit admin =>
-    DBAction(parse.multipartFormData) { implicit rs =>
-      TestcaseForms.evalTaskForm.bindFromRequest.fold(
+    Action.async(parse.multipartFormData) { implicit rs =>
+      evalTaskForm.bindFromRequest.fold(
         errorForm => {
-          BadRequest(org.ieee_passau.views.html.evaltask.insert(pid, errorForm))
+          Future.successful(BadRequest(org.ieee_passau.views.html.evaltask.insert(pid, errorForm)))
         },
 
         newTaskRaw => {
           rs.body.file("program").map { program =>
             val newTask: EvalTask = newTaskRaw.copy(filename = program.filename, file = new File(program.ref.file).toByteArray())
-            val id = (EvalTasks returning EvalTasks.map(_.id)) += newTask
-            Redirect(org.ieee_passau.controllers.routes.EvalTaskController.edit(pid, id))
-              .flashing("success" -> Messages("evaltask.create.message", newTaskRaw.position))
+            db.run((EvalTasks returning EvalTasks.map(_.id)) += newTask).map { newTaskId =>
+              Redirect(org.ieee_passau.controllers.routes.EvalTaskController.edit(pid, newTaskId)).flashing("success" -> messagesApi("evaltask.create.message", newTaskRaw.position))
+            }
           } getOrElse {
-            BadRequest(org.ieee_passau.views.html.evaltask.insert(pid,
-              TestcaseForms.evalTaskForm.fill(newTaskRaw).withError("program", Messages("evaltask.create.error.filemissing"))))
+            Future.successful(BadRequest(org.ieee_passau.views.html.evaltask.insert(pid,
+              evalTaskForm.fill(newTaskRaw).withError("program", messagesApi("evaltask.create.error.filemissing")))))
           }
         }
       )
@@ -52,27 +60,46 @@ object EvalTaskController extends Controller with PermissionCheck {
   }
 
   def update(pid: Int, id: Int): Action[MultipartFormData[TemporaryFile]] = requirePermission(Admin, parse.multipartFormData) { implicit admin =>
-    DBAction(parse.multipartFormData) { implicit rs =>
-      TestcaseForms.evalTaskForm.bindFromRequest.fold(
+    Action.async(parse.multipartFormData) { implicit rs =>
+      evalTaskForm.bindFromRequest.fold(
         errorForm => {
-          BadRequest(org.ieee_passau.views.html.evaltask.edit(pid, id, errorForm))
+          Future.successful(BadRequest(org.ieee_passau.views.html.evaltask.edit(pid, id, errorForm)))
         },
 
         task => {
           rs.body.file("program").map { program =>
             val newTask = task.copy(filename = program.filename, file = new File(program.ref.file).toByteArray())
             EvalTasks.update(id, newTask)
-            Redirect(org.ieee_passau.controllers.routes.EvalTaskController.edit(pid, id))
-              .flashing("success" -> Messages("evaltask.update.message", task.position))
+            Future.successful(Redirect(org.ieee_passau.controllers.routes.EvalTaskController.edit(pid, id)).flashing("success" -> messagesApi("evaltask.update.message", task.position)))
           } getOrElse {
-            val oldTask = EvalTasks.byId(id).first
-            val newTask = task.copy(filename = oldTask.filename, file = oldTask.file)
-            EvalTasks.update(id, newTask)
-            Redirect(org.ieee_passau.controllers.routes.EvalTaskController.edit(pid, id))
-              .flashing("success" -> Messages("evaltask.update.message", task.position))
+            db.run(EvalTasks.byId(id).result.head).map { ot =>
+              val newTask = task.copy(filename = ot.filename, file = ot.file)
+              EvalTasks.update(id, newTask)
+            }.map { _ =>
+              Redirect(org.ieee_passau.controllers.routes.EvalTaskController.edit(pid, id))
+                .flashing("success" -> messagesApi("evaltask.update.message", task.position))
+            }
           }
         }
       )
     }
   }
+
+  val evalTaskForm = Form(
+    mapping(
+      "id" -> optional(number),
+      "problemId" -> number,
+      "position" -> number, // TODO check uniqueness for problem
+      "command" -> text,
+      "outputCheck" -> boolean,
+      "scoreCalc" -> boolean,
+      "runCorrect" -> boolean,
+      "runWrong" -> boolean
+    )
+    ((id: Option[Int], problemId: Int, position: Int, command: String, outputCheck: Boolean, scoreCalc: Boolean,
+      runCorrect: Boolean, runWrong: Boolean) =>
+      EvalTask(id, problemId, position, command, "", Array(), outputCheck, scoreCalc, command.contains("{stdIn}"),
+        command.contains("{expOut}"), command.contains("{progOut}"), command.contains("{program}"), runCorrect, runWrong))
+    ((t: EvalTask) => Some(t.id, t.problemId, t.position, t.command, t.outputCheck, t.scoreCalc, t.runCorrect, t.runWrong))
+  )
 }

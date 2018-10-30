@@ -35,6 +35,12 @@ object Beans {
 
   case class StatusQ()
 
+  case class NotificationM(run: Boolean)
+
+  case class NotificationQ()
+
+  case class NotificationT()
+
   case class RankingQ(userId: Int, displayHiddenUsers: Boolean)
 
   case class ProblemsQ(userId: Int, lang: Lang, unHide: Boolean)

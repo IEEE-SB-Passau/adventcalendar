@@ -44,7 +44,6 @@ class VMMaster extends EvaluationActor with AkkaScopingHelper {
     case StatusM(false) => router.routees.foreach {
       routee => context.stop(routee.asInstanceOf[ActorRefRoutee].ref)
     }
-    //    case StatusM(true) =>
 
     case RunningVMsQ =>
       val list = router.routees.map { routee =>
@@ -59,7 +58,6 @@ class VMMaster extends EvaluationActor with AkkaScopingHelper {
         val child = addChild(config)
         log.info("VMMaster added new VMClient %s".format(child.toString()))
       }
-
       sender ! isNew
 
     case RemoveVM(name) =>

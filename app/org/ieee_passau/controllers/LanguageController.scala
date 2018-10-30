@@ -1,63 +1,100 @@
 package org.ieee_passau.controllers
 
-import org.ieee_passau.forms.MaintenanceForms
+import com.google.inject.Inject
 import org.ieee_passau.models._
 import org.ieee_passau.utils.PermissionCheck
-import play.api.Play.current
-import play.api.db.slick.Config.driver.simple._
-import play.api.db.slick._
-import play.api.i18n.Messages
+import play.api.data.Form
+import play.api.data.Forms.{mapping, of, _}
+import play.api.data.format.Formats._
+import play.api.db.slick.DatabaseConfigProvider
+import play.api.i18n.MessagesApi
 import play.api.mvc._
+import slick.driver.JdbcProfile
+import slick.driver.PostgresDriver.api._
 
-object LanguageController extends Controller with PermissionCheck {
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-  def index: Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
-    Ok(org.ieee_passau.views.html.language.index(Languages.sortBy(_.id.asc).list))
+class LanguageController @Inject()(val messagesApi: MessagesApi, dbConfigProvider: DatabaseConfigProvider) extends Controller with PermissionCheck {
+  private implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
+  private implicit val mApi: MessagesApi = messagesApi
+
+  def index: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
+    db.run(Languages.sortBy(_.id.asc).to[List].result).map { list =>
+      Ok(org.ieee_passau.views.html.language.index(list))
+    }
   }}
 
-  def list: Action[AnyContent] = DBAction { implicit rs =>
-    implicit val sessionUser = getUserFromRequest(rs)
-    Ok(org.ieee_passau.views.html.language.languages(Languages.sortBy(_.id.asc).list))
-  }
-
-  def edit(language: String): Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
-    Languages.byLang(language).map { lng =>
-      Ok(org.ieee_passau.views.html.language.edit(lng.id, MaintenanceForms.languageUpdateForm.fill(lng)))
-    }.getOrElse(NotFound(org.ieee_passau.views.html.errors.e404()))
+  def list: Action[AnyContent] = requirePermission(Everyone) { implicit user => Action.async { implicit rs =>
+    db.run(Languages.sortBy(_.id.asc).to[List].result).map { list =>
+      Ok(org.ieee_passau.views.html.language.languages(list))
+    }
   }}
 
-  def insert: Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
-    Ok(org.ieee_passau.views.html.language.insert(MaintenanceForms.languageNewForm))
+  def edit(language: String): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
+    Languages.byLang(language).map {
+      case Some(lang) => Ok(org.ieee_passau.views.html.language.edit(lang.id, languageUpdateForm.fill(lang)))
+      case _ => NotFound(org.ieee_passau.views.html.errors.e404())
+    }
   }}
 
-  def save: Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
-    MaintenanceForms.languageNewForm.bindFromRequest.fold(
+  def insert: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action { implicit rs =>
+    Ok(org.ieee_passau.views.html.language.insert(languageNewForm))
+  }}
+
+  def save: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
+    languageNewForm.bindFromRequest.fold(
       errorForm => {
-        BadRequest(org.ieee_passau.views.html.language.insert(errorForm))
+        Future.successful(BadRequest(org.ieee_passau.views.html.language.insert(errorForm)))
       },
 
       newCodelang => {
-        Languages += newCodelang
-        Redirect(org.ieee_passau.controllers.routes.LanguageController.edit(newCodelang.id))
-          .flashing("success" -> Messages("codelang.create.message", newCodelang.id))
+        db.run(Languages += newCodelang).map(_ =>
+          Redirect(org.ieee_passau.controllers.routes.LanguageController.edit(newCodelang.id))
+            .flashing("success" -> messagesApi("codelang.create.message", newCodelang.id))
+        )
       }
     )
   }}
 
-  def update(language: String): Action[AnyContent] = requirePermission(Admin) { implicit admin => DBAction { implicit rs =>
-    Languages.byLang(language).fold(NotFound(org.ieee_passau.views.html.errors.e404()))(lng => {
-      MaintenanceForms.languageUpdateForm.bindFromRequest.fold(
+  def update(language: String): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
+    Languages.byLang(language).flatMap {
+      case Some(lang) => languageUpdateForm.bindFromRequest.fold(
         errorForm => {
-          BadRequest(org.ieee_passau.views.html.language.edit(lng.id, errorForm))
+          Future.successful(BadRequest(org.ieee_passau.views.html.language.edit(lang.id, errorForm)))
         },
 
         codelang => {
-          Languages.update(language, lng.copy(name = codelang.name, cpuFactor = codelang.cpuFactor,
-            memFactor = codelang.memFactor, comment = codelang.comment))
-          Redirect(org.ieee_passau.controllers.routes.LanguageController.edit(language))
-            .flashing("success" -> Messages("codelang.update.message", codelang.id))
+          val newCodelang = lang.copy(name = codelang.name, cpuFactor = codelang.cpuFactor, memFactor = codelang.memFactor, comment = codelang.comment)
+          db.run(Languages.update(language, newCodelang)).map(_ =>
+            Redirect(org.ieee_passau.controllers.routes.LanguageController.edit(language))
+              .flashing("success" -> messagesApi("codelang.update.message", codelang.id))
+          )
         }
       )
-    })
+      case _ => Future.successful(NotFound(org.ieee_passau.views.html.errors.e404()))
+    }
   }}
+
+  val languageNewForm = Form(
+    mapping(
+      "id" -> text,
+      "name" -> text,
+      "highlightClass" -> text,
+      "extension" -> text,
+      "cpuFactor" -> of[Float],
+      "memFactor" -> of[Float],
+      "comment" -> text
+    )(Language.apply)(Language.unapply)
+  )
+
+  val languageUpdateForm = Form(
+    mapping(
+      "name" -> text,
+      "cpuFactor" -> of[Float],
+      "memFactor" -> of[Float],
+      "comment" -> text
+    )((name, cpuFactor, memFactor, comment) => Language("", name, "", "", cpuFactor, memFactor, comment))
+    ((l: Language) => Some((l.name, l.cpuFactor, l.memFactor, l.comment)))
+  )
 }

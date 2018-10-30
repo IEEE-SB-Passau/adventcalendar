@@ -3,12 +3,13 @@ package org.ieee_passau.models
 import java.util.Date
 
 import org.ieee_passau.utils.LanguageHelper
-import play.api.Play.current
-import play.api.db.slick.Config.driver.simple._
-import play.api.db.slick.{DB, Session, _}
+import org.ieee_passau.utils.LanguageHelper.LangTypeMapper
 import play.api.i18n.Lang
+import slick.dbio.Effect
+import slick.driver.PostgresDriver.api._
+import slick.lifted.{CompiledFunction, CompiledStreamingExecutable, ForeignKeyQuery, ProvenShape, TableQuery}
 
-import scala.slick.lifted.{CompiledFunction, ForeignKeyQuery, ProvenShape}
+import scala.concurrent.{ExecutionContext, Future}
 
 case class Problem (id: Option[Int], title: String, door: Int, description: String, readableStart: Date,
                     readableStop: Date, solvableStart: Date, solvableStop: Date, evalMode: EvalMode,
@@ -25,47 +26,42 @@ case class Problem (id: Option[Int], title: String, door: Int, description: Stri
 }
 
 class Problems(tag: Tag) extends TableWithId[Problem](tag, "problems") {
-  def title: Column[String] = column[String]("title")
-  def door: Column[Int] = column[Int]("door")
-  def description: Column[String] = column[String]("description")
-  def readableStart: Column[Date] = column[Date]("readable_start")
-  def readableStop: Column[Date] = column[Date]("readable_stop")
-  def solvableStart: Column[Date] = column[Date]("solvable_start")
-  def solvableStop: Column[Date] = column[Date]("solvable_stop")
-  def evalMode: Column[EvalMode] = column[EvalMode]("eval_mode") (EvalMode.evalModeTypeMapper)
-  def cpuFactor: Column[Float] = column[Float]("cpu_factor")
-  def memFactor: Column[Float] = column[Float]("mem_factor")
+  def title: Rep[String] = column[String]("title")
+  def door: Rep[Int] = column[Int]("door")
+  def description: Rep[String] = column[String]("description")
+  def readableStart: Rep[Date] = column[Date]("readable_start")(DateSupport.dateMapper)
+  def readableStop: Rep[Date] = column[Date]("readable_stop")(DateSupport.dateMapper)
+  def solvableStart: Rep[Date] = column[Date]("solvable_start")(DateSupport.dateMapper)
+  def solvableStop: Rep[Date] = column[Date]("solvable_stop")(DateSupport.dateMapper)
+  def evalMode: Rep[EvalMode] = column[EvalMode]("eval_mode")(EvalMode.evalModeTypeMapper)
+  def cpuFactor: Rep[Float] = column[Float]("cpu_factor")
+  def memFactor: Rep[Float] = column[Float]("mem_factor")
 
   def * : ProvenShape[Problem] = (id.?, title, door, description, readableStart, readableStop, solvableStart,
     solvableStop, evalMode, cpuFactor, memFactor) <> (Problem.tupled, Problem.unapply)
 }
 
 object Problems extends TableQuery(new Problems(_)) {
-  def byDoor: CompiledFunction[(Column[Int]) => Query[Problems, Problem, Seq], Column[Int], Int, Query[Problems, Problem, Seq], Seq[Problem]] =
+  def byDoor: CompiledFunction[Rep[Int] => Query[Problems, Problem, Seq], Rep[Int], Int, Query[Problems, Problem, Seq], Seq[Problem]] =
     this.findBy(_.door)
-  def byId: CompiledFunction[(Column[Int]) => Query[Problems, Problem, Seq], Column[Int], Int, Query[Problems, Problem, Seq], Seq[Problem]] =
+  def byId: CompiledFunction[Rep[Int] => Query[Problems, Problem, Seq], Rep[Int], Int, Query[Problems, Problem, Seq], Seq[Problem]] =
     this.findBy(_.id)
-  def update(id: Int, problem: Problem)(implicit session: Session): Int =
-    this.filter(_.id === id).update(problem.withId(id))
+  def update(id: Int, problem: Problem): DBIOAction[Int, NoStream, Effect.Write] =
+    this.byId(id).update(problem.withId(id))
 
-  def doorAvailable(door: Int, id: Int): Boolean = {
-    DB.withSession { implicit session: Session =>
-      !Problems.filter(_.door === door).list.exists(p => p.id.get != id)
-    }
-  }
-
-  def doorAvailable(door: Int): Boolean = { DB.withSession { implicit session: Session =>
-    Query(Problems.filter(_.door === door).length).first == 0
-  }}
+  def doorAvailable(door: Int, id: Int)(implicit db: Database, ec: ExecutionContext): Future[Boolean] =
+    db.run(Problems.filter(_.door === door).result).map(result => !result.exists(problem => problem.id.get == id))
+  def doorAvailable(door: Int)(implicit db: Database, ec: ExecutionContext): Future[Boolean] =
+    db.run(Problems.filter(_.door === door).result).map(result => result.isEmpty)
 }
 
 case class ProblemTranslation(problemId: Int, language: Lang, title: String, description: String)
 
 class ProblemTranslations(tag: Tag) extends Table[ProblemTranslation](tag, "problem_translations") {
-  def problemId: Column[Int] = column[Int]("problem_id")
-  def lang: Column[Lang] = column[Lang]("language_code")(LanguageHelper.LangTypeMapper)
-  def title: Column[String] = column[String]("title")
-  def description: Column[String] = column[String]("description")
+  def problemId: Rep[Int] = column[Int]("problem_id")
+  def lang: Rep[Lang] = column[Lang]("language_code")(LanguageHelper.LangTypeMapper)
+  def title: Rep[String] = column[String]("title")
+  def description: Rep[String] = column[String]("description")
 
   def problem: ForeignKeyQuery[Problems, Problem] = foreignKey("problem_fk", problemId, Problems)(_.id)
 
@@ -73,15 +69,11 @@ class ProblemTranslations(tag: Tag) extends Table[ProblemTranslation](tag, "prob
 }
 
 object ProblemTranslations extends TableQuery(new ProblemTranslations(_)){
-  implicit private def mapper =  LanguageHelper.LangTypeMapper
+  def byProblemLang(problemId: Int, lang: Lang): CompiledStreamingExecutable[Query[ProblemTranslations, ProblemTranslation, Seq], Seq[ProblemTranslation], ProblemTranslation] =
+    Compiled(this.filter(t => t.problemId === problemId && t.lang === lang))
+  def byProblemLang(problemId: Int, lang: String): CompiledStreamingExecutable[Query[ProblemTranslations, ProblemTranslation, Seq], Seq[ProblemTranslation], ProblemTranslation] =
+    Compiled(this.filter(t => t.problemId === problemId && t.lang === Lang(lang)))
 
-  def byProblem(problemId: Int): CompiledFunction[(Column[Int]) => Query[ProblemTranslations, ProblemTranslation, Seq], Column[Int], Int, Query[ProblemTranslations, ProblemTranslation, Seq], Seq[ProblemTranslation]] =
-    this.findBy(_.problemId)
-  def byProblemLang(problemId: Int, lang: Lang): Query[ProblemTranslations, ProblemTranslation, Seq] =
-    this.filter(t => t.problemId === problemId && t.lang === lang)
-  def byProblemLang(problemId: Int, lang: String): Query[ProblemTranslations, ProblemTranslation, Seq] =
-    this.filter(t => t.problemId === problemId && t.lang === Lang(lang))
-
-  def update(lang: String, problemTranslation: ProblemTranslation)(implicit session: Session): Int =
+  def update(lang: String, problemTranslation: ProblemTranslation): DBIOAction[Int, NoStream, Effect.Write] =
     this.filter(t => t.problemId === problemTranslation.problemId && t.lang === Lang(lang)).update(problemTranslation)
 }

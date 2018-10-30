@@ -1,8 +1,7 @@
 package org.ieee_passau.models
 
-import play.api.db.slick.Config.driver.simple._
-
-import scala.slick.lifted.{ForeignKeyQuery, ProvenShape}
+import slick.driver.PostgresDriver.api._
+import slick.lifted.{ForeignKeyQuery, ProvenShape}
 
 case class Feedback(id: Option[Int], userId: Int, rating: Int, pro: Option[String], con: Option[String],
                     freetext: Option[String])  extends Entity[Feedback] {
@@ -10,11 +9,11 @@ case class Feedback(id: Option[Int], userId: Int, rating: Int, pro: Option[Strin
 }
 
 class Feedbacks(tag: Tag) extends TableWithId[Feedback](tag, "feedback") {
-  def userId: Column[Int] = column[Int]("user_id")
-  def rating: Column[Int] = column[Int]("rating")
-  def pro: Column[String] = column[String]("pro")
-  def con: Column[String] = column[String]("con")
-  def freetext: Column[String] = column[String]("freetext")
+  def userId: Rep[Int] = column[Int]("user_id")
+  def rating: Rep[Int] = column[Int]("rating")
+  def pro: Rep[String] = column[String]("pro")
+  def con: Rep[String] = column[String]("con")
+  def freetext: Rep[String] = column[String]("freetext")
 
   def user: ForeignKeyQuery[Users, User] = foreignKey("user_fk", userId, Users)(_.id)
 

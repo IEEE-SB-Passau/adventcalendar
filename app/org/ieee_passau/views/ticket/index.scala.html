@@ -2,21 +2,21 @@
 @import org.ieee_passau.models.{Problem, Ticket, User}
 @import org.ieee_passau.utils.ViewHelper._
 @import org.ieee_passau.views.html.main
-@import play.api.i18n.{Lang, Messages}
+@import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.{Flash, RequestHeader}
 @import play.twirl.api.TemplateMagic._
 @import scala.language.implicitConversions
-@(tickets: List[(Ticket, User, Problem, Boolean)])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
+@(tickets: List[(Ticket, User, Problem, Boolean)])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
 
-@main(Messages("ticket.list.title")) {
+@main(messagesApi("ticket.list.title")) {
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>@Messages("general.id")</th>
-                <th>@Messages("problem.title")</th>
-                <th>@Messages("user.title")</th>
-                <th>@Messages("general.createdate")</th>
-                <th>@Messages("ticket.public")</th>
+                <th>@messagesApi("general.id")</th>
+                <th>@messagesApi("problem.title")</th>
+                <th>@messagesApi("user.title")</th>
+                <th>@messagesApi("general.createdate")</th>
+                <th>@messagesApi("ticket.public")</th>
                 <th></th>
             </tr>
         </thead>
@@ -39,7 +39,7 @@
 
                     <form style="display : inline" method="POST" action="@org.ieee_passau.controllers.routes.TicketController.delete(t.id.get)">
                     @CSRF.formField
-                        <button type="submit" onclick="return(window.confirm('@Messages("general.delete.confirm")'))" class="btn btn-danger">
+                        <button type="submit" onclick="return(window.confirm('@messagesApi("general.delete.confirm")'))" class="btn btn-danger">
                             <span class="glyphicon glyphicon-remove"></span>
                         </button>
                     </form>

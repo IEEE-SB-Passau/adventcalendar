@@ -3,18 +3,18 @@
 @import org.ieee_passau.views.html.bootstrap3._
 @import org.ieee_passau.views.html.main
 @import play.api.data.Form
-@import play.api.i18n.{Lang, Messages}
+@import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.{Flash, RequestHeader}
-@(feedback: Form[Feedback])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
+@(feedback: Form[Feedback])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
 
-@main(Messages("feedback.title")) {
-    @form(org.ieee_passau.controllers.routes.MainController.submitFeedback, 'class -> "form-horizontal") {
+@main(messagesApi("feedback.title")) {
+    @form(org.ieee_passau.controllers.routes.TicketController.submitFeedback, 'class -> "form-horizontal") {
         @CSRF.formField
         <div class="well">
-            @radiobuttons(feedback("rating"), label = Messages("feedback.rating"), buttonNameList = List("1", "2", "3", "4", "5"))
-            @textareaBs(feedback("pro"), label = Messages("feedback.pro"))
-            @textareaBs(feedback("con"), label = Messages("feedback.contra"))
-            @textareaBs(feedback("freetext"), label = Messages("feedback.freetext"))
+            @radiobuttons(feedback("rating"), label = messagesApi("feedback.rating"), buttonNameList = List("1", "2", "3", "4", "5"))
+            @textareaBs(feedback("pro"), label = messagesApi("feedback.pro"))
+            @textareaBs(feedback("con"), label = messagesApi("feedback.contra"))
+            @textareaBs(feedback("freetext"), label = messagesApi("feedback.freetext"))
             @buttonSave()
         </div>
     }

@@ -2,57 +2,57 @@
 @import org.ieee_passau.utils.{LanguageHelper, ViewHelper}
 @import org.ieee_passau.views.html.bootstrap3._
 @import play.api.data.Form
-@import play.api.i18n.{Lang, Messages}
-@(problem: Form[Problem], evalModes: List[EvalMode])(implicit lang: Lang)
+@import play.api.i18n.{Lang, MessagesApi}
+@(problem: Form[Problem], evalModes: List[EvalMode])(implicit messagesApi: MessagesApi, lang: Lang)
 
 <fieldset>
     @if(problem.value.isDefined) {
         <input type="hidden" name="id" value="@problem.value.get.id.get" />
     }
-    @text(problem("title"), label = Messages("problem.name"), placeholder = Messages("problem.name"))
+    @text(problem("title"), label = messagesApi("problem.name"), placeholder = messagesApi("problem.name"))
     <div class="form-group @if(problem.errors.nonEmpty) {
         @problem.errors.map { e => @if(e.message == "problem.create.error.door") { has-error } }
     } @if(problem("door").hasErrors) { has-error }">
-        <label class="col-sm-2 control-label">@Messages("problem.door")</label>
+        <label class="col-sm-2 control-label">@messagesApi("problem.door")</label>
         <div class="col-sm-10">
-            <input type="number" class="form-control" id="door" name="door" value="@problem("door").value.getOrElse("")" placeholder="@Messages("problem.door")"/>
+            <input type="number" class="form-control" id="door" name="door" value="@problem("door").value.getOrElse("")" placeholder="@messagesApi("problem.door")"/>
             <span class="help-block">
                 @if(problem.errors.nonEmpty) {
-                    @problem.errors.map { e => @if(e.messages.head == "problem.create.error.door") { @Messages(e.messages.head, Messages("problem.readablestop"), Messages("problem.readablestart")) }}
+                    @problem.errors.map { e => @if(e.messages.head == "problem.create.error.door") { @messagesApi(e.messages.head, messagesApi("problem.readablestop"), messagesApi("problem.readablestart")) }}
                 }
             </span>
-            <span class="help-block">@{ problem("door").error.map { error => Messages(error.message) }}</span>
+            <span class="help-block">@{ problem("door").error.map { error => messagesApi(error.message) }}</span>
         </div>
     </div>
-    @textareaBs(problem("description"), label = Messages("problem.description.lang", Messages("language.name")(LanguageHelper.defaultLanguage)), placeholder =  Messages("problem.description"), wysiwyg = true)
+    @textareaBs(problem("description"), label = messagesApi("problem.description.lang", messagesApi("language.name")(LanguageHelper.defaultLanguage)), placeholder =  messagesApi("problem.description"), wysiwyg = true)
     @fileloader("description")
 
-    @dateManualError(problem("readableStart"), label =  Messages("problem.readablestart"), placeholder = "01.12.2013")
+    @dateManualError(problem("readableStart"), label =  messagesApi("problem.readablestart"), placeholder = "01.12.2013")
     @{
         val (hasError, error) = ViewHelper.checkAmbiguesKey("vis", problem)
-        dateManualError(problem("readableStop"), label =  Messages("problem.readablestop"), placeholder = "01.12.2013",
-            hasError = hasError, errorMsg = Messages(error, Messages("problem.readablestop"), Messages("problem.readablestart")))
+        dateManualError(problem("readableStop"), label =  messagesApi("problem.readablestop"), placeholder = "01.12.2013",
+            hasError = hasError, errorMsg = messagesApi(error, messagesApi("problem.readablestop"), messagesApi("problem.readablestart")))
     }
-    @dateManualError(problem("solvableStart"), label = Messages("problem.solvablestart"), placeholder = "01.12.2013")
+    @dateManualError(problem("solvableStart"), label = messagesApi("problem.solvablestart"), placeholder = "01.12.2013")
     @{
         val (hasError, error) = ViewHelper.checkAmbiguesKey("vis", problem)
-        dateManualError(problem("solvableStop"), label =  Messages("problem.solvablestop"), placeholder = "01.12.2013",
-            hasError = hasError, errorMsg = Messages(error, Messages("problem.solvablestop"), Messages("problem.solvablestart")))
+        dateManualError(problem("solvableStop"), label =  messagesApi("problem.solvablestop"), placeholder = "01.12.2013",
+            hasError = hasError, errorMsg = messagesApi(error, messagesApi("problem.solvablestop"), messagesApi("problem.solvablestart")))
     }
 
     <div class="form-group">
-        <label for="evalMode" class="col-sm-2 control-label">@Messages("problem.evalmode")</label>
+        <label for="evalMode" class="col-sm-2 control-label">@messagesApi("problem.evalmode")</label>
         <div class="col-sm-10">
             <select id="evalMode" size="1" name="evalMode" class="col-sm-10 form-control">
             @evalModes.map { mode =>
-                <option value="@mode.mode" @{if(problem.value.isDefined && mode == problem.get.evalMode) "selected" }>@Messages(mode.toString)</option>
+                <option value="@mode.mode" @{if(problem.value.isDefined && mode == problem.get.evalMode) "selected" }>@messagesApi(mode.toString)</option>
             }
             </select>
         </div>
     </div>
 
-    @number(problem("cpuFactor"), label = Messages("problem.cpufactor", play.Configuration.root().getString("evaluator.eval.basetime", "60 seconds")), step=0.1f)
-    @number(problem("memFactor"), label = Messages("problem.memfactor", play.Configuration.root().getInt("evaluator.eval.basemem", 100)), step=0.1f)
+    @number(problem("cpuFactor"), label = messagesApi("problem.cpufactor", play.Configuration.root().getString("evaluator.eval.basetime", "60 seconds")), step=0.1f)
+    @number(problem("memFactor"), label = messagesApi("problem.memfactor", play.Configuration.root().getInt("evaluator.eval.basemem", 100)), step=0.1f)
 
     @buttonSave()
 </fieldset>

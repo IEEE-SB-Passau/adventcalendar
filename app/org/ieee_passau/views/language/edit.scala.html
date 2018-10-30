@@ -3,25 +3,25 @@
 @import org.ieee_passau.views.html.bootstrap3.{buttonSave, number, text, textareaBs}
 @import org.ieee_passau.views.html.main
 @import play.api.data.Form
-@import play.api.i18n.{Lang, Messages}
+@import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.{Flash, RequestHeader}
-@(codelangId: String, language: Form[Language])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, lang: Lang)
+@(codelangId: String, language: Form[Language])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
 
-@main(Messages("codelang.edit")) {
+@main(messagesApi("codelang.edit")) {
 
     <ol class="breadcrumb">
-        <li><a href="@org.ieee_passau.controllers.routes.LanguageController.index">@Messages("general.listoverview")</a></li>
-        <li class="active">@Messages("codelang.title")</li>
+        <li><a href="@org.ieee_passau.controllers.routes.LanguageController.index">@messagesApi("general.listoverview")</a></li>
+        <li class="active">@messagesApi("codelang.title")</li>
     </ol>
 
     @form(org.ieee_passau.controllers.routes.LanguageController.update(codelangId), 'class -> "form-horizontal") {
         @CSRF.formField
         <fieldset>
             <div class="well">
-                @text(language("name"), label = Messages("codelang.name") , placeholder = "C, gcc")
-                @number(language("cpuFactor"), label = Messages("codelang.cpufactor"), step=0.1f)
-                @number(language("memFactor"), label = Messages("codelang.memfactor"), step=0.1f)
-                @textareaBs(language("comment"), label = Messages("codelang.comment"), wysiwyg = true)
+                @text(language("name"), label = messagesApi("codelang.name") , placeholder = "C, gcc")
+                @number(language("cpuFactor"), label = messagesApi("codelang.cpufactor"), step=0.1f)
+                @number(language("memFactor"), label = messagesApi("codelang.memfactor"), step=0.1f)
+                @textareaBs(language("comment"), label = messagesApi("codelang.comment"), wysiwyg = true)
 
                 @buttonSave()
             </div>

@@ -2,9 +2,11 @@ package org.ieee_passau.models
 
 import java.util.Date
 
-import play.api.db.slick.Config.driver.simple._
+import org.ieee_passau.models.DateSupport.dateMapper
+import slick.driver.PostgresDriver.api._
+import slick.lifted.{ForeignKeyQuery, ProvenShape}
 
-import scala.slick.lifted.{CompiledFunction, ForeignKeyQuery, ProvenShape}
+import scala.concurrent.Future
 
 case class Solution (id: Option[Int], userId: Int, problemId: Int, language: String, program: String,
                      programName: String, ip: Option[String], userAgent: Option[String], browserId: Option[String],
@@ -13,15 +15,15 @@ case class Solution (id: Option[Int], userId: Int, problemId: Int, language: Str
 }
 
 class Solutions(tag: Tag) extends TableWithId[Solution](tag, "solutions") {
-  def userId: Column[Int] = column[Int]("user_id")
-  def problemId: Column[Int] = column[Int]("problem_id")
-  def language: Column[String] = column[String]("language")
-  def program: Column[String] = column[String]("program")
-  def programName: Column[String] = column[String]("program_name")
-  def ip: Column[String] = column[String]("ip")
-  def userAgent: Column[String] = column[String]("user_agent")
-  def browserId: Column[String] = column[String]("browser_id")
-  def created: Column[Date] = column[Date]("created")
+  def userId: Rep[Int] = column[Int]("user_id")
+  def problemId: Rep[Int] = column[Int]("problem_id")
+  def language: Rep[String] = column[String]("language")
+  def program: Rep[String] = column[String]("program")
+  def programName: Rep[String] = column[String]("program_name")
+  def ip: Rep[String] = column[String]("ip")
+  def userAgent: Rep[String] = column[String]("user_agent")
+  def browserId: Rep[String] = column[String]("browser_id")
+  def created: Rep[Date] = column[Date]("created")(DateSupport.dateMapper)
 
   def user: ForeignKeyQuery[Users, User] = foreignKey("user_fk", userId, Users)(_.id)
   def problem: ForeignKeyQuery[Problems, Problem] = foreignKey("problem_fk", problemId, Problems)(_.id)
@@ -31,6 +33,10 @@ class Solutions(tag: Tag) extends TableWithId[Solution](tag, "solutions") {
 }
 
 object Solutions extends TableQuery(new Solutions(_)) {
-  def byProblemId: CompiledFunction[(Column[Int]) => Query[Solutions, Solution, Seq], Column[Int], Int, Query[Solutions, Solution, Seq], Seq[Solution]] =
-    this.findBy(_.problemId)
+  def getLatestSolutionByUser(userId: Int)(implicit db: Database): Future[Option[Solution]] = {
+    db.run(Solutions.filter(_.userId === userId).sortBy(_.created.desc).result.headOption)
+  }
+  def getLatestSolutionByUserAndProblem(userId: Int, problemId: Int)(implicit db: Database): Future[Option[Solution]] = {
+    db.run(Solutions.filter(_.userId === userId).filter(_.problemId === problemId).sortBy(_.created.desc).result.headOption)
+  }
 }

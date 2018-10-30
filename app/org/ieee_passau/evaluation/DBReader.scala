@@ -2,62 +2,76 @@ package org.ieee_passau.evaluation
 
 import java.util.UUID
 
+import akka.actor.Props
 import org.ieee_passau.evaluation.Messages._
 import org.ieee_passau.models._
 import org.ieee_passau.utils.StringHelper._
-import play.api.Play.current
-import play.api.db.slick.Config.driver.simple._
-import play.api.db.slick._
+import org.ieee_passau.utils.{FutureHelper, MathHelper}
+import play.api.Configuration
+import play.api.db.slick.DatabaseConfigProvider
+import slick.driver.JdbcProfile
+import slick.driver.PostgresDriver.api._
+
+import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
+
+object DBReader {
+  def props(dbConfigProvider: DatabaseConfigProvider, config: Configuration): Props = Props(new DBReader(dbConfigProvider, config))
+}
 
 /**
   * If prompted by InputRegulator, reads jobs from the database and sends them to InputRegulator.
   */
-class DBReader extends EvaluationActor {
+class DBReader (dbConfigProvider: DatabaseConfigProvider, config: Configuration) extends EvaluationActor {
+  private implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
 
   override def receive: Receive = {
     case ReadJobsDB(count) =>
       log.debug("DBReader received request for %d jobs".format(count))
 
-      DB.withSession { implicit session =>
-        val q = for {
-          tr <- Testruns if tr.stage.?.isDefined // || tr.result === (Queued: Result)
-          tc <- Testcases if tc.id === tr.testcaseId
-          sl <- Solutions if sl.id === tr.solutionId
-          pr <- Problems if pr.id === sl.problemId
-        } yield (tr.created, tr.id, sl.language, sl.program, tc.input, tc.expectedOutput, pr.id, tr, sl.programName)
+      val query = for {
+        tr <- Testruns if tr.stage.?.isDefined // || tr.result === (Queued: Result)
+        tc <- Testcases if tc.id === tr.testcaseId
+        sl <- Solutions if sl.id === tr.solutionId
+        pr <- Problems if pr.id === sl.problemId
+        lang <- Languages if lang.name === sl.language
+      } yield (pr.id, pr.cpuFactor, pr.memFactor, sl.program, sl.programName, lang, tc.input, tc.expectedOutput, tr.progOut, tr.id, tr.stage)
 
-        val rawJobs = q.sortBy(_._1.asc).take(count).list
+      db.run(query.sortBy(_._1.asc).take(count).to[List].result).foreach { rawJobs =>
         val jobs = rawJobs.map { rawJob =>
-          val stage = rawJob._8/*testrun*/.stage.get
           val uuid = UUID.randomUUID().toString
-          if (stage == 0) { // normal evaluation job
+          if (rawJob._11 /*stage*/ == 0) { // normal evaluation job
             Messages.BaseJob(
-              problemId = rawJob._7,
-              testrunId = rawJob._2,
+              cpuFactor = MathHelper.makeDuration(config.getString("evaluator.eval.basetime").getOrElse("60 seconds")).mul(rawJob._2).toSeconds,
+              memFactor = (rawJob._3 * config.getInt("evaluator.eval.basemem").getOrElse(100)).floor.toInt,
+              lang = rawJob._6.name,
+              testrunId = rawJob._10,
               evalId = uuid,
-              language = rawJob._3,
               program = rawJob._4,
-              programName = rawJob._9,
-              stdin = cleanNewlines(rawJob._5),
-              expectedOut = cleanNewlines(rawJob._6)
+              programName = rawJob._5,
+              stdin = cleanNewlines(rawJob._7),
+              expectedOut = cleanNewlines(rawJob._8)
             )
           } else { // never the less, create a new task, but now for higher stage
-            val task = EvalTasks.filter(_.position === stage).filter(_.problemId === rawJob._7).first
-            Messages.NextStageJob(
-              testrunId = rawJob._2,
-              stage = stage,
-              evalId = uuid,
-              program = rawJob._4,
-              stdin = cleanNewlines(rawJob._5),
-              expectedOut = cleanNewlines(rawJob._6),
-              progOut = rawJob._8.progOut.get,
-              command = task.command,
-              inputData = (task.useStdin, task.useProgout, task.useExpout, task.useProgram),
-              outputStdoutCheck = task.outputCheck,
-              outputScore = task.scoreCalc,
-              programName = task.filename,
-              file = task.file
-            )
+
+            val taskQuery = EvalTasks.filter(_.position === rawJob._11).filter(_.problemId === rawJob._1)
+            Await.result(db.run(taskQuery.result.head) map { task =>
+              Messages.NextStageJob(
+                testrunId = rawJob._10,
+                stage = rawJob._11,
+                evalId = uuid,
+                program = rawJob._4,
+                stdin = cleanNewlines(rawJob._7),
+                expectedOut = cleanNewlines(rawJob._8),
+                progOut = cleanNewlines(rawJob._9),
+                command = task.command,
+                inputData = (task.useStdin, task.useProgout, task.useExpout, task.useProgram),
+                outputStdoutCheck = task.outputCheck,
+                outputScore = task.scoreCalc,
+                programName = task.filename,
+                file = task.file
+              )
+            }, FutureHelper.dbTimeout)
           }
         }
 

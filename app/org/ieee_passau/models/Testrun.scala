@@ -2,9 +2,10 @@ package org.ieee_passau.models
 
 import java.util.Date
 
-import play.api.db.slick.Config.driver.simple._
+import slick.driver.PostgresDriver.api._
+import slick.lifted.{CompiledFunction, ForeignKeyQuery, ProvenShape}
 
-import scala.slick.lifted.{CompiledFunction, ForeignKeyQuery, ProvenShape}
+import scala.concurrent.Future
 
 case class Testrun(id: Option[Int], solutionId: Int, testcaseId: Int, progOut: Option[String], progErr: Option[String],
                    progExit: Option[Int], progRuntime: Option[Double], progMemory: Option[Int], compOut: Option[String],
@@ -15,25 +16,25 @@ case class Testrun(id: Option[Int], solutionId: Int, testcaseId: Int, progOut: O
 }
 
 class Testruns(tag: Tag) extends TableWithId[Testrun](tag, "testruns") {
-  def solutionId: Column[Int] = column[Int]("solution_id")
-  def testcaseId: Column[Int] = column[Int]("testcase_id")
-  def progOut: Column[String] = column[String]("prog_out")
-  def progErr: Column[String] = column[String]("prog_err")
-  def progExit: Column[Int] = column[Int]("prog_exit")
-  def progRuntime: Column[Double] = column[Double]("prog_runtime")
-  def progMemory: Column[Int] = column[Int]("prog_memory")
-  def compOut: Column[String] = column[String]("comp_out")
-  def compErr: Column[String] = column[String]("comp_err")
-  def compExit: Column[Int] = column[Int]("comp_exit")
-  def compRuntime: Column[Double] = column[Double]("comp_runtime")
-  def compMemory: Column[Int] = column[Int]("comp_memory")
-  def result: Column[Result] = column[Result]("result")(Result.resultTypeMapper)
-  def created: Column[Date] = column[Date]("created")
-  def stage: Column[Int] = column[Int]("stage")
-  def vm: Column[String] = column[String]("vm")
-  def completed: Column[Date] = column[Date]("completed")
-  def score: Column[Int] = column[Int]("score")
-  def evalId: Column[String] = column[String]("eval_id")
+  def solutionId: Rep[Int] = column[Int]("solution_id")
+  def testcaseId: Rep[Int] = column[Int]("testcase_id")
+  def progOut: Rep[String] = column[String]("prog_out")
+  def progErr: Rep[String] = column[String]("prog_err")
+  def progExit: Rep[Int] = column[Int]("prog_exit")
+  def progRuntime: Rep[Double] = column[Double]("prog_runtime")
+  def progMemory: Rep[Int] = column[Int]("prog_memory")
+  def compOut: Rep[String] = column[String]("comp_out")
+  def compErr: Rep[String] = column[String]("comp_err")
+  def compExit: Rep[Int] = column[Int]("comp_exit")
+  def compRuntime: Rep[Double] = column[Double]("comp_runtime")
+  def compMemory: Rep[Int] = column[Int]("comp_memory")
+  def result: Rep[Result] = column[Result]("result")(Result.resultTypeMapper)
+  def created: Rep[Date] = column[Date]("created")(DateSupport.dateMapper)
+  def stage: Rep[Int] = column[Int]("stage")
+  def vm: Rep[String] = column[String]("vm")
+  def completed: Rep[Date] = column[Date]("completed")(DateSupport.dateMapper)
+  def score: Rep[Int] = column[Int]("score")
+  def evalId: Rep[String] = column[String]("eval_id")
 
   def solution: ForeignKeyQuery[Solutions, Solution] = foreignKey("solution_fk", solutionId, Solutions)(_.id)
   def testcase: ForeignKeyQuery[Testcases, Testcase] = foreignKey("testcase_fk", testcaseId, Testcases)(_.id)
@@ -45,13 +46,11 @@ class Testruns(tag: Tag) extends TableWithId[Testrun](tag, "testruns") {
 }
 
 object Testruns extends TableQuery(new Testruns(_)) {
-  def bySolutionId: CompiledFunction[(Column[Int]) => Query[Testruns, Testrun, Seq], Column[Int], Int, Query[Testruns, Testrun, Seq], Seq[Testrun]] =
-    this.findBy(_.solutionId)
   def bySolutionIdTestcaseId(solutionId: Int, testcaseId: Int): Query[Testruns, Testrun, Seq] =
     filter(r => r.solutionId === solutionId && r.testcaseId === testcaseId)
-
-  def byId: CompiledFunction[(Column[Int]) => Query[Testruns, Testrun, Seq], Column[Int], Int, Query[Testruns, Testrun, Seq], Seq[Testrun]] =
+  def byId: CompiledFunction[Rep[Int] => Query[Testruns, Testrun, Seq], Rep[Int], Int, Query[Testruns, Testrun, Seq], Seq[Testrun]] =
     this.findBy(_.id)
-  def update(id: Int, testrun: Testrun)(implicit session: Session): Int =
-    this.filter(_.id === id).update(testrun.withId(id))
+
+  def update(id: Int, testrun: Testrun)(implicit db: Database): Future[Int] =
+    db.run(this.byId(id).update(testrun.withId(id)))
 }
