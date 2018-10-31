@@ -54,6 +54,7 @@
 
     <script type="text/javascript">
         var reloadMessage = '@messagesApi("submit.codeeditor.reload")';
+        var buttonMessage = '@messagesApi("submit.codeeditor.defaultButton")';
 
         function loadCodeEditor() {
             $.ajax(
@@ -62,7 +63,9 @@
                 $("#codeEditor").html(data);
             });
 
-            $("#defaultSubmit")[0].classList = "btn btn-default";
+            var defaultSubmitButton = $("#defaultSubmit")[0];
+            defaultSubmitButton.classList = "btn btn-default";
+            defaultSubmitButton.innerHTML = buttonMessage;
             var editorButton = $("#loadEditor")[0];
             editorButton.classList = "btn btn-warning";
             editorButton.innerHTML = reloadMessage;

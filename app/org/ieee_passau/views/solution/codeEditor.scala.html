@@ -20,8 +20,8 @@
 
 <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
-        <input type="submit" value="@messagesApi("submit.submit")" onmouseover="updateEdits();"
-        formaction="@org.ieee_passau.controllers.routes.MainController.solveString(door)" class="btn btn-primary"/>
+        <input type="submit" value="@messagesApi("submit.submit")" class="btn btn-primary"
+               formaction="@org.ieee_passau.controllers.routes.MainController.solveString(door)" />
     </div>
 </div>
 
@@ -29,10 +29,6 @@
 <script src="@routes.Assets.at("javascripts/ace/ext-modelist.js")" type="text/javascript" charset="utf-8"></script>
 <script src="@routes.Assets.at("javascripts/ace/ext-language_tools.js")" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript">
-    function updateEdits() {
-        submissiontext.value = editor.getValue();
-    }
-
     function loadSource(input) {
         var fileToLoad = input.files[0];
 
@@ -57,6 +53,10 @@
         enableBasicAutocompletion: true,
         enableSnippets: true,
         enableLiveAutocompletion: false
+    });
+
+    editor.getSession().on("change", function () {
+        $('#submissiontext').val(editor.getSession().getValue());
     });
 
     updateLang();

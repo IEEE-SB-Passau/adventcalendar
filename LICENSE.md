@@ -19,15 +19,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-This product contatins software by various authors, each distributed under its
+This product contains software by various authors, each distributed under its
 own licence. 
 
-jQuerry             MIT LICENSE             https://jquery.org
-jQuerry Timeago     MIT LICENSE             http://timeago.yarp.com
-moment.js           MIT LICENSE             http://momentjs.com
-Highlight.js        BSD-3-Clause            https://highlightjs.org
-Bootstrap           Apache LICENSE 2.0      http://getbootstrap.com
-summernote          MIT LICENSE             https://summernote.org/
-ACE                 BSD 3-Clause            https://ace.c9.io/
-Bootstrap Languages Apache LICENSE 2.0      http://usrz.github.io/bootstrap-languages
-Cookie Consent      MIT LICENSE             https://cookieconsent.insites.com/                    
+jQuery                      MIT LICENSE             https://jquery.org
+jQuery Timeago              MIT LICENSE             http://timeago.yarp.com
+moment.js                   MIT LICENSE             http://momentjs.com
+Highlight.js                BSD-3-Clause            https://highlightjs.org
+Bootstrap                   Apache LICENSE 2.0      http://getbootstrap.com
+bootstrap-datetimepicker    Apache LICENSE 2.0      http://www.eyecon.ro/bootstrap-datepicker
+summernote                  MIT LICENSE             https://summernote.org/
+ACE                         BSD 3-Clause            https://ace.c9.io/
+Bootstrap Languages         Apache LICENSE 2.0      http://usrz.github.io/bootstrap-languages
+Cookie Consent              MIT LICENSE             https://cookieconsent.insites.com/                    

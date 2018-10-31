@@ -26,7 +26,7 @@
                 <td>@t.id</td>
                 <td>@p.door @p.title</td>
                 <td>@u.username</td>
-                <td>@t.created.format("dd.MM.yyyy HH:mm")</td>
+                <td>@t.created.format("yyyy-MM-dd HH:mm")</td>
                 <td>@showCheckmark(t.public)</td>
                 <td>
                     <a href="@org.ieee_passau.controllers.routes.TicketController.view(t.id.get)" class="btn btn-default">

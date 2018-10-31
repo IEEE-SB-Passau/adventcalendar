@@ -19,7 +19,7 @@
             @s.solution.ip
         </p>
         <p><label class="col-sm-2 control-label">@messagesApi("general.createdate")</label>
-            @s.solution.created.format("dd.MM.yyyy HH:mm")
+            @s.solution.created.format("yyyy-MM-dd HH:mm")
         </p>
         <p><label class="col-sm-2 control-label">@messagesApi("problem.title")</label>
           <a href=@org.ieee_passau.controllers.routes.MainController.problemDetails(problem.door)>@problem.title</a>

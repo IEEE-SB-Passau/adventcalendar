@@ -1,12 +1,13 @@
 // activate source highlighting
 hljs.initHighlightingOnLoad();
 
+// activate the pretty time display
 $(document).ready(function () {
-    // activate the datetimepickers
-    $('.datetimepicker').datetimepicker();
     $('abbr.timeago').timeago();
+});
 
-    // activate diff
+// activate diff
+$(document).ready(function () {
     applyDiff();
 });
 
@@ -14,7 +15,6 @@ $(document).ready(function () {
 $(document).on('change', '.btn-file :file', function() {
     $(this).trigger('fileselect', $(this).val().replace(/\\/g, '/').replace(/.*\//, ''));
 });
-
 $(document).ready(function() {
     $('.btn-file :file').on('fileselect', function(event, label) {
         $(this).parents('.input-group').find(':text').val(label);
@@ -70,7 +70,7 @@ window.addEventListener("load", function(){
             "message": cookieText,
             "dismiss": cookieButton,
             "link": cookieLink,
-            "href": jsRoutes.org.ieee_passau.controllers.MainController.content("contact").url
+            "href": jsRoutes.org.ieee_passau.controllers.CmsController.content("contact").url
         }
     })
 });

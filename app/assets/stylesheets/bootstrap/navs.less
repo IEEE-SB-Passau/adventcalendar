@@ -10,7 +10,7 @@
   margin-bottom: 0;
   padding-left: 0; // Override default ul/ol
   list-style: none;
-  .clearfix();
+  &:extend(.clearfix all);
 
   > li {
     position: relative;
@@ -36,7 +36,7 @@
         color: @nav-disabled-link-hover-color;
         text-decoration: none;
         background-color: transparent;
-        cursor: not-allowed;
+        cursor: @cursor-disabled;
       }
     }
   }
@@ -48,17 +48,12 @@
     &:focus {
       background-color: @nav-link-hover-bg;
       border-color: @link-color;
-
-      .caret {
-        border-top-color: @link-hover-color;
-        border-bottom-color: @link-hover-color;
-      }
     }
   }
 
   // Nav dividers (deprecated with v3.0.1)
   //
-  // This should have been removed in v3 with the dropping of `.nav-index`, but
+  // This should have been removed in v3 with the dropping of `.nav-list`, but
   // we missed it. We don't currently support this anywhere, but in the interest
   // of maintaining backward compatibility in case you use it, it's deprecated.
   .nav-divider {
@@ -82,7 +77,7 @@
   border-bottom: 1px solid @nav-tabs-border-color;
   > li {
     float: left;
-    // Make the index-items overlay the bottom border
+    // Make the list-items overlay the bottom border
     margin-bottom: -1px;
 
     // Actual tabs (as links)
@@ -96,7 +91,7 @@
       }
     }
 
-    // Active state, and it's :hover to override normal :hover
+    // Active state, and its :hover to override normal :hover
     &.active > a {
       &,
       &:hover,
@@ -138,11 +133,6 @@
       &:focus {
         color: @nav-pills-active-link-hover-color;
         background-color: @nav-pills-active-link-hover-bg;
-
-        .caret {
-          border-top-color: @nav-pills-active-link-hover-color;
-          border-bottom-color: @nav-pills-active-link-hover-color;
-        }
       }
     }
   }
@@ -172,7 +162,7 @@
 
   > li {
     float: none;
-     > a {
+    > a {
       text-align: center;
       margin-bottom: 5px;
     }
@@ -194,7 +184,7 @@
   }
 }
 
-// Move borders to anchors instead of bottom of index
+// Move borders to anchors instead of bottom of list
 //
 // Mixin for adding on top the shared `.nav-justified` styles for our tabs
 .nav-tabs-justified {
@@ -242,16 +232,6 @@
 
 // Dropdowns
 // -------------------------
-
-// Make dropdown carets use link color in navs
-.nav .caret {
-  border-top-color: @link-color;
-  border-bottom-color: @link-color;
-}
-.nav a:hover .caret {
-  border-top-color: @link-hover-color;
-  border-bottom-color: @link-hover-color;
-}
 
 // Specific dropdowns
 .nav-tabs .dropdown-menu {

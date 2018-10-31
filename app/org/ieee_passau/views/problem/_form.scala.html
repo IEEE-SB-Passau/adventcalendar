@@ -23,16 +23,16 @@
             <span class="help-block">@{ problem("door").error.map { error => messagesApi(error.message) }}</span>
         </div>
     </div>
-    @dateManualError(problem("readableStart"), label =  messagesApi("problem.readablestart"), placeholder = "01.12.2013")
+    @dateManualError(problem("readableStart"), label =  messagesApi("problem.readablestart"), placeholder = "2013-12-01 00:00")
     @{
         val (hasError, error) = ViewHelper.checkAmbiguesKey("vis", problem)
-        dateManualError(problem("readableStop"), label =  messagesApi("problem.readablestop"), placeholder = "01.12.2013",
+        dateManualError(problem("readableStop"), label =  messagesApi("problem.readablestop"), placeholder = "2013-12-01 00:00",
             hasError = hasError, errorMsg = messagesApi(error, messagesApi("problem.readablestop"), messagesApi("problem.readablestart")))
     }
-    @dateManualError(problem("solvableStart"), label = messagesApi("problem.solvablestart"), placeholder = "01.12.2013")
+    @dateManualError(problem("solvableStart"), label = messagesApi("problem.solvablestart"), placeholder = "2013-12-01 00:00")
     @{
         val (hasError, error) = ViewHelper.checkAmbiguesKey("vis", problem)
-        dateManualError(problem("solvableStop"), label =  messagesApi("problem.solvablestop"), placeholder = "01.12.2013",
+        dateManualError(problem("solvableStop"), label =  messagesApi("problem.solvablestop"), placeholder = "2013-12-01 00:00",
             hasError = hasError, errorMsg = messagesApi(error, messagesApi("problem.solvablestop"), messagesApi("problem.solvablestart")))
     }
 
@@ -52,3 +52,45 @@
 
     @buttonSave()
 </fieldset>
+<script type="text/javascript">
+    window.addEventListener("DOMContentLoaded", function() {
+        var readableStart = $('#readableStart');
+        var readableStop = $('#readableStop');
+        var solvableStart = $('#solvableStart');
+        var solvableStop = $('#solvableStop');
+        var format = 'YYYY-MM-DD HH:mm';
+
+        readableStart.datetimepicker({
+            format: format,
+            useCurrent: false,
+            maxDate: '@problem("readableStop").value'
+        });
+        readableStop.datetimepicker({
+            format: format,
+            useCurrent: false,
+            minDate: '@problem("readableStart").value'
+        });
+        solvableStart.datetimepicker({
+            format: format,
+            useCurrent: false,
+            maxDate: '@problem("solvableStop").value'
+        });
+        solvableStop.datetimepicker({
+            format: format,
+            useCurrent: false,
+            minDate: '@problem("solvableStart").value'
+        });
+        readableStart.on("dp.change", function (e) {
+            readableStop.data("DateTimePicker").minDate(e.date);
+        });
+        readableStop.on("dp.change", function (e) {
+            readableStart.data("DateTimePicker").maxDate(e.date);
+        });
+        solvableStart.on("dp.change", function (e) {
+            solvableStop.data("DateTimePicker").minDate(e.date);
+        });
+        solvableStop.on("dp.change", function (e) {
+            solvableStart.data("DateTimePicker").maxDate(e.date);
+        });
+    });
+</script>

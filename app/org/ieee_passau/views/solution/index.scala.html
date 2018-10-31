@@ -34,7 +34,7 @@
                 <td>@s.user</td>
                 <td>@s.lang</td>
                 <td>@s.passedTC / @s.allTC</td>
-                <td>@s.date.format("dd.MM.yyyy HH:mm")</td>
+                <td>@s.date.format("yyyy-MM-dd HH:mm")</td>
                 @if(sessionUser.isDefined && sessionUser.get.permission.includes(Admin)) {
                 <td>
                     <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.EvaluationController.reEval(s.id)">
