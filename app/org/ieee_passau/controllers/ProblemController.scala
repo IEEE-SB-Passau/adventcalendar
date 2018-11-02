@@ -6,7 +6,6 @@ import com.google.inject.name.Named
 import org.ieee_passau.controllers.Beans.UpdateRankingM
 import org.ieee_passau.models.{EvalMode, Problem, ProblemTranslation, Problems, _}
 import org.ieee_passau.utils.{AkkaHelper, FutureHelper, LanguageHelper, PermissionCheck}
-import play.api.Application
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.format.Formats._
@@ -27,7 +26,6 @@ class ProblemController @Inject()(val messagesApi: MessagesApi,
                                   @Named(AkkaHelper.rankingActor) rankingActor: ActorRef
                                  ) extends Controller with PermissionCheck {
   private implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
-  private implicit val app: Application = play.api.Play.current
   private implicit val mApi: MessagesApi = messagesApi
 
   def index: Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>

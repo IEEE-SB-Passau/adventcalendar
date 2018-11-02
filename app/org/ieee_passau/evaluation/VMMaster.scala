@@ -11,6 +11,12 @@ import scala.collection.mutable
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
+object VMMaster {
+  trait Factory {
+    def apply(): VMMaster
+  }
+}
+
 /**
   * Manages VMClients. Received jobs are relayed to a VMClient via a router.
   */

@@ -3,24 +3,26 @@ package org.ieee_passau.evaluation
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
-import akka.actor.Props
+import akka.actor.ActorSystem
+import com.google.inject.Inject
+import com.google.inject.assistedinject.Assisted
 import org.ieee_passau.controllers.Beans.{RunningJobsQ, StatusM}
 import org.ieee_passau.utils.AkkaHelper
-import play.api.Play.current
 
 import scala.language.postfixOps
 
 // Needed for application context, do not remove!
 
 import org.ieee_passau.evaluation.Messages._
-import play.api.libs.concurrent.Akka
 
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
 object InputRegulator {
-  def props(jobLimit: Int, jobLifetime: Duration): Props = Props(new InputRegulator(jobLimit, jobLifetime))
+  trait Factory {
+    def apply(jobLimit: Int, jobLifetime: Duration): InputRegulator
+  }
 }
 
 /**
@@ -28,7 +30,7 @@ object InputRegulator {
   * Controls the number of jobs entering the system.
   * Forwards jobs to the job router.
   */
-class InputRegulator(jobLimit: Int, jobLifetime: Duration) extends EvaluationActor {
+class InputRegulator @Inject() (@Assisted jobLimit: Int, @Assisted jobLifetime: Duration, system: ActorSystem) extends EvaluationActor {
   val STARTUP_DELAY: FiniteDuration = 2 minutes
   val TICK_INTERVAL: FiniteDuration = 1 second
   val TICK_MSG = "tick"
@@ -36,7 +38,7 @@ class InputRegulator(jobLimit: Int, jobLifetime: Duration) extends EvaluationAct
   private var running = true
 
   private val fetchedJobs = mutable.HashMap.empty[Job, Date]
-  private val tickSchedule = Akka.system.scheduler.schedule(STARTUP_DELAY, TICK_INTERVAL, self, TICK_MSG)
+  private val tickSchedule = system.scheduler.schedule(STARTUP_DELAY, TICK_INTERVAL, self, TICK_MSG)
 
   override def postStop(): Unit = {
     super.postStop()

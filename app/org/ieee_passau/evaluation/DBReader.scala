@@ -3,6 +3,7 @@ package org.ieee_passau.evaluation
 import java.util.UUID
 
 import akka.actor.Props
+import com.google.inject.Inject
 import org.ieee_passau.evaluation.Messages._
 import org.ieee_passau.models._
 import org.ieee_passau.utils.StringHelper._
@@ -16,13 +17,15 @@ import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object DBReader {
-  def props(dbConfigProvider: DatabaseConfigProvider, config: Configuration): Props = Props(new DBReader(dbConfigProvider, config))
+  trait Factory {
+    def apply(): DBReader
+  }
 }
 
 /**
   * If prompted by InputRegulator, reads jobs from the database and sends them to InputRegulator.
   */
-class DBReader (dbConfigProvider: DatabaseConfigProvider, config: Configuration) extends EvaluationActor {
+class DBReader @Inject() (dbConfigProvider: DatabaseConfigProvider, config: Configuration) extends EvaluationActor {
   private implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
 
   override def receive: Receive = {

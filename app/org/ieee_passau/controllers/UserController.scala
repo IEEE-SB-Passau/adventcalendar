@@ -5,11 +5,10 @@ import org.apache.commons.mail.EmailException
 import org.ieee_passau.models.{Admin, _}
 import org.ieee_passau.utils.{CaptchaHelper, PasswordHasher, PermissionCheck}
 import play.api.Configuration
-import play.api.Play.current
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.db.slick.DatabaseConfigProvider
-import play.api.i18n.{Lang, MessagesApi}
+import play.api.i18n.{Lang, Langs, MessagesApi}
 import play.api.libs.mailer._
 import play.api.mvc._
 import slick.driver.JdbcProfile
@@ -18,7 +17,12 @@ import slick.driver.PostgresDriver.api._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class UserController @Inject()(val messagesApi: MessagesApi, dbConfigProvider: DatabaseConfigProvider, mailerClient: MailerClient, configuration: Configuration) extends Controller with PermissionCheck {
+class UserController @Inject()(val messagesApi: MessagesApi,
+                               langs: Langs,
+                               dbConfigProvider: DatabaseConfigProvider,
+                               val captchaHelper: CaptchaHelper,
+                               mailerClient: MailerClient,
+                               configuration: Configuration) extends Controller with PermissionCheck {
   private implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
   private implicit val mApi: MessagesApi = messagesApi
   private implicit val config: Configuration = configuration
@@ -75,7 +79,7 @@ class UserController @Inject()(val messagesApi: MessagesApi, dbConfigProvider: D
           .flashing("success" -> messagesApi("user.login.message", user.username))
           .withSession("user" -> uid)
           .withCookies(
-            Cookie(play.Play.langCookieName(),
+            Cookie(messagesApi.langCookieName,
               user.lang.getOrElse(rs.acceptLanguages.headOption.getOrElse(play.api.i18n.Lang.defaultLang).language)
             )
           )
@@ -223,7 +227,7 @@ class UserController @Inject()(val messagesApi: MessagesApi, dbConfigProvider: D
 
   def updateLang(lang: String): Action[AnyContent] = requirePermission(Everyone) { implicit user => Action { implicit rs =>
     val maybeLang = Lang.get(lang)
-    if (maybeLang.isEmpty || !Lang.availables.contains(maybeLang.get)) {
+    if (maybeLang.isEmpty || !langs.availables.contains(maybeLang.get)) {
       Redirect(org.ieee_passau.controllers.routes.CmsController.calendar())
         .flashing("danger" -> messagesApi("language.unsupported"))
 
@@ -296,7 +300,7 @@ class UserController @Inject()(val messagesApi: MessagesApi, dbConfigProvider: D
       "semester" -> optional(number),
       "studySubject" -> optional(nonEmptyText),
       "school" -> optional(nonEmptyText),
-      "g-recaptcha-response" -> text.verifying("user.error.captcha", value => CaptchaHelper.check(value))
+      "g-recaptcha-response" -> text.verifying("user.error.captcha", value => captchaHelper.check(value))
     )
     ((username: String, password: (String, String), email: String, semester: Option[Int], studySubject: Option[String],
       school: Option[String], _: String ) => UserRegistration(username, password, email, semester, studySubject, school))

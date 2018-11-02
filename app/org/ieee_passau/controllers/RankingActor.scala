@@ -2,7 +2,7 @@ package org.ieee_passau.controllers
 
 import java.util.Date
 
-import akka.actor.{Actor, ActorSystem, Props}
+import akka.actor.{Actor, ActorSystem}
 import com.google.inject.Inject
 import org.ieee_passau.controllers.Beans._
 import org.ieee_passau.models.DateSupport.dateMapper
@@ -12,7 +12,6 @@ import org.ieee_passau.models.Visibility.visibilityTypeMapper
 import org.ieee_passau.models._
 import org.ieee_passau.utils.ViewHelper.{Highlight, HighlightSpecial, NoHighlight}
 import org.ieee_passau.utils.{FutureHelper, MathHelper}
-import play.api.Application
 import play.api.db.slick.DatabaseConfigProvider
 import slick.driver.JdbcProfile
 import slick.driver.PostgresDriver.api._
@@ -24,11 +23,7 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util.Try
 
-object RankingActor {
-  def props(dbConfigProvider: DatabaseConfigProvider, system: ActorSystem, app: Application): Props = Props(new RankingActor(dbConfigProvider, system, app))
-}
-
-class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, system: ActorSystem, app: Application) extends Actor {
+class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, system: ActorSystem) extends Actor {
 
   private val dbConfig = dbConfigProvider.get[JdbcProfile]
   private val db: Database = dbConfig.db

@@ -2,7 +2,7 @@ package org.ieee_passau.evaluation
 
 import java.util.Date
 
-import akka.actor.Props
+import com.google.inject.Inject
 import org.ieee_passau.evaluation.Messages._
 import org.ieee_passau.models._
 import org.ieee_passau.utils.StringHelper
@@ -13,13 +13,15 @@ import slick.driver.PostgresDriver.api._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object DBWriter {
-  def props(dbConfigProvider: DatabaseConfigProvider): Props = Props(new DBWriter(dbConfigProvider))
+  trait Factory {
+    def apply(): DBWriter
+  }
 }
 
 /**
   * Writes evaluated jobs to the database and broadcasts a JobFinished message.
   */
-class DBWriter(dbConfigProvider: DatabaseConfigProvider) extends EvaluationActor {
+class DBWriter @Inject() (dbConfigProvider: DatabaseConfigProvider) extends EvaluationActor {
   private implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
 
   override def receive: Receive = {
