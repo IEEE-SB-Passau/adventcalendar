@@ -10,23 +10,20 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.format.Formats._
 import play.api.db.slick.DatabaseConfigProvider
-import play.api.i18n.{Lang, MessagesApi}
+import play.api.i18n.Lang
 import play.api.mvc._
 import slick.ast.BaseTypedType
-import slick.driver.JdbcProfile
 import slick.driver.PostgresDriver.api._
 import slick.jdbc.JdbcType
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Await, Future}
 
-class ProblemController @Inject()(val messagesApi: MessagesApi,
-                                  dbConfigProvider: DatabaseConfigProvider,
+class ProblemController @Inject()(dbConfigProvider: DatabaseConfigProvider,
+                                  components: MessagesControllerComponents,
                                   system: ActorSystem,
                                   @Named(AkkaHelper.rankingActor) rankingActor: ActorRef
-                                 ) extends Controller with PermissionCheck {
-  private implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
-  private implicit val mApi: MessagesApi = messagesApi
+                                 ) extends ControllerWithDBAndI18n(dbConfigProvider, components) with PermissionCheck {
 
   def index: Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
     db.run(Problems.sortBy(_.door.asc).result).map(problems =>
@@ -82,7 +79,7 @@ class ProblemController @Inject()(val messagesApi: MessagesApi,
         db.run((Problems returning Problems.map(_.id)) += newProblem).map { id =>
           rankingActor ! UpdateRankingM
           Redirect(org.ieee_passau.controllers.routes.ProblemController.edit(id))
-            .flashing("success" -> messagesApi("problem.create.message", newProblem.title))
+            .flashing("success" -> rs.messages("problem.create.message", newProblem.title))
         }
       }
     )
@@ -111,9 +108,9 @@ class ProblemController @Inject()(val messagesApi: MessagesApi,
       },
 
       problem => {
-        db.run(Problems.update(id, problem)).map(it =>
+        db.run(Problems.update(id, problem)).map(_ =>
           Redirect(org.ieee_passau.controllers.routes.ProblemController.edit(id))
-            .flashing("success" -> messagesApi("problem.update.message", problem.title))
+            .flashing("success" -> rs.messages("problem.update.message", problem.title))
         )
       }
     )
@@ -133,11 +130,11 @@ class ProblemController @Inject()(val messagesApi: MessagesApi,
         db.run(ProblemTranslations.byProblemLang(problemId, newTrans.language).result.headOption).flatMap {
           case Some(_) =>
             Future.successful(BadRequest(org.ieee_passau.views.html.problemTranslation.insert(problemId,
-              problemTranslationForm.fill(newTrans).withError("duplicate_translation", messagesApi("problem.translation.create.error.exists")))))
+              problemTranslationForm.fill(newTrans).withError("duplicate_translation", rs.messages("problem.translation.create.error.exists")))))
           case _ =>
             db.run(ProblemTranslations += newTrans).map(_ =>
               Redirect(org.ieee_passau.controllers.routes.ProblemController.edit(newTrans.problemId))
-                .flashing("success" -> messagesApi("problem.translation.create.message", newTrans.title, newTrans.language.code))
+                .flashing("success" -> rs.messages("problem.translation.create.message", newTrans.title, newTrans.language.code))
             )
         }
       }
@@ -162,7 +159,7 @@ class ProblemController @Inject()(val messagesApi: MessagesApi,
       trans => {
         db.run(ProblemTranslations.update(lang, trans)).map(_ =>
           Redirect(org.ieee_passau.controllers.routes.ProblemController.editTranslation(problemId, lang))
-            .flashing("success" -> messagesApi("problem.translation.update.message", trans.title, trans.language.code))
+            .flashing("success" -> rs.messages("problem.translation.update.message", trans.title, trans.language.code))
         )
       }
     )

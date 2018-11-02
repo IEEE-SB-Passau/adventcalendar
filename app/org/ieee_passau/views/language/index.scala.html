@@ -1,17 +1,16 @@
 @import org.ieee_passau.models.{Language, User}
 @import org.ieee_passau.views.html.main
-@import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.RequestHeader
-@(languages: List[Language])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
+@(languages: List[Language])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
 
-@main(messagesApi("codelang.list.title")) {
+@main(messages("codelang.list.title")) {
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>@messagesApi("general.id")</th>
-                <th>@messagesApi("codelang.name")</th>
-                <th>@messagesApi("codelang.cpufactor")</th>
-                <th>@messagesApi("codelang.memfactor")</th>
+                <th>@messages("general.id")</th>
+                <th>@messages("codelang.name")</th>
+                <th>@messages("codelang.cpufactor")</th>
+                <th>@messages("codelang.memfactor")</th>
                 <th></th>
             </tr>
         </thead>

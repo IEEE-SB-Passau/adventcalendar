@@ -1,32 +1,31 @@
 @import org.ieee_passau.models.{Testcase, Visibility, Private}
 @import org.ieee_passau.views.html.bootstrap3.{buttonSave, fileloader, number, text, textareaBs}
 @import play.api.data.Form
-@import play.api.i18n.{Lang, MessagesApi}
-@(pid: Int, testcase: Form[Testcase], visibilities: List[Visibility])(implicit messagesApi: MessagesApi, lang: Lang)
+@(pid: Int, testcase: Form[Testcase], visibilities: List[Visibility])(implicit messages: Messages)
 
 <fieldset>
     <input type="hidden" name="problemId" value="@pid" />
-    @number(testcase("position"), label = messagesApi("testcase.position"), placeholder = messagesApi("testcase.position"))
+    @number(testcase("position"), label = messages("testcase.position"), placeholder = messages("testcase.position"))
 
     <div class="form-group">
-        <label for="visibility" class="col-sm-2 control-label">@messagesApi("testcase.visibility")</label>
+        <label for="visibility" class="col-sm-2 control-label">@messages("testcase.visibility")</label>
         <div class="col-sm-10">
             <select id="visibility" size="1" name="visibility" class="col-sm-10 form-control">
             @visibilities.map { vis =>
                 <option value="@vis.scope"
                     @{if(testcase.value.isDefined && vis == testcase.get.visibility) "selected" else if (vis == Private) "selectet"}
-                >@messagesApi(vis.toString)</option>
+                >@messages(vis.toString)</option>
             }
             </select>
         </div>
     </div>
 
-    @textareaBs(testcase("input"), label = messagesApi("testcase.input"), placeholder = messagesApi("testcase.input"))
+    @textareaBs(testcase("input"), label = messages("testcase.input"), placeholder = messages("testcase.input"))
     @fileloader("input")
-    @textareaBs(testcase("output"), label = messagesApi("testcase.output"), placeholder = messagesApi("testcase.output"),
-        help = messagesApi("testcase.output.limitnote"))
+    @textareaBs(testcase("output"), label = messages("testcase.output"), placeholder = messages("testcase.output"),
+        help = messages("testcase.output.limitnote"))
     @fileloader("output")
-    @number(testcase("points"), label = messagesApi("testcase.points"), placeholder = messagesApi("testcase.points"))
+    @number(testcase("points"), label = messages("testcase.points"), placeholder = messages("testcase.points"))
 
     @buttonSave()
 </fieldset>

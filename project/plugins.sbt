@@ -2,9 +2,9 @@ resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/release
 
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.5.19")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.6.20")
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-web" % "1.4.4")
+//addSbtPlugin("com.typesafe.sbt" % "sbt-web" % "1.4.4")
 
 //addSbtPlugin("com.typesafe.sbt" % "sbt-webdriver" % "1.1.1")
 //

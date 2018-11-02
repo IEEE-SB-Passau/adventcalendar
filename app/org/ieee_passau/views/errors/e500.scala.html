@@ -1,15 +1,13 @@
-@import org.ieee_passau.models.{User, Page}
+@import org.ieee_passau.models.{Page, User}
 @import org.ieee_passau.views.html.main
-@import play.api.i18n.{Lang, MessagesApi}
-@import play.api.mvc.Flash
+@import play.api.mvc.{Flash, RequestHeader}
 @import play.twirl.api.Html
-@import play.api.mvc.RequestHeader
-@(errorID: Option[String])(implicit flash: Flash, sessionUser: Option[User], request: RequestHeader, messagesApi: MessagesApi, lang: Lang)
+@(errorID: Option[String])(implicit flash: Flash, sessionUser: Option[User], request: RequestHeader, messages: Messages)
 
-@main(messagesApi("error.500.short")) {
+@main(messages("error.500.short")) {
     <p>
-        @Html(messagesApi("error.500.long", org.ieee_passau.controllers.routes.CmsController.content(Page.contact.toString)))
-        @if(errorID.isDefined) { @Html(messagesApi("error.500.code", errorID.get)) }
+        @Html(messages("error.500.long", org.ieee_passau.controllers.routes.CmsController.content(Page.contact.toString)))
+        @if(errorID.isDefined) { @Html(messages("error.500.code", errorID.get)) }
     </p>
 <p>
 ............................................________ <br />
@@ -37,4 +35,4 @@
 ........................................_..........._,-%.......` <br />
 ...................................,
 </p>
-}(Flash.emptyCookie, sessionUser, request, messagesApi, lang)
+}(Flash.emptyCookie, sessionUser, request, messages)

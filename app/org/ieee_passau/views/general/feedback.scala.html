@@ -3,18 +3,17 @@
 @import org.ieee_passau.views.html.bootstrap3._
 @import org.ieee_passau.views.html.main
 @import play.api.data.Form
-@import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.{Flash, RequestHeader}
-@(feedback: Form[Feedback])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
+@(feedback: Form[Feedback])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
 
-@main(messagesApi("feedback.title")) {
+@main(messages("feedback.title")) {
     @form(org.ieee_passau.controllers.routes.TicketController.submitFeedback, 'class -> "form-horizontal") {
         @CSRF.formField
         <div class="well">
-            @radiobuttons(feedback("rating"), label = messagesApi("feedback.rating"), buttonNameList = List("1", "2", "3", "4", "5"))
-            @textareaBs(feedback("pro"), label = messagesApi("feedback.pro"))
-            @textareaBs(feedback("con"), label = messagesApi("feedback.contra"))
-            @textareaBs(feedback("freetext"), label = messagesApi("feedback.freetext"))
+            @radiobuttons(feedback("rating"), label = messages("feedback.rating"), buttonNameList = List("1", "2", "3", "4", "5"))
+            @textareaBs(feedback("pro"), label = messages("feedback.pro"))
+            @textareaBs(feedback("con"), label = messages("feedback.contra"))
+            @textareaBs(feedback("freetext"), label = messages("feedback.freetext"))
             @buttonSave()
         </div>
     }

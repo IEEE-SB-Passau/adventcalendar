@@ -11,12 +11,13 @@ routesGenerator := InjectedRoutesGenerator
 
 libraryDependencies ++= Seq(
   ws,
-  cache,
+  ehcache,
   filters,
-  "com.typesafe.play" %% "play" % "2.5.19",
-  "com.typesafe.play" %% "play-slick" % "2.0.0",
-  "com.typesafe.play" %% "play-slick-evolutions" % "2.0.0",
-  "com.typesafe.slick" %% "slick" % "3.1.1",
+  guice, 
+  "com.typesafe.play" %% "play" % "2.6.20",
+  "com.typesafe.play" %% "play-slick" % "3.0.1",
+  "com.typesafe.play" %% "play-slick-evolutions" % "3.0.1",
+  "com.typesafe.slick" %% "slick" % "3.2.3",
   "com.typesafe.play" %% "anorm" % "2.4.0",
   "com.typesafe.akka" %% "akka-actor" % "2.3.14",
   "com.typesafe.akka" %% "akka-remote" % "2.3.14",

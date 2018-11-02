@@ -7,17 +7,15 @@ import play.api.data.Form
 import play.api.data.Forms.{mapping, of, _}
 import play.api.data.format.Formats._
 import play.api.db.slick.DatabaseConfigProvider
-import play.api.i18n.MessagesApi
 import play.api.mvc._
-import slick.driver.JdbcProfile
 import slick.driver.PostgresDriver.api._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class LanguageController @Inject()(val messagesApi: MessagesApi, dbConfigProvider: DatabaseConfigProvider) extends Controller with PermissionCheck {
-  private implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
-  private implicit val mApi: MessagesApi = messagesApi
+class LanguageController @Inject()(dbConfigProvider: DatabaseConfigProvider,
+                                   components: MessagesControllerComponents
+                                  ) extends ControllerWithDBAndI18n(dbConfigProvider, components) with PermissionCheck {
 
   def index: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     db.run(Languages.sortBy(_.id.asc).to[List].result).map { list =>
@@ -51,7 +49,7 @@ class LanguageController @Inject()(val messagesApi: MessagesApi, dbConfigProvide
       newCodelang => {
         db.run(Languages += newCodelang).map(_ =>
           Redirect(org.ieee_passau.controllers.routes.LanguageController.edit(newCodelang.id))
-            .flashing("success" -> messagesApi("codelang.create.message", newCodelang.id))
+            .flashing("success" -> rs.messages("codelang.create.message", newCodelang.id))
         )
       }
     )
@@ -68,7 +66,7 @@ class LanguageController @Inject()(val messagesApi: MessagesApi, dbConfigProvide
           val newCodelang = lang.copy(name = codelang.name, cpuFactor = codelang.cpuFactor, memFactor = codelang.memFactor, comment = codelang.comment)
           db.run(Languages.update(language, newCodelang)).map(_ =>
             Redirect(org.ieee_passau.controllers.routes.LanguageController.edit(language))
-              .flashing("success" -> messagesApi("codelang.update.message", codelang.id))
+              .flashing("success" -> rs.messages("codelang.update.message", codelang.id))
           )
         }
       )

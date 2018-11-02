@@ -13,12 +13,11 @@ import org.ieee_passau.models._
 import org.ieee_passau.utils.FutureHelper.akkaTimeout
 import org.ieee_passau.utils.{AkkaHelper, FormHelper, ListHelper, PermissionCheck}
 import play.api.db.slick.DatabaseConfigProvider
-import play.api.i18n.{Lang, MessagesApi}
+import play.api.i18n.Lang
 import play.api.libs.Files.TemporaryFile
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{JsPath, Json, Writes}
 import play.api.mvc.{Result, _}
-import slick.driver.JdbcProfile
 import slick.driver.PostgresDriver.api._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -26,17 +25,15 @@ import scala.concurrent.Future
 import scala.language.postfixOps
 import scala.reflect.io.File
 
-class MainController @Inject()(val messagesApi: MessagesApi,
-                               dbConfigProvider: DatabaseConfigProvider,
+class MainController @Inject()(dbConfigProvider: DatabaseConfigProvider,
+                               components: MessagesControllerComponents,
                                system: ActorSystem,
                                @Named(AkkaHelper.monitoringActor) monitoringActor: ActorRef,
                                @Named(AkkaHelper.rankingActor) rankingActor: ActorRef
-                              ) extends Controller with PermissionCheck {
-  private implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
-  private implicit val mApi: MessagesApi = messagesApi
+                              ) extends ControllerWithDBAndI18n(dbConfigProvider, components) with PermissionCheck {
 
   def problems: Action[AnyContent] = requirePermission(Everyone) { implicit user => Action.async { implicit rs =>
-    val lang = request2lang
+    val lang = rs.lang
     val suid = if (user.isDefined) user.get.id.get else -1
     val unHide = user.isDefined && user.get.hidden
     val problems = (rankingActor ? ProblemsQ(suid, lang, unHide)).mapTo[List[ProblemInfo]]
@@ -55,7 +52,7 @@ class MainController @Inject()(val messagesApi: MessagesApi,
     val unHide = user.isDefined && user.get.hidden
     (rankingActor ? RankingQ(suid, displayHiddenUsers = unHide)).mapTo[List[(Int, String, Boolean, Int, Int, Int)]].flatMap { ranking =>
       (monitoringActor ? NotificationQ).mapTo[NotificationM].flatMap {
-        case NotificationM(true) => Postings.byId(Page.notification.id, request2lang).map(_.content).map { notification =>
+        case NotificationM(true) => Postings.byId(Page.notification.id, rs.lang).map(_.content).map { notification =>
           Ok(org.ieee_passau.views.html.general.ranking(ranking, "notification" -> notification))
         }
         case _ => Future.successful(Ok(org.ieee_passau.views.html.general.ranking(ranking, "" -> "")))
@@ -70,7 +67,7 @@ class MainController @Inject()(val messagesApi: MessagesApi,
     * @param sourcecode the submitted sourcecode
     * @param filename   the file name of the source file, default: "", we will guess a proper name based on the language
     */
-  def handleSubmission(door: Int, sourcecode: String, filename: String = "")(implicit rs: Request[MultipartFormData[TemporaryFile]], user: Option[User]): Future[Result] = {
+  def handleSubmission(door: Int, sourcecode: String, filename: String = "")(implicit rs: MessagesRequest[MultipartFormData[TemporaryFile]], user: Option[User]): Future[Result] = {
     db.run(Problems.byDoor(door).result.headOption).flatMap {
       case Some(problem) if !problem.solvable => Future.successful(Unauthorized(org.ieee_passau.views.html.errors.e403()))
       case Some(problem) =>
@@ -86,7 +83,7 @@ class MainController @Inject()(val messagesApi: MessagesApi,
           // only one submission every minute per task
           case Some(lastSolution) if lastSolution.created.after(new Date(now.getTime - 60000)) && !user.get.permission.includes(Moderator) =>
             Future.successful(Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door)).flashing("danger" ->
-              (messagesApi("submit.ratelimit.message") + " " + messagesApi("submit.ratelimit.timer"))))
+              (rs.messages("submit.ratelimit.message") + " " + rs.messages("submit.ratelimit.timer"))))
           case _ =>
             solutionId.flatMap { sid =>
               db.run((for {
@@ -96,7 +93,7 @@ class MainController @Inject()(val messagesApi: MessagesApi,
               // if the last submission for this task is not evaluated yet, a new submission is only allowed every 15 minutes
               case Some(testCaseDate) if testCaseDate.after(new Date(now.getTime - 900000)) && !user.get.permission.includes(Moderator) =>
                 Future.successful(Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door)).flashing("danger" ->
-                  (messagesApi("submit.ratelimit.message") + " " + messagesApi("submit.ratelimit.queue"))))
+                  (rs.messages("submit.ratelimit.message") + " " + rs.messages("submit.ratelimit.queue"))))
               case _ =>
                 Languages.byLang(rs.body.dataParts("lang").headOption.getOrElse("")).flatMap {
                   case Some(codelang) =>
@@ -125,14 +122,14 @@ class MainController @Inject()(val messagesApi: MessagesApi,
                     } catch {
                       case _ /*pokemon*/ : Throwable => // ignore
                         Future.successful(Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
-                          .flashing("danger" -> (messagesApi("submit.error.message") + " " + messagesApi("submit.error.fileformat"))))
+                          .flashing("danger" -> (rs.messages("submit.error.message") + " " + rs.messages("submit.error.fileformat"))))
                     }
 
                     Future.successful(Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door).url + "#latest")
-                      .flashing("success" -> messagesApi("submit.success.message")))
+                      .flashing("success" -> rs.messages("submit.success.message")))
 
                   case _ => Future.successful(Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door)).flashing("danger" ->
-                    (messagesApi("submit.error.message") + " " + messagesApi("submit.error.invalidlang"))))
+                    (rs.messages("submit.error.message") + " " + rs.messages("submit.error.invalidlang"))))
                 }
             }
         }
@@ -148,22 +145,22 @@ class MainController @Inject()(val messagesApi: MessagesApi,
   def solveFile(door: Int): Action[MultipartFormData[TemporaryFile]] =
     requirePermission(Contestant, parse.multipartFormData) { implicit user => Action.async(parse.multipartFormData) { implicit rs =>
       rs.body.file("solution").map { submission =>
-        val sourceFile = submission.ref.file
+        val sourceFile = submission.ref.path.toFile
         if (sourceFile.length > 262144) {
           Future.successful(Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
-            .flashing("danger" -> (messagesApi("submit.error.message") + " " + messagesApi("submit.error.filesize"))))
+            .flashing("danger" -> (rs.messages("submit.error.message") + " " + rs.messages("submit.error.filesize"))))
         } else {
           try {
             handleSubmission(door, File(sourceFile).slurp, submission.filename)
           } catch {
             case _: MalformedInputException =>
               Future.successful(Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
-                .flashing("danger" -> (messagesApi("submit.error.message") + " " + messagesApi("submit.error.fileformat"))))
+                .flashing("danger" -> (rs.messages("submit.error.message") + " " + rs.messages("submit.error.fileformat"))))
           }
         }
       } getOrElse {
         Future.successful(Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
-          .flashing("danger" -> messagesApi("submit.error.message")))
+          .flashing("danger" -> rs.messages("submit.error.message")))
       }
     }}
 
@@ -177,13 +174,13 @@ class MainController @Inject()(val messagesApi: MessagesApi,
       rs.body.dataParts.find(_._1 == "submissiontext").map { submission =>
         if (submission._2.head.length > 262144) {
           Future.successful(Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
-            .flashing("danger" -> (messagesApi("submit.error.message") + " " + messagesApi("submit.error.filesize"))))
+            .flashing("danger" -> (rs.messages("submit.error.message") + " " + rs.messages("submit.error.filesize"))))
         } else {
           handleSubmission(door, submission._2.head)
         }
       } getOrElse {
         Future.successful(Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
-          .flashing("danger" -> messagesApi("submit.error.message")))
+          .flashing("danger" -> rs.messages("submit.error.message")))
       }
     }}
 
@@ -236,7 +233,7 @@ class MainController @Inject()(val messagesApi: MessagesApi,
             else "JAVA"
           }
 
-          val displayLang: Lang = request2lang
+          val displayLang: Lang = rs.lang
           val transQuery: Future[Option[ProblemTranslation]] = db.run(ProblemTranslations.byProblemLang(problem.id.get, displayLang.code).result.headOption)
           val transProblem = transQuery.map(pt => pt.fold(problem)(trans => problem.copy(title = trans.title, description = trans.description)))
           val status = (monitoringActor ? StatusQ).mapTo[StatusM].flatMap {

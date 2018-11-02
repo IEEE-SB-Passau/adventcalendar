@@ -15,9 +15,7 @@ import org.ieee_passau.utils.FutureHelper.akkaTimeout
 import org.ieee_passau.utils.ListHelper._
 import org.ieee_passau.utils.{AkkaHelper, FutureHelper, PermissionCheck}
 import play.api.db.slick.DatabaseConfigProvider
-import play.api.i18n.MessagesApi
 import play.api.mvc._
-import slick.driver.JdbcProfile
 import slick.driver.PostgresDriver.api._
 
 import scala.concurrent.Await
@@ -26,13 +24,11 @@ import scala.language.postfixOps
 import scala.xml.NodeSeq
 
 @Singleton
-class EvaluationController @Inject()(val messagesApi: MessagesApi,
-                                     dbConfigProvider: DatabaseConfigProvider,
+class EvaluationController @Inject()(dbConfigProvider: DatabaseConfigProvider,
+                                     components: MessagesControllerComponents,
                                      system: ActorSystem,
                                      @Named(AkkaHelper.monitoringActor) monitoringActor: ActorRef
-                                    ) extends Controller with PermissionCheck {
-  private implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
-  private implicit val mApi: MessagesApi = messagesApi
+                                    ) extends ControllerWithDBAndI18n(dbConfigProvider, components) with PermissionCheck {
 
   private def sort(key: String, list: List[SubmissionListEntry]) = {
     key match {
@@ -44,7 +40,7 @@ class EvaluationController @Inject()(val messagesApi: MessagesApi,
   }
 
   def index(page: Int, ordering: String): Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
-    val lang = request2lang
+    val lang = rs.lang
 
     val subsPerPage = 50
 
@@ -181,10 +177,10 @@ class EvaluationController @Inject()(val messagesApi: MessagesApi,
         Testruns.update(id, job.copy(result = Canceled, vm = Some("_"), evalId = None, completed = new Date, stage = None))
         monitoringActor ! JobFinished(BaseJob(0, 0, "", id, job.evalId.getOrElse(""), "", "", "", ""))
         Redirect(org.ieee_passau.controllers.routes.EvaluationController.indexQueued())
-          .flashing("success" -> messagesApi("jobs.control.cancel.message"))
+          .flashing("success" -> rs.messages("jobs.control.cancel.message"))
       case _ =>
         Redirect(org.ieee_passau.controllers.routes.EvaluationController.indexQueued())
-          .flashing("warning" -> messagesApi("jobs.error.invalidjob"))
+          .flashing("warning" -> rs.messages("jobs.error.invalidjob"))
     }
   }}
 
@@ -197,7 +193,7 @@ class EvaluationController @Inject()(val messagesApi: MessagesApi,
         progRuntime = Some(0), progMemory = Some(0), compRuntime = Some(0), compMemory = Some(0)))
     }}
     Redirect(org.ieee_passau.controllers.routes.EvaluationController.index())
-      .flashing("success" -> messagesApi("jobs.control.revaluate.message"))
+      .flashing("success" -> rs.messages("jobs.control.revaluate.message"))
   }}
 
   def registerVM: Action[NodeSeq] = requirePermission(Internal, parse.xml) { _ => Action[NodeSeq](parse.xml) { implicit rs =>

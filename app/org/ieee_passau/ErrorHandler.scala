@@ -8,9 +8,10 @@ import org.ieee_passau.utils.PermissionCheck
 import play.api._
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.http.DefaultHttpErrorHandler
-import play.api.i18n.MessagesApi
+import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.mailer.{Email, MailerClient}
-import play.api.mvc.{RequestHeader, Result}
+import play.api.mvc.Results._
+import play.api.mvc.{Flash, RequestHeader, Result}
 import play.api.routing.Router
 import slick.driver.JdbcProfile
 import slick.driver.PostgresDriver.api._
@@ -23,16 +24,16 @@ class ErrorHandler @Inject()(env: Environment,
                              config: Configuration,
                              sourceMapper: OptionalSourceMapper,
                              router: Provider[Router],
-                             dbConfigProvider: DatabaseConfigProvider,
                              mailerClient: MailerClient,
-                             mApi: MessagesApi
-                            ) extends DefaultHttpErrorHandler(env, config, sourceMapper, router) with PermissionCheck {
+                             dbConfigProvider: DatabaseConfigProvider,
+                             val messagesApi: MessagesApi
+                            ) extends DefaultHttpErrorHandler(env, config, sourceMapper, router) with I18nSupport {
   implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
-  implicit val messagesApi: MessagesApi = mApi
 
   override protected def onProdServerError(request: RequestHeader, exception: UsefulException): Future[Result] = {
-    getUserFromRequest(request).map(maybeUser => {
+    PermissionCheck.getUserFromRequest(request).map(maybeUser => {
       implicit val rs: RequestHeader = request
+      implicit val flash: Flash = rs.flash
       implicit val sessionUser: Option[User] = maybeUser
       val id = exception match {
         case pex: PlayException =>
@@ -67,17 +68,19 @@ class ErrorHandler @Inject()(env: Environment,
   }
 
   override protected def onBadRequest(request: RequestHeader, message: String): Future[Result] = {
-    getUserFromRequest(request).map(maybeUser => {
+    PermissionCheck.getUserFromRequest(request).map(maybeUser => {
       implicit val rs: RequestHeader = request
       implicit val sessionUser: Option[User] = maybeUser
+      implicit val flash: Flash = rs.flash
       InternalServerError(views.html.errors.e404())
     })
   }
 
   override protected def onNotFound(request: RequestHeader, message: String): Future[Result] = {
-    getUserFromRequest(request).map(maybeUser => {
+    PermissionCheck.getUserFromRequest(request).map(maybeUser => {
       implicit val rs: RequestHeader = request
       implicit val sessionUser: Option[User] = maybeUser
+      implicit val flash: Flash = rs.flash
       InternalServerError(views.html.errors.e404())
     })
   }

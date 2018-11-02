@@ -1,27 +1,26 @@
 @import org.ieee_passau.models.User
 @import org.ieee_passau.views.html.main
-@import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.Flash
-@(numJobs1H: Int, vms1H: List[(String, Int)], langs1H: List[(String, Int)], numJobsFull: Int, vmsFull: List[(String, Int)], langsFull: List[(String, Int)])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
+@(numJobs1H: Int, vms1H: List[(String, Int)], langs1H: List[(String, Int)], numJobsFull: Int, vmsFull: List[(String, Int)], langsFull: List[(String, Int)])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
 
-@main(messagesApi("nav.admin.stats")) {
-    <div class="row"><div class="col-sm-12"><h3>@messagesApi("general.lasthour")</h3></div></div>
+@main(messages("nav.admin.stats")) {
+    <div class="row"><div class="col-sm-12"><h3>@messages("general.lasthour")</h3></div></div>
     <div class="row"><div class="col-sm-6">
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>@messagesApi("status.vm.id")</th>
-                    <th>@messagesApi("general.count")</th>
+                    <th>@messages("status.vm.id")</th>
+                    <th>@messages("general.count")</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>@messagesApi("general.sum")</td>
+                    <td>@messages("general.sum")</td>
                     <td>@numJobs1H</td>
                 </tr>
             @vms1H.map { case (vm, num) =>
                 <tr>
-                    <td>@if(vm == "_") { @messagesApi("status.canceled") } else { @vm }</td>
+                    <td>@if(vm == "_") { @messages("status.canceled") } else { @vm }</td>
                     <td>@num</td>
                 </tr>
             }
@@ -32,8 +31,8 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>@messagesApi("codelang.title")</th>
-                    <th>@messagesApi("general.count")</th>
+                    <th>@messages("codelang.title")</th>
+                    <th>@messages("general.count")</th>
                 </tr>
             </thead>
             <tbody>
@@ -47,23 +46,23 @@
         </table>
     </div></div>
 
-    <div class="row"><div class="col-sm-12"><h3>@messagesApi("general.sum")</h3></div></div>
+    <div class="row"><div class="col-sm-12"><h3>@messages("general.sum")</h3></div></div>
     <div class="row"><div class="col-sm-6">
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>@messagesApi("status.vm.id")</th>
-                    <th>@messagesApi("general.count")</th>
+                    <th>@messages("status.vm.id")</th>
+                    <th>@messages("general.count")</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>@messagesApi("general.sum")</td>
+                    <td>@messages("general.sum")</td>
                     <td>@numJobsFull</td>
                 </tr>
             @vmsFull.map { case (vm, num) =>
                 <tr>
-                    <td>@if(vm == "_") { @messagesApi("status.canceled") } else { @vm }</td>
+                    <td>@if(vm == "_") { @messages("status.canceled") } else { @vm }</td>
                     <td>@num</td>
                 </tr>
             }
@@ -74,8 +73,8 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>@messagesApi("codelang.title")</th>
-                    <th>@messagesApi("general.count")</th>
+                    <th>@messages("codelang.title")</th>
+                    <th>@messages("general.count")</th>
                 </tr>
             </thead>
             <tbody>

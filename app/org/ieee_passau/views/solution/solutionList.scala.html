@@ -1,10 +1,8 @@
 @import org.ieee_passau.controllers.Beans.SolutionListEntry
 @import org.ieee_passau.models.{Canceled, CompileError, Language, Moderator, Page, Passed, Private, Public, Queued, User}
 @import org.ieee_passau.utils.ViewHelper.isErrorResult
-@import play.api.i18n.{Lang, MessagesApi}
 @import play.twirl.api.Html
-@import play.twirl.api.TemplateMagic._
-@(solutions: List[SolutionListEntry], languages: List[Language], showAll: Boolean = false, first: Boolean = true)(implicit sessionUser: Option[User], messagesApi: MessagesApi, lang: Lang)
+@(solutions: List[SolutionListEntry], languages: List[Language], showAll: Boolean = false, first: Boolean = true)(implicit sessionUser: Option[User], messages: Messages)
 @* @param showAll: show also details for private testcases
  * @param first:   special handling first element in solution list if true (default)
  *@
@@ -19,22 +17,22 @@
             @* Panel Header *@
             <div class="panel-heading"><h3 class="panel-title">
                 <a data-toggle="collapse" data-target="#solution@s.position" href="#solution@s.position">
-                    @if(s.state == Queued) { <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>} @messagesApi("solution.title") @s.position
+                    @if(s.state == Queued) { <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>} @messages("solution.title") @s.position
                     <span class="pull-right">
-                        @s.testcases.filter(_.testrun.result == Passed).map(_.testcase.points).sum / @s.testcases.map(_.testcase.points).sum @messagesApi("testcase.points")
+                        @s.testcases.filter(_.testrun.result == Passed).map(_.testcase.points).sum / @s.testcases.map(_.testcase.points).sum @messages("testcase.points")
                     </span>
                 </a>
             </h3></div>
 
             <div id="solution@s.position" class="panel-collapse collapse @if(first && solutions.head == s) { in }"><div class="panel-body">
                 <p>
-                    <Strong>@messagesApi("solution.state"):</Strong>
-                    @Html(messagesApi(s.state.toString, org.ieee_passau.controllers.routes.CmsController.content(Page.contact.toString)))
+                    <Strong>@messages("solution.state"):</Strong>
+                    @Html(messages(s.state.toString, org.ieee_passau.controllers.routes.CmsController.content(Page.contact.toString)))
                 </p>
 
                 <p><button type="button" class="btn" data-toggle="collapse" data-target="#code@s.position">
                     <span class="glyphicon glyphicon-eye-open"></span>
-                    @messagesApi("submission.program_source") (@languages.filter(_.id == s.solution.language).map{l=>@l.name})
+                    @messages("submission.program_source") (@languages.filter(_.id == s.solution.language).map{l=>@l.name})
                 </button></p>
 
                 <div id="code@s.position" class="collapse">
@@ -49,54 +47,54 @@
                         @if(t.testrun.result == Canceled) { panel-warning }">
                         <div class="panel-heading"><h3 class="panel-title">
                             <a data-toggle="collapse" data-target="#solution@(s.position)_@(t.position)" href="#solution@(s.position)_@(t.position)">
-                                @messagesApi("testcase.title") @t.position @if(t.testcase.visibility == Private) { (@messagesApi(Private.toString)) }
-                                <span class="pull-right">@t.testcase.points @messagesApi("testcase.points")</span>
+                                @messages("testcase.title") @t.position @if(t.testcase.visibility == Private) { (@messages(Private.toString)) }
+                                <span class="pull-right">@t.testcase.points @messages("testcase.points")</span>
                             </a>
                         </h3></div>
 
                         <div id="solution@(s.position)_@(t.position)" class="panel-collapse collapse @if(t.testrun.result != Passed) { in }"><div class="panel-body">
                             <p>
                                 <strong>Status:</strong>
-                                @if(t.testrun.stage.isDefined) { @Html(messagesApi(Queued.toString)) } else { @Html(messagesApi(t.testrun.result.toString, org.ieee_passau.controllers.routes.CmsController.content(Page.contact.toString))) }
+                                @if(t.testrun.stage.isDefined) { @Html(messages(Queued.toString)) } else { @Html(messages(t.testrun.result.toString, org.ieee_passau.controllers.routes.CmsController.content(Page.contact.toString))) }
                             </p>
 
                             @if(t.testrun.stage.isEmpty && (t.testcase.visibility == Public || showAll)) {
-                                <p><strong>@messagesApi("submission.compiler_return"):</strong> @t.testrun.compExit</p>
+                                <p><strong>@messages("submission.compiler_return"):</strong> @t.testrun.compExit</p>
 
-                                @messagesApi("submission.compiler_output"):
+                                @messages("submission.compiler_output"):
                                 <pre>@t.testrun.compOut</pre>
 
                                 @if(t.testrun.compErr.isDefined && t.testrun.compErr.get.length > 0) {
-                                    @messagesApi("submission.compiler_error"):
+                                    @messages("submission.compiler_error"):
                                     <pre>@t.testrun.compErr</pre>
                                 }
 
                                 @if(t.testrun.result != CompileError) {
-                                    @messagesApi("submission.program_input"):
+                                    @messages("submission.program_input"):
                                     <pre>@t.testcase.input</pre>
 
                                     <div class="row">
                                         <div  class="col-sm-6">
-                                            @messagesApi("submission.expected_output"):
+                                            @messages("submission.expected_output"):
 @* keep newlines and formatting: https://www.w3.org/TR/html5/syntax.html#restrictions-on-content-models *@
                                             <pre class="expected-output">
 @t.testcase.expectedOutput</pre>
                                         </div>
                                         <div class="col-sm-6">
-                                            @messagesApi("submission.program_output"):
+                                            @messages("submission.program_output"):
                                             <pre class="actual-output">
 @t.testrun.progOut</pre>
                                         </div>
                                     </div>
 
                                     @if(t.testrun.progErr.isDefined && t.testrun.progErr.get.length > 0) {
-                                        @messagesApi("submission.program_error"):
+                                        @messages("submission.program_error"):
                                         <pre>@t.testrun.progErr</pre>
                                     }
 
-                                    <p><strong>@messagesApi("submission.program_return"):</strong> @t.testrun.progExit.getOrElse("/")</p>
-                                    <p><strong>@messagesApi("submission.program_runtime"):</strong> @t.testrun.progRuntime.getOrElse(0f).formatted("%.2f") @messagesApi("general.seconds")</p>
-                                    <p><strong>@messagesApi("submission.program_memory"):</strong> @defining(t.testrun.progMemory.getOrElse(0)) { mem: Int =>
+                                    <p><strong>@messages("submission.program_return"):</strong> @t.testrun.progExit.getOrElse("/")</p>
+                                    <p><strong>@messages("submission.program_runtime"):</strong> @t.testrun.progRuntime.getOrElse(0f).formatted("%.2f") @messages("general.seconds")</p>
+                                    <p><strong>@messages("submission.program_memory"):</strong> @defining(t.testrun.progMemory.getOrElse(0)) { mem: Int =>
                                         @if(mem < 1024)               { @mem                     B} else {
                                         @if(mem < 1024 * 1024)        { @(mem/1024)             kB} else {
                                         @if(mem < 1024 * 1024 * 1024) { @(mem/(1024*1024))      MB} else {
@@ -104,8 +102,8 @@
                                     }</p>
                                 }
                                 @if(sessionUser.isDefined && sessionUser.get.permission.includes(Moderator)) {
-                                    <p><strong>@messagesApi("submission.evalid"):</strong> @t.testrun.evalId</p>
-                                    <p><strong>@messagesApi("submission.completed"):</strong> <abbr class="timeago" title="@t.testrun.completed.format("yyyy-MM-dd'T'HH:mm:ssZ")">@t.testrun.completed.format("yyyy-MM-dd HH:mm:ss")</abbr></p>
+                                    <p><strong>@messages("submission.evalid"):</strong> @t.testrun.evalId</p>
+                                    <p><strong>@messages("submission.completed"):</strong> <abbr class="timeago" title="@t.testrun.completed.format("yyyy-MM-dd'T'HH:mm:ssZ")">@t.testrun.completed.format("yyyy-MM-dd HH:mm:ss")</abbr></p>
                                 }
                             }
                         </div></div>

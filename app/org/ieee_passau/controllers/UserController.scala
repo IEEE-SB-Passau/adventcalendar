@@ -8,23 +8,20 @@ import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.db.slick.DatabaseConfigProvider
-import play.api.i18n.{Lang, Langs, MessagesApi}
+import play.api.i18n.{Lang, Langs}
 import play.api.libs.mailer._
 import play.api.mvc._
-import slick.driver.JdbcProfile
 import slick.driver.PostgresDriver.api._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class UserController @Inject()(val messagesApi: MessagesApi,
+class UserController @Inject()(dbConfigProvider: DatabaseConfigProvider,
+                               components: MessagesControllerComponents,
                                langs: Langs,
-                               dbConfigProvider: DatabaseConfigProvider,
                                val captchaHelper: CaptchaHelper,
                                mailerClient: MailerClient,
-                               configuration: Configuration) extends Controller with PermissionCheck {
-  private implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
-  private implicit val mApi: MessagesApi = messagesApi
+                               configuration: Configuration) extends ControllerWithDBAndI18n(dbConfigProvider, components) with PermissionCheck {
   private implicit val config: Configuration = configuration
 
   def index: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
@@ -48,7 +45,7 @@ class UserController @Inject()(val messagesApi: MessagesApi,
   def impersonate(id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     db.run(Users.byId(id).result.headOption).map {
       case Some(user) => Redirect(org.ieee_passau.controllers.routes.CmsController.calendar())
-        .flashing("success" -> messagesApi("user.impersonate.message", user.username))
+        .flashing("success" -> rs.messages("user.impersonate.message", user.username))
         .withSession("user" -> user.id.get.toString)
       case _ => NotFound(org.ieee_passau.views.html.errors.e404())
     }
@@ -67,7 +64,7 @@ class UserController @Inject()(val messagesApi: MessagesApi,
         val baseForm = loginForm.bind(Map("username" -> errorForm("username").value.getOrElse("")))
         val form = if (errorForm.hasGlobalErrors)
           // if global error -> login failed due to failed auth, clear the pass to short error
-          baseForm.discardingErrors.withGlobalError(messagesApi("user.login.error"))
+          baseForm.discardingErrors.withGlobalError(rs.messages("user.login.error"))
         else baseForm
         BadRequest(org.ieee_passau.views.html.user.login(form))
       },
@@ -76,7 +73,7 @@ class UserController @Inject()(val messagesApi: MessagesApi,
         val user: User = userLogin.user.get
         val uid = user.id.get.toString
         Redirect(org.ieee_passau.controllers.routes.CmsController.calendar())
-          .flashing("success" -> messagesApi("user.login.message", user.username))
+          .flashing("success" -> rs.messages("user.login.message", user.username))
           .withSession("user" -> uid)
           .withCookies(
             Cookie(messagesApi.langCookieName,
@@ -89,8 +86,7 @@ class UserController @Inject()(val messagesApi: MessagesApi,
 
   def logout: Action[AnyContent] = requirePermission(Contestant) { implicit user => Action { implicit rs =>
     Redirect(org.ieee_passau.controllers.routes.CmsController.calendar())
-      .flashing("success" -> messagesApi("user.logout.message", user.get.username))
-      .withNewSession;
+      .flashing("success" -> rs.messages("user.logout.message", user.get.username)).withNewSession;
   }}
 
   def register: Action[AnyContent] = requirePermission(Guest) { implicit guest => Action { implicit rs =>
@@ -104,7 +100,8 @@ class UserController @Inject()(val messagesApi: MessagesApi,
       },
 
       registration => {
-        val createdUser: User = registration.makeUser(request2lang)
+        implicit val sessionLang: Lang = rs.lang
+        val createdUser: User = registration.makeUser(sessionLang)
         val link = org.ieee_passau.controllers.routes.UserController.activate(createdUser.activationToken.get)
           .absoluteURL(secure = play.Configuration.root().getBoolean("application.https", false))
         val regMail = Email(
@@ -140,15 +137,13 @@ class UserController @Inject()(val messagesApi: MessagesApi,
   def activate(token: String): Action[AnyContent] = requirePermission(Guest) { _ => Action.async { implicit rs =>
     db.run(Users.byToken(token).result.headOption).map {
       case Some(user) =>
-        implicit val sessionUser: User = user
         Users.update(user.id, user.copy(active = true, activationToken = None))
         Redirect(org.ieee_passau.controllers.routes.CmsController.calendar())
-          .flashing("success" -> messagesApi("user.register.message", user.username))
+          .flashing("success" -> rs.messages("user.register.message", user.username))
           .addingToSession("user" -> user.id.get.toString)
-
       case None =>
         Redirect(org.ieee_passau.controllers.routes.CmsController.calendar())
-          .flashing("warning" -> messagesApi("error.invalidlink"))
+          .flashing("warning" -> rs.messages("error.invalidlink"))
     }
   }}
 
@@ -169,16 +164,16 @@ class UserController @Inject()(val messagesApi: MessagesApi,
             val link = org.ieee_passau.controllers.routes.UserController.editPassword(token)
               .absoluteURL(secure = config.getBoolean("application.https").getOrElse(false))
             val regMail = Email(
-              subject = messagesApi("email.header") + " " + messagesApi("email.passwordreset.subject"),
+              subject = rs.messages("email.header") + " " + rs.messages("email.passwordreset.subject"),
               from = config.getString("email.from").getOrElse(""),
               to = List(user.email),
-              bodyText = Some(messagesApi("email.passwordreset.body", user.username, link))
+              bodyText = Some(rs.messages("email.passwordreset.body", user.username, link))
             )
             mailerClient.send(regMail)
             Users.update(user.id, user.copy(activationToken = Some(token)))
 
             Redirect(org.ieee_passau.controllers.routes.UserController.login())
-              .flashing("success" -> messagesApi("user.register.verify.message"))
+              .flashing("success" -> rs.messages("user.register.verify.message"))
           case _ => NotFound(org.ieee_passau.views.html.errors.e404())
         }
       }
@@ -196,7 +191,7 @@ class UserController @Inject()(val messagesApi: MessagesApi,
 
         case None =>
           Redirect(org.ieee_passau.controllers.routes.CmsController.calendar())
-            .flashing("danger" -> messagesApi("error.invalidlink"))
+            .flashing("danger" -> rs.messages("error.invalidlink"))
       }
     }
   }}
@@ -219,7 +214,7 @@ class UserController @Inject()(val messagesApi: MessagesApi,
           }
 
           Redirect(org.ieee_passau.controllers.routes.CmsController.calendar())
-            .flashing("success" -> messagesApi("user.login.message"))
+            .flashing("success" -> rs.messages("user.login.message"))
         }
       )
     }
@@ -229,8 +224,7 @@ class UserController @Inject()(val messagesApi: MessagesApi,
     val maybeLang = Lang.get(lang)
     if (maybeLang.isEmpty || !langs.availables.contains(maybeLang.get)) {
       Redirect(org.ieee_passau.controllers.routes.CmsController.calendar())
-        .flashing("danger" -> messagesApi("language.unsupported"))
-
+        .flashing("danger" -> rs.messages("language.unsupported"))
     } else {
       if (user.nonEmpty) {
         Users.update(user.get.id, user.get.copy(lang = Some(lang)))
@@ -259,7 +253,7 @@ class UserController @Inject()(val messagesApi: MessagesApi,
             val password = if (user.password.isEmpty) dbUser.password else PasswordHasher.hashPassword(user.password)
             Users.update(dbUser.id, user.copy(password = password, activationToken = dbUser.activationToken, lang = dbUser.lang))
             Redirect(org.ieee_passau.controllers.routes.UserController.edit(id))
-              .flashing("success" -> messagesApi("user.update.message", user.username))
+              .flashing("success" -> rs.messages("user.update.message", user.username))
           case _ => NotFound(org.ieee_passau.views.html.errors.e404())
         }
       }

@@ -1,18 +1,14 @@
 package org.ieee_passau.utils
 
 import org.ieee_passau.models.{Guest, Permission, User, Users, _}
-import play.api.i18n.MessagesApi
+import play.api.i18n.I18nSupport
 import play.api.mvc._
 import slick.driver.PostgresDriver.api._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-/**
-  * This class provides handy wrappers for actions to check if a user is authorized to do something.
-  */
-trait PermissionCheck extends Controller {
-
+object PermissionCheck {
   /**
     * Get a user based on the given request. First tries to get a user from the session, if no user (valid or invalid)
     * is present, tries to use a given access token to identify the user, internal users only.
@@ -21,7 +17,7 @@ trait PermissionCheck extends Controller {
     * @return optionally the user in the session ot specified by the token
     */
   def getUserFromRequest(request: RequestHeader)(implicit db: Database): Future[Option[User]] = {
-    request2session(request).get("user").map { uid =>
+    request.session.get("user").map { uid =>
       db.run(Users.byId(uid.toInt).result.headOption).flatMap {
         case Some(x) => Future.successful(Some(x))
         case _ =>
@@ -35,6 +31,14 @@ trait PermissionCheck extends Controller {
       }
     }.getOrElse(Future.successful(None))
   }
+}
+
+/**
+  * This class provides handy wrappers for actions to check if a user is authorized to do something.
+  */
+trait PermissionCheck extends MessagesBaseController with I18nSupport {
+
+
 
   /**
     * Requires the given permission level to execute the given action
@@ -44,11 +48,11 @@ trait PermissionCheck extends Controller {
     * @return an asynchronous action
     */
 
-  def requirePermission(level: Permission)(f: => Option[User] => Action[AnyContent])(implicit db: Database, messagesApi: MessagesApi): Action[AnyContent] = Action.async { implicit rs =>
-    getUserFromRequest(rs).flatMap {
+  def requirePermission(level: Permission)(f: => Option[User] => Action[AnyContent])(implicit db: Database): Action[AnyContent] = Action.async { implicit rs =>
+    PermissionCheck.getUserFromRequest(rs).flatMap {
       case Some(u) if u.active && u.permission.includes(level) => f(Some(u))(rs)
       case None if Guest.includes(level) => f(None)(rs)
-      case _ => Future.successful(Unauthorized(org.ieee_passau.views.html.errors.e403()(request2flash, None, rs, messagesApi, request2lang)))
+      case _ => Future.successful(Unauthorized(org.ieee_passau.views.html.errors.e403()(rs.flash, None, rs, rs.messages)))
     }
   }
 
@@ -62,11 +66,11 @@ trait PermissionCheck extends Controller {
     * @return an asynchronous action
     */
 
-  def requirePermission[A](level: Permission, bp: BodyParser[A])(f: => Option[User] => Action[A])(implicit db: Database, messagesApi: MessagesApi): Action[A] = Action.async(bp) { implicit rs =>
-    getUserFromRequest(rs).flatMap({
+  def requirePermission[A](level: Permission, bp: BodyParser[A])(f: => Option[User] => Action[A])(implicit db: Database): Action[A] = Action.async(bp) { implicit rs =>
+    PermissionCheck.getUserFromRequest(rs).flatMap({
       case Some(u) if u.active && u.permission.includes(level) => f(Some(u))(rs)
       case None if Guest.includes(level) => f(None)(rs)
-      case _ => Future.successful(Unauthorized(org.ieee_passau.views.html.errors.e403()(request2flash, None, rs, messagesApi, request2lang)))
+      case _ => Future.successful(Unauthorized(org.ieee_passau.views.html.errors.e403()(rs.flash, None, rs, rs.messages)))
     })
   }
 }

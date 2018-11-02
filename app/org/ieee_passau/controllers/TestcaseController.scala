@@ -8,17 +8,15 @@ import org.ieee_passau.utils.PermissionCheck
 import play.api.data.Form
 import play.api.data.Forms.{mapping, number, optional, _}
 import play.api.db.slick.DatabaseConfigProvider
-import play.api.i18n.MessagesApi
 import play.api.mvc._
-import slick.driver.JdbcProfile
 import slick.driver.PostgresDriver.api._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class TestcaseController @Inject()(val messagesApi: MessagesApi, dbConfigProvider: DatabaseConfigProvider) extends Controller with PermissionCheck {
-  private implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
-  private implicit val mApi: MessagesApi = messagesApi
+class TestcaseController @Inject()(dbConfigProvider: DatabaseConfigProvider,
+                                   components: MessagesControllerComponents
+                                  ) extends ControllerWithDBAndI18n(dbConfigProvider, components) with PermissionCheck {
 
   def edit(pid: Int, id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     db.run(Testcases.byId(id).result.headOption).flatMap {
@@ -61,7 +59,7 @@ class TestcaseController @Inject()(val messagesApi: MessagesApi, dbConfigProvide
             db.run(Testruns += Testrun(None, s, tuple._1, None, None, None, None, None, None, None, None, None, None, Queued, None, now, Some(0), None, None, now))
           )
           Redirect(org.ieee_passau.controllers.routes.TestcaseController.edit(pid, tuple._1))
-            .flashing("success" -> messagesApi("testcase.create.message", newTestcase.position))
+            .flashing("success" -> rs.messages("testcase.create.message", newTestcase.position))
         }
       }
     )
@@ -92,7 +90,7 @@ class TestcaseController @Inject()(val messagesApi: MessagesApi, dbConfigProvide
           )
 
           Redirect(org.ieee_passau.controllers.routes.TestcaseController.edit(pid, id))
-            .flashing("success" -> messagesApi("testcase.update.message", testcase.position))
+            .flashing("success" -> rs.messages("testcase.update.message", testcase.position))
         }
       }
     )

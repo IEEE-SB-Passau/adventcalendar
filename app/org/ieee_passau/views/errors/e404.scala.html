@@ -1,11 +1,9 @@
-@import org.ieee_passau.models.{User, Page}
+@import org.ieee_passau.models.{Page, User}
 @import org.ieee_passau.views.html.main
-@import play.api.i18n.{Lang, MessagesApi}
-@import play.api.mvc.Flash
+@import play.api.mvc.{Flash, RequestHeader}
 @import play.twirl.api.Html
-@import play.api.mvc.RequestHeader
-@()(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
+@()(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
 
-@main(messagesApi("error.404.short")) {
-    <p>@Html(messagesApi("error.404.long", org.ieee_passau.controllers.routes.CmsController.content(Page.contact.toString)))</p>
-}(Flash.emptyCookie, sessionUser, requestHeader, messagesApi, lang)
+@main(messages("error.404.short")) {
+    <p>@Html(messages("error.404.long", org.ieee_passau.controllers.routes.CmsController.content(Page.contact.toString)))</p>
+}(Flash.emptyCookie, sessionUser, requestHeader, messages)

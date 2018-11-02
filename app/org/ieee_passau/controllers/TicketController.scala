@@ -10,18 +10,18 @@ import org.ieee_passau.utils.{FormHelper, PermissionCheck}
 import play.api.data.Form
 import play.api.data.Forms.{mapping, number, optional, text}
 import play.api.db.slick.DatabaseConfigProvider
-import play.api.i18n.MessagesApi
+import play.api.i18n.I18nSupport
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc._
-import slick.driver.JdbcProfile
 import slick.driver.PostgresDriver.api._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class TicketController @Inject()(val messagesApi: MessagesApi, dbConfigProvider: DatabaseConfigProvider, mailerClient: MailerClient) extends Controller with PermissionCheck {
-  private implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
-  private implicit val mApi: MessagesApi = messagesApi
+class TicketController @Inject()(dbConfigProvider: DatabaseConfigProvider,
+                                 components: MessagesControllerComponents,
+                                 mailerClient: MailerClient
+                                ) extends ControllerWithDBAndI18n(dbConfigProvider, components) with PermissionCheck with I18nSupport {
 
   def index: Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
     val responsesQuery = for {
@@ -65,10 +65,10 @@ class TicketController @Inject()(val messagesApi: MessagesApi, dbConfigProvider:
     FormHelper.ticketForm.bindFromRequest.fold(
       _ => {
         Future.successful(Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
-          .flashing("danger" -> messagesApi("ticket.create.error")))
+          .flashing("danger" -> rs.messages("ticket.create.error")))
       },
       ticket => {
-        val language = request2lang
+        val language = rs.lang
 
         db.run(Problems.byDoor(door).result.headOption).flatMap {
           case Some(problem) =>
@@ -77,21 +77,21 @@ class TicketController @Inject()(val messagesApi: MessagesApi, dbConfigProvider:
               val now = new Date()
               db.run((Tickets returning Tickets.map(_.id)) += Ticket(None, problem.id, user.get.id, None, ticket.text, public = false, now, language)).map { id =>
                 val email = Email(
-                  subject = messagesApi("email.header") + " " +  messagesApi("ticket.title") + " zu " + messagesApi("problem.title") + " " + problem.door + ": " + problemTitle,
+                  subject = rs.messages("email.header") + " " +  rs.messages("ticket.title") + " zu " + rs.messages("problem.title") + " " + problem.door + ": " + problemTitle,
                   from = encodeEmailName(user.get.username) + " @ " + play.Configuration.root().getString("email.from"),
                   to = List(play.Configuration.root().getString("email.from")),
-                  bodyText = Some(ticket.text + "\n\n" + messagesApi("ticket.answer") + ": " + org.ieee_passau.controllers.routes.TicketController.view(id).absoluteURL(play.Configuration.root().getBoolean("application.https", false)))
+                  bodyText = Some(ticket.text + "\n\n" + rs.messages("ticket.answer") + ": " + org.ieee_passau.controllers.routes.TicketController.view(id).absoluteURL(play.Configuration.root().getBoolean("application.https", false)))
                 )
                 mailerClient.send(email)
 
                 Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
-                  .flashing("success" -> messagesApi("ticket.create.message"))
+                  .flashing("success" -> rs.messages("ticket.create.message"))
               }
             }
 
           case _ =>
             Future.successful(Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
-              .flashing("danger" -> messagesApi("ticket.create.error")))
+              .flashing("danger" -> rs.messages("ticket.create.error")))
         }
       }
     )
@@ -101,7 +101,7 @@ class TicketController @Inject()(val messagesApi: MessagesApi, dbConfigProvider:
     FormHelper.ticketForm.bindFromRequest.fold(
       _ => {
         Future.successful(Redirect(org.ieee_passau.controllers.routes.TicketController.index())
-          .flashing("danger" -> messagesApi("ticket.answer.error")))
+          .flashing("danger" -> rs.messages("ticket.answer.error")))
       },
       ticket => {
         db.run(Tickets.byId(id).result.headOption).flatMap {
@@ -118,7 +118,7 @@ class TicketController @Inject()(val messagesApi: MessagesApi, dbConfigProvider:
                     db.run(ProblemTranslations.byProblemLang(problem.id.get, msgLang).result.headOption).map { maybeProblemTitle =>
                       val problemTitle = maybeProblemTitle.fold(problem.title)(_.title)
                       val email = Email(
-                        subject = messagesApi("email.header")(msgLang) + " " + messagesApi("email.answer.subject", messagesApi("ticket.title")(msgLang) +  " zu " + messagesApi("problem.title")(msgLang) + " " + problem.door + ": " + problemTitle)(msgLang),
+                        subject = rs.messagesApi("email.header")(msgLang) + " " + rs.messagesApi("email.answer.subject", rs.messagesApi("ticket.title")(msgLang) +  " zu " + rs.messagesApi("problem.title")(msgLang) + " " + problem.door + ": " + problemTitle)(msgLang),
                         from = encodeEmailName(mod.get.username) + " @ " + play.Configuration.root().getString("email.from"),
                         to = List(recipient.email),
                         cc = List(play.Configuration.root().getString("email.from")),
@@ -126,16 +126,16 @@ class TicketController @Inject()(val messagesApi: MessagesApi, dbConfigProvider:
                       )
                       mailerClient.send(email)
                       Redirect(org.ieee_passau.controllers.routes.TicketController.index())
-                        .flashing("success" -> messagesApi("ticket.answer.message"))
+                        .flashing("success" -> rs.messages("ticket.answer.message"))
                     }
                   case _ => Future.successful(Redirect(org.ieee_passau.controllers.routes.TicketController.index())
-                    .flashing("danger" -> messagesApi("ticket.answer.error")))
+                    .flashing("danger" -> rs.messages("ticket.answer.error")))
                 }
               case _ => Future.successful(Redirect(org.ieee_passau.controllers.routes.TicketController.index())
-                .flashing("danger" -> messagesApi("ticket.answer.error")))
+                .flashing("danger" -> rs.messages("ticket.answer.error")))
             }
           case _ => Future.successful(Redirect(org.ieee_passau.controllers.routes.TicketController.index())
-            .flashing("danger" -> messagesApi("ticket.answer.error")))
+            .flashing("danger" -> rs.messages("ticket.answer.error")))
         }
       }
     )
@@ -159,7 +159,7 @@ class TicketController @Inject()(val messagesApi: MessagesApi, dbConfigProvider:
       fb => {
         db.run(Feedbacks += Feedback(None, user.get.id.get, fb.rating, fb.pro, fb.con, fb.freetext)).map(_ =>
           Redirect(org.ieee_passau.controllers.routes.CmsController.calendar())
-          .flashing("success" -> messagesApi("feedback.submit.message"))
+          .flashing("success" -> rs.messages("feedback.submit.message"))
         )
       }
     )

@@ -2,19 +2,18 @@
 @import org.ieee_passau.models.User
 @import org.ieee_passau.utils.ViewHelper._
 @import org.ieee_passau.views.html.main
-@import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.{Flash, RequestHeader}
-@(users: List[User])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
+@(users: List[User])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
 
-@main(messagesApi("user.list.title")) {
+@main(messages("user.list.title")) {
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>@messagesApi("general.id")</th>
-                <th>@messagesApi("user.title")</th>
-                <th>@messagesApi("user.email")</th>
-                <th>@messagesApi("user.active")</th>
-                <th>@messagesApi("user.permission")</th>
+                <th>@messages("general.id")</th>
+                <th>@messages("user.title")</th>
+                <th>@messages("user.email")</th>
+                <th>@messages("user.active")</th>
+                <th>@messages("user.permission")</th>
                 <th></th>
             </tr>
         </thead>
@@ -25,12 +24,12 @@
                 <td>@user.username</td>
                 <td>@user.email</td>
                 <td>@showCheckmark(user.active)</td>
-                <td>@messagesApi(user.permission.name.toLowerCase)</td>
+                <td>@messages(user.permission.name.toLowerCase)</td>
                 <td>
                     <a href="@org.ieee_passau.controllers.routes.UserController.edit(user.id.get)" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span></a>
                     <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.UserController.delete(user.id.get)">
                         @CSRF.formField
-                        <button type="submit" onclick="return(window.confirm('@messagesApi("general.delete.confirm")'))" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span></button>
+                        <button type="submit" onclick="return(window.confirm('@messages("general.delete.confirm")'))" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span></button>
                     </form>
                 </td>
             </tr>

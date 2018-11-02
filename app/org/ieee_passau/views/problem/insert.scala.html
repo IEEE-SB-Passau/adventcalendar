@@ -2,15 +2,14 @@
 @import org.ieee_passau.models.{EvalMode, Problem, User}
 @import org.ieee_passau.views.html.main
 @import play.api.data.Form
-@import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.{Flash, RequestHeader}
-@(problem: Form[Problem], evalModes: List[EvalMode])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
+@(problem: Form[Problem], evalModes: List[EvalMode])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
 
-@main(messagesApi("problem.create")) {
+@main(messages("problem.create")) {
 
     <ol class="breadcrumb">
-        <li><a href="@org.ieee_passau.controllers.routes.ProblemController.index">@messagesApi("general.listoverview")</a></li>
-        <li class="active">@messagesApi("problem.title")</li>
+        <li><a href="@org.ieee_passau.controllers.routes.ProblemController.index">@messages("general.listoverview")</a></li>
+        <li class="active">@messages("problem.title")</li>
     </ol>
 
     @form(org.ieee_passau.controllers.routes.ProblemController.save, 'class -> "form-horizontal") {

@@ -1,21 +1,19 @@
 @import org.ieee_passau.models.{Language, User}
 @import org.ieee_passau.utils.MathHelper
 @import org.ieee_passau.views.html.main
-@import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.RequestHeader
-@import play.twirl.api.TemplateMagic._
 @import org.ieee_passau.models.Admin
-@(languages: List[Language])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
+@(languages: List[Language])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
 
-@main(messagesApi("codelang.list.title") + " ") {
+@main(messages("codelang.list.title") + " ") {
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>@messagesApi("codelang.title")</th>
-                <th>@messagesApi("codelang.name")</th>
-                <th>@messagesApi("codelang.time")</th>
-                <th>@messagesApi("codelang.memory")</th>
-                <th>@messagesApi("codelang.comment")</th>
+                <th>@messages("codelang.title")</th>
+                <th>@messages("codelang.name")</th>
+                <th>@messages("codelang.time")</th>
+                <th>@messages("codelang.memory")</th>
+                <th>@messages("codelang.comment")</th>
             </tr>
         </thead>
         <tbody>
@@ -25,7 +23,7 @@
                     <td>@lng.name.substring(0, split)</td>
                     <td>@lng.name.substring(split + 2)</td>
                 }
-                    <td>@(MathHelper.makeDuration(play.Configuration.root().getString("evaluator.eval.basetime", "60 seconds")).mul(lng.cpuFactor).toSeconds) @messagesApi("general.seconds")</td>
+                    <td>@(MathHelper.makeDuration(play.Configuration.root().getString("evaluator.eval.basetime", "60 seconds")).mul(lng.cpuFactor).toSeconds) @messages("general.seconds")</td>
                     <td>@((lng.memFactor * play.Configuration.root().getInt("evaluator.eval.basemem", 100)).floor.toInt) MB</td>
                     <td>@Html(lng.comment)</td>
                 </tr>
@@ -35,7 +33,7 @@
 
     @if(sessionUser.isDefined && sessionUser.get.permission.includes(Admin)) {
         <p class="text-right">
-            <a class="btn btn-default" href="@org.ieee_passau.controllers.routes.LanguageController.index"><span class="glyphicon glyphicon-pencil"></span> @messagesApi("general.edit")</a>
+            <a class="btn btn-default" href="@org.ieee_passau.controllers.routes.LanguageController.index"><span class="glyphicon glyphicon-pencil"></span> @messages("general.edit")</a>
         </p>
     }
 }

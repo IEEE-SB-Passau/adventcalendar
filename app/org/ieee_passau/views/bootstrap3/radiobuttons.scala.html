@@ -1,5 +1,4 @@
-@import play.api.i18n.{Lang, MessagesApi}
-@(field: Field, label: String = "CHANGEME", buttonNameList: List[String], help: String = "")(implicit messagesApi: MessagesApi, lang: Lang)
+@(field: Field, label: String = "CHANGEME", buttonNameList: List[String], help: String = "")(implicit messages: Messages)
 
 <div class="form-group @if(field.hasErrors) { has-error }">
     <label class="col-sm-2 control-label" for="@field.id">@label</label>
@@ -16,7 +15,7 @@
         }
         <span class="help-block">@help</span>
         <span class="help-block">@{
-            field.error.map { error => messagesApi(error.message) }
+            field.error.map { error => messages(error.message) }
         }</span>
     </div>
 </div>

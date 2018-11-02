@@ -2,14 +2,13 @@
 @import org.ieee_passau.models.{Posting, User}
 @import org.ieee_passau.utils.LanguageHelper
 @import org.ieee_passau.views.html.main
-@import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.{Flash, RequestHeader}
 @import play.twirl.api.Html
 @(running: Boolean, statusMessage: String, notificationActive: Boolean, notificationMessage: String,
-        postings: Map[Int, List[Posting]])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
+        postings: Map[Int, List[Posting]])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages, messagesApi: MessagesApi)
 
-@main(messagesApi("nav.admin.postings")) {
-    <h3>@messagesApi("status.title")</h3>
+@main(messages("nav.admin.postings")) {
+    <h3>@messages("status.title")</h3>
     @if(running) {
         <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.CmsController.playPause">
             @CSRF.formField
@@ -17,7 +16,7 @@
                 <fieldset>
                     <input type="hidden" name="state" value="false"/>
                     <div class="form-group"><div class="col-sm-offset-2 col-sm-10">
-                        <button type="submit" class="btn btn-danger pull-right"><span class="glyphicon glyphicon-pause"></span> @messagesApi("status.eval.stop")</button>
+                        <button type="submit" class="btn btn-danger pull-right"><span class="glyphicon glyphicon-pause"></span> @messages("status.eval.stop")</button>
                     </div></div>
                 </fieldset>
             </div>
@@ -30,7 +29,7 @@
                     <input type="hidden" name="state" value="true"/>
                     @Html(statusMessage)
                     <div class="form-group"><div class="col-sm-offset-2 col-sm-10">
-                        <button type="submit" class="btn btn-success pull-right"><span class="glyphicon glyphicon-play"></span> @messagesApi("status.eval.start")</button>
+                        <button type="submit" class="btn btn-success pull-right"><span class="glyphicon glyphicon-play"></span> @messages("status.eval.start")</button>
                     </div></div>
                 </fieldset>
             </div>
@@ -44,7 +43,7 @@
                 <fieldset>
                     @Html(notificationMessage)
                     <div class="form-group"><div class="col-sm-offset-2 col-sm-10">
-                        <button type="submit" class="btn btn-danger pull-right"><span class="glyphicon glyphicon-pause"></span> @messagesApi("status.notification.stop")</button>
+                        <button type="submit" class="btn btn-danger pull-right"><span class="glyphicon glyphicon-pause"></span> @messages("status.notification.stop")</button>
                     </div></div>
                 </fieldset>
             </div>
@@ -56,28 +55,28 @@
                 <fieldset>
                     @Html(notificationMessage)
                     <div class="form-group"><div class="col-sm-offset-2 col-sm-10">
-                        <button type="submit" class="btn btn-success pull-right"><span class="glyphicon glyphicon-play"></span> @messagesApi("status.notification.start")</button>
+                        <button type="submit" class="btn btn-success pull-right"><span class="glyphicon glyphicon-play"></span> @messages("status.notification.start")</button>
                     </div></div>
                 </fieldset>
             </div>
         </form>
     }
 
-    <h3>@messagesApi("posting.edit")</h3>
+    <h3>@messages("posting.edit")</h3>
 
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>@messagesApi("posting.post.title")</th>
-                <th>@messagesApi("posting.post.default")</th>
-                <th>@messagesApi("posting.post.trans")</th>
+                <th>@messages("posting.post.title")</th>
+                <th>@messages("posting.post.default")</th>
+                <th>@messages("posting.post.trans")</th>
             </tr>
         </thead>
         <tbody>
         @postings.toList.sortBy(_._1).map { case (id, list) =>
             <tr>
                 <td>
-                    @messagesApi(list.head.title)
+                    @messages(list.head.title)
                 </td>
                 <td>
                     @messagesApi("language.icon")(LanguageHelper.defaultLanguage)

@@ -15,25 +15,22 @@ import org.ieee_passau.utils.{AkkaHelper, LanguageHelper, PermissionCheck}
 import play.api.data.Form
 import play.api.data.Forms.{mapping, number, optional, _}
 import play.api.db.slick.DatabaseConfigProvider
-import play.api.i18n.{Lang, MessagesApi}
+import play.api.i18n.Lang
 import play.api.mvc._
-import slick.driver.JdbcProfile
 import slick.driver.PostgresDriver.api._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
 
-class CmsController @Inject()(val messagesApi: MessagesApi,
-                              dbConfigProvider: DatabaseConfigProvider,
+class CmsController @Inject()(dbConfigProvider: DatabaseConfigProvider,
+                              components: MessagesControllerComponents,
                               system: ActorSystem,
                               @Named(AkkaHelper.monitoringActor) monitoringActor: ActorRef
-                             ) extends Controller with PermissionCheck {
-  private implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
-  private implicit val mApi: MessagesApi = messagesApi
+                             ) extends ControllerWithDBAndI18n(dbConfigProvider, components) with PermissionCheck {
 
   def maintenance: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
-    val displayLang = request2lang
+    val displayLang: Lang = rs.lang
     Postings.byId(Page.status.id, displayLang).flatMap { post =>
       db.run(Postings.map(p => (p.id.?, p.lang, p.title, p.content, p.date)).to[List].result).flatMap { list: List[(Option[Int], Lang, String, String, Date)] =>
         val posts = list.groupBy(_._1 /*id*/).map(l =>
@@ -55,12 +52,12 @@ class CmsController @Inject()(val messagesApi: MessagesApi,
     statusForm.bindFromRequest.fold(
       _ => {
         Redirect(org.ieee_passau.controllers.routes.CmsController.maintenance())
-          .flashing("warning" -> messagesApi("status.update.error"))
+          .flashing("warning" -> rs.messages("status.update.error"))
       },
       status => {
         monitoringActor ! StatusM(status)
         Redirect(org.ieee_passau.controllers.routes.CmsController.maintenance())
-          .flashing("success" -> messagesApi("status.update.message"))
+          .flashing("success" -> rs.messages("status.update.message"))
       }
     )
   }}
@@ -70,7 +67,7 @@ class CmsController @Inject()(val messagesApi: MessagesApi,
       if(state.run) db.run((for {u <- Users} yield u.notificationDismissed).update(false))
 
       Redirect(org.ieee_passau.controllers.routes.CmsController.maintenance())
-        .flashing("success" -> messagesApi("status.notification.state." + (if (state.run) "on" else "off")))
+        .flashing("success" -> rs.messages("status.notification.state." + (if (state.run) "on" else "off")))
     }
   }}
 
@@ -105,7 +102,7 @@ class CmsController @Inject()(val messagesApi: MessagesApi,
           case _ =>
           db.run(Postings += posting).map(_ =>
             Redirect(org.ieee_passau.controllers.routes.CmsController.maintenance())
-              .flashing("success" -> messagesApi("posting.update.message"))
+              .flashing("success" -> rs.messages("posting.update.message"))
           )
         }
       }
@@ -120,7 +117,7 @@ class CmsController @Inject()(val messagesApi: MessagesApi,
       posting => {
         Postings.update(id, lang, posting.copy(title=Page.byId(id).toString)).map(_ =>
         Redirect(org.ieee_passau.controllers.routes.CmsController.editPage(id, lang))
-          .flashing("success" ->  messagesApi("posting.update.message"))
+          .flashing("success" ->  rs.messages("posting.update.message"))
         )
       }
     )
@@ -132,7 +129,7 @@ class CmsController @Inject()(val messagesApi: MessagesApi,
     * @param page the page to display
     */
   def content(page: String): Action[AnyContent] = requirePermission(Everyone) { implicit user => Action.async { implicit rs =>
-    val displayLang = request2lang
+    val displayLang = rs.lang
     db.run(Page.withName(page).id.result).flatMap { pageId =>
       Postings.byIdOption(pageId, displayLang)
     } map {
@@ -142,7 +139,7 @@ class CmsController @Inject()(val messagesApi: MessagesApi,
   }}
 
   def calendar: Action[AnyContent] = requirePermission(Everyone) { implicit user =>  Action.async { implicit rs =>
-    val displayLang = request2lang
+    val displayLang = rs.lang
     val now = new Date()
     val problemsQuery: Future[List[Problem]] = db.run(Problems.filter(_.readableStart <= now).filter(_.readableStop > now).sortBy(_.door.asc).to[List].result)
     val postingQuery: Future[Posting] = Postings.byId(Page.calendar.id, displayLang)

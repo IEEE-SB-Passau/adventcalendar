@@ -6,20 +6,17 @@ import org.ieee_passau.utils.PermissionCheck
 import play.api.data.Form
 import play.api.data.Forms.{mapping, number, optional, _}
 import play.api.db.slick.DatabaseConfigProvider
-import play.api.i18n.MessagesApi
 import play.api.libs.Files.TemporaryFile
 import play.api.mvc._
-import slick.driver.JdbcProfile
 import slick.driver.PostgresDriver.api._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.reflect.io.File
 
-class EvalTaskController @Inject()(val messagesApi: MessagesApi, dbConfigProvider: DatabaseConfigProvider) extends Controller with PermissionCheck {
-  private implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
-  private implicit val mApi: MessagesApi = messagesApi
-
+class EvalTaskController @Inject()(dbConfigProvider: DatabaseConfigProvider,
+                                   components: MessagesControllerComponents
+                                  ) extends ControllerWithDBAndI18n(dbConfigProvider, components) with PermissionCheck {
   def edit(pid: Int, id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     db.run(EvalTasks.byId(id).result.headOption).map {
       case Some(task) => Ok(org.ieee_passau.views.html.evaltask.edit(pid, id, evalTaskForm.fill(task)))
@@ -48,11 +45,11 @@ class EvalTaskController @Inject()(val messagesApi: MessagesApi, dbConfigProvide
           rs.body.file("program").map { program =>
             val newTask: EvalTask = newTaskRaw.copy(filename = program.filename, file = new File(program.ref.file).toByteArray())
             db.run((EvalTasks returning EvalTasks.map(_.id)) += newTask).map { newTaskId =>
-              Redirect(org.ieee_passau.controllers.routes.EvalTaskController.edit(pid, newTaskId)).flashing("success" -> messagesApi("evaltask.create.message", newTaskRaw.position))
+              Redirect(org.ieee_passau.controllers.routes.EvalTaskController.edit(pid, newTaskId)).flashing("success" -> rs.messages("evaltask.create.message", newTaskRaw.position))
             }
           } getOrElse {
             Future.successful(BadRequest(org.ieee_passau.views.html.evaltask.insert(pid,
-              evalTaskForm.fill(newTaskRaw).withError("program", messagesApi("evaltask.create.error.filemissing")))))
+              evalTaskForm.fill(newTaskRaw).withError("program", rs.messages("evaltask.create.error.filemissing")))))
           }
         }
       )
@@ -70,14 +67,14 @@ class EvalTaskController @Inject()(val messagesApi: MessagesApi, dbConfigProvide
           rs.body.file("program").map { program =>
             val newTask = task.copy(filename = program.filename, file = new File(program.ref.file).toByteArray())
             EvalTasks.update(id, newTask)
-            Future.successful(Redirect(org.ieee_passau.controllers.routes.EvalTaskController.edit(pid, id)).flashing("success" -> messagesApi("evaltask.update.message", task.position)))
+            Future.successful(Redirect(org.ieee_passau.controllers.routes.EvalTaskController.edit(pid, id)).flashing("success" -> rs.messages("evaltask.update.message", task.position)))
           } getOrElse {
             db.run(EvalTasks.byId(id).result.head).map { ot =>
               val newTask = task.copy(filename = ot.filename, file = ot.file)
               EvalTasks.update(id, newTask)
             }.map { _ =>
               Redirect(org.ieee_passau.controllers.routes.EvalTaskController.edit(pid, id))
-                .flashing("success" -> messagesApi("evaltask.update.message", task.position))
+                .flashing("success" -> rs.messages("evaltask.update.message", task.position))
             }
           }
         }

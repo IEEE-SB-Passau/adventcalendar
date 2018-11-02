@@ -1,14 +1,14 @@
 @import org.ieee_passau.models.ProblemTranslation
-@import play.api.i18n.{Lang, MessagesApi}
+@import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.RequestHeader
 @import views.html.helper.CSRF
-@(pid: Int, translations: List[ProblemTranslation])(implicit requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
+@(pid: Int, translations: List[ProblemTranslation])(implicit requestHeader: RequestHeader, messages: Messages, messagesApi: MessagesApi)
 
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>@messagesApi("general.language")</th>
-            <th>@messagesApi("problem.name")</th>
+            <th>@messages("general.language")</th>
+            <th>@messages("problem.name")</th>
             <th></th>
         </tr>
     </thead>
@@ -24,7 +24,7 @@
 
                     <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.ProblemController.deleteTranslation(pid, trans.language.code)">
                         @CSRF.formField
-                        <button type="submit" onclick="return(window.confirm('@messagesApi("general.delete.confirm")'))" class="btn btn-danger">
+                        <button type="submit" onclick="return(window.confirm('@messages("general.delete.confirm")'))" class="btn btn-danger">
                             <span class="glyphicon glyphicon-remove"></span>
                         </button>
                     </form>

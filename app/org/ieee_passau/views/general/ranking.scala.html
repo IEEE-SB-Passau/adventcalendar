@@ -1,18 +1,17 @@
 @import org.ieee_passau.utils.ViewHelper.{Highlight, HighlightSpecial}
 @import org.ieee_passau.models.User
 @import org.ieee_passau.views.html.main
-@import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.Flash
-@(users: List[(Int, String, Boolean, Int, Int, Int)], notification: (String, String))(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
+@(users: List[(Int, String, Boolean, Int, Int, Int)], notification: (String, String))(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
 
-@main(messagesApi("nav.ranking")) {
+@main(messages("nav.ranking")) {
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>@messagesApi("ranking.position")</th>
-                <th>@messagesApi("user.title")</th>
-                <th>@messagesApi("testcase.points")</th>
-                <th>@messagesApi("ranking.solves")</th>
+                <th>@messages("ranking.position")</th>
+                <th>@messages("user.title")</th>
+                <th>@messages("testcase.points")</th>
+                <th>@messages("ranking.solves")</th>
             </tr>
         </thead>
         <tbody>
@@ -26,5 +25,5 @@
         }
         </tbody>
     </table>
-    <p>@if(users.isEmpty) { @Html(messagesApi("ranking.empty", org.ieee_passau.controllers.routes.MainController.problems)) }</p>
-}(flash = (flash + notification), sessionUser, requestHeader, messagesApi, lang)
+    <p>@if(users.isEmpty) { @Html(messages("ranking.empty", org.ieee_passau.controllers.routes.MainController.problems)) }</p>
+}(flash = (flash + notification), sessionUser, requestHeader, messages)

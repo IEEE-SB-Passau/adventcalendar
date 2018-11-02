@@ -3,13 +3,12 @@
 @import org.ieee_passau.views.html.bootstrap3._
 @import org.ieee_passau.views.html.main
 @import play.api.data.Form
-@import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.{Flash, RequestHeader}
 @import  play.twirl.api.Html
 @import play.api.Configuration
-@(registrationForm: Form[UserRegistration], useCaptcha: Boolean)(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang, config: Configuration)
+@(registrationForm: Form[UserRegistration], useCaptcha: Boolean)(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, config: Configuration, messages: Messages)
 
-@main(messagesApi("nav.user.register")) {
+@main(messages("nav.user.register")) {
     @if(useCaptcha) {
         <script src='https://www.google.com/recaptcha/api.js'></script>
     }
@@ -17,45 +16,45 @@
         @form(org.ieee_passau.controllers.routes.UserController.create, 'class -> "form-horizontal") {
             @CSRF.formField
             <fieldset>
-                @text(registrationForm("username"), label = messagesApi("user.username") + "*", placeholder = messagesApi("user.username"), offset = "col-sm-3", width = "col-sm-9")
+                @text(registrationForm("username"), label = messages("user.username") + "*", placeholder = messages("user.username"), offset = "col-sm-3", width = "col-sm-9")
                 @password2(registrationForm("password"), registrationForm("password.main"), registrationForm("password.repeat"),
-                    label1 = messagesApi("user.password") + "*", label2 = " " + messagesApi("user.password.repeat") + "*",
-                    placeholder = messagesApi("user.password"), help = messagesApi("user.help.password"),
+                    label1 = messages("user.password") + "*", label2 = " " + messages("user.password.repeat") + "*",
+                    placeholder = messages("user.password"), help = messages("user.help.password"),
                     offset = "col-sm-3", width = "col-sm-9")
 
                 <div class="form-group @if(registrationForm("email").hasErrors || registrationForm.errors("invalidEmail").nonEmpty ) { has-error }">
-                    <label class="col-sm-3 control-label">@(messagesApi("user.email") + "*")</label>
+                    <label class="col-sm-3 control-label">@(messages("user.email") + "*")</label>
                     <div class="col-sm-9">
                         <input type="text"
                                class="form-control"
                                id="@registrationForm("email").id"
                                name="@registrationForm("email").name"
                                value="@registrationForm("email").value.getOrElse("")"
-                               placeholder="@messagesApi("user.email")" />
-                        <span class="help-block">@{ registrationForm("email").error.map { error => messagesApi(error.message) }}</span>
-                        <span class="help-block">@{ registrationForm.errors("invalidEmail").map { error => messagesApi(error.message) }}</span>
+                               placeholder="@messages("user.email")" />
+                        <span class="help-block">@{ registrationForm("email").error.map { error => messages(error.message) }}</span>
+                        <span class="help-block">@{ registrationForm.errors("invalidEmail").map { error => messages(error.message) }}</span>
                     </div>
                 </div>
 
-                @text(registrationForm("school"), label = messagesApi("user.school"), placeholder = messagesApi("user.school"), offset = "col-sm-3", width = "col-sm-9")
-                @text(registrationForm("semester"), label = messagesApi("user.semester"), placeholder = messagesApi("user.semester"), offset = "col-sm-3", width = "col-sm-9")
-                @text(registrationForm("studySubject"), label = messagesApi("user.studysubject"), placeholder = messagesApi("user.studysubject"), offset = "col-sm-3", width = "col-sm-9")
+                @text(registrationForm("school"), label = messages("user.school"), placeholder = messages("user.school"), offset = "col-sm-3", width = "col-sm-9")
+                @text(registrationForm("semester"), label = messages("user.semester"), placeholder = messages("user.semester"), offset = "col-sm-3", width = "col-sm-9")
+                @text(registrationForm("studySubject"), label = messages("user.studysubject"), placeholder = messages("user.studysubject"), offset = "col-sm-3", width = "col-sm-9")
 
                 <div class="form-group">
                     @if(useCaptcha) {
                         <div class="col-sm-offset-3 col-sm-6" style="padding-left: 30px;">
                             <div class="form-group @if(registrationForm("g-recaptcha-response").hasErrors || registrationForm.errors("g-recaptcha-response").nonEmpty ) { has-error }">
                                 <div class="g-recaptcha" data-sitekey="@config.getString("captcha.sitekey").getOrElse("")"></div>
-                                <span class="help-block">@{ registrationForm("g-recaptcha-response").error.map { error => messagesApi(error.message) }}</span>
+                                <span class="help-block">@{ registrationForm("g-recaptcha-response").error.map { error => messages(error.message) }}</span>
                             </div>
                         </div>
                         <div class="col-sm-3">
-                            <button id="submit" type="submit" value="Submit" class="btn btn-primary">@messagesApi("nav.user.register")</button>
+                            <button id="submit" type="submit" value="Submit" class="btn btn-primary">@messages("nav.user.register")</button>
                         </div>
                     } else {
                         <input type="hidden" name="g-recaptcha-response" value="" />
                         <div class="col-sm-offset-3 col-sm-9">
-                            <button id="submit" type="submit" value="Submit" class="btn btn-primary">@messagesApi("nav.user.register")</button>
+                            <button id="submit" type="submit" value="Submit" class="btn btn-primary">@messages("nav.user.register")</button>
                         </div>
                     }
                 </div>
@@ -63,7 +62,7 @@
 
         }
         <div class="pull-right">
-            <small>@Html(messagesApi("user.help.register"))</small>
+            <small>@Html(messages("user.help.register"))</small>
         </div>
     </div>
 }

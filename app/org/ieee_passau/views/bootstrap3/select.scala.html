@@ -1,5 +1,4 @@
-@import play.api.i18n.{Lang, MessagesApi}
-@(field: Field, label: String = "CHANGEME", optionMap: Map[String, Boolean], isMultiple: Boolean, help: String = "")(implicit messagesApi: MessagesApi, lang: Lang)
+@(field: Field, label: String = "CHANGEME", optionMap: Map[String, Boolean], isMultiple: Boolean, help: String = "")(implicit messages: Messages)
 
 <div class="form-group @if(field.hasErrors) { has-error }">
     <label class="col-sm-2 control-label" for="@field.id">@label</label>
@@ -8,7 +7,7 @@
                 id="@field.id"
                 name="@if(isMultiple) { @(field.name + "[]") } else { @field.name }"
                 @if(isMultiple) { multiple="multiple" }>
-            @if(!isMultiple) { <option class="blank" value="">@messagesApi("general.select")</option> }
+            @if(!isMultiple) { <option class="blank" value="">@messages("general.select")</option> }
             @for( (optionName, isSelected) <- optionMap) {
                 <option id="@optionName"
                         value="@optionName"
@@ -18,6 +17,6 @@
             }
         </select>
         <span class="help-block">@help</span>
-        <span class="help-block">@{field.error.map { error => messagesApi(error.message) }}</span>
+        <span class="help-block">@{field.error.map { error => messages(error.message) }}</span>
     </div>
 </div>

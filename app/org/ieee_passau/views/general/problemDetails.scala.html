@@ -5,46 +5,45 @@
 @import org.ieee_passau.views.html.solution.{solutionForm, solutionListAutoReload}
 @import org.ieee_passau.views.html.ticket.ticketView
 @import play.api.data.Form
-@import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.{Flash, RequestHeader}
 @import play.twirl.api.Html
 @import views.html.helper.{CSRF, form}
-@(problem: Problem, languages: List[Language], lastLang: String, solutions: List[SolutionListEntry], tickets: List[(Ticket, String)], ticketForm: Form[TicketText], notifications: Map[String, String])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
-@main(messagesApi("problem.title") + " " + problem.door + ": " + problem.title, hasTitle = true) {
+@(problem: Problem, languages: List[Language], lastLang: String, solutions: List[SolutionListEntry], tickets: List[(Ticket, String)], ticketForm: Form[TicketText], notifications: Map[String, String])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
+@main(messages("problem.title") + " " + problem.door + ": " + problem.title, hasTitle = true) {
     @Html(problem.description)
 
-    <h3>@messagesApi("problemdetails.qna")</h3>
+    <h3>@messages("problemdetails.qna")</h3>
     @ticketView(tickets)
 
     @if(sessionUser.isDefined) {
         @form(org.ieee_passau.controllers.routes.TicketController.submitTicket(problem.door), 'class -> "form-horizontal") {
             @CSRF.formField
             <div class="well">
-                @textareaBs(ticketForm("text"), label = messagesApi("ticket.title"), required = true)
+                @textareaBs(ticketForm("text"), label = messages("ticket.title"), required = true)
                 @buttonSave()
             </div>
         }
     } else {
-        <p>@Html(messagesApi("problemdetails.notice.ticket"))</p>
+        <p>@Html(messages("problemdetails.notice.ticket"))</p>
     }
 
-    <h3>@messagesApi("problemdetails.submit")</h3>
+    <h3>@messages("problemdetails.submit")</h3>
     @if(problem.solvable) {
         @if(sessionUser.isDefined) {
             <div class="well">
                 @solutionForm(problem.door, languages, lastLang)
             </div>
         } else {
-            <p>@Html(messagesApi("problemdetails.notice.submit.login"))</p>
+            <p>@Html(messages("problemdetails.notice.submit.login"))</p>
         }
     } else {
-        <p>@Html(messagesApi("problemdetails.notice.submit.notsolvable"))</p>
+        <p>@Html(messages("problemdetails.notice.submit.notsolvable"))</p>
     }
 
     @if(solutions.nonEmpty) {
-        <h3>@messagesApi("problemdetails.submissionlist")</h3>
-        <p>@Html(messagesApi("problemdetails.notice.submit.errormsg", org.ieee_passau.controllers.routes.CmsController.content(Page.faq.toString)))</p>
+        <h3>@messages("problemdetails.submissionlist")</h3>
+        <p>@Html(messages("problemdetails.notice.submit.errormsg", org.ieee_passau.controllers.routes.CmsController.content(Page.faq.toString)))</p>
 
         @solutionListAutoReload(solutions, languages, problem.door)
     }
-}(flash.copy(flash.data++notifications), sessionUser, requestHeader, messagesApi, lang)
+}(flash.copy(flash.data++notifications), sessionUser, requestHeader, messages)

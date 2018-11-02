@@ -3,13 +3,11 @@
 @import org.ieee_passau.views.html.bootstrap3.{buttonSave, checkboxBs, textareaBs}
 @import org.ieee_passau.views.html.main
 @import play.api.data.Form
-@import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.{Flash, RequestHeader}
-@import play.twirl.api.TemplateMagic._
 @import views.html.helper.{CSRF, form}
-@(ticket: (Ticket, User, Problem), answers: List[(Ticket, String)], ticketForm: Form[TicketText])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
+@(ticket: (Ticket, User, Problem), answers: List[(Ticket, String)], ticketForm: Form[TicketText])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages, messagesApi: MessagesApi)
 
-@main(messagesApi("ticket.list.show")) {
+@main(messages("ticket.list.show")) {
     @defining((ticket._1, ticket._2.username) +: answers) { list: List[(Ticket, String)] =>
         @ticketView(list, expanded = true, admin = true)
     }
@@ -18,7 +16,7 @@
         @CSRF.formField
         <div class="well">
             <div class="form-group">
-                <label class="col-sm-2 control-label">@messagesApi("general.language")</label>
+                <label class="col-sm-2 control-label">@messages("general.language")</label>
                 <div class="col-sm-10">
                     <input type="text"
                            class="form-control"
@@ -28,8 +26,8 @@
                     <span class="help-block"></span>
                 </div>
             </div>
-            @checkboxBs(ticketForm("public"), label = messagesApi("ticket.public"))
-            @textareaBs(ticketForm("text"), label = messagesApi("ticket.answers.title"))
+            @checkboxBs(ticketForm("public"), label = messages("ticket.public"))
+            @textareaBs(ticketForm("text"), label = messages("ticket.answers.title"))
             @buttonSave()
         </div>
     }

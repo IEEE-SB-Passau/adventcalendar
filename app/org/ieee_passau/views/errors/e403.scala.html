@@ -1,10 +1,9 @@
 @import org.ieee_passau.models.User
 @import org.ieee_passau.views.html.main
-@import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.Flash
 @import play.twirl.api.Html
-@()(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
+@()(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
 
-@main(messagesApi("error.403.short")) {
-    <p>@Html(messagesApi("error.403.long"))</p>
+@main(messages("error.403.short")) {
+    <p>@Html(messages("error.403.long"))</p>
 }

@@ -1,16 +1,15 @@
-@import play.api.i18n.{Lang, MessagesApi}
-@(textarea: String)(implicit messagesApi: MessagesApi, lang: Lang)
+@(textarea: String)(implicit messages: Messages)
 <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
         <div class="row">
             <div class="col-sm-2">
-                <button class="btn btn-info" type="button" onclick="loadFileAsText(@(textarea + "Input"), @textarea)">@messagesApi("testcase.loadfile")</button>
+                <button class="btn btn-info" type="button" onclick="loadFileAsText(@(textarea + "Input"), @textarea)">@messages("testcase.loadfile")</button>
             </div>
             <div class="col-sm-10">
                 <div class="input-group">
                     <span class="input-group-btn">
                         <span class="btn btn-default btn-file">
-                            @messagesApi("general.file") <input id="@(textarea + "Input")" type="file"/>
+                            @messages("general.file") <input id="@(textarea + "Input")" type="file"/>
                         </span>
                     </span>
                     <input type="text" class="col-sm-10 form-control" readonly title="">

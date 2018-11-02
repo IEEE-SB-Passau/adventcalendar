@@ -1,10 +1,8 @@
 @import org.ieee_passau.models.Ticket
-@import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.RequestHeader
 @import views.html.helper.CSRF
-@import play.twirl.api.TemplateMagic._
 @import scala.language.implicitConversions
-@(tickets: List[(Ticket, String)], expanded: Boolean = false, admin: Boolean = false)(implicit requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
+@(tickets: List[(Ticket, String)], expanded: Boolean = false, admin: Boolean = false)(implicit requestHeader: RequestHeader, messages: Messages)
 
 @tickets.filter(t => t._1.responseTo.isEmpty).map { case (t: Ticket, un) =>
     <div class="panel panel-default">
@@ -14,7 +12,7 @@
                 <a data-toggle="collapse" data-target="#question@t.id" href="#question@t.id">
                     @un am @t.created.format("dd.MM.yyyy 'um' HH:mm")
                     @defining(tickets.count(x => x._1.responseTo == t.id)) { responses: Int =>
-                        <span class="pull-right">@responses @if(responses == 1) { @messagesApi("ticket.answers.title") } else {  @messagesApi("ticket.answers.list.title") } </span>
+                        <span class="pull-right">@responses @if(responses == 1) { @messages("ticket.answers.title") } else {  @messages("ticket.answers.list.title") } </span>
                     }
                 </a>
             </h3>
@@ -33,7 +31,7 @@
                             <span class="pull-right">
                                 <form style="display : inline" method="POST" action="@org.ieee_passau.controllers.routes.TicketController.delete(r.id.get)">
                                     @CSRF.formField
-                                    <button type="submit" onclick="return(window.confirm('@messagesApi("general.delete.confirm")'))" class="btn btn-xs btn-danger">
+                                    <button type="submit" onclick="return(window.confirm('@messages("general.delete.confirm")'))" class="btn btn-xs btn-danger">
                                         <span class="glyphicon glyphicon-remove"></span>
                                     </button>
                                 </form>

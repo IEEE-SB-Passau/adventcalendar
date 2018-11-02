@@ -1,6 +1,5 @@
-@import play.api.i18n.{Lang, MessagesApi}
 @(field: Field, label: String = "CHANGEME", placeholder: String = "1", help: String = "", offset: String = "col-sm-2",
-        width: String = "col-sm-10", step: Float = 1)(implicit messagesApi: MessagesApi, lang: Lang)
+        width: String = "col-sm-10", step: Float = 1)(implicit messages: Messages)
 
 <div class="form-group @if(field.hasErrors) { has-error }">
     <label class="@offset control-label">@label</label>
@@ -13,6 +12,6 @@
                value="@field.value.getOrElse("")"
                placeholder="@placeholder" />
         <span class="help-block">@help</span>
-        <span class="help-block">@{ field.error.map { error => messagesApi(error.message) }}</span>
+        <span class="help-block">@{ field.error.map { error => messages(error.message) }}</span>
     </div>
 </div>

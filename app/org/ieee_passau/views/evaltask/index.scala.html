@@ -1,18 +1,17 @@
 @import org.ieee_passau.models.EvalTask
 @import org.ieee_passau.utils.ViewHelper._
-@import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.RequestHeader
 @import views.html.helper.CSRF
-@(pid: Int, tasks: List[EvalTask])(implicit requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
+@(pid: Int, tasks: List[EvalTask])(implicit requestHeader: RequestHeader, messages: Messages)
 
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>@messagesApi("general.id")</th>
-            <th>@messagesApi("evaltask.position")</th>
-            <th>@messagesApi("evaltask.program")</th>
-            <th>@messagesApi("evaltask.validate")</th>
-            <th>@messagesApi("evaltask.evaluate")</th>
+            <th>@messages("general.id")</th>
+            <th>@messages("evaltask.position")</th>
+            <th>@messages("evaltask.program")</th>
+            <th>@messages("evaltask.validate")</th>
+            <th>@messages("evaltask.evaluate")</th>
             <th></th>
         </tr>
     </thead>
@@ -20,7 +19,7 @@
         <tr>
             <td>-</td>
             <td>0</td>
-            <td>@messagesApi("evaltask.useroutput")</td>
+            <td>@messages("evaltask.useroutput")</td>
             <td>@showCheckmark(true)</td>
             <td>@showCheckmark(false)</td>
             <td></td>
@@ -39,7 +38,7 @@
 
                 <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.EvalTaskController.delete(pid, task.id.get)">
                     @CSRF.formField
-                    <button type="submit" onclick="return(window.confirm('@messagesApi("general.delete.confirm")'))" class="btn btn-danger">
+                    <button type="submit" onclick="return(window.confirm('@messages("general.delete.confirm")'))" class="btn btn-danger">
                         <span class="glyphicon glyphicon-remove"></span>
                     </button>
                 </form>

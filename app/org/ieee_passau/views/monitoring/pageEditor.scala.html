@@ -4,14 +4,13 @@
 @import org.ieee_passau.views.html.bootstrap3.{buttonSave, fileloader, textareaBs}
 @import org.ieee_passau.views.html.main
 @import play.api.data.Form
-@import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.{Flash, RequestHeader}
-@(id: Int, lng: String, post: Form[Posting], title: String = "")(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
+@(id: Int, lng: String, post: Form[Posting], title: String = "")(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages, messagesApi: MessagesApi)
 
-@main(messagesApi("nav.admin.postings")) {
+@main(messages("nav.admin.postings")) {
     <ol class="breadcrumb">
-        <li><a href="@org.ieee_passau.controllers.routes.CmsController.maintenance">@messagesApi("nav.admin.postings")</a></li>
-        <li class="active">@messagesApi("posting.page")</li>
+        <li><a href="@org.ieee_passau.controllers.routes.CmsController.maintenance">@messages("nav.admin.postings")</a></li>
+        <li class="active">@messages("posting.page")</li>
     </ol>
 
     <div class="well">
@@ -23,7 +22,7 @@
                 <input type="hidden" name="id" value="@id" />
 
                 <div class="form-group">
-                    <label for="visibility" class="col-sm-2 control-label">@messagesApi("general.language")</label>
+                    <label for="visibility" class="col-sm-2 control-label">@messages("general.language")</label>
                     <div class="col-sm-10">
                         <select id="lang" size="1" name="lang" class="col-sm-10 form-control">
                         @LanguageHelper.langs.map { l =>
@@ -36,7 +35,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="col-sm-2 control-label">@messagesApi("posting.post.title")</label>
+                    <label class="col-sm-2 control-label">@messages("posting.post.title")</label>
                     <div class="col-sm-10">
                         <input type="text"
                                class="form-control"
@@ -49,7 +48,7 @@
                         <span class="help-block"></span>
                     </div>
                 </div>
-                @textareaBs(post("content"),  label = messagesApi("posting.post.content"), placeholder = messagesApi("posting.post.content"), wysiwyg = true)
+                @textareaBs(post("content"),  label = messages("posting.post.content"), placeholder = messages("posting.post.content"), wysiwyg = true)
                 @fileloader("content")
 
                 @buttonSave()

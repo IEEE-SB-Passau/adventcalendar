@@ -2,16 +2,15 @@
 @import org.ieee_passau.models.{Testcase, User, Visibility}
 @import org.ieee_passau.views.html.main
 @import play.api.data.Form
-@import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.{Flash, RequestHeader}
-@(pid: Int, visibilities: List[Visibility], testcase: Form[Testcase])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
+@(pid: Int, visibilities: List[Visibility], testcase: Form[Testcase])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
 
-@main(messagesApi("testcase.create")) {
+@main(messages("testcase.create")) {
 
     <ol class="breadcrumb">
-        <li><a href="@org.ieee_passau.controllers.routes.ProblemController.index">@messagesApi("general.listoverview")</a></li>
-        <li><a href="@org.ieee_passau.controllers.routes.ProblemController.edit(pid)">@messagesApi("problem.title")</a></li>
-        <li class="active">@messagesApi("testcase.title")</li>
+        <li><a href="@org.ieee_passau.controllers.routes.ProblemController.index">@messages("general.listoverview")</a></li>
+        <li><a href="@org.ieee_passau.controllers.routes.ProblemController.edit(pid)">@messages("problem.title")</a></li>
+        <li class="active">@messages("testcase.title")</li>
     </ol>
 
     @form(org.ieee_passau.controllers.routes.TestcaseController.save(pid), 'class -> "form-horizontal") {

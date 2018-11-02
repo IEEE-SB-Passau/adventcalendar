@@ -1,15 +1,14 @@
 @import org.ieee_passau.models.{Language, Page}
-@import play.api.i18n.{Lang, MessagesApi}
 @import play.api.mvc.RequestHeader
 @import views.html.helper.CSRF
 @import org.ieee_passau.controllers.routes
-@(door: Int, languages: List[Language], lastLanguage: String)(implicit requestHeader: RequestHeader, messagesApi: MessagesApi, lang: Lang)
+@(door: Int, languages: List[Language], lastLanguage: String)(implicit requestHeader: RequestHeader, messages: Messages)
 
 <form id="submissionForm" action="#" method="post" enctype="multipart/form-data" class="form-horizontal">
     @CSRF.formField
     <fieldset>
         <div class="form-group" >
-            <label for="lang" class="col-sm-2 control-label">@messagesApi("codelang.title")</label>
+            <label for="lang" class="col-sm-2 control-label">@messages("codelang.title")</label>
             <div class="col-sm-10">
                 <select id="lang" size="1" name="lang" class="col-sm-10 form-control">
                 @languages.map { lang =>
@@ -20,7 +19,7 @@
         </div>
 
         <div class="form-group" >
-            <label class="col-sm-2 control-label">@messagesApi("submission.program_source")</label>
+            <label class="col-sm-2 control-label">@messages("submission.program_source")</label>
             <div class="col-sm-10">
                 <div class="input-group">
                     <span class="input-group-btn">
@@ -31,9 +30,9 @@
                     <input id="filename" type="text" class="col-sm-10 form-control" readonly title="">
                 </div>
 
-                <p><small>@Html(messagesApi("submit.notice.codelang"))</small></p>
+                <p><small>@Html(messages("submit.notice.codelang"))</small></p>
                 <p><small>
-                    @Html(messagesApi("submit.notice.help", org.ieee_passau.controllers.routes.CmsController.content(Page.faq.toString),
+                    @Html(messages("submit.notice.help", org.ieee_passau.controllers.routes.CmsController.content(Page.faq.toString),
                                                          org.ieee_passau.controllers.routes.CmsController.content(Page.examples.toString)))
                 </small></p>
             </div>
@@ -41,11 +40,11 @@
 
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-2">
-                <input id="defaultSubmit" type="submit" value="@messagesApi("submit.submit")" class="btn btn-primary"/>
+                <input id="defaultSubmit" type="submit" value="@messages("submit.submit")" class="btn btn-primary"/>
             </div>
 
             <div class="col-sm-2">
-                <button id="loadEditor" type="button" onclick="loadCodeEditor();" class="btn btn-primary">@messagesApi("submit.codeeditor.load")</button>
+                <button id="loadEditor" type="button" onclick="loadCodeEditor();" class="btn btn-primary">@messages("submit.codeeditor.load")</button>
             </div>
         </div>
 
@@ -53,8 +52,8 @@
     </fieldset>
 
     <script type="text/javascript">
-        var reloadMessage = '@messagesApi("submit.codeeditor.reload")';
-        var buttonMessage = '@messagesApi("submit.codeeditor.defaultButton")';
+        var reloadMessage = '@messages("submit.codeeditor.reload")';
+        var buttonMessage = '@messages("submit.codeeditor.defaultButton")';
 
         function loadCodeEditor() {
             $.ajax(
