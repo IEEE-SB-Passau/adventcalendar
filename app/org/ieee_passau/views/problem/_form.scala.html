@@ -2,7 +2,8 @@
 @import org.ieee_passau.utils.{LanguageHelper, ViewHelper}
 @import org.ieee_passau.views.html.bootstrap3._
 @import play.api.data.Form
-@(problem: Form[Problem], evalModes: List[EvalMode])(implicit messages: Messages)
+@import play.api.Configuration
+@(problem: Form[Problem], evalModes: List[EvalMode])(implicit messages: Messages, configuration: Configuration)
 
 <fieldset>
     @if(problem.value.isDefined) {
@@ -46,8 +47,8 @@
         </div>
     </div>
 
-    @number(problem("cpuFactor"), label = messages("problem.cpufactor", play.Configuration.root().getString("evaluator.eval.basetime", "60 seconds")), step=0.1f)
-    @number(problem("memFactor"), label = messages("problem.memfactor", play.Configuration.root().getInt("evaluator.eval.basemem", 100)), step=0.1f)
+    @number(problem("cpuFactor"), label = messages("problem.cpufactor", configuration.getOptional[String]("evaluator.eval.basetime").getOrElse("60 seconds")), step=0.1f)
+    @number(problem("memFactor"), label = messages("problem.memfactor", configuration.getOptional[Int]("evaluator.eval.basemem").getOrElse(100)), step=0.1f)
 
     @buttonSave()
 </fieldset>

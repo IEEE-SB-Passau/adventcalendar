@@ -79,9 +79,9 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
               db.run((Tickets returning Tickets.map(_.id)) += Ticket(None, problem.id, user.get.id, None, ticket.text, public = false, now, language)).map { id =>
                 val email = Email(
                   subject = rs.messages("email.header") + " " +  rs.messages("ticket.title") + " zu " + rs.messages("problem.title") + " " + problem.door + ": " + problemTitle,
-                  from = encodeEmailName(user.get.username) + " @ " + play.Configuration.root().getString("email.from"),
-                  to = List(play.Configuration.root().getString("email.from")),
-                  bodyText = Some(ticket.text + "\n\n" + rs.messages("ticket.answer") + ": " + org.ieee_passau.controllers.routes.TicketController.view(id).absoluteURL(play.Configuration.root().getBoolean("application.https", false)))
+                  from = encodeEmailName(user.get.username) + " @ " + configuration.getOptional[String]("email.from").getOrElse("adventskalender@ieee.uni-passau.de"),
+                  to = List(configuration.getOptional[String]("email.from").getOrElse("adventskalender@ieee.uni-passau.de")),
+                  bodyText = Some(ticket.text + "\n\n" + rs.messages("ticket.answer") + ": " + org.ieee_passau.controllers.routes.TicketController.view(id).absoluteURL(configuration.getOptional[Boolean]("application.https").getOrElse(false)))
                 )
                 mailerClient.send(email)
 
@@ -120,9 +120,9 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                       val problemTitle = maybeProblemTitle.fold(problem.title)(_.title)
                       val email = Email(
                         subject = rs.messagesApi("email.header")(msgLang) + " " + rs.messagesApi("email.answer.subject", rs.messagesApi("ticket.title")(msgLang) +  " zu " + rs.messagesApi("problem.title")(msgLang) + " " + problem.door + ": " + problemTitle)(msgLang),
-                        from = encodeEmailName(mod.get.username) + " @ " + play.Configuration.root().getString("email.from"),
+                        from = encodeEmailName(mod.get.username) + " @ " + configuration.getOptional[String]("email.from").getOrElse("adventskalender@ieee.uni-passau.de"),
                         to = List(recipient.email),
-                        cc = List(play.Configuration.root().getString("email.from")),
+                        cc = List(configuration.getOptional[String]("email.from").getOrElse("adventskalender@ieee.uni-passau.de")),
                         bodyText = Some(ticket.text)
                       )
                       mailerClient.send(email)

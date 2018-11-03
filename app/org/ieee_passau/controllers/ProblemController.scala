@@ -5,7 +5,8 @@ import com.google.inject.Inject
 import com.google.inject.name.Named
 import org.ieee_passau.controllers.Beans.UpdateRankingM
 import org.ieee_passau.models.{EvalMode, Problem, ProblemTranslation, Problems, _}
-import org.ieee_passau.utils.{AkkaHelper, FutureHelper, LanguageHelper, UserHelper}
+import org.ieee_passau.utils.{AkkaHelper, FutureHelper, LanguageHelper}
+import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.format.Formats._
@@ -13,8 +14,8 @@ import play.api.db.slick.DatabaseConfigProvider
 import play.api.i18n.Lang
 import play.api.mvc._
 import slick.ast.BaseTypedType
-import slick.jdbc.PostgresProfile.api._
 import slick.jdbc.JdbcType
+import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Await, Future}
@@ -22,6 +23,7 @@ import scala.concurrent.{Await, Future}
 class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                                   val components: MessagesControllerComponents,
                                   val system: ActorSystem,
+                                  implicit val configuration: Configuration,
                                   @Named(AkkaHelper.rankingActor) val rankingActor: ActorRef
                                  ) extends MasterController(dbConfigProvider, components) {
 

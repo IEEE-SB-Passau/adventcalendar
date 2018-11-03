@@ -50,14 +50,14 @@ class ErrorHandler @Inject()(env: Environment,
           bodyText += Some(sw.toString)
           val configRecipients = config.underlying.getStringList("logging.errormail.recipient").asScala
           val recipients = if (configRecipients.isEmpty) {
-            List("adventskalender@ieee.students.uni-passau.de")
+            List("adventskalender@ieee.uni-passau.de")
           } else {
             configRecipients
           }
 
           val errorMail = Email(
             subject = "Adventskalender Error",
-            from = "IEEE Adventskalender <adventskalender@ieee.students.uni-passau.de>",
+            from = "IEEE Adventskalender <adventskalender@ieee.uni-passau.de>",
             to = recipients,
             bodyText = Some(bodyText)
           )

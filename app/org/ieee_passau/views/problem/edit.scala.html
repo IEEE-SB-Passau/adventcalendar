@@ -5,7 +5,10 @@
 @import play.api.data.Form
 @import play.api.mvc.{Flash, RequestHeader}
 @import org.ieee_passau.models.Admin
-@(pid: Int, testcases: List[Testcase], evalTasks: List[EvalTask], translations: List[ProblemTranslation], problem: Form[Problem], evalModes: List[EvalMode])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages, messagesApi: MessagesApi)
+@import play.api.Configuration
+@(pid: Int, testcases: List[Testcase], evalTasks: List[EvalTask], translations: List[ProblemTranslation],
+        problem: Form[Problem], evalModes: List[EvalMode])(implicit flash: Flash, sessionUser: Option[User],
+        requestHeader: RequestHeader, messages: Messages, messagesApi: MessagesApi, configuration: Configuration)
 
 @main(messages("problem.edit")) {
 

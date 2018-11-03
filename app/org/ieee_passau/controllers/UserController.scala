@@ -96,17 +96,17 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   def create: Action[AnyContent] = requirePermission(Guest) { implicit guest => Action.async { implicit rs =>
     registrationForm.bindFromRequest.fold(
       errorForm => {
-        Future.successful(BadRequest(org.ieee_passau.views.html.user.register(errorForm, play.Configuration.root().getBoolean("captcha.active"))))
+        Future.successful(BadRequest(org.ieee_passau.views.html.user.register(errorForm, configuration.getOptional[Boolean]("captcha.active").getOrElse(false))))
       },
 
       registration => {
         implicit val sessionLang: Lang = rs.lang
         val createdUser: User = registration.makeUser(sessionLang)
         val link = org.ieee_passau.controllers.routes.UserController.activate(createdUser.activationToken.get)
-          .absoluteURL(secure = play.Configuration.root().getBoolean("application.https", false))
+          .absoluteURL(secure = configuration.getOptional[Boolean]("application.https").getOrElse(false))
         val regMail = Email(
           subject = messagesApi("email.header") + " " + messagesApi("email.register.subject"),
-          from = play.Configuration.root().getString("email.from"),
+          from = configuration.getOptional[String]("email.from").getOrElse("adventskalender@ieee.uni-passau.de"),
           to = List(createdUser.email),
           bodyText = Some(messagesApi("email.register.body", createdUser.username, link))
         )
@@ -122,7 +122,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
               Users.filter(_.id === id).delete
               BadRequest(org.ieee_passau.views.html.user.register(
                 registrationForm.fill(registration).withError("invalidEmail", "error.email"),
-                play.Configuration.root().getBoolean("captcha.active"))
+                configuration.getOptional[Boolean]("captcha.active").getOrElse(false))
               )
 
             case e: Throwable =>
