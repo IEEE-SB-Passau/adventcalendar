@@ -10,8 +10,7 @@ import play.api.i18n.Lang
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{ProvenShape, TableQuery}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 case class Posting(id: Option[Int], lang: Lang, title: String, content: String, date: Date) extends Entity[Posting] {
   override def withId(id: Int): Posting = this.copy(id = Some(id))
@@ -43,11 +42,11 @@ object Page extends Enumeration {
 }
 
 object Postings extends TableQuery(new Postings(_)) {
-  def byId(id: Int, preferredLang: Lang)(implicit db: Database): Future[Posting] = {
+  def byId(id: Int, preferredLang: Lang)(implicit db: Database, ec: ExecutionContext): Future[Posting] = {
     byIdOption(id, preferredLang).map(_.get)
   }
 
-  def byIdOption(id: Int, preferredLang: Lang)(implicit db: Database): Future[Option[Posting]] = {
+  def byIdOption(id: Int, preferredLang: Lang)(implicit db: Database, ec: ExecutionContext): Future[Option[Posting]] = {
     // cannot be inlined because type cannot be inferred
     val query: Query[(Rep[Option[Int]], Rep[Lang], Rep[String], Rep[String], Rep[Date]), (Option[Int], Lang, String, String, Date), Seq] = for {
       p <- Postings if p.id === id

@@ -7,8 +7,8 @@ import play.api.libs.ws.WSClient
 import scala.concurrent.{Await, ExecutionContext}
 import scala.language.postfixOps
 
-class CaptchaHelper @Inject() (ws: WSClient) {
-  def check(response: String)(implicit config: Configuration, ex: ExecutionContext): Boolean = {
+class CaptchaHelper @Inject() (val ws: WSClient, implicit val ec: ExecutionContext) {
+  def check(response: String)(implicit config: Configuration): Boolean = {
     if (!config.getOptional[Boolean]("captcha.active").getOrElse(false)) return true
     Await.result(ws.url("https://www.google.com/recaptcha/api/siteverify").post(Map(
       "secret" -> Seq(config.getOptional[String]("captcha.secret").getOrElse("")),

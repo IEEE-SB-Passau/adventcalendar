@@ -53,7 +53,7 @@ case class UserLogin(username: String, password: String) {
   private var _user: Option[User] = None
   def user: Option[User] = _user
 
-  def authenticate()(implicit db: Database, ex: ExecutionContext): Option[User] = {
+  def authenticate()(implicit db: Database, ec: ExecutionContext): Option[User] = {
     _user = None
     Await.result(db.run(Users.filter(_.username === this.username).result.headOption).map {
       case Some(user) if user.active && PasswordHasher.verifyPassword(this.password, user.password) =>

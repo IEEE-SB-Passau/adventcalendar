@@ -15,17 +15,18 @@ import play.api.mvc.{Flash, RequestHeader, Result}
 import play.api.routing.Router
 import slick.jdbc.JdbcProfile
 import slick.jdbc.PostgresProfile.api._
-import scala.collection.JavaConverters._
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
-class ErrorHandler @Inject()(env: Environment,
-                             config: Configuration,
-                             sourceMapper: OptionalSourceMapper,
-                             router: Provider[Router],
-                             mailerClient: MailerClient,
-                             dbConfigProvider: DatabaseConfigProvider,
-                             val messagesApi: MessagesApi
+import scala.collection.JavaConverters._
+import scala.concurrent.{ExecutionContext, Future}
+
+class ErrorHandler @Inject()(val env: Environment,
+                             val dbConfigProvider: DatabaseConfigProvider,
+                             val messagesApi: MessagesApi,
+                             val mailerClient: MailerClient,
+                             val config: Configuration,
+                             val router: Provider[Router],
+                             val sourceMapper: OptionalSourceMapper,
+                             implicit val ec: ExecutionContext
                             ) extends DefaultHttpErrorHandler(env, config, sourceMapper, router) with I18nSupport {
   implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
 

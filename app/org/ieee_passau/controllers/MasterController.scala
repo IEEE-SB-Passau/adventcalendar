@@ -7,13 +7,14 @@ import play.api.db.slick.DatabaseConfigProvider
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import slick.jdbc.JdbcProfile
-import scala.concurrent.ExecutionContext.Implicits.global
+
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class MasterController @Inject()(private val dbConfigProvider: DatabaseConfigProvider,
-                                 private val components: MessagesControllerComponents
+                                 private val components: MessagesControllerComponents,
+                                 implicit private val ec: ExecutionContext
                                 ) extends MessagesAbstractController(components) with I18nSupport {
   implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
 

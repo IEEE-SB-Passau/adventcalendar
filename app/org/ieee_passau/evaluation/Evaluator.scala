@@ -7,13 +7,13 @@ import play.api.Configuration
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.concurrent.InjectedActorSupport
 
-class Evaluator @Inject() (configuration: Configuration,
-                           dbConfigProvider: DatabaseConfigProvider,
-                           system: ActorSystem,
-                           dbReaderFactory: DBReader.Factory,
-                           dbWriterFactory: DBWriter.Factory,
-                           vmMasterFactory: VMMaster.Factory,
-                           inputRegulatorFactory: InputRegulator.Factory
+class Evaluator @Inject() (val dbConfigProvider: DatabaseConfigProvider,
+                           val config: Configuration,
+                           val system: ActorSystem,
+                           val dbReaderFactory: DBReader.Factory,
+                           val dbWriterFactory: DBWriter.Factory,
+                           val vmMasterFactory: VMMaster.Factory,
+                           val inputRegulatorFactory: InputRegulator.Factory
                           ) extends EvaluationActor with InjectedActorSupport {
 
   override def receive: Receive = {
@@ -21,8 +21,8 @@ class Evaluator @Inject() (configuration: Configuration,
   }
 
   private def start = {
-    val jobLimit = configuration.getOptional[Int]("evaluator.inputregulator.joblimit").getOrElse(1)
-    val jobLifetime = MathHelper.makeDuration(configuration.getOptional[String]("evaluator.eval.basetime").getOrElse("60 seconds")).mul(10)
+    val jobLimit = config.getOptional[Int]("evaluator.inputregulator.joblimit").getOrElse(1)
+    val jobLifetime = MathHelper.makeDuration(config.getOptional[String]("evaluator.eval.basetime").getOrElse("60 seconds")).mul(10)
 
     injectedChild(dbReaderFactory(), classOf[DBReader].getSimpleName)
     injectedChild(dbWriterFactory(), classOf[DBWriter].getSimpleName)

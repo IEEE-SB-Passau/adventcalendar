@@ -11,7 +11,7 @@ import org.ieee_passau.models.DateSupport.dateMapper
 import org.ieee_passau.models.{Admin, Posting, _}
 import org.ieee_passau.utils.FutureHelper.akkaTimeout
 import org.ieee_passau.utils.LanguageHelper.LangTypeMapper
-import org.ieee_passau.utils.{AkkaHelper, LanguageHelper, UserHelper}
+import org.ieee_passau.utils.{AkkaHelper, LanguageHelper}
 import play.api.data.Form
 import play.api.data.Forms.{mapping, number, optional, _}
 import play.api.db.slick.DatabaseConfigProvider
@@ -19,15 +19,15 @@ import play.api.i18n.Lang
 import play.api.mvc._
 import slick.jdbc.PostgresProfile.api._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 
-class CmsController @Inject()(dbConfigProvider: DatabaseConfigProvider,
-                              components: MessagesControllerComponents,
-                              system: ActorSystem,
-                              @Named(AkkaHelper.monitoringActor) monitoringActor: ActorRef
-                             ) extends MasterController(dbConfigProvider, components) {
+class CmsController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
+                              val components: MessagesControllerComponents,
+                              implicit val ec: ExecutionContext,
+                              val system: ActorSystem,
+                              @Named(AkkaHelper.monitoringActor) val monitoringActor: ActorRef
+                             ) extends MasterController(dbConfigProvider, components, ec) {
 
   def maintenance: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     val displayLang: Lang = rs.lang

@@ -11,12 +11,12 @@ import play.api.db.slick.DatabaseConfigProvider
 import play.api.mvc._
 import slick.jdbc.PostgresProfile.api._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class TestcaseController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
-                                   val components: MessagesControllerComponents
-                                  ) extends MasterController(dbConfigProvider, components) {
+                                   val components: MessagesControllerComponents,
+                                   implicit val ec: ExecutionContext
+                                  ) extends MasterController(dbConfigProvider, components, ec) {
 
   def edit(pid: Int, id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     db.run(Testcases.byId(id).result.headOption).flatMap {

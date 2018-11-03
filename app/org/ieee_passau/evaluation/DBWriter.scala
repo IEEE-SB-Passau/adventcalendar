@@ -2,6 +2,7 @@ package org.ieee_passau.evaluation
 
 import java.util.Date
 
+import akka.actor.ActorSystem
 import com.google.inject.Inject
 import org.ieee_passau.evaluation.Messages._
 import org.ieee_passau.models._
@@ -10,7 +11,7 @@ import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
 import slick.jdbc.PostgresProfile.api._
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 
 object DBWriter {
   trait Factory {
@@ -21,8 +22,9 @@ object DBWriter {
 /**
   * Writes evaluated jobs to the database and broadcasts a JobFinished message.
   */
-class DBWriter @Inject() (dbConfigProvider: DatabaseConfigProvider) extends EvaluationActor {
+class DBWriter @Inject() (val dbConfigProvider: DatabaseConfigProvider, val system: ActorSystem) extends EvaluationActor {
   private implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
+  private implicit val evalContext: ExecutionContext = system.dispatchers.lookup("evaluator.context")
 
   override def receive: Receive = {
     case EvaluatedJobM(eJob) =>

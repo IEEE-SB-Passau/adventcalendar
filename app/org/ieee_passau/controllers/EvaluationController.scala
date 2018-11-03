@@ -18,17 +18,17 @@ import play.api.db.slick.DatabaseConfigProvider
 import play.api.mvc._
 import slick.jdbc.PostgresProfile.api._
 
-import scala.concurrent.Await
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{Await, ExecutionContext}
 import scala.language.postfixOps
 import scala.xml.NodeSeq
 
 @Singleton
 class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                                      val components: MessagesControllerComponents,
+                                     implicit val ec: ExecutionContext,
                                      val system: ActorSystem,
                                      @Named(AkkaHelper.monitoringActor) val monitoringActor: ActorRef
-                                    ) extends MasterController(dbConfigProvider, components) {
+                                    ) extends MasterController(dbConfigProvider, components, ec) {
 
   private def sort(key: String, list: List[SubmissionListEntry]) = {
     key match {

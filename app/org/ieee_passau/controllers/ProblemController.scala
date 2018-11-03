@@ -17,15 +17,15 @@ import slick.ast.BaseTypedType
 import slick.jdbc.JdbcType
 import slick.jdbc.PostgresProfile.api._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                                   val components: MessagesControllerComponents,
+                                  implicit val ec: ExecutionContext,
                                   val system: ActorSystem,
-                                  implicit val configuration: Configuration,
+                                  implicit val config: Configuration,
                                   @Named(AkkaHelper.rankingActor) val rankingActor: ActorRef
-                                 ) extends MasterController(dbConfigProvider, components) {
+                                 ) extends MasterController(dbConfigProvider, components, ec) {
 
   def index: Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
     db.run(Problems.sortBy(_.door.asc).result).map(problems =>

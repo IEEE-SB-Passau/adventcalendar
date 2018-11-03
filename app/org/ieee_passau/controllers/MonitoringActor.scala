@@ -2,24 +2,24 @@ package org.ieee_passau.controllers
 
 import java.util.Date
 
-import akka.actor.Actor
+import akka.actor.{Actor, ActorSystem}
 import akka.pattern.{ask, pipe}
-import akka.util.Timeout
+import com.google.inject.Inject
 import org.ieee_passau.controllers.Beans._
 import org.ieee_passau.evaluation.Messages.{JobFinished, NewVM, RemoveVM}
 import org.ieee_passau.evaluation.{InputRegulator, VMMaster}
 import org.ieee_passau.utils.AkkaHelper
+import org.ieee_passau.utils.FutureHelper.akkaTimeout
 
 import scala.collection.mutable
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 
-class MonitoringActor extends Actor {
+class MonitoringActor @Inject() (val system: ActorSystem) extends Actor {
+  implicit private val evalContext: ExecutionContext = system.dispatchers.lookup("evaluator.context")
+
   private var notification = false
   private var running = true
-  implicit val timeout: Timeout = Timeout(5000 milliseconds)
 
   private val nodes = mutable.HashMap[String, VMStatus]()
 

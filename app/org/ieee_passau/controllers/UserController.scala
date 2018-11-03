@@ -3,7 +3,7 @@ package org.ieee_passau.controllers
 import com.google.inject.Inject
 import org.apache.commons.mail.EmailException
 import org.ieee_passau.models.{Admin, _}
-import org.ieee_passau.utils.{CaptchaHelper, PasswordHasher, UserHelper}
+import org.ieee_passau.utils.{CaptchaHelper, PasswordHasher}
 import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms._
@@ -13,16 +13,16 @@ import play.api.libs.mailer._
 import play.api.mvc._
 import slick.jdbc.PostgresProfile.api._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                                val components: MessagesControllerComponents,
                                val langs: Langs,
                                val captchaHelper: CaptchaHelper,
                                val mailerClient: MailerClient,
-                               implicit val configuration: Configuration
-                              ) extends MasterController(dbConfigProvider, components) {
+                               implicit val config: Configuration,
+                               implicit val ec: ExecutionContext
+                              ) extends MasterController(dbConfigProvider, components, ec) {
 
   def index: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     db.run(Users.sortBy(_.id).to[List].result).map { userList => Ok(org.ieee_passau.views.html.user.index(userList))}
@@ -90,23 +90,23 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   }}
 
   def register: Action[AnyContent] = requirePermission(Guest) { implicit guest => Action { implicit rs =>
-    Ok(org.ieee_passau.views.html.user.register(registrationForm, configuration.getOptional[Boolean]("captcha.active").getOrElse(false)))
+    Ok(org.ieee_passau.views.html.user.register(registrationForm, config.getOptional[Boolean]("captcha.active").getOrElse(false)))
   }}
 
   def create: Action[AnyContent] = requirePermission(Guest) { implicit guest => Action.async { implicit rs =>
     registrationForm.bindFromRequest.fold(
       errorForm => {
-        Future.successful(BadRequest(org.ieee_passau.views.html.user.register(errorForm, configuration.getOptional[Boolean]("captcha.active").getOrElse(false))))
+        Future.successful(BadRequest(org.ieee_passau.views.html.user.register(errorForm, config.getOptional[Boolean]("captcha.active").getOrElse(false))))
       },
 
       registration => {
         implicit val sessionLang: Lang = rs.lang
         val createdUser: User = registration.makeUser(sessionLang)
         val link = org.ieee_passau.controllers.routes.UserController.activate(createdUser.activationToken.get)
-          .absoluteURL(secure = configuration.getOptional[Boolean]("application.https").getOrElse(false))
+          .absoluteURL(secure = config.getOptional[Boolean]("application.https").getOrElse(false))
         val regMail = Email(
           subject = messagesApi("email.header") + " " + messagesApi("email.register.subject"),
-          from = configuration.getOptional[String]("email.from").getOrElse("adventskalender@ieee.uni-passau.de"),
+          from = config.getOptional[String]("email.from").getOrElse("adventskalender@ieee.uni-passau.de"),
           to = List(createdUser.email),
           bodyText = Some(messagesApi("email.register.body", createdUser.username, link))
         )
@@ -122,7 +122,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
               Users.filter(_.id === id).delete
               BadRequest(org.ieee_passau.views.html.user.register(
                 registrationForm.fill(registration).withError("invalidEmail", "error.email"),
-                configuration.getOptional[Boolean]("captcha.active").getOrElse(false))
+                config.getOptional[Boolean]("captcha.active").getOrElse(false))
               )
 
             case e: Throwable =>
@@ -162,10 +162,10 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
           case Some(user) =>
             val token = PasswordHasher.generateUrlString()
             val link = org.ieee_passau.controllers.routes.UserController.editPassword(token)
-              .absoluteURL(secure = configuration.getOptional[Boolean]("application.https").getOrElse(false))
+              .absoluteURL(secure = config.getOptional[Boolean]("application.https").getOrElse(false))
             val regMail = Email(
               subject = rs.messages("email.header") + " " + rs.messages("email.passwordreset.subject"),
-              from = configuration.getOptional[String]("email.from").getOrElse(""),
+              from = config.getOptional[String]("email.from").getOrElse(""),
               to = List(user.email),
               bodyText = Some(rs.messages("email.passwordreset.body", user.username, link))
             )

@@ -17,16 +17,15 @@ import slick.jdbc.JdbcProfile
 import slick.jdbc.PostgresProfile.api._
 
 import scala.collection.SeqView
-import scala.concurrent.Await
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{Await, ExecutionContext}
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util.Try
 
-class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, system: ActorSystem) extends Actor {
-
+class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val system: ActorSystem) extends Actor {
   private val dbConfig = dbConfigProvider.get[JdbcProfile]
   private val db: Database = dbConfig.db
+  implicit private val evalContext: ExecutionContext = system.dispatchers.lookup("evaluator.context")
 
   val STARTUP_DELAY: FiniteDuration = 500 millis
   val TICK_INTERVAL: FiniteDuration = 1 minute

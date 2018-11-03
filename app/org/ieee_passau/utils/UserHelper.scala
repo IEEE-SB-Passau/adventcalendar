@@ -4,8 +4,7 @@ import org.ieee_passau.models.{User, Users, _}
 import play.api.mvc._
 import slick.jdbc.PostgresProfile.api._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 object UserHelper {
 
@@ -16,7 +15,7 @@ object UserHelper {
     * @param request the request
     * @return optionally the user in the session ot specified by the token
     */
-  def getUserFromRequest(request: RequestHeader)(implicit db: Database): Future[Option[User]] = {
+  def getUserFromRequest(request: RequestHeader)(implicit db: Database, ec: ExecutionContext): Future[Option[User]] = {
     request.session.get("user").map { uid =>
       db.run(Users.byId(uid.toInt).result.headOption).flatMap {
         case Some(x) => Future.successful(Some(x))

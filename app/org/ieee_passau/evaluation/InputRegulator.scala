@@ -7,17 +7,13 @@ import akka.actor.ActorSystem
 import com.google.inject.Inject
 import com.google.inject.assistedinject.Assisted
 import org.ieee_passau.controllers.Beans.{RunningJobsQ, StatusM}
+import org.ieee_passau.evaluation.Messages._
 import org.ieee_passau.utils.AkkaHelper
 
-import scala.language.postfixOps
-
-// Needed for application context, do not remove!
-
-import org.ieee_passau.evaluation.Messages._
-
 import scala.collection.mutable
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
+import scala.language.postfixOps
 
 object InputRegulator {
   trait Factory {
@@ -30,7 +26,12 @@ object InputRegulator {
   * Controls the number of jobs entering the system.
   * Forwards jobs to the job router.
   */
-class InputRegulator @Inject() (@Assisted jobLimit: Int, @Assisted jobLifetime: Duration, system: ActorSystem) extends EvaluationActor {
+class InputRegulator @Inject() (@Assisted val jobLimit: Int,
+                                @Assisted val jobLifetime: Duration,
+                                val system: ActorSystem
+                               ) extends EvaluationActor {
+  implicit private val evalContext: ExecutionContext = system.dispatchers.lookup("evaluator.context")
+
   val STARTUP_DELAY: FiniteDuration = 2 minutes
   val TICK_INTERVAL: FiniteDuration = 1 second
   val TICK_MSG = "tick"

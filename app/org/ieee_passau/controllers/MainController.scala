@@ -20,17 +20,17 @@ import play.api.libs.json.{JsPath, Json, Writes}
 import play.api.mvc.{Result, _}
 import slick.jdbc.PostgresProfile.api._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 import scala.reflect.io.File
 
 class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                                val components: MessagesControllerComponents,
+                               implicit val ec: ExecutionContext,
                                val system: ActorSystem,
                                @Named(AkkaHelper.monitoringActor) val monitoringActor: ActorRef,
                                @Named(AkkaHelper.rankingActor) val rankingActor: ActorRef
-                              ) extends MasterController(dbConfigProvider, components) {
+                              ) extends MasterController(dbConfigProvider, components, ec) {
 
   def problems: Action[AnyContent] = requirePermission(Everyone) { implicit user => Action.async { implicit rs =>
     val lang = rs.lang

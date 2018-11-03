@@ -2,6 +2,7 @@ package org.ieee_passau.evaluation
 
 import java.util.UUID
 
+import akka.actor.ActorSystem
 import com.google.inject.Inject
 import org.ieee_passau.evaluation.Messages._
 import org.ieee_passau.models._
@@ -12,8 +13,7 @@ import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
 import slick.jdbc.PostgresProfile.api._
 
-import scala.concurrent.Await
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{Await, ExecutionContext}
 
 object DBReader {
   trait Factory {
@@ -24,8 +24,11 @@ object DBReader {
 /**
   * If prompted by InputRegulator, reads jobs from the database and sends them to InputRegulator.
   */
-class DBReader @Inject() (dbConfigProvider: DatabaseConfigProvider, config: Configuration) extends EvaluationActor {
+class DBReader @Inject() (val dbConfigProvider: DatabaseConfigProvider,
+                          val config: Configuration,
+                          val system: ActorSystem) extends EvaluationActor {
   private implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
+  private implicit val evalContext: ExecutionContext = system.dispatchers.lookup("evaluator.context")
 
   override def receive: Receive = {
     case ReadJobsDB(count) =>

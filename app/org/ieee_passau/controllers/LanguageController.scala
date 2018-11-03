@@ -10,13 +10,13 @@ import play.api.db.slick.DatabaseConfigProvider
 import play.api.mvc._
 import slick.jdbc.PostgresProfile.api._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class LanguageController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                                    val components: MessagesControllerComponents,
-                                   implicit val configuration: Configuration
-                                  ) extends MasterController(dbConfigProvider, components) {
+                                   implicit val config: Configuration,
+                                   implicit val ec: ExecutionContext
+                                  ) extends MasterController(dbConfigProvider, components, ec) {
 
   def index: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     db.run(Languages.sortBy(_.id.asc).to[List].result).map { list =>
