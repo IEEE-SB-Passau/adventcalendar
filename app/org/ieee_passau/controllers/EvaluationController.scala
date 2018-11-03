@@ -13,7 +13,7 @@ import org.ieee_passau.models.DateSupport.dateMapper
 import org.ieee_passau.models.{Admin, _}
 import org.ieee_passau.utils.FutureHelper.akkaTimeout
 import org.ieee_passau.utils.ListHelper._
-import org.ieee_passau.utils.{AkkaHelper, FutureHelper, PermissionCheck}
+import org.ieee_passau.utils.{AkkaHelper, FutureHelper, UserHelper}
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.mvc._
 import slick.jdbc.PostgresProfile.api._
@@ -24,11 +24,11 @@ import scala.language.postfixOps
 import scala.xml.NodeSeq
 
 @Singleton
-class EvaluationController @Inject()(dbConfigProvider: DatabaseConfigProvider,
-                                     components: MessagesControllerComponents,
-                                     system: ActorSystem,
-                                     @Named(AkkaHelper.monitoringActor) monitoringActor: ActorRef
-                                    ) extends ControllerWithDBAndI18n(dbConfigProvider, components) with PermissionCheck {
+class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
+                                     val components: MessagesControllerComponents,
+                                     val system: ActorSystem,
+                                     @Named(AkkaHelper.monitoringActor) val monitoringActor: ActorRef
+                                    ) extends MasterController(dbConfigProvider, components) {
 
   private def sort(key: String, list: List[SubmissionListEntry]) = {
     key match {

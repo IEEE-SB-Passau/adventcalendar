@@ -11,7 +11,7 @@ import org.ieee_passau.controllers.Beans._
 import org.ieee_passau.models.DateSupport.dateMapper
 import org.ieee_passau.models._
 import org.ieee_passau.utils.FutureHelper.akkaTimeout
-import org.ieee_passau.utils.{AkkaHelper, FormHelper, ListHelper, PermissionCheck}
+import org.ieee_passau.utils.{AkkaHelper, FormHelper, ListHelper, UserHelper}
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.i18n.Lang
 import play.api.libs.Files.TemporaryFile
@@ -25,12 +25,12 @@ import scala.concurrent.Future
 import scala.language.postfixOps
 import scala.reflect.io.File
 
-class MainController @Inject()(dbConfigProvider: DatabaseConfigProvider,
-                               components: MessagesControllerComponents,
-                               system: ActorSystem,
-                               @Named(AkkaHelper.monitoringActor) monitoringActor: ActorRef,
-                               @Named(AkkaHelper.rankingActor) rankingActor: ActorRef
-                              ) extends ControllerWithDBAndI18n(dbConfigProvider, components) with PermissionCheck {
+class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
+                               val components: MessagesControllerComponents,
+                               val system: ActorSystem,
+                               @Named(AkkaHelper.monitoringActor) val monitoringActor: ActorRef,
+                               @Named(AkkaHelper.rankingActor) val rankingActor: ActorRef
+                              ) extends MasterController(dbConfigProvider, components) {
 
   def problems: Action[AnyContent] = requirePermission(Everyone) { implicit user => Action.async { implicit rs =>
     val lang = rs.lang

@@ -5,12 +5,12 @@ import java.util.Date
 import com.google.inject.Inject
 import org.ieee_passau.models.DateSupport.dateMapper
 import org.ieee_passau.models._
+import org.ieee_passau.utils.FormHelper
 import org.ieee_passau.utils.StringHelper.encodeEmailName
-import org.ieee_passau.utils.{FormHelper, PermissionCheck}
+import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms.{mapping, number, optional, text}
 import play.api.db.slick.DatabaseConfigProvider
-import play.api.i18n.I18nSupport
 import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc._
 import slick.jdbc.PostgresProfile.api._
@@ -18,10 +18,11 @@ import slick.jdbc.PostgresProfile.api._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class TicketController @Inject()(dbConfigProvider: DatabaseConfigProvider,
-                                 components: MessagesControllerComponents,
-                                 mailerClient: MailerClient
-                                ) extends ControllerWithDBAndI18n(dbConfigProvider, components) with PermissionCheck with I18nSupport {
+class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
+                                 val components: MessagesControllerComponents,
+                                 val mailerClient: MailerClient,
+                                 val configuration: Configuration
+                                ) extends MasterController(dbConfigProvider, components) {
 
   def index: Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
     val responsesQuery = for {
@@ -165,7 +166,7 @@ class TicketController @Inject()(dbConfigProvider: DatabaseConfigProvider,
     )
   }}
 
-  def feedbackForm = Form(
+  val feedbackForm = Form(
     mapping(
       "id" -> optional(number),
       "user_id" -> number,

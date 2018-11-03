@@ -11,7 +11,7 @@ import org.ieee_passau.models.DateSupport.dateMapper
 import org.ieee_passau.models.{Admin, Posting, _}
 import org.ieee_passau.utils.FutureHelper.akkaTimeout
 import org.ieee_passau.utils.LanguageHelper.LangTypeMapper
-import org.ieee_passau.utils.{AkkaHelper, LanguageHelper, PermissionCheck}
+import org.ieee_passau.utils.{AkkaHelper, LanguageHelper, UserHelper}
 import play.api.data.Form
 import play.api.data.Forms.{mapping, number, optional, _}
 import play.api.db.slick.DatabaseConfigProvider
@@ -27,7 +27,7 @@ class CmsController @Inject()(dbConfigProvider: DatabaseConfigProvider,
                               components: MessagesControllerComponents,
                               system: ActorSystem,
                               @Named(AkkaHelper.monitoringActor) monitoringActor: ActorRef
-                             ) extends ControllerWithDBAndI18n(dbConfigProvider, components) with PermissionCheck {
+                             ) extends MasterController(dbConfigProvider, components) {
 
   def maintenance: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     val displayLang: Lang = rs.lang

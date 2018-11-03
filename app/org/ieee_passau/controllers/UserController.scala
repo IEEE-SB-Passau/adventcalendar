@@ -3,7 +3,7 @@ package org.ieee_passau.controllers
 import com.google.inject.Inject
 import org.apache.commons.mail.EmailException
 import org.ieee_passau.models.{Admin, _}
-import org.ieee_passau.utils.{CaptchaHelper, PasswordHasher, PermissionCheck}
+import org.ieee_passau.utils.{CaptchaHelper, PasswordHasher, UserHelper}
 import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms._
@@ -16,13 +16,13 @@ import slick.jdbc.PostgresProfile.api._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class UserController @Inject()(dbConfigProvider: DatabaseConfigProvider,
-                               components: MessagesControllerComponents,
-                               langs: Langs,
+class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
+                               val components: MessagesControllerComponents,
+                               val langs: Langs,
                                val captchaHelper: CaptchaHelper,
-                               mailerClient: MailerClient,
-                               configuration: Configuration) extends ControllerWithDBAndI18n(dbConfigProvider, components) with PermissionCheck {
-  private implicit val config: Configuration = configuration
+                               val mailerClient: MailerClient,
+                               implicit val configuration: Configuration
+                              ) extends MasterController(dbConfigProvider, components) {
 
   def index: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     db.run(Users.sortBy(_.id).to[List].result).map { userList => Ok(org.ieee_passau.views.html.user.index(userList))}
@@ -90,7 +90,7 @@ class UserController @Inject()(dbConfigProvider: DatabaseConfigProvider,
   }}
 
   def register: Action[AnyContent] = requirePermission(Guest) { implicit guest => Action { implicit rs =>
-    Ok(org.ieee_passau.views.html.user.register(registrationForm, config.getOptional[Boolean]("captcha.active").getOrElse(false)))
+    Ok(org.ieee_passau.views.html.user.register(registrationForm, configuration.getOptional[Boolean]("captcha.active").getOrElse(false)))
   }}
 
   def create: Action[AnyContent] = requirePermission(Guest) { implicit guest => Action.async { implicit rs =>
@@ -162,10 +162,10 @@ class UserController @Inject()(dbConfigProvider: DatabaseConfigProvider,
           case Some(user) =>
             val token = PasswordHasher.generateUrlString()
             val link = org.ieee_passau.controllers.routes.UserController.editPassword(token)
-              .absoluteURL(secure = config.getOptional[Boolean]("application.https").getOrElse(false))
+              .absoluteURL(secure = configuration.getOptional[Boolean]("application.https").getOrElse(false))
             val regMail = Email(
               subject = rs.messages("email.header") + " " + rs.messages("email.passwordreset.subject"),
-              from = config.getOptional[String]("email.from").getOrElse(""),
+              from = configuration.getOptional[String]("email.from").getOrElse(""),
               to = List(user.email),
               bodyText = Some(rs.messages("email.passwordreset.body", user.username, link))
             )
@@ -264,7 +264,7 @@ class UserController @Inject()(dbConfigProvider: DatabaseConfigProvider,
     Users.update(user.get.id, user.get.copy(notificationDismissed = true)).map(_ => Ok(""))
   }}
 
-  def userForm = Form(
+  val userForm = Form(
     mapping(
       "id" -> optional(number),
       "username" -> nonEmptyText(3, 30),
@@ -283,7 +283,7 @@ class UserController @Inject()(dbConfigProvider: DatabaseConfigProvider,
     ((user: User) => Some(user.id, user.username, Some(""), user.email, user.active, user.hidden, user.semester, user.studySubject, user.school, user.permission.name))
   )
 
-  def registrationForm = Form(
+  val registrationForm = Form(
     mapping(
       "username" -> nonEmptyText(3, 30).verifying("user.error.usernametake", u => Users.usernameAvailable(u)),
       "password" -> tuple(
@@ -302,7 +302,7 @@ class UserController @Inject()(dbConfigProvider: DatabaseConfigProvider,
 
   )
 
-  def loginForm = Form(
+  val loginForm = Form(
     mapping(
       "username" -> nonEmptyText(3, 30),
       "password" -> nonEmptyText(6, 128)
@@ -310,7 +310,7 @@ class UserController @Inject()(dbConfigProvider: DatabaseConfigProvider,
       verifying("user.login.error", login => login.authenticate().isDefined)
   )
 
-  def passwordForm = Form(
+  val passwordForm = Form(
     mapping(
       "password" -> tuple(
         "main" -> nonEmptyText(6, 128),
@@ -319,7 +319,7 @@ class UserController @Inject()(dbConfigProvider: DatabaseConfigProvider,
     )((password: (String, String)) => password._1)((_: String) => Some("",""))
   )
 
-  def usernameForm = Form(
+  val usernameForm = Form(
     mapping(
       "username" -> nonEmptyText(3, 30)
     )((username: String) => username)((username: String) => Some(username))

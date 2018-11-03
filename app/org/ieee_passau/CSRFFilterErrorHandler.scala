@@ -2,7 +2,7 @@ package org.ieee_passau
 
 import com.google.inject.Inject
 import org.ieee_passau.models.User
-import org.ieee_passau.utils.PermissionCheck
+import org.ieee_passau.utils.UserHelper
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Results._
@@ -18,7 +18,7 @@ class CSRFFilterErrorHandler @Inject() (dbConfigProvider: DatabaseConfigProvider
   implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
 
   override def handle(request: RequestHeader, msg: String): Future[Result] = {
-    PermissionCheck.getUserFromRequest(request).map(maybeUser => {
+    UserHelper.getUserFromRequest(request).map(maybeUser => {
       implicit val rs: RequestHeader = request
       implicit val sessionUser: Option[User] = maybeUser
       implicit val flash: Flash = Flash()

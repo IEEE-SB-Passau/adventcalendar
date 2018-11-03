@@ -2,7 +2,7 @@ package org.ieee_passau.controllers
 
 import com.google.inject.Inject
 import org.ieee_passau.models.{Admin, EvalTask, EvalTasks}
-import org.ieee_passau.utils.PermissionCheck
+import org.ieee_passau.utils.UserHelper
 import play.api.data.Form
 import play.api.data.Forms.{mapping, number, optional, _}
 import play.api.db.slick.DatabaseConfigProvider
@@ -14,9 +14,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.reflect.io.File
 
-class EvalTaskController @Inject()(dbConfigProvider: DatabaseConfigProvider,
-                                   components: MessagesControllerComponents
-                                  ) extends ControllerWithDBAndI18n(dbConfigProvider, components) with PermissionCheck {
+class EvalTaskController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
+                                   val components: MessagesControllerComponents
+                                  ) extends MasterController(dbConfigProvider, components) {
+
   def edit(pid: Int, id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     db.run(EvalTasks.byId(id).result.headOption).map {
       case Some(task) => Ok(org.ieee_passau.views.html.evaltask.edit(pid, id, evalTaskForm.fill(task)))

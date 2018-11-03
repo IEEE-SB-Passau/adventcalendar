@@ -4,7 +4,7 @@ import java.util.Date
 
 import com.google.inject.Inject
 import org.ieee_passau.models._
-import org.ieee_passau.utils.PermissionCheck
+import org.ieee_passau.utils.UserHelper
 import play.api.data.Form
 import play.api.data.Forms.{mapping, number, optional, _}
 import play.api.db.slick.DatabaseConfigProvider
@@ -14,9 +14,9 @@ import slick.jdbc.PostgresProfile.api._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class TestcaseController @Inject()(dbConfigProvider: DatabaseConfigProvider,
-                                   components: MessagesControllerComponents
-                                  ) extends ControllerWithDBAndI18n(dbConfigProvider, components) with PermissionCheck {
+class TestcaseController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
+                                   val components: MessagesControllerComponents
+                                  ) extends MasterController(dbConfigProvider, components) {
 
   def edit(pid: Int, id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     db.run(Testcases.byId(id).result.headOption).flatMap {

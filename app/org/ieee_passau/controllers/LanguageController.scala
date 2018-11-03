@@ -2,7 +2,7 @@ package org.ieee_passau.controllers
 
 import com.google.inject.Inject
 import org.ieee_passau.models._
-import org.ieee_passau.utils.PermissionCheck
+import org.ieee_passau.utils.UserHelper
 import play.api.data.Form
 import play.api.data.Forms.{mapping, of, _}
 import play.api.data.format.Formats._
@@ -13,9 +13,9 @@ import slick.jdbc.PostgresProfile.api._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class LanguageController @Inject()(dbConfigProvider: DatabaseConfigProvider,
-                                   components: MessagesControllerComponents
-                                  ) extends ControllerWithDBAndI18n(dbConfigProvider, components) with PermissionCheck {
+class LanguageController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
+                                   val components: MessagesControllerComponents
+                                  ) extends MasterController(dbConfigProvider, components) {
 
   def index: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     db.run(Languages.sortBy(_.id.asc).to[List].result).map { list =>

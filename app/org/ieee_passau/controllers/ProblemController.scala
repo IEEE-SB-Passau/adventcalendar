@@ -5,7 +5,7 @@ import com.google.inject.Inject
 import com.google.inject.name.Named
 import org.ieee_passau.controllers.Beans.UpdateRankingM
 import org.ieee_passau.models.{EvalMode, Problem, ProblemTranslation, Problems, _}
-import org.ieee_passau.utils.{AkkaHelper, FutureHelper, LanguageHelper, PermissionCheck}
+import org.ieee_passau.utils.{AkkaHelper, FutureHelper, LanguageHelper, UserHelper}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.format.Formats._
@@ -19,11 +19,11 @@ import slick.jdbc.JdbcType
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Await, Future}
 
-class ProblemController @Inject()(dbConfigProvider: DatabaseConfigProvider,
-                                  components: MessagesControllerComponents,
-                                  system: ActorSystem,
-                                  @Named(AkkaHelper.rankingActor) rankingActor: ActorRef
-                                 ) extends ControllerWithDBAndI18n(dbConfigProvider, components) with PermissionCheck {
+class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
+                                  val components: MessagesControllerComponents,
+                                  val system: ActorSystem,
+                                  @Named(AkkaHelper.rankingActor) val rankingActor: ActorRef
+                                 ) extends MasterController(dbConfigProvider, components) {
 
   def index: Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
     db.run(Problems.sortBy(_.door.asc).result).map(problems =>

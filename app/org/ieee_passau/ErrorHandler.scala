@@ -4,7 +4,7 @@ import java.io.{PrintWriter, StringWriter}
 
 import com.google.inject.{Inject, Provider}
 import org.ieee_passau.models.User
-import org.ieee_passau.utils.PermissionCheck
+import org.ieee_passau.utils.UserHelper
 import play.api._
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.http.DefaultHttpErrorHandler
@@ -30,7 +30,7 @@ class ErrorHandler @Inject()(env: Environment,
   implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
 
   override protected def onProdServerError(request: RequestHeader, exception: UsefulException): Future[Result] = {
-    PermissionCheck.getUserFromRequest(request).map(maybeUser => {
+    UserHelper.getUserFromRequest(request).map(maybeUser => {
       implicit val rs: RequestHeader = request
       implicit val flash: Flash = rs.flash
       implicit val sessionUser: Option[User] = maybeUser
@@ -72,7 +72,7 @@ class ErrorHandler @Inject()(env: Environment,
   }
 
   override protected def onBadRequest(request: RequestHeader, message: String): Future[Result] = {
-    PermissionCheck.getUserFromRequest(request).map(maybeUser => {
+    UserHelper.getUserFromRequest(request).map(maybeUser => {
       implicit val rs: RequestHeader = request
       implicit val sessionUser: Option[User] = maybeUser
       implicit val flash: Flash = rs.flash
@@ -81,7 +81,7 @@ class ErrorHandler @Inject()(env: Environment,
   }
 
   override protected def onNotFound(request: RequestHeader, message: String): Future[Result] = {
-    PermissionCheck.getUserFromRequest(request).map(maybeUser => {
+    UserHelper.getUserFromRequest(request).map(maybeUser => {
       implicit val rs: RequestHeader = request
       implicit val sessionUser: Option[User] = maybeUser
       implicit val flash: Flash = rs.flash
