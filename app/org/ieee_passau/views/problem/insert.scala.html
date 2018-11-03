@@ -4,7 +4,7 @@
 @import play.api.data.Form
 @import play.api.mvc.{Flash, RequestHeader}
 @import play.api.Configuration
-@(problem: Form[Problem], evalModes: List[EvalMode])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages, configuration: Configuration)
+@(problem: Form[Problem], evalModes: List[EvalMode])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages, config: Configuration)
 
 @main(messages("problem.create")) {
 
