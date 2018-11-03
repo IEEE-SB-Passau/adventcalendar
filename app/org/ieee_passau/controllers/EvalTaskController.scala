@@ -2,7 +2,6 @@ package org.ieee_passau.controllers
 
 import com.google.inject.Inject
 import org.ieee_passau.models.{Admin, EvalTask, EvalTasks}
-import org.ieee_passau.utils.UserHelper
 import play.api.data.Form
 import play.api.data.Forms.{mapping, number, optional, _}
 import play.api.db.slick.DatabaseConfigProvider
@@ -44,7 +43,7 @@ class EvalTaskController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
         newTaskRaw => {
           rs.body.file("program").map { program =>
-            val newTask: EvalTask = newTaskRaw.copy(filename = program.filename, file = new File(program.ref.file).toByteArray())
+            val newTask: EvalTask = newTaskRaw.copy(filename = program.filename, file = new File(program.ref.path.toFile).toByteArray())
             db.run((EvalTasks returning EvalTasks.map(_.id)) += newTask).map { newTaskId =>
               Redirect(org.ieee_passau.controllers.routes.EvalTaskController.edit(pid, newTaskId)).flashing("success" -> rs.messages("evaltask.create.message", newTaskRaw.position))
             }
@@ -66,7 +65,7 @@ class EvalTaskController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
         task => {
           rs.body.file("program").map { program =>
-            val newTask = task.copy(filename = program.filename, file = new File(program.ref.file).toByteArray())
+            val newTask = task.copy(filename = program.filename, file = new File(program.ref.path.toFile).toByteArray())
             EvalTasks.update(id, newTask)
             Future.successful(Redirect(org.ieee_passau.controllers.routes.EvalTaskController.edit(pid, id)).flashing("success" -> rs.messages("evaltask.update.message", task.position)))
           } getOrElse {
