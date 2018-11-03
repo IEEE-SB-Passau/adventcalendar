@@ -1,7 +1,7 @@
 package org.ieee_passau.models
 
 import slick.dbio.Effect
-import slick.driver.PostgresDriver.api._
+import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{CompiledFunction, ForeignKeyQuery, ProvenShape}
 
 case class EvalTask(id: Option[Int], problemId: Int, position: Int, command: String, filename: String, file: Array[Byte],

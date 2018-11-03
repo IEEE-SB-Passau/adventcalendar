@@ -7,7 +7,7 @@ import org.ieee_passau.models.DateSupport.dateMapper
 import org.ieee_passau.utils.LanguageHelper
 import org.ieee_passau.utils.LanguageHelper.LangTypeMapper
 import play.api.i18n.Lang
-import slick.driver.PostgresDriver.api._
+import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{ProvenShape, TableQuery}
 
 import scala.concurrent.ExecutionContext.Implicits.global

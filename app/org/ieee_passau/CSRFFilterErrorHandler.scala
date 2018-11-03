@@ -4,12 +4,12 @@ import com.google.inject.Inject
 import org.ieee_passau.models.User
 import org.ieee_passau.utils.PermissionCheck
 import play.api.db.slick.DatabaseConfigProvider
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Results._
 import play.api.mvc._
 import play.filters.csrf.CSRF
-import slick.driver.JdbcProfile
-import slick.driver.PostgresDriver.api._
+import slick.jdbc.JdbcProfile
+import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

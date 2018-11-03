@@ -2,7 +2,7 @@ package org.ieee_passau.models
 
 import slick.ast.BaseTypedType
 import slick.dbio.Effect
-import slick.driver.PostgresDriver.api._
+import slick.jdbc.PostgresProfile.api._
 import slick.jdbc.JdbcType
 import slick.lifted.ProvenShape
 

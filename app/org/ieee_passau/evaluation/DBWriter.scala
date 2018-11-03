@@ -7,8 +7,8 @@ import org.ieee_passau.evaluation.Messages._
 import org.ieee_passau.models._
 import org.ieee_passau.utils.StringHelper
 import play.api.db.slick.DatabaseConfigProvider
-import slick.driver.JdbcProfile
-import slick.driver.PostgresDriver.api._
+import slick.jdbc.JdbcProfile
+import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

@@ -6,7 +6,7 @@ import org.ieee_passau.utils.LanguageHelper
 import org.ieee_passau.utils.LanguageHelper.LangTypeMapper
 import play.api.i18n.Lang
 import slick.dbio.Effect
-import slick.driver.PostgresDriver.api._
+import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{CompiledFunction, CompiledStreamingExecutable, ForeignKeyQuery, ProvenShape, TableQuery}
 
 import scala.concurrent.{ExecutionContext, Future}

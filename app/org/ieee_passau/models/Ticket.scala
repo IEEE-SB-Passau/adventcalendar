@@ -5,7 +5,7 @@ import java.util.Date
 import org.ieee_passau.utils.LanguageHelper
 import org.ieee_passau.utils.LanguageHelper.LangTypeMapper
 import play.api.i18n.Lang
-import slick.driver.PostgresDriver.api._
+import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{CompiledFunction, ProvenShape}
 
 import scala.concurrent.Future

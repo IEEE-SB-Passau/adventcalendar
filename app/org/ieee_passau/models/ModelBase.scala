@@ -4,7 +4,7 @@ import java.sql.Timestamp
 import java.util.Date
 
 import slick.ast.BaseTypedType
-import slick.driver.PostgresDriver.api._
+import slick.jdbc.PostgresProfile.api._
 import slick.jdbc.JdbcType
 
 object DateSupport {

@@ -13,8 +13,8 @@ import org.ieee_passau.models._
 import org.ieee_passau.utils.ViewHelper.{Highlight, HighlightSpecial, NoHighlight}
 import org.ieee_passau.utils.{FutureHelper, MathHelper}
 import play.api.db.slick.DatabaseConfigProvider
-import slick.driver.JdbcProfile
-import slick.driver.PostgresDriver.api._
+import slick.jdbc.JdbcProfile
+import slick.jdbc.PostgresProfile.api._
 
 import scala.collection.SeqView
 import scala.concurrent.Await

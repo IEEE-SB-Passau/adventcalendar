@@ -2,7 +2,7 @@ package org.ieee_passau.utils
 
 import play.api.i18n._
 import slick.ast.BaseTypedType
-import slick.driver.PostgresDriver.api._
+import slick.jdbc.PostgresProfile.api._
 import slick.jdbc.JdbcType
 
 import scala.collection.JavaConverters._

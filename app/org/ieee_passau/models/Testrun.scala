@@ -2,7 +2,7 @@ package org.ieee_passau.models
 
 import java.util.Date
 
-import slick.driver.PostgresDriver.api._
+import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{CompiledFunction, ForeignKeyQuery, ProvenShape}
 
 import scala.concurrent.Future

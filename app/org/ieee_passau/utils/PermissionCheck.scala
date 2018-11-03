@@ -3,7 +3,7 @@ package org.ieee_passau.utils
 import org.ieee_passau.models.{Guest, Permission, User, Users, _}
 import play.api.i18n.I18nSupport
 import play.api.mvc._
-import slick.driver.PostgresDriver.api._
+import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

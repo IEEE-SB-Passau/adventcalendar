@@ -11,7 +11,7 @@ import play.api.db.slick.DatabaseConfigProvider
 import play.api.i18n.{Lang, Langs}
 import play.api.libs.mailer._
 import play.api.mvc._
-import slick.driver.PostgresDriver.api._
+import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

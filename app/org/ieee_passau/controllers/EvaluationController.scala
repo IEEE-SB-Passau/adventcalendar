@@ -16,7 +16,7 @@ import org.ieee_passau.utils.ListHelper._
 import org.ieee_passau.utils.{AkkaHelper, FutureHelper, PermissionCheck}
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.mvc._
-import slick.driver.PostgresDriver.api._
+import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global

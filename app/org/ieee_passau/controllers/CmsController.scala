@@ -17,7 +17,7 @@ import play.api.data.Forms.{mapping, number, optional, _}
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.i18n.Lang
 import play.api.mvc._
-import slick.driver.PostgresDriver.api._
+import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

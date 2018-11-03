@@ -1,6 +1,6 @@
 package org.ieee_passau.models
 
-import slick.driver.PostgresDriver.api._
+import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{ForeignKeyQuery, ProvenShape}
 
 case class Feedback(id: Option[Int], userId: Int, rating: Int, pro: Option[String], con: Option[String],

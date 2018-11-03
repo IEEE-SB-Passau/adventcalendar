@@ -13,9 +13,8 @@ import play.api.libs.mailer.{Email, MailerClient}
 import play.api.mvc.Results._
 import play.api.mvc.{Flash, RequestHeader, Result}
 import play.api.routing.Router
-import slick.driver.JdbcProfile
-import slick.driver.PostgresDriver.api._
-
+import slick.jdbc.JdbcProfile
+import slick.jdbc.PostgresProfile.api._
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

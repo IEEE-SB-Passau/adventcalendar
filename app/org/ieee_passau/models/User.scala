@@ -2,7 +2,7 @@ package org.ieee_passau.models
 
 import org.ieee_passau.utils.{FutureHelper, PasswordHasher}
 import play.api.i18n.Lang
-import slick.driver.PostgresDriver.api._
+import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{CompiledFunction, ProvenShape}
 
 import scala.concurrent.{Await, ExecutionContext, Future}

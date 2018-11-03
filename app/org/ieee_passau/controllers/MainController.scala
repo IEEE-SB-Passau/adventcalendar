@@ -18,7 +18,7 @@ import play.api.libs.Files.TemporaryFile
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{JsPath, Json, Writes}
 import play.api.mvc.{Result, _}
-import slick.driver.PostgresDriver.api._
+import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

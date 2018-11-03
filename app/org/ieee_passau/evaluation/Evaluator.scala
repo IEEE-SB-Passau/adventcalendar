@@ -1,6 +1,6 @@
 package org.ieee_passau.evaluation
 
-import akka.actor.{ActorSystem, Props}
+import akka.actor.ActorSystem
 import com.google.inject.Inject
 import org.ieee_passau.utils.MathHelper
 import play.api.Configuration

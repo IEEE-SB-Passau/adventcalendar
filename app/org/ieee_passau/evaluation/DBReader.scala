@@ -2,7 +2,6 @@ package org.ieee_passau.evaluation
 
 import java.util.UUID
 
-import akka.actor.Props
 import com.google.inject.Inject
 import org.ieee_passau.evaluation.Messages._
 import org.ieee_passau.models._
@@ -10,8 +9,8 @@ import org.ieee_passau.utils.StringHelper._
 import org.ieee_passau.utils.{FutureHelper, MathHelper}
 import play.api.Configuration
 import play.api.db.slick.DatabaseConfigProvider
-import slick.driver.JdbcProfile
-import slick.driver.PostgresDriver.api._
+import slick.jdbc.JdbcProfile
+import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global

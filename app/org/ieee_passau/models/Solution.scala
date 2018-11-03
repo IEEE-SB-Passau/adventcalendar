@@ -3,7 +3,7 @@ package org.ieee_passau.models
 import java.util.Date
 
 import org.ieee_passau.models.DateSupport.dateMapper
-import slick.driver.PostgresDriver.api._
+import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{ForeignKeyQuery, ProvenShape}
 
 import scala.concurrent.Future
