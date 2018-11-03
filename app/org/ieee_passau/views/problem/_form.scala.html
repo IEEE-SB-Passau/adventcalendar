@@ -9,6 +9,7 @@
     @if(problem.value.isDefined) {
         <input type="hidden" name="id" value="@problem.value.get.id.get" />
     }
+    @text(problem("title"), label = messages("problem.name"), placeholder = messages("problem.name"))
     <div class="form-group @if(problem.errors.nonEmpty) {
         @problem.errors.map { e => @if(e.message == "problem.create.error.door") { has-error } }
     } @if(problem("door").hasErrors) { has-error }">

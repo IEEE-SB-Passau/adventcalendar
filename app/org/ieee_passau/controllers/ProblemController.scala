@@ -178,7 +178,6 @@ class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
       "id" -> optional(text),
       "title" -> nonEmptyText,
       "door" -> number, //(1, 24)
-      "description" -> text,
       "readableStart" -> date("yyyy-MM-dd HH:mm"),
       "readableStop" -> date("yyyy-MM-dd HH:mm"),
       "solvableStart" -> date("yyyy-MM-dd HH:mm"),
@@ -187,11 +186,11 @@ class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
       "cpuFactor" -> of[Float],
       "memFactor" -> of[Float]
     )
-    ((id: Option[String], title, door, description, readableStart, readableStop, solvableStart, solvableStop,
+    ((id: Option[String], title, door, readableStart, readableStop, solvableStart, solvableStop,
       evalMode: String, cpuFacotr: Float, memFator: Float) =>
-      Problem(if (id.isDefined) Some(id.get.toInt) else None, title, door, description, readableStart, readableStop,
+      Problem(if (id.isDefined) Some(id.get.toInt) else None, title, door, "", readableStart, readableStop,
         solvableStart, solvableStop, EvalMode(evalMode), cpuFacotr, memFator))
-    ((p: Problem) => Some(Some(p.id.toString), p.title, p.door, p.description, p.readableStart, p.readableStop,
+    ((p: Problem) => Some(Some(p.id.toString), p.title, p.door, p.readableStart, p.readableStop,
       p.solvableStart, p.solvableStop, p.evalMode.mode, p.cpuFactor, p.memFactor))
 
       verifying("viserror.date.reverse", p => p.readableStart.compareTo(p.readableStop) < 0)
