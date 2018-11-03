@@ -8,7 +8,7 @@ import play.api.i18n.Lang
 object Beans {
 
   // Beans
-  case class ProblemSolution(door: Int, title: String, points: Int, testcase: Int, solution: Int, user: Int, problem: (Int, Date, Date), result: Result, evalMode: EvalMode)
+  case class ProblemSolution(door: Int, points: Int, testcase: Int, solution: Int, user: Int, problem: (Int, Date, Date), result: Result, evalMode: EvalMode)
 
   case class UserSolution(user: User, testcase: Int, points: Int, testrun: Int, problem: Int, solution: Int, evalMode: EvalMode, score: Option[Int])
 

@@ -1,16 +1,17 @@
 package org.ieee_passau.models
 
-import org.ieee_passau.utils.{FutureHelper, PasswordHasher}
+import org.ieee_passau.utils.{FutureHelper, LanguageHelper, PasswordHasher}
 import play.api.i18n.Lang
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{CompiledFunction, ProvenShape}
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.language.postfixOps
+import org.ieee_passau.utils.LanguageHelper.LangTypeMapper
 
 case class User(id: Option[Int], username: String, password: String, email: String, active: Boolean, hidden: Boolean,
-                semester: Option[Int], studySubject: Option[String], school: Option[String],
-                lang: Option[String], activationToken: Option[String], permission: Permission,  notificationDismissed: Boolean) extends Entity[User] {
+                semester: Option[Int], studySubject: Option[String], school: Option[String], lang: Lang,
+                activationToken: Option[String], permission: Permission, notificationDismissed: Boolean) extends Entity[User] {
   override def withId(id: Int): User = this.copy(id = Some(id))
 }
 
@@ -24,12 +25,12 @@ class Users(tag: Tag) extends TableWithId[User](tag, "users") {
   def school: Rep[String] = column[String]("school")
   def studySubject: Rep[String] = column[String]("study_subject")
   def activationToken: Rep[String] = column[String]("token")
-  def lang: Rep[String] = column[String]("language")
+  def lang: Rep[Lang] = column[Lang]("language")(LanguageHelper.LangTypeMapper)
   def permission: Rep[Permission] = column[Permission]("permission")(Permission.permissionTypeMapper)
   def notificationDismissed: Rep[Boolean] = column[Boolean]("notification_dismissed")
 
   override def * : ProvenShape[User] = (id.?, username, password, email, active, hidden, semester.?,
-    studySubject.?, school.?, lang.?, activationToken.?, permission, notificationDismissed) <> (User.tupled, User.unapply)
+    studySubject.?, school.?, lang, activationToken.?, permission, notificationDismissed) <> (User.tupled, User.unapply)
 }
 
 object Users extends TableQuery(new Users(_)) {
@@ -81,7 +82,7 @@ case class UserRegistration(username: String, password: (String, String), email:
       semester = this.semester,
       studySubject = this.studySubject,
       school = this.school,
-      lang = Some(lang.code),
+      lang = lang,
       activationToken = Some(link),
       permission = Contestant,
       notificationDismissed= false

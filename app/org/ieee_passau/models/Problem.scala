@@ -26,9 +26,7 @@ case class Problem (id: Option[Int], title: String, door: Int, description: Stri
 }
 
 class Problems(tag: Tag) extends TableWithId[Problem](tag, "problems") {
-  def title: Rep[String] = column[String]("title")
   def door: Rep[Int] = column[Int]("door")
-  def description: Rep[String] = column[String]("description")
   def readableStart: Rep[Date] = column[Date]("readable_start")(DateSupport.dateMapper)
   def readableStop: Rep[Date] = column[Date]("readable_stop")(DateSupport.dateMapper)
   def solvableStart: Rep[Date] = column[Date]("solvable_start")(DateSupport.dateMapper)
@@ -37,7 +35,7 @@ class Problems(tag: Tag) extends TableWithId[Problem](tag, "problems") {
   def cpuFactor: Rep[Float] = column[Float]("cpu_factor")
   def memFactor: Rep[Float] = column[Float]("mem_factor")
 
-  def * : ProvenShape[Problem] = (id.?, title, door, description, readableStart, readableStop, solvableStart,
+  def * : ProvenShape[Problem] = (id.?, "", door, "", readableStart, readableStop, solvableStart,
     solvableStop, evalMode, cpuFactor, memFactor) <> (Problem.tupled, Problem.unapply)
 }
 

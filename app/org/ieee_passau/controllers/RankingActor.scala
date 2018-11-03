@@ -17,8 +17,8 @@ import slick.jdbc.JdbcProfile
 import slick.jdbc.PostgresProfile.api._
 
 import scala.collection.SeqView
-import scala.concurrent.{Await, ExecutionContext}
 import scala.concurrent.duration._
+import scala.concurrent.{Await, ExecutionContext}
 import scala.language.postfixOps
 import scala.util.Try
 
@@ -30,8 +30,8 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
   val STARTUP_DELAY: FiniteDuration = 500 millis
   val TICK_INTERVAL: FiniteDuration = 1 minute
 
-  private var problemsAll: List[((Int, Date, Date), Int, String, Double, EvalMode, Int, Int, Int, List[Int])] = List()
-  private var problemsNormal: List[((Int, Date, Date), Int, String, Double, EvalMode, Int, Int, Int, List[Int])] = List()
+  private var problemsAll: List[((Int, Date, Date), Int, Double, EvalMode, Int, Int, Int, List[Int])] = List()
+  private var problemsNormal: List[((Int, Date, Date), Int, Double, EvalMode, Int, Int, Int, List[Int])] = List()
   private var rankingAll: List[(Int, User, Double, Int)] = List()
   private var rankingNormal: List[(Int, User, Double, Int)] = List()
   private var userProblemPointsAll: Map[User, (Map[Int, Double], Int)] = Map()
@@ -52,7 +52,7 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
         case Dynamic =>
           val problemList = if (head.user.hidden) { problemsAll } else { problemsNormal }
           val problem = problemList.find(_._1._1 == head.problem).get
-          (sf * calcChallengeFactor(problem._8, problem._7)) / 100
+          (sf * calcChallengeFactor(problem._7, problem._6)) / 100
 
         case Best => problemRankings(head.problem)(sf) * 100
 
@@ -175,23 +175,23 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
     }
   }
 
-  private def calcProblemList(showHiddenUsers: Boolean): List[((Int, Date, Date), Int, String, Double, EvalMode, Int, Int, Int, List[Int])] = {
+  private def calcProblemList(showHiddenUsers: Boolean): List[((Int, Date, Date), Int, Double, EvalMode, Int, Int, Int, List[Int])] = {
     val solutionsQuery = for {
       r <- Testruns
       c <- r.testcase     if c.visibility =!= (Hidden: Visibility)
       s <- r.solution
       u <- s.user         if u.hidden === false || (showHiddenUsers: Boolean)
       p <- s.problem
-    } yield (p.door, p.title, c.points, c.id, s.id, s.userId, (p.id, p.readableStart, p.readableStop), r.result, p.evalMode)
+    } yield (p.door, c.points, c.id, s.id, s.userId, (p.id, p.readableStart, p.readableStop), r.result, p.evalMode)
 
     Await.result(db.run(solutionsQuery.to[List].result).flatMap { solutions =>
       val solved = solutions.map(x => ProblemSolution.tupled(x)).groupBy(_.door)
 
       val testcasesQuery = for {
         (p, c) <- Problems joinLeft Testcases.filter(_.visibility =!= (Hidden: Visibility)) on (_.id === _.problemId)
-      } yield (p.door, p.title, c.map(_.points), c.map(_.id), (p.id, p.readableStart, p.readableStop), p.evalMode)
+      } yield (p.door, c.map(_.points), c.map(_.id), (p.id, p.readableStart, p.readableStop), p.evalMode)
 
-      db.run(testcasesQuery.to[List].result).map { testcases: List[(Int, String, Option[Int], Option[Int], (Int, Date, Date), EvalMode)] =>
+      db.run(testcasesQuery.to[List].result).map { testcases: List[(Int, Option[Int], Option[Int], (Int, Date, Date), EvalMode)] =>
         testcases.groupBy(_._1 /*door*/).map {
           case (problem, pInfo) =>
             if (solved.contains(problem)) {
@@ -205,7 +205,7 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
               val correct = problemSolutions.groupBy(_.user).map(x => x._2.groupBy(_.solution))
                 .count(user => user.exists(solution => solution._2.forall(_.result == Passed)))
               (
-                ps.problem, ps.door, ps.title,
+                ps.problem, ps.door,
                 calcProblemPoints(ps.evalMode, problemSolutions, distinct, correct),
                 ps.evalMode, total, distinct, correct,
                 // list all used which have passing solutions
@@ -214,11 +214,11 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
               )
             } else {
               // problem does not yet have any submissions so we must insert an empty entry
-              val (door, title, _, _, problem, mode) = pInfo.head
+              val (door, _, _, problem, mode) = pInfo.head
               (
-                problem, door, title,
+                problem, door,
                 // sum all possible points up
-                pInfo.groupBy(_._4.getOrElse(0) /*testcase*/).map(_._2.head._3.getOrElse(0) /*points*/).sum.toDouble,
+                pInfo.groupBy(_._3.getOrElse(0) /*testcase*/).map(_._2.head._2.getOrElse(0) /*points*/).sum.toDouble,
                 mode, 0, 0, 0, List()
               )
             }
@@ -245,10 +245,10 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
       val list = (if (displayAll) problemsAll else problemsNormal).filter(p => p._1._2.before(now) && p._1._3.after(now))
       val list2 = if (displayAll) userProblemPointsAll else userProblemPointsNormal
       db.run(Users.byId(uid).result.headOption).map(sessionUser => list.map {
-        case (problem, door, title, points, mode, tries, _, correctCount, correctList) =>
+        case (problem, door, points, mode, tries, _, correctCount, correctList) =>
           val ownPoints = sessionUser.fold(0)(user => list2.get(user).fold(0)(_._1.get(problem._1).fold(0)(_.floor.toInt)))
           Await.result(db.run(ProblemTranslations.byProblemLang(problem._1, lang).result.headOption).map { problemTrans =>
-            val problemTitle = if (problemTrans.isDefined) problemTrans.get.title else title
+            val problemTitle = if (problemTrans.isDefined) problemTrans.get.title else ""
             ProblemInfo(problem._1, door, problemTitle, points.floor.toInt, ownPoints, mode, tries, correctCount, correctList.contains(uid))
           }, FutureHelper.dbTimeout)
       }).map(problemList => source ! problemList.sortBy(_.door))

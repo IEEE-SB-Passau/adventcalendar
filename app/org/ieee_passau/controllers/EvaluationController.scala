@@ -13,7 +13,7 @@ import org.ieee_passau.models.DateSupport.dateMapper
 import org.ieee_passau.models.{Admin, _}
 import org.ieee_passau.utils.FutureHelper.akkaTimeout
 import org.ieee_passau.utils.ListHelper._
-import org.ieee_passau.utils.{AkkaHelper, FutureHelper, UserHelper}
+import org.ieee_passau.utils.{AkkaHelper, FutureHelper}
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.mvc._
 import slick.jdbc.PostgresProfile.api._
@@ -49,19 +49,19 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
       tr <- Testruns if tr.solutionId === s.id
       p <- Problems if p.id === s.problemId
       u <- Users if u.id === s.userId
-    } yield (s.id, s.language, u.username, p.id, p.door, p.title, s.created, tr.result, tr.stage.?)
+    } yield (s.id, s.language, u.username, p.id, p.door, s.created, tr.result, tr.stage.?)
 
-    db.run(solutionsQuery.to[List].result).map { rawSolutions: List[(Int, String, String, Int, Int, String, Date, org.ieee_passau.models.Result, Option[Int])] =>
+    db.run(solutionsQuery.to[List].result).map { rawSolutions: List[(Int, String, String, Int, Int, Date, org.ieee_passau.models.Result, Option[Int])] =>
       val solutions = rawSolutions.groupBy(_._1).map { case (sid, sols) =>
-        val solvedTestcases = sols.count(_._8 == Passed)
+        val solvedTestcases = sols.count(_._7 == Passed)
         val allTestcases = sols.length
 
         Await.result(db.run(ProblemTranslations.byProblemLang(sols.head._4 /*problem*/ , lang).result.headOption).map { pt =>
-          val title = pt.fold(sols.head._6)(_.title)
-          val solved = sols.forall { case (_, _, _, _, _, _, _, r, _) => r == Passed }
-          val failed = sols.exists { case (_, _, _, _, _, _, _, r, _) => r != Passed && r != Queued }
-          val canceled = sols.forall { case (_, _, _, _, _, _, _, r, _) => r == Canceled || r == Passed }
-          val queued = sols.exists { case (_, _, _, _, _, _, _, _, s) => s.isDefined }
+          val title = pt.fold("")(_.title)
+          val solved = sols.forall { case (_, _, _, _, _, _, r, _) => r == Passed }
+          val failed = sols.exists { case (_, _, _, _, _, _, r, _) => r != Passed && r != Queued }
+          val canceled = sols.forall { case (_, _, _, _, _, _, r, _) => r == Canceled || r == Passed }
+          val queued = sols.exists { case (_, _, _, _, _, _, _, s) => s.isDefined }
           val state = if (queued)
             Queued
           else if (canceled && !solved)
@@ -70,7 +70,7 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
             WrongAnswer
           else
             Passed
-          SubmissionListEntry(sid, sols.head._2, sols.head._3, sols.head._5, title, sols.head._7, solvedTestcases, allTestcases, state)
+          SubmissionListEntry(sid, sols.head._2, sols.head._3, sols.head._5, title, sols.head._6, solvedTestcases, allTestcases, state)
         }, FutureHelper.dbTimeout)
       }.toList
 

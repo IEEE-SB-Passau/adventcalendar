@@ -3,7 +3,7 @@ package org.ieee_passau.controllers
 import com.google.inject.Inject
 import org.apache.commons.mail.EmailException
 import org.ieee_passau.models.{Admin, _}
-import org.ieee_passau.utils.{CaptchaHelper, PasswordHasher}
+import org.ieee_passau.utils.{CaptchaHelper, LanguageHelper, PasswordHasher}
 import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms._
@@ -75,11 +75,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
         Redirect(org.ieee_passau.controllers.routes.CmsController.calendar())
           .flashing("success" -> rs.messages("user.login.message", user.username))
           .withSession("user" -> uid)
-          .withCookies(
-            Cookie(messagesApi.langCookieName,
-              user.lang.getOrElse(rs.acceptLanguages.headOption.getOrElse(play.api.i18n.Lang.defaultLang).language)
-            )
-          )
+          .withCookies(Cookie(messagesApi.langCookieName, user.lang.code))
       }
     )
   }}
@@ -209,9 +205,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
         password => {
           val pwh = PasswordHasher.hashPassword(password)
-          db.run(Users.filter(_.id === sessionUser.id).map(_.lang).result.headOption).map { lang =>
-            Users.update(sessionUser.id, sessionUser.copy(password = pwh, activationToken = None, lang = lang))
-          }
+          Users.update(sessionUser.id, sessionUser.copy(password = pwh, activationToken = None))
 
           Redirect(org.ieee_passau.controllers.routes.CmsController.calendar())
             .flashing("success" -> rs.messages("user.login.message"))
@@ -227,7 +221,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
         .flashing("danger" -> rs.messages("language.unsupported"))
     } else {
       if (user.nonEmpty) {
-        Users.update(user.get.id, user.get.copy(lang = Some(lang)))
+        Users.update(user.get.id, user.get.copy(lang = maybeLang.get))
       }
 
       val refererUrl = rs.headers.get("referer")
@@ -279,8 +273,10 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
     )
     ((id: Option[Int], username: String, password: Option[String], email: String, active: Boolean, hidden: Boolean,
       semester: Option[Int], studySubject: Option[String], school: Option[String], permission: String) =>
-      User(id, username, password.getOrElse(""), email, active, hidden, semester, studySubject, school, None, None, Permission(permission), notificationDismissed = false))
-    ((user: User) => Some(user.id, user.username, Some(""), user.email, user.active, user.hidden, user.semester, user.studySubject, user.school, user.permission.name))
+      User(id, username, password.getOrElse(""), email, active, hidden, semester, studySubject, school,
+        LanguageHelper.defaultLanguage, None, Permission(permission), notificationDismissed = false))
+    ((user: User) => Some(user.id, user.username, Some(""), user.email, user.active, user.hidden, user.semester,
+      user.studySubject, user.school, user.permission.name))
   )
 
   val registrationForm = Form(
