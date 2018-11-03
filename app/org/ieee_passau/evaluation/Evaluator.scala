@@ -7,8 +7,6 @@ import play.api.Configuration
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.concurrent.InjectedActorSupport
 
-object Evaluator {}
-
 class Evaluator @Inject() (configuration: Configuration,
                            dbConfigProvider: DatabaseConfigProvider,
                            system: ActorSystem,
@@ -23,8 +21,8 @@ class Evaluator @Inject() (configuration: Configuration,
   }
 
   private def start = {
-    val jobLimit = configuration.getInt("evaluator.inputregulator.joblimit").getOrElse(1)
-    val jobLifetime = MathHelper.makeDuration(configuration.getString("evaluator.eval.basetime").getOrElse("60 seconds")).mul(10)
+    val jobLimit = configuration.getOptional[Int]("evaluator.inputregulator.joblimit").getOrElse(1)
+    val jobLifetime = MathHelper.makeDuration(configuration.getOptional[String]("evaluator.eval.basetime").getOrElse("60 seconds")).mul(10)
 
     injectedChild(dbReaderFactory(), classOf[DBReader].getSimpleName)
     injectedChild(dbWriterFactory(), classOf[DBWriter].getSimpleName)

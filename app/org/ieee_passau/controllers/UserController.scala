@@ -90,7 +90,7 @@ class UserController @Inject()(dbConfigProvider: DatabaseConfigProvider,
   }}
 
   def register: Action[AnyContent] = requirePermission(Guest) { implicit guest => Action { implicit rs =>
-    Ok(org.ieee_passau.views.html.user.register(registrationForm, config.getBoolean("captcha.active").getOrElse(false)))
+    Ok(org.ieee_passau.views.html.user.register(registrationForm, config.getOptional[Boolean]("captcha.active").getOrElse(false)))
   }}
 
   def create: Action[AnyContent] = requirePermission(Guest) { implicit guest => Action.async { implicit rs =>
@@ -162,10 +162,10 @@ class UserController @Inject()(dbConfigProvider: DatabaseConfigProvider,
           case Some(user) =>
             val token = PasswordHasher.generateUrlString()
             val link = org.ieee_passau.controllers.routes.UserController.editPassword(token)
-              .absoluteURL(secure = config.getBoolean("application.https").getOrElse(false))
+              .absoluteURL(secure = config.getOptional[Boolean]("application.https").getOrElse(false))
             val regMail = Email(
               subject = rs.messages("email.header") + " " + rs.messages("email.passwordreset.subject"),
-              from = config.getString("email.from").getOrElse(""),
+              from = config.getOptional[String]("email.from").getOrElse(""),
               to = List(user.email),
               bodyText = Some(rs.messages("email.passwordreset.body", user.username, link))
             )

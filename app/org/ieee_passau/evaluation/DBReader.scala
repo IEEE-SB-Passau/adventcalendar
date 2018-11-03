@@ -44,8 +44,8 @@ class DBReader @Inject() (dbConfigProvider: DatabaseConfigProvider, config: Conf
           val uuid = UUID.randomUUID().toString
           if (rawJob._11 /*stage*/ == 0) { // normal evaluation job
             Messages.BaseJob(
-              cpuFactor = MathHelper.makeDuration(config.getString("evaluator.eval.basetime").getOrElse("60 seconds")).mul(rawJob._2).toSeconds,
-              memFactor = (rawJob._3 * config.getInt("evaluator.eval.basemem").getOrElse(100)).floor.toInt,
+              cpuFactor = MathHelper.makeDuration(config.getOptional[String]("evaluator.eval.basetime").getOrElse("60 seconds")).mul(rawJob._2).toSeconds,
+              memFactor = (rawJob._3 * config.getOptional[Int]("evaluator.eval.basemem").getOrElse(100)).floor.toInt,
               lang = rawJob._6.name,
               testrunId = rawJob._10,
               evalId = uuid,

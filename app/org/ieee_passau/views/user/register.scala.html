@@ -44,7 +44,7 @@
                     @if(useCaptcha) {
                         <div class="col-sm-offset-3 col-sm-6" style="padding-left: 30px;">
                             <div class="form-group @if(registrationForm("g-recaptcha-response").hasErrors || registrationForm.errors("g-recaptcha-response").nonEmpty ) { has-error }">
-                                <div class="g-recaptcha" data-sitekey="@config.getString("captcha.sitekey").getOrElse("")"></div>
+                                <div class="g-recaptcha" data-sitekey="@config.getOptional[String]("captcha.sitekey").getOrElse("")"></div>
                                 <span class="help-block">@{ registrationForm("g-recaptcha-response").error.map { error => messages(error.message) }}</span>
                             </div>
                         </div>

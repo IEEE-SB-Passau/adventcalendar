@@ -41,14 +41,19 @@ class ErrorHandler @Inject()(env: Environment,
           None
       }
 
-      if (play.Configuration.root().getBoolean("logging.errormail.active", false)) {
+      if (config.getOptional[Boolean]("logging.errormail.active").getOrElse(false)) {
         try {
           val sw = new StringWriter
           exception.printStackTrace(new PrintWriter(sw))
 
           var bodyText = if (sessionUser.isDefined) sessionUser.get.username + "\n\n" else "No user logged in\n\n"
           bodyText += Some(sw.toString)
-          val recipients = config.getStringList("logging.errormail.recipient").map(_.asScala).getOrElse(List("adventskalender@ieee.students.uni-passau.de"))
+          val configRecipients = config.underlying.getStringList("logging.errormail.recipient").asScala
+          val recipients = if (configRecipients.isEmpty) {
+            List("adventskalender@ieee.students.uni-passau.de")
+          } else {
+            configRecipients
+          }
 
           val errorMail = Email(
             subject = "Adventskalender Error",
