@@ -75,6 +75,8 @@ problem.create=Aufgabe hinzufügen
 problem.edit=Aufgabe bearbeiten
 problem.create.message=Aufgabe {0} wurde angelegt.
 problem.create.error.door=Diese Tür hat schon ein anderes Problem!
+problem.create.error.datereverse.vis='Sichtbar ab' muss vor 'Sichtbar bis' liegen!
+problem.create.error.datereverse.solve='Lösbar ab' muss vor 'Lösbar bis' liegen!
 problem.update.message=Aufgabe {0} wurde aktualisiert.
 
 problem.translation.title=Übersetzung

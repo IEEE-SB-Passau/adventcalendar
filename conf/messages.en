@@ -340,3 +340,5 @@ notification=Notification
 nav.moderator.message=Moderator
 problem.settings.title=Settings
 submit.codeeditor.defaultButton=Submit file
+problem.create.error.datereverse.vis='Visible from' needs to be before 'Visible until'
+problem.create.error.datereverse.solve='Solvable from' needs to be before 'Solvable until'

@@ -176,7 +176,6 @@ class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   val problemForm = Form(
     mapping(
       "id" -> optional(text),
-      "title" -> nonEmptyText,
       "door" -> number, //(1, 24)
       "readableStart" -> date("yyyy-MM-dd HH:mm"),
       "readableStop" -> date("yyyy-MM-dd HH:mm"),
@@ -186,15 +185,15 @@ class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
       "cpuFactor" -> of[Float],
       "memFactor" -> of[Float]
     )
-    ((id: Option[String], title, door, readableStart, readableStop, solvableStart, solvableStop,
-      evalMode: String, cpuFacotr: Float, memFator: Float) =>
-      Problem(if (id.isDefined) Some(id.get.toInt) else None, title, door, "", readableStart, readableStop,
-        solvableStart, solvableStop, EvalMode(evalMode), cpuFacotr, memFator))
-    ((p: Problem) => Some(Some(p.id.toString), p.title, p.door, p.readableStart, p.readableStop,
+    ((id: Option[String], door, readableStart, readableStop, solvableStart, solvableStop,
+      evalMode: String, cpuFactor: Float, memFactor: Float) =>
+      Problem(if (id.isDefined) Some(id.get.toInt) else None, "", door, "", readableStart, readableStop,
+        solvableStart, solvableStop, EvalMode(evalMode), cpuFactor, memFactor))
+    ((p: Problem) => Some(Some(p.id.toString), p.door, p.readableStart, p.readableStop,
       p.solvableStart, p.solvableStop, p.evalMode.mode, p.cpuFactor, p.memFactor))
 
-      verifying("viserror.date.reverse", p => p.readableStart.compareTo(p.readableStop) < 0)
-      verifying("sloverror.date.reverse", p => p.solvableStart.compareTo(p.solvableStop) < 0)
+      verifying("problem.create.error.datereverse.vis", p => p.readableStart.compareTo(p.readableStop) < 0)
+      verifying("problem.create.error.datereverse.solve", p => p.solvableStart.compareTo(p.solvableStop) < 0)
       verifying("problem.create.error.door",
       p => Await.result(p.id match {
         case Some(id) => Problems.doorAvailable(p.door, id)
@@ -212,6 +211,5 @@ class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
     )((problemId: Int, language: String, title: String, description: String)
     => ProblemTranslation(problemId, Lang(language), title, description))
     ((p: ProblemTranslation) => Some(p.problemId, p.language.code, p.title, p.description))
-
   )
 }
