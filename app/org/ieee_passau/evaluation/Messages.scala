@@ -6,9 +6,9 @@ object Messages {
 
   // Entities/Beans
 
- case class Config(actorName: String,
-                   host: String,
-                   port: Int)
+  case class Config(actorName: String,
+                    host: String,
+                    port: Int)
 
   trait Job {
     val testrunId: Int
@@ -25,9 +25,9 @@ object Messages {
 
     override def hashCode(): Int = testrunId.hashCode
 
-    override def equals(obj: scala.Any): Boolean = {
+    override def equals(obj: Any): Boolean = {
       obj match {
-        case job: Job => job.testrunId == testrunId
+        case job: Job => job.testrunId == testrunId && job.stage == stage
         case _ => false
       }
     }
@@ -57,14 +57,7 @@ object Messages {
                           outputStdoutCheck: Boolean,
                           outputScore: Boolean,
                           programName: String,
-                          file: Array[Byte]) extends Job {
-
-    override def equals(obj: scala.Any): Boolean = {
-      super.equals(obj) &&
-        obj.isInstanceOf[NextStageJob] &&
-        obj.asInstanceOf[NextStageJob].stage == stage
-    }
-  }
+                          file: Array[Byte]) extends Job
 
   case class EvaluatedJob(job: Job,
                           progOut: Option[String],
@@ -102,5 +95,4 @@ object Messages {
   case class JobFailure(job: Job)
 
   case class JobFinished(job: Job)
-
 }
