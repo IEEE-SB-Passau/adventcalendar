@@ -35,8 +35,19 @@ class Problems(tag: Tag) extends TableWithId[Problem](tag, "problems") {
   def cpuFactor: Rep[Float] = column[Float]("cpu_factor")
   def memFactor: Rep[Float] = column[Float]("mem_factor")
 
-  def * : ProvenShape[Problem] = (id.?, "", door, "", readableStart, readableStop, solvableStart,
-    solvableStop, evalMode, cpuFactor, memFactor) <> (Problem.tupled, Problem.unapply)
+  def * : ProvenShape[Problem] = (id.?, door, readableStart, readableStop, solvableStart,
+    solvableStop, evalMode, cpuFactor, memFactor) <> (rowToProblem, problemToRow)
+
+  private val rowToProblem: ((Option[Int], Int, Date, Date, Date, Date, EvalMode, Float, Float)) => Problem = {
+    case (id, door, readableStart, readableStop, solvableStart,
+    solvableStop, evalMode, cpuFactor, memFactor) => Problem(id, "", door, "", readableStart, readableStop, solvableStart,
+      solvableStop, evalMode, cpuFactor, memFactor)
+  }
+
+  private val problemToRow: Problem => Option[(Option[Int], Int, Date, Date, Date, Date, EvalMode, Float, Float)] = {
+    case Problem(id, _, door, _, readableStart, readableStop, solvableStart, solvableStop, evalMode, cpuFactor, memFactor) =>
+      Some(id, door, readableStart, readableStop, solvableStart, solvableStop, evalMode, cpuFactor, memFactor)
+  }
 }
 
 object Problems extends TableQuery(new Problems(_)) {
