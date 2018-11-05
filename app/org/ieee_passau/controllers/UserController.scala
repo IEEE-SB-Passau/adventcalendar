@@ -155,7 +155,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
       username => {
         db.run(Users.byUsername(username).result.headOption).map {
-          case Some(user) =>
+          case Some(user) if user.permission != Internal =>
             val token = PasswordHasher.generateUrlString()
             val link = org.ieee_passau.controllers.routes.UserController.editPassword(token)
               .absoluteURL(secure = config.getOptional[Boolean]("application.https").getOrElse(false))
