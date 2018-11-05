@@ -1,9 +1,13 @@
 name := """ieee-passau-advent-frontend"""
 version := "2018-BASE"
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.12.7"
 
-lazy val root = (project in file(".")).enablePlugins(PlayScala)
+lazy val root = (project in file("."))
+  .enablePlugins(PlayScala)
+  .enablePlugins(SbtWeb)
+
+LessKeys.compress in Assets := true
 
 scalacOptions in ThisBuild ++= Seq("-unchecked", "-deprecation", "-feature")
 
@@ -12,10 +16,10 @@ routesGenerator := InjectedRoutesGenerator
 libraryDependencies ++= Seq(
   ws,
   filters,
-  guice, 
+  guice,
   "com.typesafe.play" %% "play" % "2.6.20",
-  "com.typesafe.play" %% "play-slick" % "3.0.1",
-  "com.typesafe.play" %% "play-slick-evolutions" % "3.0.1",
+  "com.typesafe.play" %% "play-slick" % "3.0.3",
+  "com.typesafe.play" %% "play-slick-evolutions" % "3.0.3",
   "com.typesafe.slick" %% "slick" % "3.2.3",
   "com.typesafe.play" %% "play-mailer" % "6.0.1",
   "com.typesafe.play" %% "play-mailer-guice" % "6.0.1",
