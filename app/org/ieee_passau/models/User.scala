@@ -1,5 +1,6 @@
 package org.ieee_passau.models
 
+import org.ieee_passau.utils.LanguageHelper.LangTypeMapper
 import org.ieee_passau.utils.{FutureHelper, LanguageHelper, PasswordHasher}
 import play.api.i18n.Lang
 import slick.jdbc.PostgresProfile.api._
@@ -7,7 +8,6 @@ import slick.lifted.{CompiledFunction, ProvenShape}
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.language.postfixOps
-import org.ieee_passau.utils.LanguageHelper.LangTypeMapper
 
 case class User(id: Option[Int], username: String, password: String, email: String, active: Boolean, hidden: Boolean,
                 semester: Option[Int], studySubject: Option[String], school: Option[String], lang: Lang,
@@ -29,8 +29,26 @@ class Users(tag: Tag) extends TableWithId[User](tag, "users") {
   def permission: Rep[Permission] = column[Permission]("permission")(Permission.permissionTypeMapper)
   def notificationDismissed: Rep[Boolean] = column[Boolean]("notification_dismissed")
 
-  override def * : ProvenShape[User] = (id.?, username, password, email, active, hidden, semester.?,
-    studySubject.?, school.?, lang, activationToken.?, permission, notificationDismissed) <> (User.tupled, User.unapply)
+  override def * : ProvenShape[User] = (id.?, username, password, email, active, hidden, semester.?, studySubject.?,
+    school.?, lang.?, activationToken.?, permission, notificationDismissed) <> (rowToUser, userToRow)
+
+  private val rowToUser: ((Option[Int], String, String, String, Boolean, Boolean, Option[Int], Option[String],
+    Option[String], Option[Lang], Option[String], Permission, Boolean)) => User = {
+    case (id: Option[Int], username: String, password: String, email: String, active: Boolean, hidden: Boolean,
+    semester: Option[Int], studySubject: Option[String], school: Option[String], lang: Option[Lang],
+    activationToken: Option[String], permission: Permission, notificationDismissed: Boolean) =>
+      User(id, username, password, email, active, hidden, semester, studySubject, school,
+        lang.getOrElse(LanguageHelper.defaultLanguage), activationToken, permission, notificationDismissed )
+  }
+
+  private val userToRow: User => Option[(Option[Int], String, String, String, Boolean, Boolean, Option[Int], Option[String],
+    Option[String], Option[Lang], Option[String], Permission, Boolean)] = {
+    case User(id: Option[Int], username: String, password: String, email: String, active: Boolean, hidden: Boolean,
+    semester: Option[Int], studySubject: Option[String], school: Option[String], lang: Lang,
+    activationToken: Option[String], permission: Permission, notificationDismissed: Boolean) =>
+      Some((id, username, password, email, active, hidden, semester, studySubject, school, Some(lang), activationToken,
+        permission, notificationDismissed))
+  }
 }
 
 object Users extends TableQuery(new Users(_)) {
