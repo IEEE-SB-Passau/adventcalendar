@@ -11,14 +11,14 @@ import org.ieee_passau.controllers.Beans._
 import org.ieee_passau.evaluation.Messages._
 import org.ieee_passau.models.DateSupport.dateMapper
 import org.ieee_passau.models.{Admin, _}
+import org.ieee_passau.utils.AkkaHelper
 import org.ieee_passau.utils.FutureHelper.akkaTimeout
 import org.ieee_passau.utils.ListHelper._
-import org.ieee_passau.utils.{AkkaHelper, FutureHelper}
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.mvc._
 import slick.jdbc.PostgresProfile.api._
 
-import scala.concurrent.{Await, ExecutionContext}
+import scala.concurrent.ExecutionContext
 import scala.language.postfixOps
 import scala.xml.NodeSeq
 
@@ -50,14 +50,12 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
       p <- Problems if p.id === s.problemId
       u <- Users if u.id === s.userId
     } yield (s.id, s.language, u.username, p.id, p.door, s.created, tr.result, tr.stage.?)
-
-    db.run(solutionsQuery.to[List].result).map { rawSolutions: List[(Int, String, String, Int, Int, Date, org.ieee_passau.models.Result, Option[Int])] =>
-      val solutions = rawSolutions.groupBy(_._1).map { case (sid, sols) =>
-        val solvedTestcases = sols.count(_._7 == Passed)
-        val allTestcases = sols.length
-
-        Await.result(ProblemTranslations.byProblemOption(sols.head._4 /*problem*/ , lang).map { pt =>
-          val title = pt.fold("")(_.title)
+    ProblemTranslations.problemTitleListByLang(lang).flatMap { transList =>
+      db.run(solutionsQuery.to[List].result).map { rawSolutions: List[(Int, String, String, Int, Int, Date, org.ieee_passau.models.Result, Option[Int])] =>
+        val solutions = rawSolutions.groupBy(_._1).map { case (sid, sols) =>
+          val solvedTestcases = sols.count(_._7 == Passed)
+          val allTestcases = sols.length
+          val title = transList.getOrElse(sols.head._4, "")
           val solved = sols.forall { case (_, _, _, _, _, _, r, _) => r == Passed }
           val failed = sols.exists { case (_, _, _, _, _, _, r, _) => r != Passed && r != Queued }
           val canceled = sols.forall { case (_, _, _, _, _, _, r, _) => r == Canceled || r == Passed }
@@ -71,13 +69,13 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
           else
             Passed
           SubmissionListEntry(sid, sols.head._2, sols.head._3, sols.head._5, title, sols.head._6, solvedTestcases, allTestcases, state)
-        }, FutureHelper.dbTimeout)
-      }.toList
+        }.toList
 
-      val sorted = sort(ordering, solutions)
+        val sorted = sort(ordering, solutions)
 
-      Ok(org.ieee_passau.views.html.solution.index(sorted.slice((page - 1) * subsPerPage,
-        (page - 1) * subsPerPage + subsPerPage), (sorted.length / subsPerPage) + 1, page, ordering))
+        Ok(org.ieee_passau.views.html.solution.index(sorted.slice((page - 1) * subsPerPage,
+          (page - 1) * subsPerPage + subsPerPage), (sorted.length / subsPerPage) + 1, page, ordering))
+      }
     }
   }}
 

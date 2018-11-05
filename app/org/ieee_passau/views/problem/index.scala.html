@@ -3,7 +3,8 @@
 @import org.ieee_passau.views.html.main
 @import play.api.mvc.{Flash, RequestHeader}
 @import org.ieee_passau.models.Admin
-@(problems: List[Problem])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
+@import org.ieee_passau.models.ProblemTranslation
+@(problems: List[Problem], translations: Map[Int, String])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
 
 @main(messages("problem.list.title")) {
     <table class="table table-striped">
@@ -20,7 +21,7 @@
         @problems.map { problem =>
             <tr>
                 <td>@problem.id</td>
-                <td>@problem.title</td>
+                <td>@translations.getOrElse(problem.id.get, "")</td>
                 <td>@problem.door</td>
                 <td>@messages(problem.evalMode.toString)</td>
                 <td>

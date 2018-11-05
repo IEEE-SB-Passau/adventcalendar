@@ -29,8 +29,11 @@ class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                                  ) extends MasterController(dbConfigProvider, components, ec) {
 
   def index: Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
-    db.run(Problems.sortBy(_.door.asc).result).map(problems =>
-      Ok(org.ieee_passau.views.html.problem.index(problems.toList)))
+    ProblemTranslations.problemTitleListByLang(admin.get.lang).flatMap { transList =>
+      db.run(Problems.sortBy(_.door.asc).result).map { problems =>
+        Ok(org.ieee_passau.views.html.problem.index(problems.toList, transList))
+      }
+    }
   }}
 
   def edit(id: Int): Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>

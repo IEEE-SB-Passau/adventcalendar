@@ -85,9 +85,20 @@ object ProblemTranslations extends TableQuery(new ProblemTranslations(_)){
     } yield (p.problemId, p.lang, p.title, p.description)
     db.run(query.result).map { pt =>
       // TODO: ordering would need to work on Rep[Lang] in order to sort in the database
-      pt.sortBy(x => x._2 /*lang*/)(LanguageHelper.ordering(preferredLang))
-        .map { p => ProblemTranslation.tupled(p) }
+      pt.sortBy(_._2 /*lang*/)(LanguageHelper.ordering(preferredLang))
+        .map(ProblemTranslation.tupled(_))
     }.flatMap { pt => Future.successful(pt.headOption) }
+  }
+
+  def problemTitleListByLang(preferredLang: Lang)(implicit db: Database, ec: ExecutionContext): Future[Map[Int, String]] = {
+    db.run((for {
+      p <- ProblemTranslations
+    } yield (p.problemId, p.lang, p.title, p.description)).result).map { list =>
+      list.map(ProblemTranslation.tupled(_)).groupBy(_.problemId).map {
+        case (p: Int, l: Seq[ProblemTranslation]) =>
+          p -> l.sortBy(_.language)(LanguageHelper.ordering(preferredLang)).headOption.fold("")(_.title)
+      }
+    }
   }
 
   def update(lang: String, problemTranslation: ProblemTranslation): DBIOAction[Int, NoStream, Effect.Write] =

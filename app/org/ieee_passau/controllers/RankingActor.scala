@@ -248,14 +248,14 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
       val now = new Date()
       val list = (if (displayAll) problemsAll else problemsNormal).filter(p => p._1._2.before(now) && p._1._3.after(now))
       val list2 = if (displayAll) userProblemPointsAll else userProblemPointsNormal
-      db.run(Users.byId(uid).result.headOption).map(sessionUser => list.map {
-        case (problem, door, points, mode, tries, _, correctCount, correctList) =>
-          val ownPoints = sessionUser.fold(0)(user => list2.get(user).fold(0)(_._1.get(problem._1).fold(0)(_.floor.toInt)))
-          Await.result(ProblemTranslations.byProblemOption(problem._1, lang).map { problemTrans =>
-            val problemTitle = if (problemTrans.isDefined) problemTrans.get.title else ""
+      ProblemTranslations.problemTitleListByLang(lang).flatMap { transList =>
+        db.run(Users.byId(uid).result.headOption).map { sessionUser => list.map {
+          case (problem, door, points, mode, tries, _, correctCount, correctList) =>
+            val ownPoints = sessionUser.fold(0)(user => list2.get(user).fold(0)(_._1.get(problem._1).fold(0)(_.floor.toInt)))
+            val problemTitle = transList.getOrElse(problem._1, "")
             ProblemInfo(problem._1, door, problemTitle, points.floor.toInt, ownPoints, mode, tries, correctCount, correctList.contains(uid))
-          }, FutureHelper.dbTimeout)
-      }).map(problemList => source ! problemList.sortBy(_.door))
+        }}
+      } map(problemList => source ! problemList.sortBy(_.door))
 
     case RankingQ(uid, displayAll) =>
       val list =  if (displayAll) rankingAll else rankingNormal
