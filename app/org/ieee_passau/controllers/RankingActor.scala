@@ -24,7 +24,7 @@ import scala.util.Try
 
 class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val system: ActorSystem) extends Actor {
   private val dbConfig = dbConfigProvider.get[JdbcProfile]
-  private val db: Database = dbConfig.db
+  implicit private val db: Database = dbConfig.db
   implicit private val evalContext: ExecutionContext = system.dispatchers.lookup("evaluator.context")
 
   val STARTUP_DELAY: FiniteDuration = 500 millis
@@ -57,6 +57,8 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
         case Best => problemRankings(head.problem)(sf) * 100
 
         case NoEval => 0
+
+        case _ => 0
       })
     } .toMap
   }
@@ -172,6 +174,8 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
       case Dynamic => calcChallengeFactor(correct, total)
 
       case NoEval => 0
+
+      case _ => 0
     }
   }
 
@@ -247,7 +251,7 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
       db.run(Users.byId(uid).result.headOption).map(sessionUser => list.map {
         case (problem, door, points, mode, tries, _, correctCount, correctList) =>
           val ownPoints = sessionUser.fold(0)(user => list2.get(user).fold(0)(_._1.get(problem._1).fold(0)(_.floor.toInt)))
-          Await.result(db.run(ProblemTranslations.byProblemLang(problem._1, lang).result.headOption).map { problemTrans =>
+          Await.result(ProblemTranslations.byProblemOption(problem._1, lang).map { problemTrans =>
             val problemTitle = if (problemTrans.isDefined) problemTrans.get.title else ""
             ProblemInfo(problem._1, door, problemTitle, points.floor.toInt, ownPoints, mode, tries, correctCount, correctList.contains(uid))
           }, FutureHelper.dbTimeout)

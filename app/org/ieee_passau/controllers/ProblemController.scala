@@ -6,6 +6,7 @@ import com.google.inject.name.Named
 import org.ieee_passau.controllers.Beans.UpdateRankingM
 import org.ieee_passau.models.{EvalMode, Problem, ProblemTranslation, Problems, _}
 import org.ieee_passau.utils.{AkkaHelper, FutureHelper, LanguageHelper}
+import org.ieee_passau.utils.LanguageHelper.LangTypeMapper
 import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms._
@@ -129,7 +130,7 @@ class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
       },
 
       newTrans => {
-        db.run(ProblemTranslations.byProblemLang(problemId, newTrans.language).result.headOption).flatMap {
+        ProblemTranslations.byProblemOption(problemId, newTrans.language).flatMap {
           case Some(_) =>
             Future.successful(BadRequest(org.ieee_passau.views.html.problemTranslation.insert(problemId,
               problemTranslationForm.fill(newTrans).withError("duplicate_translation", rs.messages("problem.translation.create.error.exists")))))
@@ -144,7 +145,7 @@ class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   }}
 
   def editTranslation(problemId: Int, lang: String): Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
-    db.run(ProblemTranslations.byProblemLang(problemId, lang).result.headOption).map {
+    ProblemTranslations.byProblemOption(problemId, Lang(lang)).map {
       case Some(trans) =>
         Ok(org.ieee_passau.views.html.problemTranslation.edit(problemId, problemTranslationForm.fill(trans)))
       case _ =>
@@ -168,7 +169,7 @@ class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   }}
 
   def deleteTranslation(problemId: Int, lang: String): Action[AnyContent] = requirePermission(Moderator) { implicit admin =>Action.async { implicit rs =>
-    db.run(ProblemTranslations.byProblemLang(problemId, lang).delete).map(_ =>
+    db.run(ProblemTranslations.filter(t => t.problemId === problemId && t.lang === Lang(lang)).delete).map(_ =>
       Redirect(org.ieee_passau.controllers.routes.ProblemController.edit(problemId))
     )
   }}

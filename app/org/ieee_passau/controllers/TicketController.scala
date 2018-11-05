@@ -73,7 +73,7 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
         db.run(Problems.byDoor(door).result.headOption).flatMap {
           case Some(problem) =>
-            db.run(ProblemTranslations.byProblemLang(problem.id.get, language).result.headOption).flatMap { maybeProblemTitle =>
+            ProblemTranslations.byProblemOption(problem.id.get, language).flatMap { maybeProblemTitle =>
               val problemTitle = maybeProblemTitle.fold(problem.title)(_.title)
               val now = new Date()
               db.run((Tickets returning Tickets.map(_.id)) += Ticket(None, problem.id, user.get.id, None, ticket.text, public = false, now, language)).map { id =>
@@ -116,7 +116,7 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                     db.run(Tickets += Ticket(None, parent.problemId, mod.get.id, Some(id), ticket.text, public = ticket.public, now, parent.language))
                     val updated = parent.copy(public = ticket.public)
                     Tickets.update(updated.id.get, updated)
-                    db.run(ProblemTranslations.byProblemLang(problem.id.get, msgLang).result.headOption).map { maybeProblemTitle =>
+                    ProblemTranslations.byProblemOption(problem.id.get, msgLang).map { maybeProblemTitle =>
                       val problemTitle = maybeProblemTitle.fold(problem.title)(_.title)
                       val email = Email(
                         subject = rs.messagesApi("email.header")(msgLang) + " " + rs.messagesApi("email.answer.subject", rs.messagesApi("ticket.title")(msgLang) +  " zu " + rs.messagesApi("problem.title")(msgLang) + " " + problem.door + ": " + problemTitle)(msgLang),

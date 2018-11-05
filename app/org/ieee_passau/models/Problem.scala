@@ -7,7 +7,7 @@ import org.ieee_passau.utils.LanguageHelper.LangTypeMapper
 import play.api.i18n.Lang
 import slick.dbio.Effect
 import slick.jdbc.PostgresProfile.api._
-import slick.lifted.{CompiledFunction, CompiledStreamingExecutable, ForeignKeyQuery, ProvenShape, TableQuery}
+import slick.lifted.{CompiledFunction, ForeignKeyQuery, ProvenShape, TableQuery}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -78,10 +78,17 @@ class ProblemTranslations(tag: Tag) extends Table[ProblemTranslation](tag, "prob
 }
 
 object ProblemTranslations extends TableQuery(new ProblemTranslations(_)){
-  def byProblemLang(problemId: Int, lang: Lang): CompiledStreamingExecutable[Query[ProblemTranslations, ProblemTranslation, Seq], Seq[ProblemTranslation], ProblemTranslation] =
-    Compiled(this.filter(t => t.problemId === problemId && t.lang === lang))
-  def byProblemLang(problemId: Int, lang: String): CompiledStreamingExecutable[Query[ProblemTranslations, ProblemTranslation, Seq], Seq[ProblemTranslation], ProblemTranslation] =
-    Compiled(this.filter(t => t.problemId === problemId && t.lang === Lang(lang)))
+  def byProblemOption(id: Int, preferredLang: Lang)(implicit db: Database, ec: ExecutionContext): Future[Option[ProblemTranslation]] = {
+    // cannot be inlined because type cannot be inferred
+    val query = for {
+      p <- ProblemTranslations if p.problemId === id
+    } yield (p.problemId, p.lang, p.title, p.description)
+    db.run(query.result).map { pt =>
+      // TODO: ordering would need to work on Rep[Lang] in order to sort in the database
+      pt.sortBy(x => x._2 /*lang*/)(LanguageHelper.ordering(preferredLang))
+        .map { p => ProblemTranslation.tupled(p) }
+    }.flatMap { pt => Future.successful(pt.headOption) }
+  }
 
   def update(lang: String, problemTranslation: ProblemTranslation): DBIOAction[Int, NoStream, Effect.Write] =
     this.filter(t => t.problemId === problemTranslation.problemId && t.lang === Lang(lang)).update(problemTranslation)

@@ -56,7 +56,7 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
         val solvedTestcases = sols.count(_._7 == Passed)
         val allTestcases = sols.length
 
-        Await.result(db.run(ProblemTranslations.byProblemLang(sols.head._4 /*problem*/ , lang).result.headOption).map { pt =>
+        Await.result(ProblemTranslations.byProblemOption(sols.head._4 /*problem*/ , lang).map { pt =>
           val title = pt.fold("")(_.title)
           val solved = sols.forall { case (_, _, _, _, _, _, r, _) => r == Passed }
           val failed = sols.exists { case (_, _, _, _, _, _, r, _) => r != Passed && r != Queued }

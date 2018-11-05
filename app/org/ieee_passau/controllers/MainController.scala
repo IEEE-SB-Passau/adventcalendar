@@ -234,7 +234,7 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
           }
 
           val displayLang: Lang = rs.lang
-          val transQuery: Future[Option[ProblemTranslation]] = db.run(ProblemTranslations.byProblemLang(problem.id.get, displayLang.code).result.headOption)
+          val transQuery: Future[Option[ProblemTranslation]] = ProblemTranslations.byProblemOption(problem.id.get, displayLang)
           val transProblem = transQuery.map(pt => pt.fold(problem)(trans => problem.copy(title = trans.title, description = trans.description)))
           val status = (monitoringActor ? StatusQ).mapTo[StatusM].flatMap {
             case StatusM(true) =>
