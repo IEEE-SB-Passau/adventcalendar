@@ -16,18 +16,16 @@ object UserHelper {
     * @return optionally the user in the session ot specified by the token
     */
   def getUserFromRequest(request: RequestHeader)(implicit db: Database, ec: ExecutionContext): Future[Option[User]] = {
-    request.session.get("user").map { uid =>
-      db.run(Users.byId(uid.toInt).result.headOption).flatMap {
-        case Some(x) => Future.successful(Some(x))
-        case _ =>
-          request.getQueryString("token").map { token =>
-            db.run(Users.byToken(token).result.headOption).map {
-              // only internal aka backend users can authenticate with a token
-              case Some(u) if u.permission == Internal => Some(u)
-              case _ => None
-            }
-          }.getOrElse(Future.successful(None))
-      }
-    }.getOrElse(Future.successful(None))
+    request.session.get("user") match {
+      case Some(uid) => db.run(Users.byId(uid.toInt).result.headOption)
+      case _ =>
+        request.getQueryString("token").map { token =>
+          db.run(Users.byToken(token).result.headOption).map {
+            // only internal aka backend users can authenticate with a token
+            case Some(u) if u.permission == Internal => Some(u)
+            case _ => None
+          }
+        }.getOrElse(Future.successful(None))
+    }
   }
 }
