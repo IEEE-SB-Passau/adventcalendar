@@ -12,7 +12,9 @@ object StringHelper {
     * @param charsToStrip Set of characters to remove from string.
     * @return s with all characters of charsToStrip removed.
     */
-  def stripChars(s: String, charsToStrip: String): String = s.filterNot((c) => charsToStrip.contains(c))
+  def stripChars(s: String, charsToStrip: String): String = s.filterNot(c => charsToStrip.contains(c))
+
+  def stripNull: Option[String] => Option[String] = (x: Option[String]) => if (x.isDefined) Some(stripChars(x.get, "\u0000")) else None
 
   def base64Encode(data: String): String = {
     Base64.encodeBase64String(data.getBytes(Charset.forName("UTF-8")))

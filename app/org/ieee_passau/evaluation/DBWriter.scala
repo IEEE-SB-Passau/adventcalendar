@@ -6,7 +6,7 @@ import akka.actor.ActorSystem
 import com.google.inject.Inject
 import org.ieee_passau.evaluation.Messages._
 import org.ieee_passau.models._
-import org.ieee_passau.utils.StringHelper
+import org.ieee_passau.utils.StringHelper.stripNull
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
 import slick.jdbc.PostgresProfile.api._
@@ -30,14 +30,13 @@ class DBWriter @Inject() (val dbConfigProvider: DatabaseConfigProvider, val syst
     case EvaluatedJobM(eJob) =>
       log.debug("DBWriter is saving %s to database".format(eJob.job))
 
-      def stripNull = (x: Option[String]) => if (x.isDefined) Some(StringHelper.stripChars(x.get, "\u0000")) else None
-
       // Update testrun in database with evaluation results
       db.run(Testruns.byId(eJob.job.testrunId).result.headOption).foreach { maybeTR =>
 
         if (maybeTR.isDefined && maybeTR.get.stage.isDefined) {
           val tr = maybeTR.get
 
+          // returns `None` if there is no stage left or else the stage number to queue next
           val nextStageQuery = (for {
             s <- Solutions if s.id === tr.solutionId
             p <- s.problem
