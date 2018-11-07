@@ -45,6 +45,14 @@ class DBWriter @Inject() (val dbConfigProvider: DatabaseConfigProvider, val syst
                                                                                 eJob.result.isEmpty)
           } yield t.position).sortBy(_.asc).result.headOption
 
+          if (eJob.result.fold(false)(_ == Passed)) {
+            db.run(Solutions.filter(_.id === tr.solutionId).result.head).map { solution =>
+              db.run(Testcases.filter(_.id === tr.testcaseId).map(_.points).result.head).map { points =>
+                Solutions.update(tr.solutionId, solution.copy(score = solution.score + points))
+              }
+            }
+          }
+
           db.run(nextStageQuery).foreach { nextStage =>
             db.run(Testruns.byId(eJob.job.testrunId).result.head).foreach { oldTr =>
               Testruns.update(oldTr.id.get, oldTr.copy(
