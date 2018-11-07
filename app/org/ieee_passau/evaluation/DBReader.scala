@@ -39,17 +39,16 @@ class DBReader @Inject() (val dbConfigProvider: DatabaseConfigProvider,
         tc <- Testcases if tc.id === tr.testcaseId
         sl <- Solutions if sl.id === tr.solutionId
         pr <- Problems if pr.id === sl.problemId
-        lang <- Languages if lang.name === sl.language
-      } yield (pr.id, pr.cpuFactor, pr.memFactor, sl.program, sl.programName, lang, tc.input, tc.expectedOutput, tr.progOut, tr.id, tr.stage)
+      } yield (pr.id, pr.cpuFactor, pr.memFactor, sl.program, sl.programName, sl.language, tc.input, tc.expectedOutput, tr.progOut.?, tr.id, tr.stage)
 
-      db.run(query.sortBy(_._1.asc).take(count).to[List].result).foreach { rawJobs =>
+      db.run(query.sortBy(_._1.asc).take(count).result).foreach { rawJobs =>
         val jobs = rawJobs.map { rawJob =>
           val uuid = UUID.randomUUID().toString
           if (rawJob._11 /*stage*/ == 0) { // normal evaluation job
             Messages.BaseJob(
               cpuFactor = MathHelper.makeDuration(config.getOptional[String]("evaluator.eval.basetime").getOrElse("60 seconds")).mul(rawJob._2).toSeconds,
               memFactor = (rawJob._3 * config.getOptional[Int]("evaluator.eval.basemem").getOrElse(100)).floor.toInt,
-              lang = rawJob._6.name,
+              lang = rawJob._6,
               testrunId = rawJob._10,
               evalId = uuid,
               program = rawJob._4,
@@ -58,7 +57,6 @@ class DBReader @Inject() (val dbConfigProvider: DatabaseConfigProvider,
               expectedOut = cleanNewlines(rawJob._8)
             )
           } else { // never the less, create a new task, but now for higher stage
-
             val taskQuery = EvalTasks.filter(_.position === rawJob._11).filter(_.problemId === rawJob._1)
             Await.result(db.run(taskQuery.result.head) map { task =>
               Messages.NextStageJob(
@@ -68,7 +66,7 @@ class DBReader @Inject() (val dbConfigProvider: DatabaseConfigProvider,
                 program = rawJob._4,
                 stdin = cleanNewlines(rawJob._7),
                 expectedOut = cleanNewlines(rawJob._8),
-                progOut = cleanNewlines(rawJob._9),
+                progOut = cleanNewlines(rawJob._9.getOrElse("")),
                 command = task.command,
                 inputData = (task.useStdin, task.useProgout, task.useExpout, task.useProgram),
                 outputStdoutCheck = task.outputCheck,
@@ -81,7 +79,7 @@ class DBReader @Inject() (val dbConfigProvider: DatabaseConfigProvider,
         }
 
         log.debug("DBReader is sending %d jobs to InputRegulator".format(jobs.length))
-        sender ! JobsM(jobs)
+        sender ! JobsM(jobs.toList)
       }
   }
 }
