@@ -18,7 +18,7 @@ import play.api.db.slick.DatabaseConfigProvider
 import play.api.mvc._
 import slick.jdbc.PostgresProfile.api._
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 import scala.xml.NodeSeq
 
@@ -27,7 +27,8 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
                                      val components: MessagesControllerComponents,
                                      implicit val ec: ExecutionContext,
                                      val system: ActorSystem,
-                                     @Named(AkkaHelper.monitoringActor) val monitoringActor: ActorRef
+                                     @Named(AkkaHelper.monitoringActor) val monitoringActor: ActorRef,
+                                     @Named(AkkaHelper.rankingActor) val rankingActor: ActorRef
                                     ) extends MasterController(dbConfigProvider, components, ec) {
 
   private def sort(key: String, list: List[SubmissionListEntry]) = {
@@ -132,6 +133,7 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
   }}
 
   def stats: Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
+    // TODO maybe cache in RankingActor
     db.run((for {
       r <- Testruns if r.result =!= (Queued: org.ieee_passau.models.Result)
       s <- r.solution
@@ -182,16 +184,19 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
     }
   }}
 
-  def reEval(id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action { implicit rs =>
+  def reEval(id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     db.run((for {
       r <- Testruns
       s <- r.solution if s.id === id
-    } yield r).result).foreach { testruns => testruns.foreach { testrun =>
-      Testruns.update(testrun.id.get, testrun.copy(result = Queued, stage = Some(0), vm = None,
-        progRuntime = Some(0), progMemory = Some(0), compRuntime = Some(0), compMemory = Some(0)))
-    }}
-    Redirect(org.ieee_passau.controllers.routes.EvaluationController.index())
-      .flashing("success" -> rs.messages("jobs.control.revaluate.message"))
+    } yield r).result).map { testruns =>
+      Future.reduceLeft(testruns.map { testrun =>
+        Testruns.update(testrun.id.get, testrun.copy(result = Queued, stage = Some(0), vm = None,
+          progRuntime = Some(0), progMemory = Some(0), compRuntime = Some(0), compMemory = Some(0)))
+      }.toList)(_)
+    }.map(_ =>
+      Redirect(org.ieee_passau.controllers.routes.EvaluationController.index())
+        .flashing("success" -> rs.messages("jobs.control.revaluate.message"))
+    )
   }}
 
   def registerVM: Action[NodeSeq] = requirePermission(Internal, parse.xml) { _ => Action[NodeSeq](parse.xml) { implicit rs =>

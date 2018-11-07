@@ -163,7 +163,7 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
           }
         }
       }
-    }, FutureHelper.dbTimeout)
+    }, FutureHelper.dbTimeout * 3)
   }
 
   private def calcProblemPoints(mode: EvalMode, problemSolutions: SeqView[ProblemSolution, List[ProblemSolution]], total: Int, correct: Int): Double = {
