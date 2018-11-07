@@ -111,7 +111,7 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
                     try {
                       val solution: Future[Int] = db.run((Solutions returning Solutions.map(_.id)) +=
-                        Solution(None, user.get.id.get, pid, codelang.id, sourcecode, fixedFilename, remoteAddress, userAgent, None, now))
+                        Solution(None, user.get.id.get, pid, codelang.id, sourcecode, fixedFilename, remoteAddress, userAgent, None, now, 0))
                       solution.flatMap { solutionId =>
                         db.run(Testcases.filter(_.problemId === pid).map(_.id).result).map { testcases =>
                           testcases.foreach(t =>

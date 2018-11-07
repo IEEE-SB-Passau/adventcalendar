@@ -10,7 +10,7 @@ import scala.concurrent.Future
 
 case class Solution (id: Option[Int], userId: Int, problemId: Int, language: String, program: String,
                      programName: String, ip: Option[String], userAgent: Option[String], browserId: Option[String],
-                     created: Date) extends Entity[Solution] {
+                     created: Date, score: Int) extends Entity[Solution] {
   override def withId(id: Int): Solution = this.copy(id = Some(id))
 }
 
@@ -24,12 +24,13 @@ class Solutions(tag: Tag) extends TableWithId[Solution](tag, "solutions") {
   def userAgent: Rep[String] = column[String]("user_agent")
   def browserId: Rep[String] = column[String]("browser_id")
   def created: Rep[Date] = column[Date]("created")(DateSupport.dateMapper)
+  def score: Rep[Int] = column[Int]("score")
 
   def user: ForeignKeyQuery[Users, User] = foreignKey("user_fk", userId, Users)(_.id)
   def problem: ForeignKeyQuery[Problems, Problem] = foreignKey("problem_fk", problemId, Problems)(_.id)
 
   override def * : ProvenShape[Solution] = (id.?, userId, problemId, language, program, programName, ip.?, userAgent.?,
-    browserId.?, created) <> (Solution.tupled, Solution.unapply)
+    browserId.?, created, score) <> (Solution.tupled, Solution.unapply)
 }
 
 object Solutions extends TableQuery(new Solutions(_)) {
@@ -39,4 +40,7 @@ object Solutions extends TableQuery(new Solutions(_)) {
   def getLatestSolutionByUserAndProblem(userId: Int, problemId: Int)(implicit db: Database): Future[Option[Solution]] = {
     db.run(Solutions.filter(_.userId === userId).filter(_.problemId === problemId).sortBy(_.created.desc).result.headOption)
   }
+
+  def update(id: Int, solution: Solution)(implicit db: Database): Future[Int] =
+    db.run(this.filter(_.id === id).update(solution.withId(id)))
 }

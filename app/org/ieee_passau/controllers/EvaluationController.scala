@@ -133,7 +133,6 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
   }}
 
   def stats: Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
-    // TODO maybe cache in RankingActor
     db.run((for {
       r <- Testruns if r.result =!= (Queued: org.ieee_passau.models.Result)
       s <- r.solution
@@ -188,8 +187,9 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
     db.run((for {
       r <- Testruns
       s <- r.solution if s.id === id
-    } yield r).result).map { testruns =>
-      Future.reduceLeft(testruns.map { testrun =>
+    } yield (r, s)).result).map { testruns =>
+      Future.reduceLeft(testruns.map { case (testrun, solution) =>
+        Solutions.update(solution.id.get, solution.copy(score = 0))
         Testruns.update(testrun.id.get, testrun.copy(result = Queued, stage = Some(0), vm = None,
           progRuntime = Some(0), progMemory = Some(0), compRuntime = Some(0), compMemory = Some(0)))
       }.toList)(_)
