@@ -41,9 +41,9 @@ object Beans {
 
   case class NotificationT()
 
-  case class RankingQ(userId: Int, displayHiddenUsers: Boolean)
+  case class RankingQ(userId: Int)
 
-  case class ProblemsQ(userId: Int, lang: Lang, unHide: Boolean)
+  case class ProblemsQ(userId: Int, lang: Option[Lang] = None)
 
   case class VMStatusM(vMStatus: VMStatus)
 

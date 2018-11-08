@@ -7,10 +7,6 @@ import scala.xml.Elem
 
 object ViewHelper {
 
-  val NoHighlight = 0
-  val Highlight = 1
-  val HighlightSpecial = 2
-
   /**
     * Creates HTML to show a boolean value with a icon
     *

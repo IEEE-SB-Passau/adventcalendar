@@ -3,7 +3,7 @@
 @import org.ieee_passau.utils.ViewHelper.showCheckmark
 @import org.ieee_passau.views.html.main
 @import play.api.mvc.Flash
-@(problems: List[ProblemInfo], notification: (String, String))(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
+@(problems: Seq[ProblemInfo], notification: (String, String))(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
 
 @main(messages("nav.problems")) {
     <table class="table table-striped">
