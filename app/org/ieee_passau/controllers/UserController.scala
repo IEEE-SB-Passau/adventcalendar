@@ -111,6 +111,8 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
           try {
             mailerClient.send(regMail)
 
+            registration.school.map(school => db.run(Schools += School(Some(school))))
+
             Redirect(org.ieee_passau.controllers.routes.UserController.login())
               .flashing("success" -> messagesApi("user.register.error.existing", createdUser.username))
           } catch {
@@ -266,17 +268,12 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
       "email" -> email,
       "active" -> boolean,
       "hidden" -> boolean,
-      "semester" -> optional(number),
-      "studySubject" -> optional(nonEmptyText),
-      "school" -> optional(nonEmptyText),
       "permission" -> nonEmptyText
     )
-    ((id: Option[Int], username: String, password: Option[String], email: String, active: Boolean, hidden: Boolean,
-      semester: Option[Int], studySubject: Option[String], school: Option[String], permission: String) =>
-      User(id, username, password.getOrElse(""), email, active, hidden, semester, studySubject, school,
-        LanguageHelper.defaultLanguage, None, Permission(permission), notificationDismissed = false))
-    ((user: User) => Some(user.id, user.username, Some(""), user.email, user.active, user.hidden, user.semester,
-      user.studySubject, user.school, user.permission.name))
+    ((id: Option[Int], username: String, password: Option[String], email: String, active: Boolean, hidden: Boolean, permission: String) =>
+      User(id, username, password.getOrElse(""), email, active, hidden, LanguageHelper.defaultLanguage, None,
+        Permission(permission), notificationDismissed = false))
+    ((user: User) => Some(user.id, user.username, Some(""), user.email, user.active, user.hidden, user.permission.name))
   )
 
   val registrationForm = Form(
@@ -287,14 +284,12 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
         "repeat" -> text
       ).verifying("user.error.passwordsnomatch", pw => pw._1 == pw._2),
       "email" -> email.verifying("user.error.emailtaken", e => Users.emailAvailable(e)),
-      "semester" -> optional(number),
-      "studySubject" -> optional(nonEmptyText),
       "school" -> optional(nonEmptyText),
       "g-recaptcha-response" -> text.verifying("user.error.captcha", value => captchaHelper.check(value))
     )
-    ((username: String, password: (String, String), email: String, semester: Option[Int], studySubject: Option[String],
-      school: Option[String], _: String ) => UserRegistration(username, password, email, semester, studySubject, school))
-    ((user: UserRegistration) => Some(user.username, ("", ""), user.email, user.semester, user.studySubject, user.school, ""))
+    ((username: String, password: (String, String), email: String, school: Option[String], _: String ) =>
+      UserRegistration(username, password, email, school))
+    ((user: UserRegistration) => Some(user.username, ("", ""), user.email, user.school, ""))
 
   )
 

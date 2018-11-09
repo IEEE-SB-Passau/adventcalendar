@@ -9,8 +9,7 @@ import slick.lifted.{ForeignKeyQuery, ProvenShape}
 import scala.concurrent.Future
 
 case class Solution (id: Option[Int], userId: Int, problemId: Int, language: String, program: String,
-                     programName: String, ip: Option[String], userAgent: Option[String], browserId: Option[String],
-                     created: Date, score: Int, result: Result) extends Entity[Solution] {
+                     programName: String, created: Date, score: Int, result: Result) extends Entity[Solution] {
   override def withId(id: Int): Solution = this.copy(id = Some(id))
 }
 
@@ -20,9 +19,6 @@ class Solutions(tag: Tag) extends TableWithId[Solution](tag, "solutions") {
   def language: Rep[String] = column[String]("language")
   def program: Rep[String] = column[String]("program")
   def programName: Rep[String] = column[String]("program_name")
-  def ip: Rep[String] = column[String]("ip")
-  def userAgent: Rep[String] = column[String]("user_agent")
-  def browserId: Rep[String] = column[String]("browser_id")
   def created: Rep[Date] = column[Date]("created")(DateSupport.dateMapper)
   def score: Rep[Int] = column[Int]("score")
   def result: Rep[Result] = column[Result]("result")(Result.resultTypeMapper)
@@ -30,8 +26,7 @@ class Solutions(tag: Tag) extends TableWithId[Solution](tag, "solutions") {
   def user: ForeignKeyQuery[Users, User] = foreignKey("user_fk", userId, Users)(_.id)
   def problem: ForeignKeyQuery[Problems, Problem] = foreignKey("problem_fk", problemId, Problems)(_.id)
 
-  override def * : ProvenShape[Solution] = (id.?, userId, problemId, language, program, programName, ip.?, userAgent.?,
-    browserId.?, created, score, result) <> (Solution.tupled, Solution.unapply)
+  override def * : ProvenShape[Solution] = (id.?, userId, problemId, language, program, programName, created, score, result) <> (Solution.tupled, Solution.unapply)
 }
 
 object Solutions extends TableQuery(new Solutions(_)) {

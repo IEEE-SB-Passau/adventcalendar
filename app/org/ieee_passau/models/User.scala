@@ -10,8 +10,8 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.language.postfixOps
 
 case class User(id: Option[Int], username: String, password: String, email: String, active: Boolean, hidden: Boolean,
-                semester: Option[Int], studySubject: Option[String], school: Option[String], lang: Lang,
-                activationToken: Option[String], permission: Permission, notificationDismissed: Boolean) extends Entity[User] {
+                lang: Lang, activationToken: Option[String], permission: Permission, notificationDismissed: Boolean
+               ) extends Entity[User] {
   override def withId(id: Int): User = this.copy(id = Some(id))
 }
 
@@ -21,33 +21,25 @@ class Users(tag: Tag) extends TableWithId[User](tag, "users") {
   def email: Rep[String] = column[String]("email")
   def active: Rep[Boolean] = column[Boolean]("is_active")
   def hidden: Rep[Boolean] = column[Boolean]("is_hidden")
-  def semester: Rep[Int] = column[Int]("semester")
-  def school: Rep[String] = column[String]("school")
-  def studySubject: Rep[String] = column[String]("study_subject")
   def activationToken: Rep[String] = column[String]("token")
   def lang: Rep[Lang] = column[Lang]("language")(LanguageHelper.LangTypeMapper)
   def permission: Rep[Permission] = column[Permission]("permission")(Permission.permissionTypeMapper)
   def notificationDismissed: Rep[Boolean] = column[Boolean]("notification_dismissed")
 
-  override def * : ProvenShape[User] = (id.?, username, password, email, active, hidden, semester.?, studySubject.?,
-    school.?, lang.?, activationToken.?, permission, notificationDismissed) <> (rowToUser, userToRow)
+  override def * : ProvenShape[User] = (id.?, username, password, email, active, hidden, lang.?, activationToken.?,
+    permission, notificationDismissed) <> (rowToUser, userToRow)
 
-  private val rowToUser: ((Option[Int], String, String, String, Boolean, Boolean, Option[Int], Option[String],
-    Option[String], Option[Lang], Option[String], Permission, Boolean)) => User = {
+  private val rowToUser: ((Option[Int], String, String, String, Boolean, Boolean, Option[Lang], Option[String], Permission, Boolean)) => User = {
     case (id: Option[Int], username: String, password: String, email: String, active: Boolean, hidden: Boolean,
-    semester: Option[Int], studySubject: Option[String], school: Option[String], lang: Option[Lang],
-    activationToken: Option[String], permission: Permission, notificationDismissed: Boolean) =>
-      User(id, username, password, email, active, hidden, semester, studySubject, school,
-        lang.getOrElse(LanguageHelper.defaultLanguage), activationToken, permission, notificationDismissed )
+          lang: Option[Lang], activationToken: Option[String], permission: Permission, notificationDismissed: Boolean) =>
+      User(id, username, password, email, active, hidden, lang.getOrElse(LanguageHelper.defaultLanguage),
+           activationToken, permission, notificationDismissed)
   }
 
-  private val userToRow: User => Option[(Option[Int], String, String, String, Boolean, Boolean, Option[Int], Option[String],
-    Option[String], Option[Lang], Option[String], Permission, Boolean)] = {
+  private val userToRow: User => Option[(Option[Int], String, String, String, Boolean, Boolean, Option[Lang], Option[String], Permission, Boolean)] = {
     case User(id: Option[Int], username: String, password: String, email: String, active: Boolean, hidden: Boolean,
-    semester: Option[Int], studySubject: Option[String], school: Option[String], lang: Lang,
-    activationToken: Option[String], permission: Permission, notificationDismissed: Boolean) =>
-      Some((id, username, password, email, active, hidden, semester, studySubject, school, Some(lang), activationToken,
-        permission, notificationDismissed))
+              lang: Lang, activationToken: Option[String], permission: Permission, notificationDismissed: Boolean) =>
+      Some((id, username, password, email, active, hidden, Some(lang), activationToken, permission, notificationDismissed))
   }
 }
 
@@ -84,8 +76,7 @@ case class UserLogin(username: String, password: String) {
   }
 }
 
-case class UserRegistration(username: String, password: (String, String), email: String, semester: Option[Int],
-                            studySubject: Option[String], school: Option[String]) {
+case class UserRegistration(username: String, password: (String, String), email: String, school: Option[String]) {
   def makeUser(lang: Lang): User = {
     val pwd = PasswordHasher.hashPassword(this.password._1)
     val link = PasswordHasher.generateUrlString()
@@ -97,9 +88,6 @@ case class UserRegistration(username: String, password: (String, String), email:
       email = this.email,
       active = false,
       hidden = false,
-      semester = this.semester,
-      studySubject = this.studySubject,
-      school = this.school,
       lang = lang,
       activationToken = Some(link),
       permission = Contestant,
@@ -107,3 +95,11 @@ case class UserRegistration(username: String, password: (String, String), email:
     )
   }
 }
+
+case class School(name: Option[String])
+class Schools(tag: Tag) extends Table[School](tag, "schools") {
+  def school: Rep[String] = column[String]("school")
+  def * : ProvenShape[School] = school.? <> (School.apply, School.unapply)
+}
+object Schools extends TableQuery(new Schools(_))
+

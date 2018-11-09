@@ -4,7 +4,7 @@ import java.nio.charset.MalformedInputException
 import java.util.Date
 
 import akka.actor.{ActorRef, ActorSystem}
-import akka.pattern.{AskTimeoutException, ask}
+import akka.pattern.ask
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import org.ieee_passau.controllers.Beans._
@@ -112,7 +112,7 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
                     try {
                       val solution: Future[Int] = db.run((Solutions returning Solutions.map(_.id)) +=
-                        Solution(None, user.get.id.get, pid, codelang.id, sourcecode, fixedFilename, remoteAddress, userAgent, None, now, 0, Queued))
+                        Solution(None, user.get.id.get, pid, codelang.id, sourcecode, fixedFilename, now, 0, Queued))
                       solution.flatMap { solutionId =>
                         db.run(Testcases.filter(_.problemId === pid).map(_.id).result).map { testcases =>
                           testcases.foreach(t =>
