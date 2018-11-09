@@ -1,8 +1,7 @@
-@import org.ieee_passau.utils.ViewHelper.{Highlight, HighlightSpecial}
 @import org.ieee_passau.models.User
 @import org.ieee_passau.views.html.main
 @import play.api.mvc.Flash
-@(users: List[(Int, String, Boolean, Int, Int, Int)], notification: (String, String))(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
+@(users: List[(Int, String, Boolean, Int, Int)], notification: (String, String))(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
 
 @main(messages("nav.ranking")) {
     <table class="table table-striped">
@@ -16,7 +15,9 @@
         </thead>
         <tbody>
         @users.map { user =>
-            <tr class="@if(user._6 == Highlight) {success} @if(user._6 == HighlightSpecial) {warning} @if(user._3) {disabled}">
+            <tr class="@if(sessionUser.isDefined && sessionUser.get.username == user._2 && sessionUser.get.hidden) {warning}
+                       @if(sessionUser.isDefined && sessionUser.get.username == user._2 && !sessionUser.get.hidden) {success}
+                       @if(user._3) {disabled}">
                 <td>@user._1</td>
                 <td>@user._2</td>
                 <td>@user._4</td>

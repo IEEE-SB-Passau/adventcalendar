@@ -299,6 +299,7 @@ error.date.reverse=''{0}'' muss nach ''{1}'' sein!
 error.path.empty=Leerer Pfad
 error.csrf=Das Formular ist abgelaufen. Lade die Seite bitte neu!
 error.invalidlink=Dieser Link ist nicht gültig!
+error.rebuild=Das System wertet gerade noch aus, probiere es bitte in wenigen Sekunden nochmal!
 
 error.403.short=Keine Berechtigung
 error.404.short=Seite nicht gefunden

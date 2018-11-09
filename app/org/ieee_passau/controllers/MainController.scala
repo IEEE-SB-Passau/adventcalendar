@@ -4,14 +4,14 @@ import java.nio.charset.MalformedInputException
 import java.util.Date
 
 import akka.actor.{ActorRef, ActorSystem}
-import akka.pattern.ask
+import akka.pattern.{AskTimeoutException, ask}
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import org.ieee_passau.controllers.Beans._
 import org.ieee_passau.models.DateSupport.dateMapper
 import org.ieee_passau.models._
 import org.ieee_passau.utils.FutureHelper.akkaTimeout
-import org.ieee_passau.utils.{AkkaHelper, FormHelper, ListHelper, UserHelper}
+import org.ieee_passau.utils.{AkkaHelper, FormHelper, ListHelper}
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.i18n.Lang
 import play.api.libs.Files.TemporaryFile
@@ -35,28 +35,29 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   def problems: Action[AnyContent] = requirePermission(Everyone) { implicit user => Action.async { implicit rs =>
     val lang = rs.lang
     val suid = if (user.isDefined) user.get.id.get else -1
-    val unHide = user.isDefined && user.get.hidden
-    val problems = (rankingActor ? ProblemsQ(suid, lang, unHide)).mapTo[List[ProblemInfo]]
-    problems.flatMap { list =>
+    (rankingActor ? ProblemsQ(suid, Some(lang))).mapTo[Seq[ProblemInfo]].flatMap { list =>
       (monitoringActor ? NotificationQ).mapTo[NotificationM].flatMap {
         case NotificationM(true) => Postings.byId(Page.notification.id, lang).map(_.content).map { notification =>
           Ok(org.ieee_passau.views.html.general.problemList(list, "notification" -> notification))
         }
         case _ => Future.successful(Ok(org.ieee_passau.views.html.general.problemList(list, "" -> "")))
       }
+    } recover {
+      case _: akka.pattern.AskTimeoutException => Ok(org.ieee_passau.views.html.general.ranking(List(), "system" -> rs.messages("error.rebuild")))
     }
   }}
 
   def ranking: Action[AnyContent] = requirePermission(Everyone) { implicit user => Action.async { implicit rs =>
     val suid = if (user.isDefined) user.get.id.get else -1
-    val unHide = user.isDefined && user.get.hidden
-    (rankingActor ? RankingQ(suid, displayHiddenUsers = unHide)).mapTo[List[(Int, String, Boolean, Int, Int, Int)]].flatMap { ranking =>
+    (rankingActor ? RankingQ(suid)).mapTo[List[(Int, String, Boolean, Int, Int)]].flatMap { ranking =>
       (monitoringActor ? NotificationQ).mapTo[NotificationM].flatMap {
         case NotificationM(true) => Postings.byId(Page.notification.id, rs.lang).map(_.content).map { notification =>
           Ok(org.ieee_passau.views.html.general.ranking(ranking, "notification" -> notification))
         }
         case _ => Future.successful(Ok(org.ieee_passau.views.html.general.ranking(ranking, "" -> "")))
       }
+    } recover {
+      case _: akka.pattern.AskTimeoutException => Ok(org.ieee_passau.views.html.general.ranking(List(), "system" -> rs.messages("error.rebuild")))
     }
   }}
 
@@ -111,7 +112,7 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
                     try {
                       val solution: Future[Int] = db.run((Solutions returning Solutions.map(_.id)) +=
-                        Solution(None, user.get.id.get, pid, codelang.id, sourcecode, fixedFilename, remoteAddress, userAgent, None, now, 0))
+                        Solution(None, user.get.id.get, pid, codelang.id, sourcecode, fixedFilename, remoteAddress, userAgent, None, now, 0, Queued))
                       solution.flatMap { solutionId =>
                         db.run(Testcases.filter(_.problemId === pid).map(_.id).result).map { testcases =>
                           testcases.foreach(t =>
@@ -274,8 +275,8 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
           val langs = tuple._1.toList
           val solutionList = tuple._2
           val responseList = solutionList.take(1)
-            .map(e => (e.solution.id.get, e.state.name, org.ieee_passau.views.html.solution.solutionList(List(e), langs).toString())) ++ solutionList.drop(1)
-            .map(e => (e.solution.id.get, e.state.name, org.ieee_passau.views.html.solution.solutionList(List(e), langs, first = false).toString()))
+            .map(e => (e.solution.id.get, e.solution.result.name, org.ieee_passau.views.html.solution.solutionList(List(e), langs).toString())) ++ solutionList.drop(1)
+            .map(e => (e.solution.id.get, e.solution.result.name, org.ieee_passau.views.html.solution.solutionList(List(e), langs, first = false).toString()))
           val json = Json.toJson(responseList.map(e => SolutionJSON.tupled(e)))
           Ok(json)
         }

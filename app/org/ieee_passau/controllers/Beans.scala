@@ -18,7 +18,7 @@ object Beans {
 
   case class TestrunListEntry(position: Int, testcase: Testcase, testrun: Testrun)
 
-  case class SolutionListEntry(position: Int, state: Result, solution: Solution, testcases: List[TestrunListEntry])
+  case class SolutionListEntry(position: Int, solution: Solution, testcases: List[TestrunListEntry])
 
   case class TicketText(text: String, public: Boolean)
 
@@ -41,9 +41,9 @@ object Beans {
 
   case class NotificationT()
 
-  case class RankingQ(userId: Int, displayHiddenUsers: Boolean)
+  case class RankingQ(userId: Int)
 
-  case class ProblemsQ(userId: Int, lang: Lang, unHide: Boolean)
+  case class ProblemsQ(userId: Int, lang: Option[Lang] = None)
 
   case class VMStatusM(vMStatus: VMStatus)
 
