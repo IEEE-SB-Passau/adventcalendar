@@ -4,7 +4,7 @@ import java.nio.charset.MalformedInputException
 import java.util.Date
 
 import akka.actor.{ActorRef, ActorSystem}
-import akka.pattern.ask
+import akka.pattern.{AskTimeoutException, ask}
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import org.ieee_passau.controllers.Beans._
@@ -42,6 +42,8 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
         }
         case _ => Future.successful(Ok(org.ieee_passau.views.html.general.problemList(list, "" -> "")))
       }
+    } recover {
+      case _: akka.pattern.AskTimeoutException => Ok(org.ieee_passau.views.html.general.ranking(List(), "system" -> rs.messages("error.rebuild")))
     }
   }}
 
@@ -54,6 +56,8 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
         }
         case _ => Future.successful(Ok(org.ieee_passau.views.html.general.ranking(ranking, "" -> "")))
       }
+    } recover {
+      case _: akka.pattern.AskTimeoutException => Ok(org.ieee_passau.views.html.general.ranking(List(), "system" -> rs.messages("error.rebuild")))
     }
   }}
 
@@ -108,7 +112,7 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
                     try {
                       val solution: Future[Int] = db.run((Solutions returning Solutions.map(_.id)) +=
-                        Solution(None, user.get.id.get, pid, codelang.id, sourcecode, fixedFilename, remoteAddress, userAgent, None, now, 0))
+                        Solution(None, user.get.id.get, pid, codelang.id, sourcecode, fixedFilename, remoteAddress, userAgent, None, now, 0, Queued))
                       solution.flatMap { solutionId =>
                         db.run(Testcases.filter(_.problemId === pid).map(_.id).result).map { testcases =>
                           testcases.foreach(t =>
@@ -271,8 +275,8 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
           val langs = tuple._1.toList
           val solutionList = tuple._2
           val responseList = solutionList.take(1)
-            .map(e => (e.solution.id.get, e.state.name, org.ieee_passau.views.html.solution.solutionList(List(e), langs).toString())) ++ solutionList.drop(1)
-            .map(e => (e.solution.id.get, e.state.name, org.ieee_passau.views.html.solution.solutionList(List(e), langs, first = false).toString()))
+            .map(e => (e.solution.id.get, e.solution.result.name, org.ieee_passau.views.html.solution.solutionList(List(e), langs).toString())) ++ solutionList.drop(1)
+            .map(e => (e.solution.id.get, e.solution.result.name, org.ieee_passau.views.html.solution.solutionList(List(e), langs, first = false).toString()))
           val json = Json.toJson(responseList.map(e => SolutionJSON.tupled(e)))
           Ok(json)
         }

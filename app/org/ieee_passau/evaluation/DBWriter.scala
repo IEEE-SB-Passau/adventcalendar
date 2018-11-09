@@ -48,6 +48,27 @@ class DBWriter @Inject() (val dbConfigProvider: DatabaseConfigProvider, val syst
           if (eJob.result.fold(false)(_ == Passed)) {
             db.run(Solutions.filter(_.id === tr.solutionId).result.head).map { solution =>
               db.run(Testcases.filter(_.id === tr.testcaseId).map(_.points).result.head).map { points =>
+                val result = (solution.result, eJob.result) match {
+                  case (_, Some(Queued)) =>
+                    Queued
+                  case (Queued | Passed, Some(Passed)) =>
+                    Passed
+                  case (Canceled, _) =>
+                    Canceled
+                  case (Passed | WrongAnswer | Canceled | CompileError | ProgramError | RuntimeExceeded | MemoryExceeded, Some(CompileError)) =>
+                    CompileError
+                  case (Passed | WrongAnswer | Canceled | ProgramError | RuntimeExceeded | MemoryExceeded, Some(ProgramError)) =>
+                    ProgramError
+                  case (Passed | WrongAnswer | Canceled | RuntimeExceeded | MemoryExceeded, Some(RuntimeExceeded)) =>
+                    RuntimeExceeded
+                  case (Passed | WrongAnswer | Canceled | MemoryExceeded, Some(MemoryExceeded)) =>
+                    MemoryExceeded
+                  case (WrongAnswer, _) =>
+                    WrongAnswer
+                  case (_, Some(WrongAnswer)) =>
+                    WrongAnswer
+                  case _ => solution.result
+                }
                 Solutions.update(tr.solutionId, solution.copy(score = solution.score + points))
               }
             }

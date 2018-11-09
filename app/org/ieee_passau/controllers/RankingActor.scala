@@ -39,7 +39,7 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
   * total     => number of all tries of all users on that problem
   * totalUser => number of all tries of that user on that problem
   */
-  private val ranking:       mutable.Map[Boolean /*isHidden*/, Map[Int /*userId*/, Map[Int /*problemId*/, (Int /*score*/, Double /*points*/, Boolean /*isSolved*/)]]] = mutable.Map()
+  private val ranking:       mutable.Map[Boolean /*isHidden*/, Map[Int /*userId*/, Map[Int /*problemId*/, (Int /*score*/, Double /*points*/, Boolean /*isSolved*/, EvalMode)]]] = mutable.Map()
   private val problemCounts: mutable.Map[Boolean /*isHidden*/, Map[Int /*problemId*/, (Int /*correct*/, Int /*userTries*/, Int /*total*/)]] = mutable.Map()
   private var userCorrectSolutions: Map[Int /*userId*/, Int /*solved*/] = Map()
   // Variant with problem list tries = user tries
@@ -104,7 +104,7 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
       db.run(query.result).map(l => l.groupBy(_._1).map { case (p, sl) => (p, sl.head._2) })
     }
 
-    def transpose(mapOfMaps: Map[Int, Map[Int, (Int, Double, Boolean)]]) = {
+    def transpose[T](mapOfMaps: Map[Int, Map[Int, T]]) = {
       // TODO make more efficient
       mapOfMaps
         // deconstruct
@@ -112,9 +112,9 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
         // rebuild
         .groupBy(_._1).map { case (b, as) =>
         b -> as.groupBy(_._2).map { case (a, cs) =>
-          a -> cs.head._3
-        }.withDefaultValue((0, 0d, false))
-      }.withDefaultValue(Map().withDefaultValue((0, 0d, false)))
+          a -> Some(cs.head._3)
+        }.withDefaultValue(None)
+      }.withDefaultValue(Map().withDefaultValue(None))
     }
 
     def bestUserProblemSubmission(includeHidden: Boolean) = {
@@ -122,24 +122,22 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
         s <- Solutions
         p <- s.problem
         u <- s.user if u.hidden === false || (includeHidden: Boolean)
-      } yield (u.id, p.id, s.score)
+      } yield (u.id, p.id, s.score, p.evalMode)
 
       db.run(data.result).map { list =>
         ranking(includeHidden) = list.groupBy(_._1).map { case (u, pl) =>
           u -> pl.groupBy(_._2).map { case (p, sl) =>
-            p -> (sl.map(_._3).max, 0d, false)
-          }.withDefaultValue((0, 0d, false))
-        }.withDefaultValue(Map().withDefaultValue((0, 0d, false)))
+            p -> (sl.map(_._3).max, 0d, false, sl.head._4)
+          }.withDefaultValue((0, 0d, false, NoEval))
+        }.withDefaultValue(Map().withDefaultValue((0, 0d, false, NoEval)))
       }
     }
 
     val correctSubmissions = (for {
-      s <- Solutions if s.score === 100 /*TODO make independent*/
+      s <- Solutions if s.result === (Passed: Result)
       p <- s.problem
       u <- s.user if u.hidden === false || (includeHidden: Boolean)
-    } yield (p.id, s.id, u.id)).distinctOn(x => (x._1, x._3)).groupBy(_._1).map {
-      case (problem, solutions) => (problem, solutions.length)
-    }
+    } yield (p.id, s.id, u.id)).distinctOn(x => (x._1, x._3))
 
     val allSubmissions = for {
       s <- Solutions
@@ -152,10 +150,12 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
     bestUserProblemSubmission(includeHidden).foreach { _ =>
       val problemXuserXbest = transpose(ranking(includeHidden))
       simplify(problemList).foreach { modeList =>
-        simplify(correctSubmissions).foreach { correctCount =>
+        db.run(correctSubmissions.result).foreach { correctC =>
           db.run(allSubmissions.result).foreach { allS =>
+            val correctCount = correctC.groupBy(_._1).map { case (p, ul) => p -> ul.groupBy(_._3).map { case (u, l) => u -> l.length } }
+            val userXproblemXsolved = transpose(correctCount)
             val submissionCounts = allS.groupBy(_._1 /*problem*/).map { case (p, l) =>
-              p -> (correctCount.getOrElse(p, 0), l.groupBy(_._3 /*user*/).keySet.size, l.length)
+              p -> (correctCount.get(p).fold(0)(_.keySet.size), l.groupBy(_._3 /*user*/).keySet.size, l.length)
             }
             // This would be the number of tries for a problem for each user
             // val userXproblemXcount = allS.groupBy(_._3).map { case (u, pl) => u -> pl.groupBy(_._1).map { case (p, sl) => p -> sl.length } }
@@ -163,23 +163,29 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
               p -> (calculateChallengeFactor(100 /*TODO make independent*/) _).tupled(submissionCounts(p))
             }
             val bestChallengeFactor = modeList.filter(_._2 == Best).map { case (p, _) =>
-              p -> calculateChallengeRank(problemXuserXbest(p).values.map(_._1).toList)
+              p -> calculateChallengeRank(problemXuserXbest(p).values.map(_.fold(0)(_._1)).toList)
             }
 
             problemCounts(includeHidden) = submissionCounts.withDefaultValue((0,0,0))
-            userCorrectSolutions = ranking(includeHidden).map { case (u, ps) =>
-              u -> ps.count(_._2._1 == 100 /*TODO make independent*/) // use userXproblemXcount here
-            }
+
             ranking(includeHidden) = ranking(includeHidden).map { case (u, pl) =>
-              u -> pl.map { case (p, (score, _, _)) =>
-                p -> (score, modeList(p) match {
+              u -> pl.map { case (p, (score, _, _, mode)) =>
+                p -> (score, mode match {
                   case Static => score
                   case Dynamic => dynamicChallengeFactor(p) * score
                   case Best => bestChallengeFactor(p)(score)
                   case NoEval | _ => 0
-                }, score == 100 /*TODO make independent*/)
-              }.withDefaultValue((0, 0d, false))
-            }.withDefaultValue(Map().withDefaultValue((0, 0d, false)))
+                }, userXproblemXsolved(u)(p).fold(false)(_ > 0), mode)
+              }.withDefaultValue((0, 0d, false, NoEval))
+            }.withDefaultValue(Map().withDefaultValue((0, 0d, false, NoEval)))
+
+            // use userXproblemXcount here
+            userCorrectSolutions = ranking(true).map { case (u, pl) =>
+              u -> pl.count {
+                case (_, (_, _, true, mode)) if mode != NoEval => true
+                case _ => false
+              }
+            }
           }
         }
       }
@@ -193,8 +199,8 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
 
   override def receive: Receive = {
     case UpdateRankingM =>
-      buildCache(false)
       buildCache(true)
+      buildCache(false)
 
     case ProblemsQ(uid, maybeLang) =>
       val source = sender
@@ -236,24 +242,20 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
       }
 
       val source = sender
-      try {
-        simplify(Users.to[List].result).map { users =>
-          val sessionUserIsHidden = users.get(uid).fold(false)(_.hidden)
-          val rank = ranking(sessionUserIsHidden).map { case (u, pl) =>
-            val user = users(u)
-            (pl.foldLeft(0d) { case (points, (_, (staticScore, actualPoints, _))) =>
-              points + actualPoints
-            }, user.username, user.hidden, user.id.get)
-          }.toList.sortBy(-_._1 /*points*/).zipWithIndex.groupBy(_._1._1 /*points*/).flatMap {
-            case (_, rankingPos) => for {
-              ((points, username, isHidden, userId), _) <- rankingPos
-            } yield (rankingPos.head._2 + 1, username, isHidden, points.floor.toInt, userCorrectSolutions(userId))
-          }.toList.sortBy(x => (x._1, -x._5))
-          source ! rank
-        }
-      } catch {
-        // Probably the ranking is just not yet built, respond with empty list
-        case _: Throwable => source ! List()
+      val localPtr = userCorrectSolutions
+      simplify(Users.to[List].result).map { users =>
+        val sessionUserIsHidden = users.get(uid).fold(false)(_.hidden)
+        val rank = ranking(sessionUserIsHidden).map { case (u, pl) =>
+          val user = users(u)
+          (pl.foldLeft(0d) { case (points: Double, (_: Int, (_: Int, actualPoints: Double, _: Boolean, _: EvalMode))) =>
+            points + actualPoints
+          }, user.username, user.hidden, user.id.get)
+        }.toList.sortBy(-_._1 /*points*/).zipWithIndex.groupBy(_._1._1 /*points*/).flatMap {
+          case (_, rankingPos: List[((Double, String, Boolean, Int), Int)]) => for {
+            ((points: Double, username: String, isHidden: Boolean, userId: Int), _: Int) <- rankingPos
+          } yield (rankingPos.head._2 + 1, username, isHidden, points.floor.toInt, localPtr(userId))
+        }.toList.sortBy(x => (x._1, -x._5))
+        source ! rank
       }
   }
 }

@@ -8,16 +8,16 @@
  *@
 
 @solutions.map { s =>
-    <div id="@s.solution.id" data-state="@s.state">
-        <div class="panel @if(s.state == Passed) { panel-success } @if(s.state == Queued) { panel-info }
-            @if(isErrorResult(s.state)) { panel-danger } @if(s.state == Canceled) { panel-warning }">
+    <div id="@s.solution.id" data-state="@s.solution.result">
+        <div class="panel @if(s.solution.result == Passed) { panel-success } @if(s.solution.result == Queued) { panel-info }
+            @if(isErrorResult(s.solution.result)) { panel-danger } @if(s.solution.result == Canceled) { panel-warning }">
             @* Create an anchor for the first solution *@
             @if(first && solutions.head == s) { <a name="latest"></a> }
 
             @* Panel Header *@
             <div class="panel-heading"><h3 class="panel-title">
                 <a data-toggle="collapse" data-target="#solution@s.position" href="#solution@s.position">
-                    @if(s.state == Queued) { <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>} @messages("solution.title") @s.position
+                    @if(s.solution.result == Queued) { <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>} @messages("solution.title") @s.position
                     <span class="pull-right">
                         @s.testcases.filter(_.testrun.result == Passed).map(_.testcase.points).sum / @s.testcases.map(_.testcase.points).sum @messages("testcase.points")
                     </span>
@@ -27,7 +27,7 @@
             <div id="solution@s.position" class="panel-collapse collapse @if(first && solutions.head == s) { in }"><div class="panel-body">
                 <p>
                     <Strong>@messages("solution.state"):</Strong>
-                    @Html(messages(s.state.toString, org.ieee_passau.controllers.routes.CmsController.content(Page.contact.toString)))
+                    @Html(messages(s.solution.result.toString, org.ieee_passau.controllers.routes.CmsController.content(Page.contact.toString)))
                 </p>
 
                 <p><button type="button" class="btn" data-toggle="collapse" data-target="#code@s.position">
