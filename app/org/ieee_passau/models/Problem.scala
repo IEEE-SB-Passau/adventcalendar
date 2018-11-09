@@ -7,7 +7,7 @@ import org.ieee_passau.utils.LanguageHelper.LangTypeMapper
 import play.api.i18n.Lang
 import slick.dbio.Effect
 import slick.jdbc.PostgresProfile.api._
-import slick.lifted.{CompiledFunction, ForeignKeyQuery, ProvenShape, TableQuery}
+import slick.lifted.{CompiledFunction, CompiledStreamingExecutable, ForeignKeyQuery, ProvenShape, TableQuery}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -89,6 +89,9 @@ object ProblemTranslations extends TableQuery(new ProblemTranslations(_)){
         .map(ProblemTranslation.tupled(_))
     }.flatMap { pt => Future.successful(pt.headOption) }
   }
+
+  def byProblemLang(problemId: Int, lang: Lang)(implicit db: Database, ec: ExecutionContext): Future[Option[ProblemTranslation]] =
+    db.run(this.filter(t => t.problemId === problemId && t.lang === lang).result.headOption)
 
   def problemTitleListByLang(preferredLang: Lang)(implicit db: Database, ec: ExecutionContext): Future[Map[Int, String]] = {
     db.run((for {

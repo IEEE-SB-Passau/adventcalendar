@@ -133,7 +133,7 @@ class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
       },
 
       newTrans => {
-        ProblemTranslations.byProblemOption(problemId, newTrans.language).flatMap {
+        ProblemTranslations.byProblemLang(problemId, newTrans.language).flatMap {
           case Some(_) =>
             Future.successful(BadRequest(org.ieee_passau.views.html.problemTranslation.insert(problemId,
               problemTranslationForm.fill(newTrans).withError("duplicate_translation", rs.messages("problem.translation.create.error.exists")))))
@@ -148,7 +148,7 @@ class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   }}
 
   def editTranslation(problemId: Int, lang: String): Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
-    ProblemTranslations.byProblemOption(problemId, Lang(lang)).map {
+    ProblemTranslations.byProblemLang(problemId, Lang(lang)).map {
       case Some(trans) =>
         Ok(org.ieee_passau.views.html.problemTranslation.edit(problemId, problemTranslationForm.fill(trans)))
       case _ =>
