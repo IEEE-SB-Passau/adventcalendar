@@ -171,15 +171,16 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
   }}
 
   def cancel(id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
-    db.run(Testruns.byId(id).result.headOption) map {
+    db.run(Testruns.byId(id).result.headOption) flatMap {
       case Some(job) =>
-        Testruns.update(id, job.copy(result = Canceled, vm = Some("_"), evalId = None, completed = new Date, stage = None))
-        monitoringActor ! JobFinished(BaseJob(0, 0, "", id, job.evalId.getOrElse(""), "", "", "", ""))
-        Redirect(org.ieee_passau.controllers.routes.EvaluationController.indexQueued())
-          .flashing("success" -> rs.messages("jobs.control.cancel.message"))
+        Testruns.update(id, job.copy(result = Canceled, vm = Some("_"), evalId = None, completed = new Date, stage = None)) map { _ =>
+          monitoringActor ! JobFinished(BaseJob(0, 0, "", id, job.evalId.getOrElse(""), "", "", "", ""))
+          Redirect(org.ieee_passau.controllers.routes.EvaluationController.indexQueued())
+            .flashing("success" -> rs.messages("jobs.control.cancel.message"))
+        }
       case _ =>
-        Redirect(org.ieee_passau.controllers.routes.EvaluationController.indexQueued())
-          .flashing("warning" -> rs.messages("jobs.error.invalidjob"))
+        Future.successful(Redirect(org.ieee_passau.controllers.routes.EvaluationController.indexQueued())
+          .flashing("warning" -> rs.messages("jobs.error.invalidjob")))
     }
   }}
 
@@ -187,16 +188,16 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
     db.run((for {
       r <- Testruns
       s <- r.solution if s.id === id
-    } yield (r, s)).result).map { testruns =>
+    } yield (r, s)).result) flatMap { testruns =>
       Future.reduceLeft(testruns.map { case (testrun, solution) =>
         Solutions.update(solution.id.get, solution.copy(score = 0))
         Testruns.update(testrun.id.get, testrun.copy(result = Queued, stage = Some(0), vm = None,
           progRuntime = Some(0), progMemory = Some(0), compRuntime = Some(0), compMemory = Some(0)))
-      }.toList)(_)
-    }.map(_ =>
-      Redirect(org.ieee_passau.controllers.routes.EvaluationController.index())
-        .flashing("success" -> rs.messages("jobs.control.revaluate.message"))
-    )
+      }.toList)((_, it) => it) map {_ =>
+        Redirect(org.ieee_passau.controllers.routes.EvaluationController.index())
+          .flashing("success" -> rs.messages("jobs.control.revaluate.message"))
+      }
+    }
   }}
 
   def registerVM: Action[NodeSeq] = requirePermission(Internal, parse.xml) { _ => Action[NodeSeq](parse.xml) { implicit rs =>
