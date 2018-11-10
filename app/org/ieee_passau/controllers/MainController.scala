@@ -20,6 +20,7 @@ import play.api.libs.json.{JsPath, Json, Writes}
 import play.api.mvc.{Result, _}
 import slick.jdbc.PostgresProfile.api._
 
+import scala.collection.SeqView
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 import scala.reflect.io.File
@@ -98,10 +99,6 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
               case _ =>
                 Languages.byLang(rs.body.dataParts("lang").headOption.getOrElse("")).flatMap {
                   case Some(codelang) =>
-                    // When using 2 proxies, the maximal possible remote-ip length with separators is 49 chars -> rounding up to 50
-                    val remoteAddress = Some(rs.remoteAddress.take(50))
-                    val userAgent = rs.headers.get("User-Agent").fold(None: Option[String])(ua => Some(ua.take(150)))
-
                     val fixedFilename =
                       // if it's jvm then that matches at least every valid classname and therefore filename, and all others don't matter that much anyway
                       if (!filename.isEmpty) filename.replaceAll("[^\\p{javaJavaIdentifierPart}.-]", "_")
@@ -212,14 +209,14 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
           val tickets = db.run((for {
             t: Tickets <- Tickets if t.problemId === problem.id && t.responseTo.?.isEmpty && (t.public === true || t.userId === uid || isMod)
             u: Users <- Users if u.id === t.userId
-          } yield (t, u.username)).to[List].result)
+          } yield (t, u.username)).result)
 
           // answered tickets + answers
           val answers = db.run((for {
             pt: Tickets <- Tickets if pt.problemId === problem.id && (pt.public === true || pt.userId === uid || isMod)
             t: Tickets <- Tickets if t.responseTo === pt.id
             u: Users <- Users if u.id === t.userId
-          } yield (t, u.username)).to[List].result)
+          } yield (t, u.username)).result)
 
           val allTickets = tickets.zip(answers).map(tuple => tuple._1 ++ tuple._2)
 
@@ -255,7 +252,7 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                 solutionsQuery.flatMap(s =>
                   allTickets.flatMap(t =>
                     flash.map(f =>
-                      Ok(org.ieee_passau.views.html.general.problemDetails(tp, l, ll, s, t, FormHelper.ticketForm, f))
+                      Ok(org.ieee_passau.views.html.general.problemDetails(tp, l, ll, s.toList, t.toList, FormHelper.ticketForm, f))
                     )
                   )
                 )
@@ -284,14 +281,14 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
     }
   }}
 
-  private def buildSolutionList(problem: Problem, userId: Int): Future[List[SolutionListEntry]] = {
+  private def buildSolutionList(problem: Problem, userId: Int): Future[SeqView[SolutionListEntry, Seq[_]]] = {
     // submitted solutions
     db.run((for {
       c <- Testcases if c.problemId === problem.id && c.visibility =!= (Hidden: Visibility)
       s <- Solutions if s.problemId === problem.id && s.userId === userId
       r <- Testruns if c.id === r.testcaseId && s.id === r.solutionId
     } yield (s, c, r)).result).map { solutions =>
-      ListHelper.buildSolutionList(solutions.toList)
+      ListHelper.buildSolutionList(solutions)
     }
   }
 

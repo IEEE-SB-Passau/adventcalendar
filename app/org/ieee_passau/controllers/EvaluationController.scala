@@ -51,9 +51,9 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
     def sortList(key: String, list: List[SubmissionListEntry]) = {
       key match {
         case "date" => list.sortBy(_.date)(Ordering[Date].reverse)
-        case "problem" => list.sortBy(e => (e.door, e.user.toLowerCase(), e.lang.toLowerCase()))
-        case "user" => list.sortBy(e => (e.user.toLowerCase(), e.door, e.lang.toLowerCase()))
-        case "lang" => list.sortBy(e => (e.lang.toLowerCase(), e.user.toLowerCase(), e.door))
+        case "problem" => list.sortBy(e => (e.door, e.user.toLowerCase(), e.lang.toLowerCase(), e.date))
+        case "user" => list.sortBy(e => (e.user.toLowerCase(), e.door, e.lang.toLowerCase(), e.date))
+        case "lang" => list.sortBy(e => (e.lang.toLowerCase(), e.user.toLowerCase(), e.door, e.date))
       }
     }
 
@@ -67,10 +67,10 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
       (sol, tcs.length, tcs.map(y =>
         // trick the query builder, because a filter does not work here
         Case.If(y._8 === (Passed: models.Result)).Then(1).Else(0)).sum.getOrElse(0: Rep[Int]))
-    }).drop((page - 1) * pageSize).take(pageSize)
+    }).drop((page - 1) * pageSize).take(pageSize).result
 
     ProblemTranslations.problemTitleListByLang(rs.lang).flatMap { transList =>
-      db.run(solutionsQuery.result).flatMap { rawSolutions: Seq[((Int, String, String, Int, Int, Date, models.Result), Int, Int)] =>
+      db.run(solutionsQuery).flatMap { rawSolutions: Seq[((Int, String, String, Int, Int, Date, models.Result), Int, Int)] =>
         db.run(Solutions.length.result).map { numSolutions =>
           val solutions = sortList(ordering, rawSolutions.map {
             case ((sid, pLang, user, pid, door, created, result), allTestcases, solvedTestcases) =>
@@ -93,7 +93,7 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
     } yield (r, c, p, s, u)
 
     (monitoringActor ? RunningJobsQ).mapTo[List[(Job, Date)]].flatMap { jobs =>
-      db.run(testrunsQuery.to[List].result).map { testruns =>
+      db.run(testrunsQuery.result).map { testruns =>
         val runningList = for {
           j <- jobs
           r <- testruns if r._1 /*testrun*/ .id.get == j._1 /*job*/ .testrunId
@@ -113,7 +113,7 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
       tr <- Testruns if tr.solutionId === s.id
       tc <- Testcases if tc.id === tr.testcaseId
     } yield (s, tc, tr)
-    db.run(solutionsQuery.to[List].result).flatMap { solutionsList =>
+    db.run(solutionsQuery.result).flatMap { solutionsList =>
       val sol = buildSolutionList(solutionsList).head
       val userQ = Users.filter(_.id === sol.solution.userId).result.head
       val problemQ = Problems.filter(_.id === sol.solution.problemId).result.head

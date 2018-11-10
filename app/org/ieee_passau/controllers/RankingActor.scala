@@ -108,7 +108,7 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
 
     def transpose[T](mapOfMaps: Map[Int, Map[Int, T]]) = {
       // TODO make more efficient
-      mapOfMaps
+      mapOfMaps.view
         // deconstruct
         .flatMap { case (a, bs) => bs.map { case (b, c) => (b, a, c) } }
         // rebuild
@@ -151,22 +151,23 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
 
     bestUserProblemSubmission(includeHidden).foreach { _ =>
       val problemXuserXbest = transpose(ranking(includeHidden))
-      simplify(problemList).foreach { modeList =>
+      simplify(problemList).foreach { modeL =>
         db.run(correctSubmissions.result).foreach { correctC =>
           db.run(allSubmissions.result).foreach { allS =>
-            val correctCount = correctC.groupBy(_._1).map { case (p, ul) => p -> ul.groupBy(_._3).map { case (u, l) => u -> l.length } }
+            val modeList = modeL.view
+            val correctCount = correctC.view.groupBy(_._1).map { case (p, ul) => p -> ul.groupBy(_._3).map { case (u, l) => u -> l.length } }
             val userXproblemXsolved = transpose(correctCount)
-            val submissionCounts = allS.groupBy(_._1 /*problem*/).map { case (p, l) =>
+            val submissionCounts = allS.view.groupBy(_._1 /*problem*/).map { case (p, l) =>
               p -> (correctCount.get(p).fold(0)(_.keySet.size), l.groupBy(_._3 /*user*/).keySet.size, l.length)
             }
             // This would be the number of tries for a problem for each user
             // val userXproblemXcount = allS.groupBy(_._3).map { case (u, pl) => u -> pl.groupBy(_._1).map { case (p, sl) => p -> sl.length } }
             val dynamicChallengeFactor = modeList.filter(_._2 == Dynamic).map { case (p, _) =>
               p -> (calculateChallengeFactor(100 /*TODO make independent*/) _).tupled(submissionCounts(p))
-            }
+            }.toMap
             val bestChallengeFactor = modeList.filter(_._2 == Best).map { case (p, _) =>
               p -> calculateChallengeRank(problemXuserXbest(p).values.map(_.fold(0)(_._1)).toList)
-            }
+            }.toMap
 
             problemCounts(includeHidden) = submissionCounts.withDefaultValue((0,0,0))
 
@@ -204,7 +205,7 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
           r <- Testruns if r.result =!= (Queued: org.ieee_passau.models.Result)
           s <- r.solution
         } yield (r.vm.?, r.completed, s.language)).result).foreach { rawJobs =>
-          val jobs = rawJobs.flatMap {
+          val jobs = rawJobs.view.flatMap {
             case job if job._1.getOrElse("").contains(" ") =>
               job._1.get.split(" ").zipWithIndex.map {
                 case (vmName, idx) =>
@@ -232,7 +233,7 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
           }.toList.sortBy(-_._2)
 
           val counts = (userCount, ranking(true).keySet.size)
-          val schools = rawSchools.map { case (name, count) =>
+          val schools = rawSchools.view.map { case (name, count) =>
             (name.toLowerCase.split(Array(' ', '-')).map(_.capitalize).mkString(" "), count)
           }.groupBy(_._1).map {
             case (name, cs) => (name, cs.map(_._2).sum)

@@ -30,8 +30,8 @@ class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
   def index: Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
     ProblemTranslations.problemTitleListByLang(admin.get.lang).flatMap { transList =>
-      db.run(Problems.sortBy(_.door.asc).result).map { problems =>
-        Ok(org.ieee_passau.views.html.problem.index(problems.toList, transList))
+      db.run(Problems.sortBy(_.door.asc).to[List].result).map { problems =>
+        Ok(org.ieee_passau.views.html.problem.index(problems, transList))
       }
     }
   }}
@@ -41,17 +41,17 @@ class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
     db.run(Problems.byId(id).result.headOption).flatMap {
       case Some(problem) =>
-        val testCaseQuery = db.run(Testcases.filter(_.problemId === id).sortBy(_.position.asc).result)
-        val evalTaskQuery = db.run(EvalTasks.filter(_.problemId === id).sortBy(_.position.asc).result)
-        val problemTranslationQuery = db.run(ProblemTranslations.filter(_.problemId === id).sortBy(_.lang.asc).result)
-        val evalModesQuery = db.run(EvalModes.result)
+        val testCaseQuery = db.run(Testcases.filter(_.problemId === id).sortBy(_.position.asc).to[List].result)
+        val evalTaskQuery = db.run(EvalTasks.filter(_.problemId === id).sortBy(_.position.asc).to[List].result)
+        val problemTranslationQuery = db.run(ProblemTranslations.filter(_.problemId === id).sortBy(_.lang.asc).to[List].result)
+        val evalModesQuery = db.run(EvalModes.to[List].result)
 
         testCaseQuery.flatMap(testCases =>
           evalTaskQuery.flatMap(evalTasks =>
             problemTranslationQuery.flatMap(problemTranslations =>
               evalModesQuery.map(evalModes =>
-                Ok(org.ieee_passau.views.html.problem.edit(id, testCases.toList, evalTasks.toList,
-                  problemTranslations.toList, problemForm.fill(problem), evalModes.toList))
+                Ok(org.ieee_passau.views.html.problem.edit(id, testCases, evalTasks,
+                  problemTranslations, problemForm.fill(problem), evalModes))
               )
             )
           )
@@ -68,16 +68,16 @@ class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   }}
 
   def insert: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
-    db.run(EvalModes.result).map(evalModes =>
-      Ok(org.ieee_passau.views.html.problem.insert(problemForm, evalModes.toList))
+    db.run(EvalModes.to[List].result).map(evalModes =>
+      Ok(org.ieee_passau.views.html.problem.insert(problemForm, evalModes))
     )
   }}
 
   def save: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     problemForm.bindFromRequest.fold(
       errorForm => {
-        db.run(EvalModes.result).map(evalModes =>
-          Ok(org.ieee_passau.views.html.problem.insert(errorForm, evalModes.toList))
+        db.run(EvalModes.to[List].result).map(evalModes =>
+          Ok(org.ieee_passau.views.html.problem.insert(errorForm, evalModes))
         )
       },
 
@@ -96,17 +96,17 @@ class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
     problemForm.bindFromRequest.fold(
       errorForm => {
-        val testCaseQuery = db.run(Testcases.filter(_.problemId === id).sortBy(_.position.asc).result)
-        val evalTaskQuery = db.run(EvalTasks.filter(_.problemId === id).sortBy(_.position.asc).result)
-        val problemTranslationQuery = db.run(ProblemTranslations.filter(_.problemId === id).sortBy(_.lang.asc).result)
-        val evalModesQuery = db.run(EvalModes.result)
+        val testCaseQuery = db.run(Testcases.filter(_.problemId === id).sortBy(_.position.asc).to[List].result)
+        val evalTaskQuery = db.run(EvalTasks.filter(_.problemId === id).sortBy(_.position.asc).to[List].result)
+        val problemTranslationQuery = db.run(ProblemTranslations.filter(_.problemId === id).sortBy(_.lang.asc).to[List].result)
+        val evalModesQuery = db.run(EvalModes.to[List].result)
 
         testCaseQuery.flatMap(testCases =>
           evalTaskQuery.flatMap(evalTasks =>
             problemTranslationQuery.flatMap(problemTranslations =>
               evalModesQuery.map(evalModes =>
-                Ok(org.ieee_passau.views.html.problem.edit(id, testCases.toList, evalTasks.toList,
-                  problemTranslations.toList, errorForm, evalModes.toList))
+                Ok(org.ieee_passau.views.html.problem.edit(id, testCases, evalTasks,
+                  problemTranslations, errorForm, evalModes))
               )
             )
           )
