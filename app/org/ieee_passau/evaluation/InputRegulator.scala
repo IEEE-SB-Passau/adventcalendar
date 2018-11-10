@@ -29,7 +29,7 @@ object InputRegulator {
   */
 class InputRegulator @Inject() (@Assisted val jobLimit: Int,
                                 @Assisted val jobLifetime: Duration,
-                                config: Configuration,
+                                val config: Configuration,
                                 val system: ActorSystem
                                ) extends EvaluationActor {
   implicit private val evalContext: ExecutionContext = system.dispatchers.lookup("evaluator.context")
@@ -38,7 +38,7 @@ class InputRegulator @Inject() (@Assisted val jobLimit: Int,
   val TICK_INTERVAL: FiniteDuration = MathHelper.makeDuration(config.getOptional[String]("evaluator.inputregulator.ticktime").getOrElse("1 second"))
   val TICK_MSG = "tick"
 
-  private var running = true
+  private var running = config.getOptional[Boolean]("evaluator.run").getOrElse(true)
 
   private val fetchedJobs = mutable.HashMap.empty[Job, Date]
   private val tickSchedule = system.scheduler.schedule(STARTUP_DELAY, TICK_INTERVAL, self, TICK_MSG)

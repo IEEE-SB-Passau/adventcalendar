@@ -10,16 +10,17 @@ import org.ieee_passau.evaluation.Messages.{JobFinished, NewVM, RemoveVM}
 import org.ieee_passau.evaluation.{InputRegulator, VMMaster}
 import org.ieee_passau.utils.AkkaHelper
 import org.ieee_passau.utils.FutureHelper.akkaTimeout
+import play.api.Configuration
 
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 
-class MonitoringActor @Inject() (val system: ActorSystem) extends Actor {
+class MonitoringActor @Inject() (val system: ActorSystem, val config: Configuration) extends Actor {
   implicit private val evalContext: ExecutionContext = system.dispatchers.lookup("evaluator.context")
 
   private var notification = false
-  private var running = true
+  private var running = config.getOptional[Boolean]("evaluator.run").getOrElse(true)
 
   private val nodes = mutable.HashMap[String, VMStatus]()
 
