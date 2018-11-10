@@ -9,11 +9,14 @@ import com.google.inject.name.Named
 import javax.inject.Singleton
 import org.ieee_passau.controllers.Beans._
 import org.ieee_passau.evaluation.Messages._
+import org.ieee_passau.models
 import org.ieee_passau.models.DateSupport.dateMapper
+import org.ieee_passau.models.Result.resultTypeMapper
 import org.ieee_passau.models.{Admin, _}
 import org.ieee_passau.utils.AkkaHelper
 import org.ieee_passau.utils.FutureHelper.akkaTimeout
 import org.ieee_passau.utils.ListHelper._
+import play.api.Configuration
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.mvc._
 import slick.jdbc.PostgresProfile.api._
@@ -26,63 +29,63 @@ import scala.xml.NodeSeq
 class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                                      val components: MessagesControllerComponents,
                                      implicit val ec: ExecutionContext,
+                                     val config: Configuration,
                                      val system: ActorSystem,
                                      @Named(AkkaHelper.monitoringActor) val monitoringActor: ActorRef,
                                      @Named(AkkaHelper.rankingActor) val rankingActor: ActorRef
                                     ) extends MasterController(dbConfigProvider, components, ec) {
 
-  private def sort(key: String, list: List[SubmissionListEntry]) = {
-    key match {
-      case "date" => list.sortBy(_.date)(Ordering[Date].reverse)
-      case "problem" => list.sortBy(e => (e.door, e.user.toLowerCase(), e.lang.toLowerCase()))
-      case "user" => list.sortBy(e => (e.user.toLowerCase(), e.door, e.lang.toLowerCase()))
-      case "lang" => list.sortBy(e => (e.lang.toLowerCase(), e.user.toLowerCase(), e.door))
-    }
-  }
+  val pageSize: Int = config.getOptional[Int]("pagination.size").getOrElse(50)
 
   def index(page: Int, ordering: String): Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
-    val lang = rs.lang
+    def sortDB(key: String, query: Query[((Rep[Int], Rep[String], Rep[String], Rep[Int], Rep[Int], Rep[Date], Rep[models.Result]), Rep[Int], Rep[Int]), ((Int, String, String, Int, Int, Date, models.Result), Int, Int), Seq]) = {
+      key match {
+        case "date" => query.sortBy(_._1._6.asc /*date*/)
+        case "problem" => query.sortBy(q => (q._1._5 /*problem*/, q._1._3.toLowerCase /*user*/, q._1._2 /*language*/, q._1._6.asc /*date*/))
+        case "user" => query.sortBy(q => (q._1._3.toLowerCase /*user*/, q._1._5 /*problem*/, q._1._2 /*language*/, q._1._6.asc /*date*/))
+        case "lang" => query.sortBy(q => (q._1._2 /*language*/, q._1._3.toLowerCase /*user*/, q._1._5 /*problem*/, q._1._6.asc /*date*/))
+      }
+    }
 
-    val subsPerPage = 50
+    // order gets lost after materialization
+    def sortList(key: String, list: List[SubmissionListEntry]) = {
+      key match {
+        case "date" => list.sortBy(_.date)(Ordering[Date].reverse)
+        case "problem" => list.sortBy(e => (e.door, e.user.toLowerCase(), e.lang.toLowerCase()))
+        case "user" => list.sortBy(e => (e.user.toLowerCase(), e.door, e.lang.toLowerCase()))
+        case "lang" => list.sortBy(e => (e.lang.toLowerCase(), e.user.toLowerCase(), e.door))
+      }
+    }
 
-    val solutionsQuery = for {
+    val solutionsQuery = sortDB(ordering, (for {
       s <- Solutions
       tr <- Testruns if tr.solutionId === s.id
       p <- Problems if p.id === s.problemId
       u <- Users if u.id === s.userId
-    } yield (s.id, s.language, u.username, p.id, p.door, s.created, tr.result, tr.stage.?)
-    ProblemTranslations.problemTitleListByLang(lang).flatMap { transList =>
-      db.run(solutionsQuery.to[List].result).map { rawSolutions: List[(Int, String, String, Int, Int, Date, org.ieee_passau.models.Result, Option[Int])] =>
-        val solutions = rawSolutions.groupBy(_._1).map { case (sid, sols) =>
-          val solvedTestcases = sols.count(_._7 == Passed)
-          val allTestcases = sols.length
-          val title = transList.getOrElse(sols.head._4, "")
-          val solved = sols.forall { case (_, _, _, _, _, _, r, _) => r == Passed }
-          val failed = sols.exists { case (_, _, _, _, _, _, r, _) => r != Passed && r != Queued }
-          val canceled = sols.forall { case (_, _, _, _, _, _, r, _) => r == Canceled || r == Passed }
-          val queued = sols.exists { case (_, _, _, _, _, _, _, s) => s.isDefined }
-          val state = if (queued)
-            Queued
-          else if (canceled && !solved)
-            Canceled
-          else if (failed)
-            WrongAnswer
-          else
-            Passed
-          SubmissionListEntry(sid, sols.head._2, sols.head._3, sols.head._5, title, sols.head._6, solvedTestcases, allTestcases, state)
-        }.toList
+    } yield (s.id, s.language, u.username, p.id, p.door, s.created, s.result, tr.result),
+      ).groupBy(x => (x._1, x._2, x._3, x._4, x._5, x._6, x._7)).map { case (sol, tcs) =>
+      (sol, tcs.length, tcs.map(y =>
+        // trick the query builder, because a filter does not work here
+        Case.If(y._8 === (Passed: models.Result)).Then(1).Else(0)).sum.getOrElse(0: Rep[Int]))
+    }).drop((page - 1) * pageSize).take(pageSize)
 
-        val sorted = sort(ordering, solutions)
+    ProblemTranslations.problemTitleListByLang(rs.lang).flatMap { transList =>
+      db.run(solutionsQuery.result).flatMap { rawSolutions: Seq[((Int, String, String, Int, Int, Date, models.Result), Int, Int)] =>
+        db.run(Solutions.length.result).map { numSolutions =>
+          val solutions = sortList(ordering, rawSolutions.map {
+            case ((sid, pLang, user, pid, door, created, result), allTestcases, solvedTestcases) =>
+              SubmissionListEntry(sid, pLang, user, door, transList.getOrElse(pid, ""), created, solvedTestcases, allTestcases, result)
+          }.toList)
 
-        Ok(org.ieee_passau.views.html.solution.index(sorted.slice((page - 1) * subsPerPage,
-          (page - 1) * subsPerPage + subsPerPage), (sorted.length / subsPerPage) + 1, page, ordering))
+          Ok(org.ieee_passau.views.html.solution.index(solutions, (numSolutions / pageSize) + 1, page, ordering))
+        }
       }
     }
   }}
 
   def indexQueued: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     val testrunsQuery = for {
-      r <- Testruns if r.result === (Queued: org.ieee_passau.models.Result) || r.stage.?.isDefined
+      r <- Testruns if r.result === (Queued: models.Result) || r.stage.?.isDefined
       s <- r.solution
       c <- r.testcase
       p <- c.problem
