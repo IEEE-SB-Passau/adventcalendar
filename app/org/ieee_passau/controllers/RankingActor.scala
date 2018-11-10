@@ -45,6 +45,8 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
   // Variant with problem list tries = user tries
   // private var userXsubmissions: Map[Int /*userId*/ , (Int /*solved*/ , Map[Int /*problemId*/ , Int /*totalUser*/ ])] = Map(
 
+  private var stats: StatsM = StatsM(0, List(), List(), 0, List(), List(), (0, 0), List())
+
   /**
     * We suppose a problem has exactly `points` points, users get between `points` and `baseLine = 0.5 * points` points
     * for a correct solution.
@@ -192,6 +194,56 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
     }
   }
 
+  private def buildStats(): Unit = {
+    val oneHAgo = System.currentTimeMillis() - 3600 * 1000
+    val schoolQ = Schools.map(_.school.trim.getOrElse("": Rep[String]))
+      .groupBy(x => x.toUpperCase).map(x => (x._1, x._2.length)).sortBy(_._1).result
+    db.run(schoolQ).foreach { rawSchools =>
+      db.run(Users.length.result).foreach { userCount: Int =>
+        db.run((for {
+          r <- Testruns if r.result =!= (Queued: org.ieee_passau.models.Result)
+          s <- r.solution
+        } yield (r.vm.?, r.completed, s.language)).result).foreach { rawJobs =>
+          val jobs = rawJobs.flatMap {
+            case job if job._1.getOrElse("").contains(" ") =>
+              job._1.get.split(" ").zipWithIndex.map {
+                case (vmName, idx) =>
+                  if (idx == 0) (vmName, job._2, job._3)
+                  else (vmName, job._2, "BINARY")
+              }.toList
+            case job => List((job._1.get, job._2, job._3))
+          }
+
+          val jobs1H = jobs.filter(_._2.getTime >= oneHAgo)
+          val numJobs1H = jobs1H.length
+          val vmRank1H = jobs1H.groupBy(_._1).map {
+            case (k, l) => (k, l.length)
+          }.toList.sortBy(-_._2)
+          val langRank1H = jobs1H.groupBy(_._3).map {
+            case (k, l) => (k, l.length)
+          }.toList.sortBy(-_._2)
+
+          val numJobsFull = jobs.length
+          val vmRankFull = jobs.groupBy(_._1).map {
+            case (k, l) => (k, l.length)
+          }.toList.sortBy(-_._2)
+          val langRankFull = jobs.groupBy(_._3).map {
+            case (k, l) => (k, l.length)
+          }.toList.sortBy(-_._2)
+
+          val counts = (userCount, ranking(true).keySet.size)
+          val schools = rawSchools.map { case (name, count) =>
+            (name.toLowerCase.split(Array(' ', '-')).map(_.capitalize).mkString(" "), count)
+          }.groupBy(_._1).map {
+            case (name, cs) => (name, cs.map(_._2).sum)
+          }.toList.sorted
+
+          stats = StatsM(numJobs1H, vmRank1H, langRank1H, numJobsFull, vmRankFull, langRankFull, counts, schools)
+        }
+      }
+    }
+  }
+
   override def postStop(): Unit = {
     super.postStop()
     this.tickSchedule.cancel()
@@ -201,6 +253,7 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
     case UpdateRankingM =>
       buildCache(true)
       buildCache(false)
+      buildStats()
 
     case ProblemsQ(uid, maybeLang) =>
       val source = sender
@@ -257,5 +310,8 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
         }.toList.sortBy(x => (x._1, -x._5))
         source ! rank
       }
+
+    case StatsQ =>
+      sender ! stats
   }
 }

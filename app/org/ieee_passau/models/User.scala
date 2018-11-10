@@ -98,8 +98,8 @@ case class UserRegistration(username: String, password: (String, String), email:
 
 case class School(name: Option[String])
 class Schools(tag: Tag) extends Table[School](tag, "schools") {
-  def school: Rep[String] = column[String]("school")
-  def * : ProvenShape[School] = school.? <> (School.apply, School.unapply)
+  def school: Rep[Option[String]] = column[Option[String]]("school")
+  def * : ProvenShape[School] = school <> (School.apply, School.unapply)
 }
 object Schools extends TableQuery(new Schools(_))
 

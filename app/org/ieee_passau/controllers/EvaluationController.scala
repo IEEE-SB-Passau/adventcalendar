@@ -133,40 +133,8 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
   }}
 
   def stats: Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
-    db.run((for {
-      r <- Testruns if r.result =!= (Queued: org.ieee_passau.models.Result)
-      s <- r.solution
-    } yield (r.vm.?, r.completed, s.language)).to[List].result).map { rawJobs: List[(Option[String], Date, String)] =>
-      val jobs = rawJobs.flatMap {
-        case job if job._1.getOrElse("").contains(" ") =>
-          job._1.get.split(" ").zipWithIndex.map {
-            case (vmName, idx) =>
-              if (idx == 0) (vmName, job._2, job._3)
-              else          (vmName, job._2, "BINARY")
-          }.toList
-        case job => List((job._1.get, job._2, job._3))
-      }
-
-      val oneHAgo = System.currentTimeMillis() - 3600 * 1000
-
-      val jobs1H = jobs.filter(_._2.getTime >= oneHAgo)
-      val numJobs1H = jobs1H.length
-      val vmRank1H = jobs1H.groupBy(_._1).map {
-        case (k, l) => (k, l.length)
-      }.toList.sortBy(-_._2)
-      val langRank1H = jobs1H.groupBy(_._3).map {
-        case (k, l) => (k, l.length)
-      }.toList.sortBy(-_._2)
-
-      val numJobsFull = jobs.length
-      val vmRankFull = jobs.groupBy(_._1).map {
-        case (k, l) => (k, l.length)
-      }.toList.sortBy(-_._2)
-      val langRankFull = jobs.groupBy(_._3).map {
-        case (k, l) => (k, l.length)
-      }.toList.sortBy(-_._2)
-
-      Ok(org.ieee_passau.views.html.monitoring.statistics(numJobs1H, vmRank1H, langRank1H, numJobsFull, vmRankFull, langRankFull))
+    (rankingActor ? StatsQ).mapTo[StatsM].map { message =>
+      Ok(org.ieee_passau.views.html.monitoring.statistics(message))
     }
   }}
 

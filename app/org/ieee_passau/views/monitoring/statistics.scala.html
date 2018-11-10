@@ -1,7 +1,8 @@
 @import org.ieee_passau.models.User
 @import org.ieee_passau.views.html.main
 @import play.api.mvc.Flash
-@(numJobs1H: Int, vms1H: List[(String, Int)], langs1H: List[(String, Int)], numJobsFull: Int, vmsFull: List[(String, Int)], langsFull: List[(String, Int)])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
+@import org.ieee_passau.controllers.Beans.StatsM
+@(stats: StatsM)(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
 
 @main(messages("nav.admin.stats")) {
     <div class="row"><div class="col-sm-12"><h3>@messages("general.lasthour")</h3></div></div>
@@ -16,9 +17,9 @@
             <tbody>
                 <tr>
                     <td>@messages("general.sum")</td>
-                    <td>@numJobs1H</td>
+                    <td>@stats.numJobs1H</td>
                 </tr>
-            @vms1H.map { case (vm, num) =>
+            @stats.vms1H.map { case (vm, num) =>
                 <tr>
                     <td>@if(vm == "_") { @messages("status.canceled") } else { @vm }</td>
                     <td>@num</td>
@@ -36,7 +37,7 @@
                 </tr>
             </thead>
             <tbody>
-            @langs1H.map { case (lan, num) =>
+            @stats.langs1H.map { case (lan, num) =>
                 <tr>
                     <td>@lan</td>
                     <td>@num</td>
@@ -58,9 +59,9 @@
             <tbody>
                 <tr>
                     <td>@messages("general.sum")</td>
-                    <td>@numJobsFull</td>
+                    <td>@stats.numJobsFull</td>
                 </tr>
-            @vmsFull.map { case (vm, num) =>
+            @stats.vmsFull.map { case (vm, num) =>
                 <tr>
                     <td>@if(vm == "_") { @messages("status.canceled") } else { @vm }</td>
                     <td>@num</td>
@@ -78,12 +79,52 @@
                 </tr>
             </thead>
             <tbody>
-            @langsFull.map { case (lan, num) =>
+            @stats.langsFull.map { case (lan, num) =>
                 <tr>
                     <td>@lan</td>
                     <td>@num</td>
                 </tr>
             }
+            </tbody>
+        </table>
+    </div></div>
+
+    <div class="row"><div class="col-sm-12"><h3>@messages("user.title")</h3></div></div>
+    <div class="row"><div class="col-sm-6">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>@messages("user.school")</th>
+                    <th>@messages("general.count")</th>
+                </tr>
+            </thead>
+            <tbody>
+            @stats.schools.map { case (name, count) =>
+                <tr>
+                    <td>@name</td>
+                    <td>@count</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    <div class="col-sm-6">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>@messages("user.title")</th>
+                    <th>@messages("general.count")</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>@messages("user.registered")</td>
+                    <td>@stats.usersCount._1</td>
+                </tr>
+                <tr>
+                    <td>@messages("user.submitted")</td>
+                    <td>@stats.usersCount._2</td>
+                </tr>
             </tbody>
         </table>
     </div></div>

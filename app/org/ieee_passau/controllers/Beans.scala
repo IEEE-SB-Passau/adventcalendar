@@ -45,6 +45,12 @@ object Beans {
 
   case class ProblemsQ(userId: Int, lang: Option[Lang] = None)
 
+  case class StatsQ()
+
+  case class StatsM(numJobs1H: Int, vms1H: List[(String, Int)], langs1H: List[(String, Int)],
+                    numJobsFull: Int, vmsFull: List[(String, Int)], langsFull: List[(String, Int)],
+                    usersCount: (Int, Int), schools: Seq[(String, Int)])
+
   case class VMStatusM(vMStatus: VMStatus)
 
   case class UpdateRankingM()
