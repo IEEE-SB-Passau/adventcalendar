@@ -63,22 +63,22 @@
         readableStart.datetimepicker({
             format: format,
             useCurrent: false,
-            maxDate: '@problem("readableStop").value'
+            @if(!problem("readableStop").value.getOrElse("").isEmpty) {maxDate: '@problem("readableStop").value'}
         });
         readableStop.datetimepicker({
             format: format,
             useCurrent: false,
-            minDate: '@problem("readableStart").value'
+            @if(!problem("readableStart").value.getOrElse("").isEmpty) {minDate: '@problem("readableStart").value'}
         });
         solvableStart.datetimepicker({
             format: format,
             useCurrent: false,
-            maxDate: '@problem("solvableStop").value'
+            @if(!problem("solvableStop").value.getOrElse("").isEmpty) {maxDate: '@problem("solvableStop").value'}
         });
         solvableStop.datetimepicker({
             format: format,
             useCurrent: false,
-            minDate: '@problem("solvableStart").value'
+            @if(!problem("solvableStart").value.getOrElse("").isEmpty) {minDate: '@problem("solvableStart").value'}
         });
         readableStart.on("dp.change", function (e) {
             readableStop.data("DateTimePicker").minDate(e.date);
