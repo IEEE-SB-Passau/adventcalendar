@@ -102,8 +102,8 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
   }
 
   private def buildCache(includeHidden: Boolean): Unit = {
-    def simplify[A, B](query: Query[(Rep[A], Rep[B]), (A, B), scala.Seq]) = {
-      db.run(query.result).map(l => l.groupBy(_._1).map { case (p, sl) => (p, sl.head._2) })
+    def simplify[A, B, C](query: Query[(Rep[A], Rep[B], Rep[C]), (A, B, C), scala.Seq]) = {
+      db.run(query.result).map(l => l.groupBy(_._1).map { case (p, sl) => (p, (sl.head._2, sl.head._3)) })
     }
 
     def transpose[T](mapOfMaps: Map[Int, Map[Int, T]]) = {
@@ -147,7 +147,7 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
       u <- s.user if u.hidden === false || (includeHidden: Boolean)
     } yield (p.id, s.id, u.id)
 
-    val problemList = for {p <- Problems} yield (p.id, p.evalMode)
+    val problemList = for {p <- Problems} yield (p.id, p.evalMode, p.points)
 
     bestUserProblemSubmission(includeHidden).foreach { _ =>
       val problemXuserXbest = transpose(ranking(includeHidden))
@@ -162,10 +162,10 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
             }
             // This would be the number of tries for a problem for each user
             // val userXproblemXcount = allS.groupBy(_._3).map { case (u, pl) => u -> pl.groupBy(_._1).map { case (p, sl) => p -> sl.length } }
-            val dynamicChallengeFactor = modeList.filter(_._2 == Dynamic).map { case (p, _) =>
-              p -> (calculateChallengeFactor(100 /*TODO make independent*/) _).tupled(submissionCounts(p))
+            val dynamicChallengeFactor = modeList.filter(_._2._1 == Dynamic).map { case (p, (_, points)) =>
+              p -> (calculateChallengeFactor(points) _).tupled(submissionCounts(p))
             }.toMap
-            val bestChallengeFactor = modeList.filter(_._2 == Best).map { case (p, _) =>
+            val bestChallengeFactor = modeList.filter(_._2._1 == Best).map { case (p, _) =>
               p -> calculateChallengeRank(problemXuserXbest(p).values.map(_.fold(0)(_._1)).toList)
             }.toMap
 
@@ -265,17 +265,17 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
         val lang = sessionUser.map(_.lang).orElse(maybeLang).orElse(Some(LanguageHelper.defaultLanguage)).get
         val problemList = for {
           p <- Problems if (p.readableStart < (now: Date) && p.readableStop > (now: Date)) || sessionUser.fold(false)(_.hidden)
-        } yield (p.id, p.door, p.evalMode)
+        } yield (p.id, p.door, p.evalMode, p.points)
 
         ProblemTranslations.problemTitleListByLang(lang).flatMap { transList =>
           db.run(problemList.result).map { list =>
             val problems = list.map {
-              case (id, door, mode) =>
+              case (id, door, mode, points) =>
                 val submissionCounts = problemCounts(sessionUser.fold(false)(_.hidden))(id)
                 ProblemInfo(id,
                   door,
                   transList.getOrElse(id, ""),
-                  (calculateMaxProblemPoints(mode, 100 /*TODO make independent */) _).tupled(submissionCounts).floor.toInt ,
+                  (calculateMaxProblemPoints(mode, points) _).tupled(submissionCounts).floor.toInt ,
                   sessionUser.map(u => ranking(u.hidden)(u.id.get)(id)._2.floor.toInt).getOrElse(0),
                   mode,
                   // Variant with user tires

@@ -112,7 +112,7 @@ class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
       },
 
       problem => {
-        db.run(Problems.update(id, problem)).map(_ =>
+        Problems.update(id, problem).map(_ =>
           Redirect(org.ieee_passau.controllers.routes.ProblemController.edit(id))
             .flashing("success" -> rs.messages("problem.update.message", problem.title))
         )
@@ -161,7 +161,7 @@ class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
       },
 
       trans => {
-        db.run(ProblemTranslations.update(lang, trans)).map(_ =>
+        ProblemTranslations.update(lang, trans).map(_ =>
           Redirect(org.ieee_passau.controllers.routes.ProblemController.editTranslation(problemId, lang))
             .flashing("success" -> rs.messages("problem.translation.update.message", trans.title, trans.language.code))
         )
@@ -190,7 +190,7 @@ class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
     ((id: Option[String], door, readableStart, readableStop, solvableStart, solvableStop,
       evalMode: String, cpuFactor: Float, memFactor: Float) =>
       Problem(if (id.isDefined) Some(id.get.toInt) else None, "", door, "", readableStart, readableStop,
-        solvableStart, solvableStop, EvalMode(evalMode), cpuFactor, memFactor))
+        solvableStart, solvableStop, EvalMode(evalMode), cpuFactor, memFactor, 0))
     ((p: Problem) => Some(Some(p.id.toString), p.door, p.readableStart, p.readableStop,
       p.solvableStart, p.solvableStop, p.evalMode.mode, p.cpuFactor, p.memFactor))
 

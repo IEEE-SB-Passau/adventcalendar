@@ -4,7 +4,6 @@ import java.util.Date
 
 import com.google.inject.Inject
 import org.ieee_passau.models._
-import org.ieee_passau.utils.UserHelper
 import play.api.data.Form
 import play.api.data.Forms.{mapping, number, optional, _}
 import play.api.db.slick.DatabaseConfigProvider
@@ -54,12 +53,14 @@ class TestcaseController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
           s <- Solutions if s.problemId === pid
         } yield s.id
 
-        db.run((Testcases returning Testcases.map(_.id)) += newTestcase).zip(db.run(solutionsQuery.result)).map { tuple =>
-          tuple._2.foreach(s =>
-            db.run(Testruns += Testrun(None, s, tuple._1, None, None, None, None, None, None, None, None, None, None, Queued, None, now, Some(0), None, None, now))
-          )
-          Redirect(org.ieee_passau.controllers.routes.TestcaseController.edit(pid, tuple._1))
-            .flashing("success" -> rs.messages("testcase.create.message", newTestcase.position))
+        db.run((Testcases returning Testcases.map(_.id)) += newTestcase).zip(db.run(solutionsQuery.result)).map {
+          case (testcase, testruns) =>
+            Problems.updatePoints(pid)
+            testruns.map(s =>
+              db.run(Testruns += Testrun(None, s, testcase, None, None, None, None, None, None, None, None, None, None, Queued, None, now, Some(0), None, None, now))
+            )
+            Redirect(org.ieee_passau.controllers.routes.TestcaseController.edit(pid, testcase))
+              .flashing("success" -> rs.messages("testcase.create.message", newTestcase.position))
         }
       }
     )
@@ -75,13 +76,13 @@ class TestcaseController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
       testcase => {
         val now = new Date()
-        Testcases.update(id, testcase)
+        Testcases.update(id, testcase).foreach(_ => Problems.updatePoints(pid))
         val solutionsQuery = for {
           s <- Solutions if s.problemId === pid
         } yield s.id
         db.run(solutionsQuery.result).map { solutions =>
           solutions.foreach(s =>
-            db.run(Testruns.bySolutionIdTestcaseId(s, id).result.headOption).map {
+            db.run(Testruns.bySolutionIdTestcaseId(s, id).result.headOption).foreach {
               case Some(existing) =>
                 Testruns.update(id, existing.copy(result = Queued, stage = Some(0)))
               case _ =>
