@@ -92,8 +92,6 @@ class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   }}
 
   def update(id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
-    implicit val LangTypeMapper: JdbcType[Lang] with BaseTypedType[Lang] = LanguageHelper.LangTypeMapper
-
     problemForm.bindFromRequest.fold(
       errorForm => {
         val testCaseQuery = db.run(Testcases.filter(_.problemId === id).sortBy(_.position.asc).to[List].result)

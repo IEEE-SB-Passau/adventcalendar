@@ -59,7 +59,7 @@ object Problems extends TableQuery(new Problems(_)) {
     this.byId(id).update(problem.withId(id))
 
   def doorAvailable(door: Int, id: Int)(implicit db: Database, ec: ExecutionContext): Future[Boolean] =
-    db.run(Problems.filter(_.door === door).result).map(result => !result.exists(problem => problem.id.get == id))
+    db.run(Problems.filter(_.door === door).result).map(result => !result.exists(problem => problem.id.get != id))
   def doorAvailable(door: Int)(implicit db: Database, ec: ExecutionContext): Future[Boolean] =
     db.run(Problems.filter(_.door === door).result).map(result => result.isEmpty)
 }
