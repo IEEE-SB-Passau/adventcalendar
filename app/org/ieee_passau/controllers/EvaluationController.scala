@@ -52,7 +52,7 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
     // order gets lost after materialization
     def sortList(key: String, list: List[SubmissionListEntry]) = {
       key match {
-        case "date" => list.sortBy(_.date)(Ordering[Date].reverse)
+        case "date" => list.sortBy(_.date)(Ordering[Date])
         case "problem" => list.sortBy(e => (e.door, e.user.toLowerCase(), e.lang.toLowerCase(), e.date))
         case "user" => list.sortBy(e => (e.user.toLowerCase(), e.door, e.lang.toLowerCase(), e.date))
         case "lang" => list.sortBy(e => (e.lang.toLowerCase(), e.user.toLowerCase(), e.door, e.date))
