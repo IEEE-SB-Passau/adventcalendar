@@ -32,6 +32,7 @@ class DBReader @Inject() (val dbConfigProvider: DatabaseConfigProvider,
 
   override def receive: Receive = {
     case ReadJobsDB(count) =>
+      val source = sender
       log.debug("DBReader received request for %d jobs".format(count))
 
       val query = for {
@@ -79,7 +80,7 @@ class DBReader @Inject() (val dbConfigProvider: DatabaseConfigProvider,
         }
 
         log.debug("DBReader is sending %d jobs to InputRegulator".format(jobs.length))
-        sender ! JobsM(jobs.toList)
+        source ! JobsM(jobs.toList)
       }
   }
 }

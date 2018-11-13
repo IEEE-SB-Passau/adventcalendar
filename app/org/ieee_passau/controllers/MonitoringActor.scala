@@ -52,7 +52,7 @@ class MonitoringActor @Inject() (val system: ActorSystem, val config: Configurat
         }
       }) to source
     case VMStatusM(state) => nodes += ((state.actorName, state))
-    case NewVM(config) => vmMaster forward NewVM(config)
+    case NewVM(cfg) => vmMaster forward NewVM(cfg)
     case RemoveVM(name) => vmMaster forward RemoveVM(name)
     case JobFinished(job) => inputRegulator ! JobFinished(job)
   }
