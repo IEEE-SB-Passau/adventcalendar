@@ -32,7 +32,6 @@ class DBWriter @Inject() (val dbConfigProvider: DatabaseConfigProvider, val syst
 
       // Update testrun in database with evaluation results
       db.run(Testruns.byId(eJob.job.testrunId).result.headOption).foreach { maybeTR =>
-
         if (maybeTR.isDefined && maybeTR.get.stage.isDefined) {
           val tr = maybeTR.get
 
@@ -40,41 +39,36 @@ class DBWriter @Inject() (val dbConfigProvider: DatabaseConfigProvider, val syst
           val nextStageQuery = (for {
             s <- Solutions if s.id === tr.solutionId
             p <- s.problem
-            t <- EvalTasks if t.problemId === p.id && t.position > tr.stage && ((t.runCorrect && eJob.result.contains(Passed)) ||
-                                                                                (t.runWrong && eJob.result.contains(WrongAnswer)) ||
-                                                                                eJob.result.isEmpty)
+            t <- EvalTasks if t.problemId === p.id && t.position > tr.stage && (
+                              (t.runCorrect && eJob.result.contains(Passed)     ) ||
+                              (t.runWrong   && eJob.result.contains(WrongAnswer)) ||
+                                               eJob.result.isEmpty)
           } yield t.position).sortBy(_.asc).result.headOption
 
-          if (eJob.result.fold(false)(_ == Passed)) {
+          db.run(nextStageQuery).foreach { nextStage =>
             db.run(Solutions.filter(_.id === tr.solutionId).result.head).map { solution =>
-              db.run(Testcases.filter(_.id === tr.testcaseId).map(_.points).result.head).map { points =>
-                val result = (solution.result, eJob.result) match {
-                  case (_, Some(Queued)) =>
-                    Queued
-                  case (Queued | Passed, Some(Passed)) =>
-                    Passed
-                  case (Canceled, _) =>
-                    Canceled
-                  case (Passed | WrongAnswer | Canceled | CompileError | ProgramError | RuntimeExceeded | MemoryExceeded, Some(CompileError)) =>
-                    CompileError
-                  case (Passed | WrongAnswer | Canceled | ProgramError | RuntimeExceeded | MemoryExceeded, Some(ProgramError)) =>
-                    ProgramError
-                  case (Passed | WrongAnswer | Canceled | RuntimeExceeded | MemoryExceeded, Some(RuntimeExceeded)) =>
-                    RuntimeExceeded
-                  case (Passed | WrongAnswer | Canceled | MemoryExceeded, Some(MemoryExceeded)) =>
-                    MemoryExceeded
-                  case (WrongAnswer, _) =>
-                    WrongAnswer
-                  case (_, Some(WrongAnswer)) =>
-                    WrongAnswer
-                  case _ => solution.result
+              db.run(Testruns.filter(r => r.solutionId === solution.id.get && r.id =!= eJob.job.testrunId).map(r => (r.result, r.stage.?)).result).map { results =>
+                val list = results :+ (eJob.result.getOrElse(Canceled), nextStage)
+                val result =
+                     if (list.forall { case (res, _) => res == Passed })                    Passed
+                else if (list.exists { case (res, s) => res == Queued   || s.isDefined   }) Queued
+                else if (list.forall { case (res, _) => res == Canceled || res == Passed }) Canceled
+                else if (list.exists { case (res, _) => res == CompileError })              CompileError
+                else if (list.exists { case (res, _) => res == ProgramError })              ProgramError
+                else if (list.exists { case (res, _) => res == RuntimeExceeded })           RuntimeExceeded
+                else if (list.exists { case (res, _) => res == MemoryExceeded })            MemoryExceeded
+                else                                                                        WrongAnswer
+
+                if (eJob.result.fold(false)(_ == Passed)) {
+                  db.run(Testcases.filter(_.id === tr.testcaseId).map(_.points).result.head).map { points =>
+                    Solutions.update(tr.solutionId, solution.copy(score = solution.score + points, result = result))
+                  }
+                } else {
+                  Solutions.update(tr.solutionId, solution.copy(result = result))
                 }
-                Solutions.update(tr.solutionId, solution.copy(score = solution.score + points))
               }
             }
-          }
 
-          db.run(nextStageQuery).foreach { nextStage =>
             db.run(Testruns.byId(eJob.job.testrunId).result.head).foreach { oldTr =>
               Testruns.update(oldTr.id.get, oldTr.copy(
                 progOut     = if (eJob.progOut.isDefined)  stripNull(eJob.progOut) else oldTr.progOut,
