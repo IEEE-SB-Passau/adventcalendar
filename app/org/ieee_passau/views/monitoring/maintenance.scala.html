@@ -4,45 +4,10 @@
 @import org.ieee_passau.views.html.main
 @import play.api.mvc.{Flash, RequestHeader}
 @import play.twirl.api.Html
-@(running: Boolean, statusMessage: String, notificationActive: Boolean, notificationMessage: String,
-        postings: Map[Int, List[Posting]])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages, messagesApi: MessagesApi)
+@(notificationActive: Boolean, notificationMessage: String, postings: Map[Int, List[Posting]])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages, messagesApi: MessagesApi)
 
 @main(messages("nav.admin.postings")) {
     <h3>@messages("status.title")</h3>
-    @if(running) {
-        <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.CmsController.playPause">
-            <div class="form-group">
-                <div class="well">
-                    <fieldset>
-                        @CSRF.formField
-                        <input type="hidden" name="state" value="false">
-                        <div class="row>"><div class="col-sm-9"><p>@Html(statusMessage)</p></div>
-                            <div class="col-sm-3">
-                                <button type="submit" class="btn btn-danger pull-right"><span class="glyphicon glyphicon-pause"></span> @messages("status.eval.stop")</button>
-                            </div>
-                        </div>
-                    </fieldset>
-                </div>
-            </div>
-        </form>
-    } else {
-        <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.CmsController.playPause">
-            <div class="form-group">
-                <div class="well alert-danger">
-                    <fieldset>
-                        @CSRF.formField
-                        <input type="hidden" name="state" value="true">
-                        <div class="row>"><div class="col-sm-9"><p>@Html(statusMessage)</p></div>
-                            <div class="col-sm-3">
-                                <button type="submit" class="btn btn-success pull-right"><span class="glyphicon glyphicon-play"></span> @messages("status.eval.start")</button>
-                            </div>
-                        </div>
-                    </fieldset>
-                </div>
-            </div>
-        </form>
-    }
-
     @if(notificationActive) {
         <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.CmsController.toggleNotification">
             <div class="form-group">

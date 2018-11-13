@@ -71,11 +71,11 @@ POST        /admin/submission/:id/rerun                org.ieee_passau.controlle
 
 GET         /admin/monitoring/queued                   org.ieee_passau.controllers.EvaluationController.indexQueued
 GET         /admin/monitoring/vms                      org.ieee_passau.controllers.EvaluationController.vms
+POST        /admin/monitoring/eval                     org.ieee_passau.controllers.EvaluationController.toggleEvalState
 GET         /admin/monitoring/stat                     org.ieee_passau.controllers.EvaluationController.stats
 POST        /admin/monitoring/:id/delete               org.ieee_passau.controllers.EvaluationController.cancel(id: Int)
 
 GET         /admin/maintenance                         org.ieee_passau.controllers.CmsController.maintenance
-POST        /admin/maintenance/eval                    org.ieee_passau.controllers.CmsController.playPause
 POST        /admin/maintenance/notification            org.ieee_passau.controllers.CmsController.toggleNotification
 
 GET         /admin/maintenance/asset                   org.ieee_passau.controllers.CmsController.addFile

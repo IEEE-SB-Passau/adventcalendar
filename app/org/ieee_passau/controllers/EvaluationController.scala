@@ -17,6 +17,8 @@ import org.ieee_passau.utils.AkkaHelper
 import org.ieee_passau.utils.FutureHelper.akkaTimeout
 import org.ieee_passau.utils.ListHelper._
 import play.api.Configuration
+import play.api.data.Form
+import play.api.data.Forms.{mapping, _}
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.mvc._
 import slick.jdbc.PostgresProfile.api._
@@ -129,10 +131,26 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
   }}
 
   def vms: Action[AnyContent] = requirePermission(Admin){ implicit admin => Action.async { implicit rs =>
-    (monitoringActor ? RunningVMsQ).mapTo[List[(String, Int, VMStatus)]] flatMap {list =>
-      (monitoringActor ? StatusQ).mapTo[StatusM].map(running =>
-        Ok(org.ieee_passau.views.html.monitoring.vms(running.run, list.sortBy(_._1))))
+    Postings.byId(Page.status.id, rs.lang).map(_.content).flatMap { evalInfo =>
+      (monitoringActor ? RunningVMsQ).mapTo[List[(String, Int, VMStatus)]] flatMap { list =>
+        (monitoringActor ? StatusQ).mapTo[StatusM].map(running =>
+          Ok(org.ieee_passau.views.html.monitoring.vms(running.run, evalInfo, list.sortBy(_._1))))
+      }
     }
+  }}
+
+  def toggleEvalState: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action { implicit rs =>
+    statusForm.bindFromRequest.fold(
+      _ => {
+        Redirect(org.ieee_passau.controllers.routes.EvaluationController.vms())
+          .flashing("warning" -> rs.messages("status.update.error"))
+      },
+      status => {
+        monitoringActor ! StatusM(status)
+        Redirect(org.ieee_passau.controllers.routes.EvaluationController.vms())
+          .flashing("success" -> rs.messages("status.update.message"))
+      }
+    )
   }}
 
   def stats: Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
@@ -215,4 +233,10 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
     monitoringActor ! RemoveVM(name)
     Ok("")
   }}
+
+  val statusForm = Form(
+    mapping(
+      "state" -> text
+    )((state: String) => state == "true")((status: Boolean) => Some(status.toString))
+  )
 }

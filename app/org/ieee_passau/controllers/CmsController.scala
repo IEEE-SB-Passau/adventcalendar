@@ -37,33 +37,15 @@ class CmsController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
   def maintenance: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     val displayLang: Lang = rs.lang
-    Postings.byId(Page.status.id, displayLang).map(_.content).flatMap { evalInfo =>
-      db.run(Postings.map(p => (p.id.?, p.lang, p.title, p.content, p.date)).to[List].result).flatMap { list: List[(Option[Int], Lang, String, String, Date)] =>
-        val posts = list.groupBy(_._1 /*id*/).map(l =>
-          (l._1.get, l._2.sortBy(_._2 /*lang*/)(LanguageHelper.ordering(LanguageHelper.defaultLanguage)).map(p => Posting.tupled(p))))
-        (monitoringActor ? StatusQ).mapTo[StatusM].flatMap { evalState =>
-          (monitoringActor ? NotificationQ).mapTo[NotificationM].flatMap { notificationState =>
-            Postings.byId(Page.notification.id, displayLang).map(_.content).map { notification =>
-              Ok(org.ieee_passau.views.html.monitoring.maintenance(evalState.run, evalInfo, notificationState.run, notification, posts))
-            }
-          }
+    db.run(Postings.map(p => (p.id.?, p.lang, p.title, p.content, p.date)).to[List].result).flatMap { list: List[(Option[Int], Lang, String, String, Date)] =>
+      val posts = list.groupBy(_._1 /*id*/).map(l =>
+        (l._1.get, l._2.sortBy(_._2 /*lang*/)(LanguageHelper.ordering(LanguageHelper.defaultLanguage)).map(p => Posting.tupled(p))))
+      (monitoringActor ? NotificationQ).mapTo[NotificationM].flatMap { notificationState =>
+        Postings.byId(Page.notification.id, displayLang).map(_.content).map { notification =>
+          Ok(org.ieee_passau.views.html.monitoring.maintenance(notificationState.run, notification, posts))
         }
       }
     }
-  }}
-
-  def playPause: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action { implicit rs =>
-    statusForm.bindFromRequest.fold(
-      _ => {
-        Redirect(org.ieee_passau.controllers.routes.CmsController.maintenance())
-          .flashing("warning" -> rs.messages("status.update.error"))
-      },
-      status => {
-        monitoringActor ! StatusM(status)
-        Redirect(org.ieee_passau.controllers.routes.CmsController.maintenance())
-          .flashing("success" -> rs.messages("status.update.message"))
-      }
-    )
   }}
 
   def toggleNotification: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
@@ -189,12 +171,6 @@ class CmsController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
       }
     }
   }}
-
-  val statusForm = Form(
-    mapping(
-      "state" -> text
-    )((state: String) => state == "true")((status: Boolean) => Some(status.toString))
-  )
 
   val postingForm = Form(
     mapping(
