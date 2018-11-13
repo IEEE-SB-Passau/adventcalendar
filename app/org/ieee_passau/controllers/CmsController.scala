@@ -8,22 +8,21 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import com.google.inject.Inject
 import com.google.inject.name.Named
+import org.apache.commons.io.FileUtils
 import org.ieee_passau.controllers.Beans._
 import org.ieee_passau.models.DateSupport.dateMapper
-import org.ieee_passau.models.{Admin, Posting, _}
+import org.ieee_passau.models._
 import org.ieee_passau.utils.FutureHelper.akkaTimeout
 import org.ieee_passau.utils.LanguageHelper.LangTypeMapper
 import org.ieee_passau.utils.{AkkaHelper, LanguageHelper}
 import play.api.Configuration
 import play.api.data.Form
-import play.api.data.Forms.{mapping, number, optional, _}
+import play.api.data.Forms._
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.i18n.Lang
 import play.api.libs.Files.TemporaryFile
 import play.api.mvc.{Action, _}
 import slick.jdbc.PostgresProfile.api._
-
-import org.apache.commons.io.FileUtils
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
@@ -146,7 +145,7 @@ class CmsController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
     }
   }}
 
-  def listFiles(highlight: String): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action { implicit rs =>
+  def listFiles(highlight: String): Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action { implicit rs =>
     def recursiveListFiles(f: File): Array[File] = {
       val these = f.listFiles
       if (these == null) return Array()
