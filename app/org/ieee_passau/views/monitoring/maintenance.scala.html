@@ -11,53 +11,68 @@
     <h3>@messages("status.title")</h3>
     @if(running) {
         <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.CmsController.playPause">
-            @CSRF.formField
-            <div class="well">
-                <fieldset>
-                    <input type="hidden" name="state" value="false"/>
-                    <div class="form-group"><div class="col-sm-offset-2 col-sm-10">
-                        <button type="submit" class="btn btn-danger pull-right"><span class="glyphicon glyphicon-pause"></span> @messages("status.eval.stop")</button>
-                    </div></div>
-                </fieldset>
+            <div class="form-group">
+                <div class="well">
+                    <fieldset>
+                        @CSRF.formField
+                        <input type="hidden" name="state" value="false">
+                        <div class="row>"><div class="col-sm-9"><p>@Html(statusMessage)</p></div>
+                            <div class="col-sm-3">
+                                <button type="submit" class="btn btn-danger pull-right"><span class="glyphicon glyphicon-pause"></span> @messages("status.eval.stop")</button>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
             </div>
         </form>
     } else {
         <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.CmsController.playPause">
-            @CSRF.formField
-            <div class="well alert-danger">
-                <fieldset>
-                    <input type="hidden" name="state" value="true"/>
-                    @Html(statusMessage)
-                    <div class="form-group"><div class="col-sm-offset-2 col-sm-10">
-                        <button type="submit" class="btn btn-success pull-right"><span class="glyphicon glyphicon-play"></span> @messages("status.eval.start")</button>
-                    </div></div>
-                </fieldset>
+            <div class="form-group">
+                <div class="well alert-danger">
+                    <fieldset>
+                        @CSRF.formField
+                        <input type="hidden" name="state" value="true">
+                        <div class="row>"><div class="col-sm-9"><p>@Html(statusMessage)</p></div>
+                            <div class="col-sm-3">
+                                <button type="submit" class="btn btn-success pull-right"><span class="glyphicon glyphicon-pause"></span> @messages("status.eval.start")</button>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
             </div>
         </form>
     }
 
     @if(notificationActive) {
         <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.CmsController.toggleNotification">
-            @CSRF.formField
-            <div class="well">
-                <fieldset>
-                    @Html(notificationMessage)
-                    <div class="form-group"><div class="col-sm-offset-2 col-sm-10">
-                        <button type="submit" class="btn btn-danger pull-right"><span class="glyphicon glyphicon-pause"></span> @messages("status.notification.stop")</button>
-                    </div></div>
-                </fieldset>
+            <div class="form-group">
+                <div class="well">
+                    <fieldset>
+                        @CSRF.formField
+                        <input type="hidden" name="state" value="false">
+                        <div class="row>"><div class="col-sm-9"><p>@Html(notificationMessage)</p></div>
+                            <div class="col-sm-3">
+                                <button type="submit" class="btn btn-danger pull-right"><span class="glyphicon glyphicon-pause"></span> @messages("status.notification.stop")</button>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
             </div>
         </form>
     } else {
         <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.CmsController.toggleNotification">
-            @CSRF.formField
-            <div class="well alert-danger">
-                <fieldset>
-                    @Html(notificationMessage)
-                    <div class="form-group"><div class="col-sm-offset-2 col-sm-10">
-                        <button type="submit" class="btn btn-success pull-right"><span class="glyphicon glyphicon-play"></span> @messages("status.notification.start")</button>
-                    </div></div>
-                </fieldset>
+            <div class="form-group">
+                <div class="well alert-danger">
+                    <fieldset>
+                        @CSRF.formField
+                        <input type="hidden" name="state" value="true">
+                        <div class="row>"><div class="col-sm-9"><p>@Html(notificationMessage)</p></div>
+                            <div class="col-sm-3">
+                                <button type="submit" class="btn btn-success pull-right"><span class="glyphicon glyphicon-pause"></span> @messages("status.notification.start")</button>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
             </div>
         </form>
     }

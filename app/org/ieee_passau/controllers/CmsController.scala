@@ -31,17 +31,15 @@ class CmsController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
   def maintenance: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     val displayLang: Lang = rs.lang
-    Postings.byId(Page.status.id, displayLang).flatMap { post =>
+    Postings.byId(Page.status.id, displayLang).map(_.content).flatMap { evalInfo =>
       db.run(Postings.map(p => (p.id.?, p.lang, p.title, p.content, p.date)).to[List].result).flatMap { list: List[(Option[Int], Lang, String, String, Date)] =>
         val posts = list.groupBy(_._1 /*id*/).map(l =>
           (l._1.get, l._2.sortBy(_._2 /*lang*/)(LanguageHelper.ordering(LanguageHelper.defaultLanguage)).map(p => Posting.tupled(p))))
-        (monitoringActor ? StatusQ).mapTo[StatusM].flatMap { state =>
-          (monitoringActor ? NotificationQ).mapTo[NotificationM].flatMap {
-            case NotificationM(true) => Postings.byId(Page.notification.id, displayLang).map(_.content).map { notification =>
-              Ok(org.ieee_passau.views.html.monitoring.maintenance(state.run, post.content, notificationActive = true, notification, posts))
+        (monitoringActor ? StatusQ).mapTo[StatusM].flatMap { evalState =>
+          (monitoringActor ? NotificationQ).mapTo[NotificationM].flatMap { notificationState =>
+            Postings.byId(Page.notification.id, displayLang).map(_.content).map { notification =>
+              Ok(org.ieee_passau.views.html.monitoring.maintenance(evalState.run, evalInfo, notificationState.run, notification, posts))
             }
-            case _ =>
-              Future.successful(Ok(org.ieee_passau.views.html.monitoring.maintenance(state.run, post.content, notificationActive = false, "", posts)))
           }
         }
       }
