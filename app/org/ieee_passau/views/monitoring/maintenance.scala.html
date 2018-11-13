@@ -9,10 +9,10 @@
 @main(messages("nav.admin.postings")) {
     <h3>@messages("eval.status.title")</h3>
     @if(notificationActive) {
-        <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.CmsController.toggleNotification">
-            <div class="form-group">
+        <form style="display: inline" class="form-horizontal" method="POST" action="@org.ieee_passau.controllers.routes.CmsController.toggleNotification">
+            <fieldset>
                 <div class="well">
-                    <fieldset>
+                    <div class="form-group">
                         @CSRF.formField
                         <input type="hidden" name="state" value="false">
                         <div class="row>"><div class="col-sm-9"><p>@Html(notificationMessage)</p></div>
@@ -20,15 +20,15 @@
                                 <button type="submit" class="btn btn-danger pull-right"><span class="glyphicon glyphicon-pause"></span> @messages("status.notification.stop")</button>
                             </div>
                         </div>
-                    </fieldset>
+                    </div>
                 </div>
-            </div>
+            </fieldset>
         </form>
     } else {
-        <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.CmsController.toggleNotification">
-            <div class="form-group">
+        <form style="display: inline" class="form-horizontal" method="POST" action="@org.ieee_passau.controllers.routes.CmsController.toggleNotification">
+            <fieldset>
                 <div class="well alert-danger">
-                    <fieldset>
+                    <div class="form-group">
                         @CSRF.formField
                         <input type="hidden" name="state" value="true">
                         <div class="row>"><div class="col-sm-9"><p>@Html(notificationMessage)</p></div>
@@ -36,9 +36,9 @@
                                 <button type="submit" class="btn btn-success pull-right"><span class="glyphicon glyphicon-play"></span> @messages("status.notification.start")</button>
                             </div>
                         </div>
-                    </fieldset>
+                    </div>
                 </div>
-            </div>
+            </fieldset>
         </form>
     }
 
