@@ -1,0 +1,44 @@
+@import helper._
+@import org.ieee_passau.controllers.routes
+@import org.ieee_passau.models.{ProblemTranslation, User, Admin}
+@import org.ieee_passau.views.html.main
+@import play.api.data.Form
+@import org.ieee_passau.models.ProblemTranslation
+@import org.ieee_passau.utils.LanguageHelper
+@import org.ieee_passau.views.html.bootstrap3.{buttonSave, fileloader, text, textareaBs}
+@import play.api.data.Form
+@import play.api.mvc.{Flash, RequestHeader}
+@(files: Seq[String], highlight: String)(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages, messagesApi: MessagesApi)
+
+@main(messages("assets.title")) {
+    <h3>@messages("assets.title")</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>@messages("general.file")</th>
+                <th>@messages("general.link")</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @files.map { filename =>
+            <tr class="@if(highlight == filename) {success}">
+                <td><a href="@routes.MasterController.staticFile(filename)">@filename</a></td>
+                <td>@("<a href=" + routes.MasterController.staticFile(filename) + ">" + filename + "</a>")</td>
+                <td></td>
+            </tr>
+        }
+        @if(sessionUser.get.permission.includes(Admin)) {
+            <tr>
+                <td></td>
+                <td></td>
+                <td>
+                    <a href="@org.ieee_passau.controllers.routes.CmsController.addFile()" class="btn btn-default">
+                        <span class="glyphicon glyphicon-upload"></span> @messages("assets.add")
+                    </a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

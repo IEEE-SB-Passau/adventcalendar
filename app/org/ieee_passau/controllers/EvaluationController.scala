@@ -33,7 +33,7 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
                                      val system: ActorSystem,
                                      @Named(AkkaHelper.monitoringActor) val monitoringActor: ActorRef,
                                      @Named(AkkaHelper.rankingActor) val rankingActor: ActorRef
-                                    ) extends MasterController(dbConfigProvider, components, ec) {
+                                    ) extends MasterController(dbConfigProvider, components, ec, config) {
 
   val pageSize: Int = config.getOptional[Int]("pagination.size").getOrElse(50)
 

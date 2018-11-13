@@ -20,9 +20,9 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                                val langs: Langs,
                                val captchaHelper: CaptchaHelper,
                                val mailerClient: MailerClient,
-                               implicit val config: Configuration,
-                               implicit val ec: ExecutionContext
-                              ) extends MasterController(dbConfigProvider, components, ec) {
+                               implicit val ec: ExecutionContext,
+                               implicit val config: Configuration
+                              ) extends MasterController(dbConfigProvider, components, ec, config) {
 
   def index: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     db.run(Users.sortBy(_.id).to[List].result).map { userList => Ok(org.ieee_passau.views.html.user.index(userList))}

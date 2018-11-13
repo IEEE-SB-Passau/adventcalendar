@@ -1,21 +1,24 @@
 package org.ieee_passau.controllers
 
+import java.nio.file.Paths
+
 import com.google.inject.Inject
-import org.ieee_passau.models.{Guest, Permission, User}
+import org.ieee_passau.models.{Everyone, Guest, Permission, User}
 import org.ieee_passau.utils.UserHelper
+import play.api.Configuration
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import play.api.routing.JavaScriptReverseRouter
 import slick.jdbc.JdbcProfile
-
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class MasterController @Inject()(private val dbConfigProvider: DatabaseConfigProvider,
                                  private val components: MessagesControllerComponents,
-                                 implicit private val ec: ExecutionContext
+                                 implicit private val ec: ExecutionContext,
+                                 private val config: Configuration
                                 ) extends MessagesAbstractController(components) with I18nSupport {
   implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
 
@@ -63,4 +66,18 @@ class MasterController @Inject()(private val dbConfigProvider: DatabaseConfigPro
       )
     ).as("text/javascript")
   }
+
+  /**
+    * This is mainly used in dev mode, in prod the reverse proxy should serve these files.
+    *
+    * @param filename the file to serve
+    */
+  def staticFile(filename: String): Action[AnyContent] = requirePermission(Everyone) { implicit user => Action { implicit request =>
+    config.getOptional[String]("play.assets.staticPath")
+      .fold(NotFound(org.ieee_passau.views.html.errors.e404())) { source =>
+        val file = Paths.get(source, filename).toFile
+        if (file.exists()) Ok.sendFile(file)
+        else NotFound(org.ieee_passau.views.html.errors.e404())
+      }
+  }}
 }

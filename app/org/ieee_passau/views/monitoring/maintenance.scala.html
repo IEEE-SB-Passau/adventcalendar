@@ -77,7 +77,11 @@
         </form>
     }
 
-    <h3>@messages("posting.edit")</h3>
+    <h3>@messages("posting.edit")
+        <a href="@org.ieee_passau.controllers.routes.CmsController.listFiles()" class="btn btn-default pull-right">
+            <span class="glyphicon glyphicon-upload"></span> @messages("assets.title")
+        </a>
+    </h3>
 
     <table class="table table-striped">
         <thead>

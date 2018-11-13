@@ -1,5 +1,7 @@
 package org.ieee_passau.controllers
 
+import java.io.File
+import java.nio.file.Paths
 import java.util.Date
 
 import akka.actor.{ActorRef, ActorSystem}
@@ -12,12 +14,16 @@ import org.ieee_passau.models.{Admin, Posting, _}
 import org.ieee_passau.utils.FutureHelper.akkaTimeout
 import org.ieee_passau.utils.LanguageHelper.LangTypeMapper
 import org.ieee_passau.utils.{AkkaHelper, LanguageHelper}
+import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms.{mapping, number, optional, _}
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.i18n.Lang
-import play.api.mvc._
+import play.api.libs.Files.TemporaryFile
+import play.api.mvc.{Action, _}
 import slick.jdbc.PostgresProfile.api._
+
+import org.apache.commons.io.FileUtils
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
@@ -25,9 +31,10 @@ import scala.language.postfixOps
 class CmsController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                               val components: MessagesControllerComponents,
                               implicit val ec: ExecutionContext,
+                              val config: Configuration,
                               val system: ActorSystem,
                               @Named(AkkaHelper.monitoringActor) val monitoringActor: ActorRef
-                             ) extends MasterController(dbConfigProvider, components, ec) {
+                             ) extends MasterController(dbConfigProvider, components, ec, config) {
 
   def maintenance: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     val displayLang: Lang = rs.lang
@@ -119,6 +126,39 @@ class CmsController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
         )
       }
     )
+  }}
+
+  def addFile(): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action { implicit rs =>
+    Ok(org.ieee_passau.views.html.monitoring.upload())
+  }}
+
+  def uploadFile(): Action[MultipartFormData[TemporaryFile]] = requirePermission(Admin, parse.multipartFormData) { implicit admin => Action(parse.multipartFormData) { implicit rs =>
+    rs.body.file("file").map { file =>
+      val filename = Paths.get(file.filename).getFileName.toString
+      val target = new File(config.getOptional[String]("play.assets.staticPath").getOrElse("/tmp/"), filename)
+      FileUtils.copyFile(file.ref, target)
+
+      Redirect(org.ieee_passau.controllers.routes.CmsController.listFiles(filename))
+        .flashing("success" ->  rs.messages("assets.success"))
+    }.getOrElse {
+      Redirect(org.ieee_passau.controllers.routes.CmsController.listFiles())
+        .flashing("error" ->  rs.messages("assets.error"))
+    }
+  }}
+
+  def listFiles(highlight: String): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action { implicit rs =>
+    def recursiveListFiles(f: File): Array[File] = {
+      val these = f.listFiles
+      if (these == null) return Array()
+      these.filter(_.isFile) ++ these.filter(_.isDirectory).flatMap(recursiveListFiles)
+    }
+
+    config.getOptional[String]("play.assets.staticPath")
+      .fold(NotFound(org.ieee_passau.views.html.errors.e404())) { dir =>
+        val base = new File(dir)
+        val files = recursiveListFiles(base).map(f => base.toURI.relativize(f.toURI).toString)
+        Ok(org.ieee_passau.views.html.monitoring.assetList(files, highlight))
+      }
   }}
 
   /**

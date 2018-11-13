@@ -2,7 +2,8 @@
 @import play.api.i18n.{Lang, Messages}
 @import play.api.mvc.RequestHeader
 @import views.html.helper.CSRF
-@(pid: Int, translations: List[ProblemTranslation])(implicit requestHeader: RequestHeader, messages: Messages, messagesApi: MessagesApi)
+@import org.ieee_passau.models.{User, Admin}
+@(pid: Int, translations: List[ProblemTranslation])(implicit sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages, messagesApi: MessagesApi)
 
 <table class="table table-striped">
     <thead>
@@ -38,6 +39,11 @@
                 <a href="@org.ieee_passau.controllers.routes.ProblemController.addTranslation(pid)" class="btn btn-default">
                     <span class="glyphicon glyphicon-plus"></span>
                 </a>
+                @if(sessionUser.get.permission.includes(Admin)) {
+                    <a href="@org.ieee_passau.controllers.routes.CmsController.addFile()" class="btn btn-default">
+                        <span class="glyphicon glyphicon-upload"></span> @messages("assets.add")
+                    </a>
+                }
             </td>
     <tr>
     </tbody>

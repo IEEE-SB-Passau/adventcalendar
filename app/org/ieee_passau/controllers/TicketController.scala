@@ -20,9 +20,9 @@ import scala.concurrent.{ExecutionContext, Future}
 class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                                  val components: MessagesControllerComponents,
                                  val mailerClient: MailerClient,
-                                 val config: Configuration,
-                                 implicit val ec: ExecutionContext
-                                ) extends MasterController(dbConfigProvider, components, ec) {
+                                 implicit val ec: ExecutionContext,
+                                 val config: Configuration
+                                ) extends MasterController(dbConfigProvider, components, ec, config) {
 
   def index: Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
     val responsesQuery = for {

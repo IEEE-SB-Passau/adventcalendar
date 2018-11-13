@@ -2,6 +2,7 @@ package org.ieee_passau.controllers
 
 import com.google.inject.Inject
 import org.ieee_passau.models.{Admin, EvalTask, EvalTasks}
+import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms.{mapping, number, optional, _}
 import play.api.db.slick.DatabaseConfigProvider
@@ -14,8 +15,9 @@ import scala.reflect.io.File
 
 class EvalTaskController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                                    val components: MessagesControllerComponents,
-                                   implicit val ec: ExecutionContext
-                                  ) extends MasterController(dbConfigProvider, components, ec) {
+                                   implicit val ec: ExecutionContext,
+                                   val config: Configuration
+                                  ) extends MasterController(dbConfigProvider, components, ec, config) {
 
   def edit(pid: Int, id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     db.run(EvalTasks.byId(id).result.headOption).map {

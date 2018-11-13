@@ -4,6 +4,7 @@ import java.util.Date
 
 import com.google.inject.Inject
 import org.ieee_passau.models._
+import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms.{mapping, number, optional, _}
 import play.api.db.slick.DatabaseConfigProvider
@@ -14,8 +15,9 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class TestcaseController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                                    val components: MessagesControllerComponents,
-                                   implicit val ec: ExecutionContext
-                                  ) extends MasterController(dbConfigProvider, components, ec) {
+                                   implicit val ec: ExecutionContext,
+                                   val config: Configuration
+                                  ) extends MasterController(dbConfigProvider, components, ec, config) {
 
   def edit(pid: Int, id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     db.run(Testcases.byId(id).result.headOption).flatMap {

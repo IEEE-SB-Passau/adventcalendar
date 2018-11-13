@@ -78,6 +78,10 @@ GET         /admin/maintenance                         org.ieee_passau.controlle
 POST        /admin/maintenance/eval                    org.ieee_passau.controllers.CmsController.playPause
 POST        /admin/maintenance/notification            org.ieee_passau.controllers.CmsController.toggleNotification
 
+GET         /admin/maintenance/asset                   org.ieee_passau.controllers.CmsController.addFile
+POST        /admin/maintenance/asset                   org.ieee_passau.controllers.CmsController.uploadFile
+GET         /admin/maintenance/assetList               org.ieee_passau.controllers.CmsController.listFiles(highlight: String ?= "")
+
 GET         /admin/status/:id                          org.ieee_passau.controllers.CmsController.createPage(id: Int)
 POST        /admin/status/:id                          org.ieee_passau.controllers.CmsController.addPage(id: Int)
 GET         /admin/status/:id/:lang                    org.ieee_passau.controllers.CmsController.editPage(id: Int, lang: String)
@@ -102,3 +106,4 @@ POST        /admin/vms/remove                          org.ieee_passau.controlle
 # The deprication warning is a false positive
 GET         /assets/*file                              controllers.Assets.versioned(file)
 GET         /javascriptRoutes                          org.ieee_passau.controllers.MasterController.javascriptRoutes
+GET         /static/*file                              org.ieee_passau.controllers.MasterController.staticFile(file)

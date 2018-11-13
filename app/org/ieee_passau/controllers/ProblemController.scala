@@ -23,10 +23,10 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                                   val components: MessagesControllerComponents,
                                   implicit val ec: ExecutionContext,
-                                  val system: ActorSystem,
                                   implicit val config: Configuration,
+                                  val system: ActorSystem,
                                   @Named(AkkaHelper.rankingActor) val rankingActor: ActorRef
-                                 ) extends MasterController(dbConfigProvider, components, ec) {
+                                 ) extends MasterController(dbConfigProvider, components, ec, config) {
 
   def index: Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
     ProblemTranslations.problemTitleListByLang(admin.get.lang).flatMap { transList =>

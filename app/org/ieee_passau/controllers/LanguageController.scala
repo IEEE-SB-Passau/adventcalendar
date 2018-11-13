@@ -14,9 +14,9 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class LanguageController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                                    val components: MessagesControllerComponents,
-                                   implicit val config: Configuration,
-                                   implicit val ec: ExecutionContext
-                                  ) extends MasterController(dbConfigProvider, components, ec) {
+                                   implicit val ec: ExecutionContext,
+                                   implicit val config: Configuration
+                                  ) extends MasterController(dbConfigProvider, components, ec, config) {
 
   def index: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     db.run(Languages.sortBy(_.id.asc).to[List].result).map { list =>
