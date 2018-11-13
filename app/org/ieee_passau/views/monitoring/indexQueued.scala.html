@@ -15,7 +15,7 @@
                 <th>@messages("user.title")</th>
                 <th>@messages("codelang.title")</th>
                 <th>@messages("general.createdate")</th>
-                <th>@messages("status.evalstate.title")</th>
+                <th>@messages("eval.task.state.title")</th>
                 <th></th>
             </tr>
         </thead>
@@ -28,14 +28,14 @@
                 <td>@language</td>
                 <td><abbr class="timeago" title="@dateSub.format("yyyy-MM-dd'T'HH:mm:ssZ")">@dateSub.format("yyyy-MM-dd HH:mm:ss")</abbr></td>
                 <td>@if(dateQueued.isDefined) {
-                    @messages("status.evalstate.assigned") <abbr class="timeago" title="@dateQueued.get.format("yyyy-MM-dd'T'HH:mm:ssZ")">@dateQueued.get.format("yyyy-MM-dd HH:mm:ss")</abbr>
+                    @messages("eval.task.state.assigned") <abbr class="timeago" title="@dateQueued.get.format("yyyy-MM-dd'T'HH:mm:ssZ")">@dateQueued.get.format("yyyy-MM-dd HH:mm:ss")</abbr>
                 } else {
-                    @messages("status.evalstate.pending")
+                    @messages("eval.task.state.pending")
                 }</td>
                 <td>
                     <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.EvaluationController.cancel(rid)">
                         @CSRF.formField
-                        <button type="submit" onclick="return(window.confirm('@messages("status.cancel.warning")'))" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span></button>
+                        <button type="submit" onclick="return(window.confirm('@messages("eval.task.cancel.warning")'))" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span></button>
                     </form>
                 </td>
             </tr>

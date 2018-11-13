@@ -59,7 +59,7 @@
                                     @if(List(
                                         messages("user.list.title"), messages("problem.list.title"), messages("ticket.list.title"),
                                         messages("submission.list.title"), messages("nav.admin.evalqueue"), messages("nav.admin.stats"),
-                                        messages("status.vms.title"), messages("nav.admin.postings"), messages("codelang.list.title"),
+                                        messages("eval.title"), messages("nav.admin.postings"), messages("codelang.list.title"),
                                         messages("assets.title")
                                     ).contains(title)) { active }" >
                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">@messages("nav.admin.message") <b class="caret"></b></a>
@@ -70,7 +70,7 @@
                                         <li @if(title == messages("user.list.title"))       { class="active" }><a href="@org.ieee_passau.controllers.routes.UserController.index"            >@messages("user.list.title")</a></li>
                                         <li @if(title == messages("submission.list.title")) { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.index()"    >@messages("submission.list.title")</a></li>
                                         <li @if(title == messages("nav.admin.evalqueue"))   { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.indexQueued">@messages("nav.admin.evalqueue")</a></li>
-                                        <li @if(title == messages("status.vms.title"))      { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.vms"        >@messages("status.vms.title")</a></li>
+                                        <li @if(title == messages("eval.title"))      { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.vms"        >@messages("eval.title")</a></li>
                                         <li @if(title == messages("nav.admin.stats"))       { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.stats"      >@messages("nav.admin.stats")</a></li>
                                         <li role="separator" class="divider"></li>
                                         <li @if(title == messages("nav.admin.postings"))    { class="active" }><a href="@org.ieee_passau.controllers.routes.CmsController.maintenance"       >@messages("nav.admin.postings")</a></li>

@@ -194,30 +194,39 @@ codelang.fileextension=Dateiendung
 codelang.fileextension.help=c (ohne ".")
 codelang.highlightclass=Syntaxhighlighing Klasse
 
-status.update.message=Status wurde geändert.
-status.update.error=Status konnte nicht geändert werden.
-status.title=Evaluierungstatus
-status.eval.start=Evaluierung starten
-status.eval.stop=Evaluierung anhalten
+eval.status.title=Evaluierungstatus
+eval.status.start=Evaluierung starten
+eval.status.stop=Evaluierung anhalten
+eval.status.update.message=Status wurde geändert.
+eval.status.update.error=Status konnte nicht geändert werden.
+eval.status.message=Die Auswertung ist im Moment angehalten, bitte habe etwas Geduld, das Team kümmert sich darum!
+eval.token.reset.title=Evaluierungssystem Zugangstoken
+eval.token.reset=Zugangstoken zurücksetzen
+eval.token.reset.confirm=Token wirklich zurücksetzen?
+eval.token.reset.message=Das neue Zugangstoken des Internen Benutzers {0} lautet {1}.
+eval.token.reset.error=Das Zugangstoken des Backend Benutzers konnte nicht zurückgesetzt werden.
+
+eval.title=Evaluation
+eval.vms.title=Evaluierungsmaschinen
+eval.vms.id=VM Name
+eval.vms.numberofusers=# Angemeldete Benutzer
+eval.vms.uri=IP:Port
+eval.vms.load=Last
+eval.vms.memory=Speicher
+eval.vms.lastheartbeat=Letzte Rückmeldung
+
+eval.task.state.title=Status
+eval.task.state.assigned=Zugeteilt
+eval.task.state.pending=Ausstehend
+eval.task.resubmit.warning=Wirklich neu auswerten?
+eval.task.cancel.warning=Auswertung wirklich abbrechen?
+
 status.notification.start=Benachrichtigung einschalten
 status.notification.stop=Benachrichtigung ausschalten
 status.notification.state.on=Benachrichtigung wurde eingeschaltet
 status.notification.state.off=Benachrichtigung wurde ausgeschaltet
 status.paused=Aktuell ist das System angehalten
 status.canceled=Abgebrochen
-status.vm.id=VM Name
-status.vms.title=Evaluation
-status.vms.numberofusers=# Angemeldete Benutzer
-status.vms.uri=IP:Port
-status.vms.load=Last
-status.vms.memory=Speicher
-status.vms.lastheartbeat=Letzte Rückmeldung
-status.evalstate.title=Status
-status.evalstate.assigned=Zugeteilt
-status.evalstate.pending=Ausstehend
-status.resubmit.warning=Wirklich neu auswerten?
-status.cancel.warning=Auswertung wirklich abbrechen?
-status.messages.message=Die Auswertung ist im Moment angehalten, bitte habe etwas Geduld, das Team kümmert sich darum!
 
 assets.title=Statische Dateien
 assets.add=Datei hochladen

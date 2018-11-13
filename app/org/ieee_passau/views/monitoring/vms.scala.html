@@ -4,9 +4,10 @@
 @import org.ieee_passau.views.html.main
 @import play.api.mvc.Flash
 @import scala.language.implicitConversions
-@(running: Boolean, statusMessage: String, vms: List[(String, Int, VMStatus)])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
+@(running: Boolean, statusMessage: String, internalUsers: Seq[User], vms: List[(String, Int, VMStatus)])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
 
-@main(messages("status.vms.title")) {
+@main(messages("eval.title")) {
+    <h3>@messages("eval.status.title")</h3>
     @if(running) {
         <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.EvaluationController.toggleEvalState">
             <div class="form-group">
@@ -16,7 +17,7 @@
                         <input type="hidden" name="state" value="false">
                         <div class="row>"><div class="col-sm-9"><p>@Html(statusMessage)</p></div>
                             <div class="col-sm-3">
-                                <button type="submit" class="btn btn-danger pull-right"><span class="glyphicon glyphicon-pause"></span> @messages("status.eval.stop")</button>
+                                <button type="submit" class="btn btn-danger pull-right"><span class="glyphicon glyphicon-pause"></span> @messages("eval.status.stop")</button>
                             </div>
                         </div>
                     </fieldset>
@@ -32,7 +33,7 @@
                         <input type="hidden" name="state" value="true">
                         <div class="row>"><div class="col-sm-9"><p>@Html(statusMessage)</p></div>
                             <div class="col-sm-3">
-                                <button type="submit" class="btn btn-success pull-right"><span class="glyphicon glyphicon-play"></span> @messages("status.eval.start")</button>
+                                <button type="submit" class="btn btn-success pull-right"><span class="glyphicon glyphicon-play"></span> @messages("eval.status.start")</button>
                             </div>
                         </div>
                     </fieldset>
@@ -40,15 +41,39 @@
             </div>
         </form>
     }
+
+    <h3>@messages("eval.token.reset.title")</h3>
+    <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.EvaluationController.resetBackendToken">
+        <div class="form-group">
+            <fieldset>
+                <div class="col-sm-4">
+                    <select id="uid" size="1" name="uid" class="form-control">
+                        @internalUsers.map { user =>
+                        <option value="@user.id" @{ if(user == internalUsers.head) "selected" }>@user.username</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-sm-3">
+                    @CSRF.formField
+                    <input type="hidden" name="state" value="true">
+                    <button type="submit" onclick="return (window.confirm('@messages("eval.token.reset.confirm")'))" class="btn btn-danger">
+                    @messages("eval.token.reset")
+                    </button>
+                </div>
+            </fieldset>
+        </div>
+    </form>
+
+    <h3>@messages("eval.vms.title")</h3>
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>@messages("status.vm.id")</th>
-                <th>@messages("status.vms.uri")</th>
-                <th>@messages("status.vms.numberofusers")</th>
-                <th>@messages("status.vms.load")</th>
-                <th>@messages("status.vms.memory")</th>
-                <th>@messages("status.vms.lastheartbeat")</th>
+                <th>@messages("eval.vms.id")</th>
+                <th>@messages("eval.vms.uri")</th>
+                <th>@messages("eval.vms.numberofusers")</th>
+                <th>@messages("eval.vms.load")</th>
+                <th>@messages("eval.vms.memory")</th>
+                <th>@messages("eval.vms.lastheartbeat")</th>
             </tr>
         </thead>
         <tbody>

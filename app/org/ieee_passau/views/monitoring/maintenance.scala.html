@@ -7,7 +7,7 @@
 @(notificationActive: Boolean, notificationMessage: String, postings: Map[Int, List[Posting]])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages, messagesApi: MessagesApi)
 
 @main(messages("nav.admin.postings")) {
-    <h3>@messages("status.title")</h3>
+    <h3>@messages("eval.status.title")</h3>
     @if(notificationActive) {
         <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.CmsController.toggleNotification">
             <div class="form-group">

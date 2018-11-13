@@ -13,7 +13,7 @@ import org.ieee_passau.models
 import org.ieee_passau.models.DateSupport.dateMapper
 import org.ieee_passau.models.Result.resultTypeMapper
 import org.ieee_passau.models.{Admin, _}
-import org.ieee_passau.utils.AkkaHelper
+import org.ieee_passau.utils.{AkkaHelper, PasswordHasher}
 import org.ieee_passau.utils.FutureHelper.akkaTimeout
 import org.ieee_passau.utils.ListHelper._
 import play.api.Configuration
@@ -131,10 +131,12 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
   }}
 
   def vms: Action[AnyContent] = requirePermission(Admin){ implicit admin => Action.async { implicit rs =>
-    Postings.byId(Page.status.id, rs.lang).map(_.content).flatMap { evalInfo =>
-      (monitoringActor ? RunningVMsQ).mapTo[List[(String, Int, VMStatus)]] flatMap { list =>
-        (monitoringActor ? StatusQ).mapTo[StatusM].map(running =>
-          Ok(org.ieee_passau.views.html.monitoring.vms(running.run, evalInfo, list.sortBy(_._1))))
+    Postings.byId(Page.status.id, rs.lang).map(_.content) flatMap { evalInfo =>
+      db.run(Users.filter(_.permission === (Internal: Permission)).result) flatMap { internalUsers =>
+        (monitoringActor ? RunningVMsQ).mapTo[List[(String, Int, VMStatus)]] flatMap { list =>
+          (monitoringActor ? StatusQ).mapTo[StatusM].map(running =>
+            Ok(org.ieee_passau.views.html.monitoring.vms(running.run, evalInfo, internalUsers, list.sortBy(_._1))))
+        }
       }
     }
   }}
@@ -143,12 +145,34 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
     statusForm.bindFromRequest.fold(
       _ => {
         Redirect(org.ieee_passau.controllers.routes.EvaluationController.vms())
-          .flashing("warning" -> rs.messages("status.update.error"))
+          .flashing("warning" -> rs.messages("eval.status.update.error"))
       },
       status => {
         monitoringActor ! StatusM(status)
         Redirect(org.ieee_passau.controllers.routes.EvaluationController.vms())
-          .flashing("success" -> rs.messages("status.update.message"))
+          .flashing("success" -> rs.messages("eval.status.update.message"))
+      }
+    )
+  }}
+
+  def resetBackendToken: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
+    resetTokenForm.bindFromRequest.fold(
+      _ => {
+        Future.successful(Redirect(org.ieee_passau.controllers.routes.EvaluationController.vms())
+          .flashing("warning" -> rs.messages("eval.token.reset.error")))
+      },
+      uid => {
+        val token = PasswordHasher.generateUrlString()
+        db.run(Users.filter(_.id === uid).map(_.activationToken).update(token)) flatMap {
+          // since I need a second query anyway, why not use the opportunity to check if the update was successful?
+          case 0 => Future.successful(Redirect(org.ieee_passau.controllers.routes.EvaluationController.vms())
+            .flashing("warning" -> rs.messages("eval.token.reset.error")))
+          case _ =>
+            db.run(Users.byId(uid).result.head) map { internalUser =>
+              Redirect(org.ieee_passau.controllers.routes.EvaluationController.vms())
+                .flashing("success" -> rs.messages("eval.token.reset.message", internalUser.username, token))
+            }
+        }
       }
     )
   }}
@@ -238,5 +262,11 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
     mapping(
       "state" -> text
     )((state: String) => state == "true")((status: Boolean) => Some(status.toString))
+  )
+
+  val resetTokenForm = Form(
+    mapping(
+      "uid" -> number
+    )((uid: Int) => uid)((uid: Int) => Some(uid))
   )
 }
