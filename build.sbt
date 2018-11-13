@@ -7,7 +7,9 @@ lazy val root = (project in file("."))
   .enablePlugins(PlayScala)
   .enablePlugins(SbtWeb)
 
+pipelineStages := Seq(digest, gzip)
 LessKeys.compress in Assets := true
+includeFilter in gzip := "*.html" || "*.css" || "*.js" || "*.jpg"
 
 scalacOptions in ThisBuild ++= Seq("-unchecked", "-deprecation", "-feature")
 
@@ -23,7 +25,8 @@ libraryDependencies ++= Seq(
   "com.typesafe.slick" %% "slick" % "3.2.3",
   "com.typesafe.play" %% "play-mailer" % "6.0.1",
   "com.typesafe.play" %% "play-mailer-guice" % "6.0.1",
-  "org.postgresql" % "postgresql" % "42.2.5"
+  "org.postgresql" % "postgresql" % "42.2.5",
+  "commons-io" % "commons-io" % "2.5"
 )
 
 includeFilter in (Assets, LessKeys.less) := "main.less"

@@ -6,6 +6,7 @@ import org.ieee_passau.utils.UserHelper
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.i18n.I18nSupport
 import play.api.mvc._
+import play.api.routing.JavaScriptReverseRouter
 import slick.jdbc.JdbcProfile
 
 import slick.jdbc.PostgresProfile.api._
@@ -50,5 +51,16 @@ class MasterController @Inject()(private val dbConfigProvider: DatabaseConfigPro
       case None if Guest.includes(level) => f(None)(rs)
       case _ => Future.successful(Unauthorized(org.ieee_passau.views.html.errors.e403()(rs.flash, None, rs, rs.messages)))
     })
+  }
+
+  def javascriptRoutes: Action[AnyContent] = Action { implicit request =>
+    Ok(
+      JavaScriptReverseRouter("jsRoutes")(
+        org.ieee_passau.controllers.routes.javascript.MainController.codeEditor,
+        org.ieee_passau.controllers.routes.javascript.CmsController.calendar,
+        org.ieee_passau.controllers.routes.javascript.CmsController.content,
+        org.ieee_passau.controllers.routes.javascript.UserController.dismissNotification
+      )
+    ).as("text/javascript")
   }
 }
