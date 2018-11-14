@@ -26,8 +26,8 @@
     </div>
 
     <div class="col-sm-10 col-sm-offset-2"><h4>@messages("evaltask.output.description")</h4></div>
-    @checkboxBs(task("outputCheck"), label = messages("evaltask.output.checker"))
-    @checkboxBs(task("scoreCalc"), label = messages("evaltask.output.score"))
+    @checkboxBs(task("outputCheck"), label = messages("evaltask.output.checker"), help = messages("evaltask.output.checker.help"))
+    @checkboxBs(task("scoreCalc"), label = messages("evaltask.output.score"), help = messages("evaltask.output.score.help"))
 
     <div class="col-sm-10 col-sm-offset-2"><h4>@messages("evaltask.condition.description")</h4></div>
     @checkboxBs(task("runCorrect"), label = messages("evaltask.condition.passed"))

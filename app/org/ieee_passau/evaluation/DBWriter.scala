@@ -12,6 +12,7 @@ import slick.jdbc.JdbcProfile
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.ExecutionContext
+import scala.util.Try
 
 object DBWriter {
   trait Factory {
@@ -59,9 +60,19 @@ class DBWriter @Inject() (val dbConfigProvider: DatabaseConfigProvider, val syst
                 else if (list.exists { case (res, _) => res == MemoryExceeded })            MemoryExceeded
                 else                                                                        WrongAnswer
 
-                if (eJob.result.fold(false)(_ == Passed)) {
+                if (eJob.result.fold(false)(_ == Passed) && nextStage.isEmpty) { // only last updates score, and only if it passed
                   db.run(Testcases.filter(_.id === tr.testcaseId).map(_.points).result.head).map { points =>
-                    Solutions.update(tr.solutionId, solution.copy(score = solution.score + points, result = result))
+                    val newPoints = eJob.job match {
+
+                      // we need to consider the scoring factor determined by the backend
+                      case NextStageJob(_, _, _, _, _, _, _, _, _, _, true, _, _) =>
+                        // points * (1 / score) for score >= 1, => lower score results in higher points
+                        (points * Try(1d / eJob.score.getOrElse(1)).getOrElse(1d)).floor.toInt
+
+                      // no need to consider score, because it's only one stage, or the last stage does not score so we just add the points directly
+                      case _ => solution.score + points
+                    }
+                    Solutions.update(tr.solutionId, solution.copy(score = newPoints, result = result))
                   }
                 } else {
                   Solutions.update(tr.solutionId, solution.copy(result = result))
@@ -94,7 +105,6 @@ class DBWriter @Inject() (val dbConfigProvider: DatabaseConfigProvider, val syst
               ))
             }
 
-            // Broadcast JobFinished
             log.info("DBWriter is broadcasting JobFinished for %s".format(eJob.job))
             context.system.eventStream.publish(JobFinished(eJob.job))
           }
