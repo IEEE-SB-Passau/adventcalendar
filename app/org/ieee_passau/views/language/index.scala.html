@@ -1,7 +1,9 @@
 @import org.ieee_passau.models.{Language, User}
+@import org.ieee_passau.utils.FutureHelper
 @import org.ieee_passau.views.html.main
+@import play.api.Configuration
 @import play.api.mvc.RequestHeader
-@(languages: List[Language])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
+@(languages: List[Language])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages, config: Configuration)
 
 @main(messages("codelang.list.title")) {
     <table class="table table-striped">
@@ -9,8 +11,8 @@
             <tr>
                 <th>@messages("general.id")</th>
                 <th>@messages("codelang.name")</th>
-                <th>@messages("codelang.cpufactor")</th>
-                <th>@messages("codelang.memfactor")</th>
+                <th>@messages("codelang.cpufactor", FutureHelper.makeDuration(config.getOptional[String]("evaluator.eval.basetime").getOrElse("60 seconds")).toSeconds)</th>
+                <th>@messages("codelang.memfactor", config.getOptional[Int]("evaluator.eval.basemem").getOrElse(100))</th>
                 <th></th>
             </tr>
         </thead>
