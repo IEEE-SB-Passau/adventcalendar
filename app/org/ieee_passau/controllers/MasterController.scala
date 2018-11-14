@@ -29,7 +29,6 @@ class MasterController @Inject()(private val dbConfigProvider: DatabaseConfigPro
     * @param f     the action to carry out
     * @return an asynchronous action
     */
-
   def requirePermission(level: Permission)(f: => Option[User] => Action[AnyContent])(implicit db: Database): Action[AnyContent] = Action.async { implicit rs =>
     UserHelper.getUserFromRequest(rs).flatMap {
       case Some(u) if u.active && u.permission.includes(level) => f(Some(u))(rs)
@@ -47,7 +46,6 @@ class MasterController @Inject()(private val dbConfigProvider: DatabaseConfigPro
     * @tparam A the action type
     * @return an asynchronous action
     */
-
   def requirePermission[A](level: Permission, bp: BodyParser[A])(f: => Option[User] => Action[A])(implicit db: Database): Action[A] = Action.async(bp) { implicit rs =>
     UserHelper.getUserFromRequest(rs).flatMap({
       case Some(u) if u.active && u.permission.includes(level) => f(Some(u))(rs)

@@ -2,7 +2,7 @@ package org.ieee_passau.evaluation
 
 import akka.actor.ActorSystem
 import com.google.inject.Inject
-import org.ieee_passau.utils.MathHelper
+import org.ieee_passau.utils.FutureHelper
 import play.api.Configuration
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.concurrent.InjectedActorSupport
@@ -22,7 +22,7 @@ class Evaluator @Inject() (val dbConfigProvider: DatabaseConfigProvider,
 
   private def start = {
     val jobLimit = config.getOptional[Int]("evaluator.inputregulator.joblimit").getOrElse(1)
-    val jobLifetime = MathHelper.makeDuration(config.getOptional[String]("evaluator.eval.basetime").getOrElse("60 seconds")).mul(10)
+    val jobLifetime = FutureHelper.makeDuration(config.getOptional[String]("evaluator.eval.basetime").getOrElse("60 seconds")).mul(10)
 
     injectedChild(dbReaderFactory(), classOf[DBReader].getSimpleName)
     injectedChild(dbWriterFactory(), classOf[DBWriter].getSimpleName)

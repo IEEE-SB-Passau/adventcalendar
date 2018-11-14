@@ -1,9 +1,8 @@
-@import org.ieee_passau.models.{Language, User}
-@import org.ieee_passau.utils.MathHelper
+@import org.ieee_passau.models.{Admin, Language, User}
+@import org.ieee_passau.utils.FutureHelper
 @import org.ieee_passau.views.html.main
-@import play.api.mvc.RequestHeader
-@import org.ieee_passau.models.Admin
 @import play.api.Configuration
+@import play.api.mvc.RequestHeader
 @(languages: List[Language])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages, config: Configuration)
 
 @main(messages("codelang.list.title") + " ") {
@@ -24,7 +23,7 @@
                     <td>@lng.name.substring(0, split)</td>
                     <td>@lng.name.substring(split + 2)</td>
                 }
-                    <td>@(MathHelper.makeDuration(config.getOptional[String]("evaluator.eval.basetime").getOrElse("60 seconds")).mul(lng.cpuFactor).toSeconds) @messages("general.seconds")</td>
+                    <td>@(FutureHelper.makeDuration(config.getOptional[String]("evaluator.eval.basetime").getOrElse("60 seconds")).mul(lng.cpuFactor).toSeconds) @messages("general.seconds")</td>
                     <td>@((lng.memFactor * config.getOptional[Int]("evaluator.eval.basemem").getOrElse(100)).floor.toInt) MB</td>
                     <td>@Html(lng.comment)</td>
                 </tr>

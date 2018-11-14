@@ -8,7 +8,7 @@ import com.google.inject.Inject
 import com.google.inject.assistedinject.Assisted
 import org.ieee_passau.controllers.Beans.{RunningJobsQ, StatusM}
 import org.ieee_passau.evaluation.Messages._
-import org.ieee_passau.utils.{AkkaHelper, MathHelper}
+import org.ieee_passau.utils.{AkkaHelper, FutureHelper}
 import play.api.Configuration
 
 import scala.collection.mutable
@@ -34,8 +34,8 @@ class InputRegulator @Inject() (@Assisted val jobLimit: Int,
                                ) extends EvaluationActor {
   implicit private val evalContext: ExecutionContext = system.dispatchers.lookup("evaluator.context")
 
-  val STARTUP_DELAY: FiniteDuration = MathHelper.makeDuration(config.getOptional[String]("evaluator.inputregulator.startupdelay").getOrElse("2 minutes"))
-  val TICK_INTERVAL: FiniteDuration = MathHelper.makeDuration(config.getOptional[String]("evaluator.inputregulator.ticktime").getOrElse("1 second"))
+  val STARTUP_DELAY: FiniteDuration = FutureHelper.makeDuration(config.getOptional[String]("evaluator.inputregulator.startupdelay").getOrElse("2 minutes"))
+  val TICK_INTERVAL: FiniteDuration = FutureHelper.makeDuration(config.getOptional[String]("evaluator.inputregulator.ticktime").getOrElse("1 second"))
   val TICK_MSG = "tick"
 
   private var running = config.getOptional[Boolean]("evaluator.run").getOrElse(true)

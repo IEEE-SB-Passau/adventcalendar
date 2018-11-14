@@ -15,6 +15,7 @@ case class Problem (id: Option[Int], title: String, door: Int, description: Stri
                     readableStop: Date, solvableStart: Date, solvableStop: Date, evalMode: EvalMode,
                     cpuFactor: Float, memFactor: Float, points: Int) extends Entity[Problem] {
   def withId(id: Int): Problem = this.copy(id = Some(id))
+
   def readable: Boolean = {
     val now = new Date()
     readableStart.before(now) && readableStop.after(now)

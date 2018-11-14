@@ -52,7 +52,6 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   }}
 
   def login: Action[AnyContent] = requirePermission(Guest) { implicit guest => Action { implicit rs =>
-    // if no post data, display empty form
     Ok(org.ieee_passau.views.html.user.login(loginForm))
   }}
 
@@ -243,6 +242,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
           BadRequest(org.ieee_passau.views.html.user.edit(id, errorForm, permissionList))
         }
       },
+
       user => {
         db.run(Users.byId(id).result.headOption).map {
           case Some(dbUser) =>

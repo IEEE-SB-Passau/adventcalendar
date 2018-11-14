@@ -10,8 +10,8 @@ import akka.pattern.ask
 import akka.util.Timeout
 import org.ieee_passau.evaluation.Messages._
 import org.ieee_passau.models._
-import org.ieee_passau.utils.{AkkaHelper, MathHelper}
 import org.ieee_passau.utils.StringHelper._
+import org.ieee_passau.utils.{AkkaHelper, FutureHelper}
 
 import scala.collection.immutable.StringOps
 import scala.concurrent.Await
@@ -21,15 +21,13 @@ import scala.language.postfixOps
 import scala.xml.{Elem, Text}
 
 object VMClient {
-  def props(host: String,
-            port: Int,
-            name: String): Props =
+  def props(host: String, port: Int, name: String): Props =
     Props(new VMClient(host, port, name))
 }
 
 class VMClient(host: String, port: Int, name:String) extends EvaluationActor {
 
-  private val timeout = Timeout(MathHelper.makeDuration("30 minutes"))
+  private val timeout = Timeout(FutureHelper.makeDuration("30 minutes"))
 
   private case class ExecutionResult(var duration: Duration = 0 seconds,
                                      var memory: Int = 0,
@@ -42,7 +40,7 @@ class VMClient(host: String, port: Int, name:String) extends EvaluationActor {
                                      var progErr: Option[String] = None)
 
   // read timeout should be smaller than await timeout so the socket closes first
-  private val connection = context.actorOf(TCPActor.props(host, port, timeout.duration.minus(MathHelper.makeDuration("5 seconds")).toMillis.toInt))
+  private val connection = context.actorOf(TCPActor.props(host, port, timeout.duration.minus(FutureHelper.makeDuration("5 seconds")).toMillis.toInt))
 
   override def supervisorStrategy: SupervisorStrategy = OneForOneStrategy() {
     case _ => Escalate
@@ -52,6 +50,7 @@ class VMClient(host: String, port: Int, name:String) extends EvaluationActor {
     connection ! PoisonPill
     super.postStop()
   }
+
   override def toString: String = {
     "VMClient@%s[host=%s]".format(Integer.toHexString(hashCode()), name)
   }

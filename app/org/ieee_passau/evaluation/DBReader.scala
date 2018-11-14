@@ -6,8 +6,8 @@ import akka.actor.ActorSystem
 import com.google.inject.Inject
 import org.ieee_passau.evaluation.Messages._
 import org.ieee_passau.models._
+import org.ieee_passau.utils.FutureHelper
 import org.ieee_passau.utils.StringHelper._
-import org.ieee_passau.utils.{FutureHelper, MathHelper}
 import play.api.Configuration
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
@@ -36,7 +36,7 @@ class DBReader @Inject() (val dbConfigProvider: DatabaseConfigProvider,
       log.debug("DBReader received request for %d jobs".format(count))
 
       val query = for {
-        tr <- Testruns if tr.stage.?.isDefined // || tr.result === (Queued: Result)
+        tr <- Testruns if tr.stage.?.isDefined
         tc <- Testcases if tc.id === tr.testcaseId
         sl <- Solutions if sl.id === tr.solutionId
         pr <- Problems if pr.id === sl.problemId
@@ -47,7 +47,7 @@ class DBReader @Inject() (val dbConfigProvider: DatabaseConfigProvider,
           val uuid = UUID.randomUUID().toString
           if (rawJob._11 /*stage*/ == 0) { // normal evaluation job
             Messages.BaseJob(
-              cpuFactor = MathHelper.makeDuration(config.getOptional[String]("evaluator.eval.basetime").getOrElse("60 seconds")).mul(rawJob._2).toSeconds,
+              cpuFactor = FutureHelper.makeDuration(config.getOptional[String]("evaluator.eval.basetime").getOrElse("60 seconds")).mul(rawJob._2).toSeconds,
               memFactor = (rawJob._3 * config.getOptional[Int]("evaluator.eval.basemem").getOrElse(100)).floor.toInt,
               lang = rawJob._6,
               testrunId = rawJob._10,

@@ -1,9 +1,9 @@
 package org.ieee_passau.utils
 
 import java.security.SecureRandom
+
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
-
 import sun.misc.{BASE64Decoder, BASE64Encoder}
 
 /**
@@ -11,10 +11,10 @@ import sun.misc.{BASE64Decoder, BASE64Encoder}
   */
 object PasswordHasher {
 
-  val NUM_ITERATIONS = 64000
-  val HASH_LENGTH = 32 * 8
-  val SALT_LENGTH = 16 * 8
-  val MAX_PASSWORD_LENGTH = 128
+  val NUM_ITERATIONS: Int = 64000
+  val HASH_LENGTH: Int = 32 * 8
+  val SALT_LENGTH: Int = 16 * 8
+  val MAX_PASSWORD_LENGTH: Int = 128
 
   private val rng = new SecureRandom()
   private val encoder = new BASE64Encoder()
