@@ -237,7 +237,7 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
           val transQuery: Future[Option[ProblemTranslation]] = ProblemTranslations.byProblemOption(problem.id.get, displayLang)
           val transProblem = transQuery.map(pt => pt.fold(problem)(trans => problem.copy(title = trans.title, description = trans.description)))
           val status = (monitoringActor ? StatusQ).mapTo[StatusM].flatMap {
-            case StatusM(true) =>
+            case StatusM(false) => // running == false
               Postings.byId(Page.status.id, displayLang).map(_.content).map(status => "system" -> status)
             case _ => Future.successful("" -> "")
           }
