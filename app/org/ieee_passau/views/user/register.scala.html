@@ -2,10 +2,10 @@
 @import org.ieee_passau.models.{User, UserRegistration}
 @import org.ieee_passau.views.html.bootstrap3._
 @import org.ieee_passau.views.html.main
+@import play.api.Configuration
 @import play.api.data.Form
 @import play.api.mvc.{Flash, RequestHeader}
-@import  play.twirl.api.Html
-@import play.api.Configuration
+@import play.twirl.api.Html
 @(registrationForm: Form[UserRegistration], useCaptcha: Boolean)(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, config: Configuration, messages: Messages)
 
 @main(messages("nav.user.register")) {
@@ -37,8 +37,6 @@
                 </div>
 
                 @text(registrationForm("school"), label = messages("user.school"), placeholder = messages("user.school"), offset = "col-sm-3", width = "col-sm-9")
-                @text(registrationForm("semester"), label = messages("user.semester"), placeholder = messages("user.semester"), offset = "col-sm-3", width = "col-sm-9")
-                @text(registrationForm("studySubject"), label = messages("user.studysubject"), placeholder = messages("user.studysubject"), offset = "col-sm-3", width = "col-sm-9")
 
                 <div class="form-group">
                     @if(useCaptcha) {
