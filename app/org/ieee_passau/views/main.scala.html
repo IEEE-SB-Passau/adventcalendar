@@ -1,12 +1,8 @@
 @import controllers.routes
-@import org.ieee_passau.models.User
-@import play.api.i18n.{Lang, MessagesApi}
+@import org.ieee_passau.models.{Admin, Moderator, Page, User}
+@import org.ieee_passau.utils.LanguageHelper
 @import play.api.mvc.Flash
 @import play.twirl.api.Html
-@import org.ieee_passau.utils.LanguageHelper
-@import org.ieee_passau.models.Page
-@import org.ieee_passau.models.Admin
-@import org.ieee_passau.models.Moderator
 @(title: String, isFullPage: Boolean = false, hasTitle: Boolean = false)(content: Html)(implicit flash: Flash,
         sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
 @defining(messages.lang) { lang =>
@@ -16,7 +12,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.min.css")">
         <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/highlight/idea.css")">
         <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/languages.min.css")"/>
         <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("javascripts/summernote/summernote.css")">

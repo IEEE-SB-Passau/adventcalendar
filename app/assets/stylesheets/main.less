@@ -1,11 +1,18 @@
 @import "bootstrap/bootstrap.less";
 
 @import "bootstrap-fileinput.less";
-@import "bootstrap-datetimepicker";
+@import "bootstrap-datetimepicker.less";
+@import "bootstrap-checkboxes.less";
 
 .glyphicon-refresh-animate {
   -animation: spin .7s infinite linear;
   -webkit-animation: spin2 .7s infinite linear;
+}
+
+.checkbox label:after {
+  padding-left: 4px;
+  padding-top: 2px;
+  font-size: 9px;
 }
 
 @-webkit-keyframes spin2 {
