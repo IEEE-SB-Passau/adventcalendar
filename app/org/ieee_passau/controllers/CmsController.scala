@@ -115,8 +115,8 @@ class CmsController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
   def uploadFile(): Action[MultipartFormData[TemporaryFile]] = requirePermission(Admin, parse.multipartFormData) { implicit admin => Action(parse.multipartFormData) { implicit rs =>
     rs.body.file("file").map { file =>
-      val filename = Paths.get(file.filename).getFileName.toString
-      val target = new File(config.getOptional[String]("play.assets.staticPath").getOrElse("/tmp/"), filename.replaceAll("[^0-9A-z.\\-]", "_"))
+      val filename = Paths.get(file.filename).getFileName.toString.replaceAll("[^0-9A-z.\\-]", "_")
+      val target = new File(config.getOptional[String]("play.assets.staticPath").getOrElse("/tmp/"), filename)
       try {
         FileUtils.copyFile(file.ref, target)
 
@@ -141,7 +141,7 @@ class CmsController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
         case _: IOException => Redirect(org.ieee_passau.controllers.routes.CmsController.listFiles())
           .flashing("error" -> rs.messages("assets.remove.error"))
       }
-      Redirect(org.ieee_passau.controllers.routes.CmsController.listFiles(filename))
+      Redirect(org.ieee_passau.controllers.routes.CmsController.listFiles())
         .flashing("success" -> rs.messages("assets.remove.success"))
     }
   }}
