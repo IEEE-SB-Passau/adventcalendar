@@ -187,7 +187,9 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
   def cancel(id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     db.run(Testruns.byId(id).result.headOption) flatMap {
       case Some(job) =>
-        Testruns.update(id, job.copy(result = Canceled, vm = Some("_"), evalId = None, completed = new Date, stage = None)) map { _ =>
+        db.run(Testruns.filter(_.id === id).map(tr => (tr.result, tr.vm, tr.evalId, tr.completed, tr.stage))
+        .update((Canceled, Some("_"), None, new Date, None)).andThen(
+          Solutions.filter(_.id === job.solutionId).map(_.result).update(Canceled))) map { _ =>
           monitoringActor ! JobFinished(BaseJob(0, 0, "", id, job.evalId.getOrElse(""), "", "", "", ""))
           Redirect(org.ieee_passau.controllers.routes.EvaluationController.indexQueued())
             .flashing("success" -> rs.messages("eval.jobs.cancel.message"))
@@ -199,15 +201,16 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
   }}
 
   def cancelAll: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
-    db.run((for {
-      tr <- Testruns if tr.result === (Queued: org.ieee_passau.models.Result)
-    } yield (tr.id, tr.result, tr.vm, tr.evalId, tr.completed, tr.stage)).result) flatMap { testruns =>
+    db.run(Testruns.filter(_.result === (Queued: org.ieee_passau.models.Result))
+      .map(tr => (tr.id, tr.result, tr.vm, tr.evalId, tr.completed, tr.stage)).result) flatMap { testruns =>
       testruns.foreach( tr => monitoringActor ! JobFinished(BaseJob(0, 0, "", tr._1 /* id */, tr._4.getOrElse("") /* eval_id */, "", "", "", "")))
-      db.run((for {
-        tr <- Testruns if tr.result === (Queued: org.ieee_passau.models.Result)
-      } yield (tr.result, tr.vm, tr.evalId, tr.completed, tr.stage)).update((Canceled, Some("_"), None, new Date, None))) map { _ =>
-            Redirect(org.ieee_passau.controllers.routes.EvaluationController.indexQueued())
-              .flashing("success" -> rs.messages("eval.jobs.cancelall.message"))
+      db.run(
+        Solutions.filter(_.result === (Queued: org.ieee_passau.models.Result)).map(_.result).update(Canceled).andThen(
+        Testruns.filter(_.result === (Queued: org.ieee_passau.models.Result))
+          .map(tr => (tr.result, tr.vm, tr.evalId, tr.completed, tr.stage))
+          .update((Canceled, Some("_"), None, new Date, None)))) map { _ =>
+        Redirect(org.ieee_passau.controllers.routes.EvaluationController.indexQueued())
+          .flashing("success" -> rs.messages("eval.jobs.cancelall.message"))
       }
     }
   }}
