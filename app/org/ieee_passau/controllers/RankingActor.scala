@@ -204,7 +204,7 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
         db.run((for {
           r <- Testruns if r.result =!= (Queued: org.ieee_passau.models.Result)
           s <- r.solution
-        } yield (r.vm.?, r.completed, s.language)).result).foreach { rawJobs =>
+        } yield (r.vm, r.completed, s.language)).result).foreach { rawJobs =>
           val jobs = rawJobs.view.flatMap {
             case job if job._1.getOrElse("").contains(" ") =>
               job._1.get.split(" ").zipWithIndex.map {

@@ -36,11 +36,11 @@ class DBReader @Inject() (val dbConfigProvider: DatabaseConfigProvider,
       log.debug("DBReader received request for %d jobs".format(count))
 
       val query = for {
-        tr <- Testruns if tr.stage.?.isDefined
+        tr <- Testruns if tr.stage.isDefined
         tc <- Testcases if tc.id === tr.testcaseId
         sl <- Solutions if sl.id === tr.solutionId
         pr <- Problems if pr.id === sl.problemId
-      } yield (pr.id, pr.cpuFactor, pr.memFactor, sl.program, sl.programName, sl.language, tc.input, tc.expectedOutput, tr.progOut.?, tr.id, tr.stage)
+      } yield (pr.id, pr.cpuFactor, pr.memFactor, sl.program, sl.programName, sl.language, tc.input, tc.expectedOutput, tr.progOut, tr.id, tr.stage)
 
       db.run(query.sortBy(_._1.asc).take(count).result).foreach { rawJobs =>
         val jobs = rawJobs.map { rawJob =>
@@ -62,7 +62,7 @@ class DBReader @Inject() (val dbConfigProvider: DatabaseConfigProvider,
             Await.result(db.run(taskQuery.result.head) map { task =>
               Messages.NextStageJob(
                 testrunId = rawJob._10,
-                stage = rawJob._11,
+                stage = rawJob._11.get,
                 evalId = uuid,
                 program = rawJob._4,
                 stdin = cleanNewlines(rawJob._7),

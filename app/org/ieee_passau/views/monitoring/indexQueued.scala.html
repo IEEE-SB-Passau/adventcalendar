@@ -7,6 +7,15 @@
 @(list: List[(Int, Int, Int, Int, String, String, Int, String, Date, Option[Date])])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
 
 @main(messages("nav.admin.evalqueue")) {
+    <form style="display: inline" method="POST" class="form-horizontal" action="@org.ieee_passau.controllers.routes.EvaluationController.cancelAll">
+        <div class="form-group">
+            @CSRF.formField
+            <button type="submit" onclick="return (window.confirm('@messages("eval.jobs.cancelall.confirm")'))" class="btn btn-danger pull-right">
+            @messages("eval.jobs.cancelall.button")
+            </button>
+        </div>
+    </form>
+
     <table class="table table-striped">
         <thead>
             <tr>
@@ -15,7 +24,7 @@
                 <th>@messages("user.title")</th>
                 <th>@messages("codelang.title")</th>
                 <th>@messages("general.createdate")</th>
-                <th>@messages("eval.task.state.title")</th>
+                <th>@messages("eval.jobs.state.title")</th>
                 <th></th>
             </tr>
         </thead>
@@ -28,14 +37,14 @@
                 <td>@language</td>
                 <td><abbr class="timeago" title="@dateSub.format("yyyy-MM-dd'T'HH:mm:ssZ")">@dateSub.format("yyyy-MM-dd HH:mm:ss")</abbr></td>
                 <td>@if(dateQueued.isDefined) {
-                    @messages("eval.task.state.assigned") <abbr class="timeago" title="@dateQueued.get.format("yyyy-MM-dd'T'HH:mm:ssZ")">@dateQueued.get.format("yyyy-MM-dd HH:mm:ss")</abbr>
+                    @messages("eval.jobs.state.assigned") <abbr class="timeago" title="@dateQueued.get.format("yyyy-MM-dd'T'HH:mm:ssZ")">@dateQueued.get.format("yyyy-MM-dd HH:mm:ss")</abbr>
                 } else {
-                    @messages("eval.task.state.pending")
+                    @messages("eval.jobs.state.pending")
                 }</td>
                 <td>
                     <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.EvaluationController.cancel(rid)">
                         @CSRF.formField
-                        <button type="submit" onclick="return(window.confirm('@messages("eval.task.cancel.warning")'))" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span></button>
+                        <button type="submit" onclick="return(window.confirm('@messages("eval.jobs.cancel.confirm")'))" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span></button>
                     </form>
                 </td>
             </tr>

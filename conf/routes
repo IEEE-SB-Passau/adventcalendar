@@ -75,6 +75,7 @@ POST        /admin/monitoring/eval                     org.ieee_passau.controlle
 POST        /admin/monitoring/resettoken               org.ieee_passau.controllers.EvaluationController.resetBackendToken
 GET         /admin/monitoring/stat                     org.ieee_passau.controllers.EvaluationController.stats
 POST        /admin/monitoring/:id/delete               org.ieee_passau.controllers.EvaluationController.cancel(id: Int)
+POST        /admin/monitoring/deleteall            org.ieee_passau.controllers.EvaluationController.cancelAll
 
 GET         /admin/maintenance                         org.ieee_passau.controllers.CmsController.maintenance
 POST        /admin/maintenance/notification            org.ieee_passau.controllers.CmsController.toggleNotification
