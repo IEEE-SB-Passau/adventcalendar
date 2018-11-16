@@ -359,3 +359,4 @@ eval.token.reset.title=Evaluation System Access Token
 eval.vms.title=Evaluation Clients
 evaltask.output.score.help=Writes an positive integer to file "score" (lower ist better), must be last task
 evaltask.output.checker.help=Output "WRONG" or "CORRECT" in file "check"
+assets.preview=Preview

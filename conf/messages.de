@@ -231,6 +231,7 @@ status.paused=Aktuell ist das System angehalten
 status.canceled=Abgebrochen
 
 assets.title=Statische Dateien
+assets.preview=Bildvorschau
 assets.add=Datei hochladen
 assets.download=Dateidownload testen
 assets.error=Datei konnte nicht hochgeladen werden!

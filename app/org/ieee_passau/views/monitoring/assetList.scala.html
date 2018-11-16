@@ -17,15 +17,20 @@
             <tr>
                 <th>@messages("general.file")</th>
                 <th>@messages("general.link")</th>
-                <th></th>
+                <th>@messages("assets.preview")</th>
             </tr>
         </thead>
         <tbody>
         @files.map { filename =>
             <tr class="@if(highlight == filename) {success}">
                 <td><a href="@routes.MasterController.staticFile(filename)">@filename</a></td>
-                <td>@("<a href=" + routes.MasterController.staticFile(filename) + ">" + filename + "</a>")</td>
-                <td></td>
+                @if(filename.endsWith(".png") || filename.endsWith(".jpeg") || filename.endsWith(".jpg") || filename.endsWith(".gif")) {
+                    <td>@("<img src=" + routes.MasterController.staticFile(filename) + " alt=\"" + filename + "\">")</td>
+                    <td><img src="@routes.MasterController.staticFile(filename)" alt="@filename" width="200px"></td>
+                } else {
+                    <td>@("<a href=" + routes.MasterController.staticFile(filename) + ">" + filename + "</a>")</td>
+                    <td></td>
+                }
             </tr>
         }
         @if(sessionUser.get.permission.includes(Admin)) {
