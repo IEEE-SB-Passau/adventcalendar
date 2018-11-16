@@ -48,7 +48,7 @@
                 <td>
                     <form style="display: inline" method="POST" action="@org.ieee_passau.controllers.routes.EvaluationController.reEval(s.id)">
                         @CSRF.formField
-                        <button type="submit" onclick="return(window.confirm('@messages("eval.jobs.reevaluate.warning")'))" class="btn btn-danger"><span class="glyphicon glyphicon-repeat"></span></button>
+                        <button type="submit" onclick="return(window.confirm('@messages("eval.jobs.reevaluate.confirm")'))" class="btn btn-danger"><span class="glyphicon glyphicon-repeat"></span></button>
                     </form>
                 </td>
                 }

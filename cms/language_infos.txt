@@ -1,30 +1,30 @@
 language    | extension | highlight_class | cpu_factor | mem_factor | name                                                            |comment
 ------------|-----------|-----------------|------------|------------|-----------------------------------------------------------------|-----------------------------------------------------------
-C           | c         | c               | 1          | 10         | C, GCC 7.2.0                                                    | Standard: C11, libraries: libm
-COBOL       | cobol     |                 | 1.5        | 10         | COBOL, OpenCOBOL 1.1.0                                          |
-CPP         | cpp       | cpp             | 1.1        | 10         | C++, GCC 7.2.0                                                  | Standard: C++14, libraries: libm
-CSHARP      | cs        | cs              | 2          | 10         | C#, Mono C# compiler version 4.8.0.0                            | Mono Project
-D           | d         | d               | 2.0        | 10         | D, LLVM D compiler (1.3.0) based on DMD v2.073.2 and LLVM 3.9.1 |
-FORTH       | forth     |                 | 5.0        | 10         | Forth, Gforth 0.7.3                                             |
-FORTRAN     | f90       | f90             | 2          | 10         | Fortran, GCC 7.2.0                                              | Standard: Fortran 90
-FREEPASCAL  | pas       |                 | 1.2        | 10         | FreePascal, Free Pascal Compiler version 2.6.4                  |
-GO          | go        | go              | 2.2        | 10         | Go, Go 1.9.1                                                    |
-HASKELL     | hs        | hs              | 2.5        | 10         | Haskell, Glasgow Haskell Compiler Version 8.0.2                 |
-INTERCAL    | i         |                 | 5          | 10         | INTERCAL, C-INTERCAL 0.30                                       |
-JAVA        | java      | java            | 2.5        | 10         | Java, OracleJDK 1.8.0-152                                       | Main class in default package!
-JAVASCRIPT  | js        | js              | 2.8        | 10         | JavaScript, Node v6.11.5                                        |
-KOTLIN      | kt        |                 | 3.5        | 10         | Kotlin 1.1.51                                                   |
-LUA         | lua       | lua             | 5          | 10         | Lua, Lua 5.1.5                                                  |
-MMIX        | mms       |                 | 3.0        | 10         | MMIX, MMIX 20131017                                             |
-OBJECTIVEC  | m         | objectivec      | 1.1        | 10         | ObjectiveC, GCC 7.2.0                                           | Standard: C99, libraries: libm, compiler argument -lobjc
-OCAML       | ml        | ml              | 1.5        | 10         | OCaml, The OCaml compiler, version 4.04.2                       |
-PERL        | pl        | pl              | 1.8        | 10         | Perl, Perl 5.24.3                                               |
-PHP         | php       | php             | 4          | 10         | PHP, PHP 7.0.25                                                 | Zend Engine v3.0.0 with Zend OPCache v7.0.25
-PYTHON2     | py        | py              | 4          | 10         | Python 2, Python 2.7.14                                         |
-PYTHON3     | py        | py              | 4          | 10         | Python 3, Python 3.6.3                                          |
-RUBY        | rb        | rb              | 5          | 10         | Ruby, Ruby 2.2.8p477                                            |
-RUST        | rs        | rs              | 2.5        | 10         | Rust, Rust 1.22.1                                               |
-SCALA       | scala     | scala           | 3.5        | 10         | Scala, Scala 2.11.11                                            | Main class in default package!
-TCL         | tcl       | tcl             | 3.3        | 10         | Tool Command Language, TCL 8.5.17                               |
-VALA        | vala      | vala            | 5          | 10         | Vala, Vala 0.34.8                                               |
-VISUALBASIC | vb        | vb              | 2.5        | 10         | Visual Basic, VB.Net Compiler version 0.0.0.5943 Mono 4.6       | Mono Project
+C           | c         | c               | 1          | 10         | C, CLANG 7.0.0                                                  | Standard: C11, libraries: libm
+COBOL       | cobol     |                 | 1.5        | 10         |                                                                 |
+CPP         | cpp       | cpp             | 1.1        | 10         | C++, CLANG 7.0.0                                                | Standard: C++17, libraries: libm
+CSHARP      | cs        | cs              | 2          | 10         | C#, Mono C# compiler version 5.16.0                             | Mono Project
+D           | d         | d               | 2.0        | 10         |                                                                 |
+FORTH       | forth     |                 | 5.0        | 10         |                                                                 |
+FORTRAN     | f90       | f90             | 2          | 10         |                                                                 | Standard: Fortran 90
+FREEPASCAL  | pas       |                 | 1.2        | 10         |                                                                 |
+GO          | go        | go              | 2.2        | 10         |                                                                 |
+HASKELL     | hs        | hs              | 2.5        | 10         |                                                                 |
+INTERCAL    | i         |                 | 5          | 10         |                                                                 |
+JAVA        | java      | java            | 2.5        | 10         | Java, OracleJDK jdk1.8.0_191                                    | Main class in default package!
+JAVASCRIPT  | js        | js              | 2.8        | 10         |                                                                 |
+KOTLIN      | kt        |                 | 3.5        | 10         |                                                                 |
+LUA         | lua       | lua             | 5          | 10         |                                                                 |
+MMIX        | mms       |                 | 3.0        | 10         |                                                                 |
+OBJECTIVEC  | m         | objectivec      | 1.1        | 10         |                                                                 | Standard: C99, libraries: libm, compiler argument -lobjc
+OCAML       | ml        | ml              | 1.5        | 10         |                                                                 |
+PERL        | pl        | pl              | 1.8        | 10         |                                                                 |
+PHP         | php       | php             | 4          | 10         |                                                                 | Zend Engine v3.0.0 with Zend OPCache v7.0.25
+PYTHON2     | py        | py              | 4          | 10         |                                                                 |
+PYTHON3     | py        | py              | 4          | 10         | Python 3, Python 3.7.1-1                                        |
+RUBY        | rb        | rb              | 5          | 10         |                                                                 |
+RUST        | rs        | rs              | 2.5        | 10         |                                                                 |
+SCALA       | scala     | scala           | 3.5        | 10         |                                                                 | Main class in default package!
+TCL         | tcl       | tcl             | 3.3        | 10         |                                                                 |
+VALA        | vala      | vala            | 5          | 10         |                                                                 |
+VISUALBASIC | vb        | vb              | 2.5        | 10         |                                                                 | Mono Project
