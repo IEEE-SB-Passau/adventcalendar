@@ -243,8 +243,11 @@ assets.title=Statische Dateien
 assets.preview=Bildvorschau
 assets.add=Datei hochladen
 assets.download=Dateidownload testen
-assets.error=Datei konnte nicht hochgeladen werden!
-assets.success=Datei erfolgreich hochgeladen!
+assets.add.error=Datei konnte nicht hochgeladen werden!
+assets.add.success=Datei erfolgreich hochgeladen!
+assets.remove.success=Datei erfolgreich gelöscht!
+assets.remove.error=Datei konnte nicht gelöscht werden!
+
 
 feedback.title=Feedback
 feedback.rating=Bewertung

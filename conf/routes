@@ -83,6 +83,7 @@ POST        /admin/maintenance/notification            org.ieee_passau.controlle
 
 GET         /admin/maintenance/asset                   org.ieee_passau.controllers.CmsController.addFile
 POST        /admin/maintenance/asset                   org.ieee_passau.controllers.CmsController.uploadFile
+POST        /admin/maintenance/asset/delete/*name      org.ieee_passau.controllers.CmsController.deleteFile(name: String)
 GET         /admin/maintenance/assetlist               org.ieee_passau.controllers.CmsController.listFiles(highlight: String ?= "")
 
 GET         /admin/status/:id                          org.ieee_passau.controllers.CmsController.createPage(id: Int)

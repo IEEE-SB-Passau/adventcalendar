@@ -1,6 +1,6 @@
 package org.ieee_passau.controllers
 
-import java.io.File
+import java.io.{File, IOException}
 import java.nio.file.Paths
 import java.util.Date
 
@@ -116,14 +116,33 @@ class CmsController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   def uploadFile(): Action[MultipartFormData[TemporaryFile]] = requirePermission(Admin, parse.multipartFormData) { implicit admin => Action(parse.multipartFormData) { implicit rs =>
     rs.body.file("file").map { file =>
       val filename = Paths.get(file.filename).getFileName.toString
-      val target = new File(config.getOptional[String]("play.assets.staticPath").getOrElse("/tmp/"), filename)
-      FileUtils.copyFile(file.ref, target)
+      val target = new File(config.getOptional[String]("play.assets.staticPath").getOrElse("/tmp/"), filename.replaceAll("[^0-9A-z.\\-]", "_"))
+      try {
+        FileUtils.copyFile(file.ref, target)
 
-      Redirect(org.ieee_passau.controllers.routes.CmsController.listFiles(filename))
-        .flashing("success" ->  rs.messages("assets.success"))
+        Redirect(org.ieee_passau.controllers.routes.CmsController.listFiles(filename))
+          .flashing("success" ->  rs.messages("assets.add.success"))
+      } catch {
+        case _: IOException => Redirect(org.ieee_passau.controllers.routes.CmsController.listFiles())
+          .flashing("error" ->  rs.messages("assets.add.error"))
+      }
     }.getOrElse {
       Redirect(org.ieee_passau.controllers.routes.CmsController.listFiles())
-        .flashing("error" ->  rs.messages("assets.error"))
+        .flashing("error" ->  rs.messages("assets.add.error"))
+    }
+  }}
+
+  def deleteFile(filename: String): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action { implicit rs =>
+    config.getOptional[String]("play.assets.staticPath")
+    .fold(NotFound(org.ieee_passau.views.html.errors.e404())) { dir =>
+      try {
+        FileUtils.forceDelete(new File(dir, filename))
+      } catch {
+        case _: IOException => Redirect(org.ieee_passau.controllers.routes.CmsController.listFiles())
+          .flashing("error" -> rs.messages("assets.remove.error"))
+      }
+      Redirect(org.ieee_passau.controllers.routes.CmsController.listFiles(filename))
+        .flashing("success" -> rs.messages("assets.remove.success"))
     }
   }}
 
