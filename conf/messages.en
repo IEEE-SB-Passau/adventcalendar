@@ -54,7 +54,7 @@ eval.status.update.message=Status was updated.
 
 eval.jobs.cancel.invalidjob=This job does not exist!
 eval.jobs.cancel.message=Job successfully canceled!
-eval.jobs.reevaluate.message=Test case will be reevaluated!
+eval.jobs.reevaluate.message=Test case will be re-evaluated!
 
 feedback.submit.message=Thank you for your feedback!
 
@@ -362,3 +362,6 @@ evaltask.output.checker.help=Output "WRONG" or "CORRECT" in file "check"
 eval.jobs.cancelall.message=All jobs have been canceled.
 eval.jobs.cancelall.confirm=Really cancel all jobs?
 eval.jobs.cancelall.button=Cancel all jobs
+eval.jobs.reevaluateall.button=Re-evaluate all
+eval.jobs.reevaluateall.message=All Submissions will be re-evaluated.
+eval.jobs.reevaluateall.warning=Really re-evaluate all?

@@ -228,6 +228,15 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
     }
   }}
 
+  def reEvalAll: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
+    db.run(Testruns.map(tr => (tr.result, tr.stage, tr.vm, tr.progRuntime, tr.progMemory, tr.compRuntime, tr.compMemory))
+      .update(Queued, Some(0), None, Some(0), Some(0), Some(0), Some(0)).andThen(
+        Solutions.map(sl => (sl.score, sl.result)).update(0, Queued))) map {_ =>
+        Redirect(org.ieee_passau.controllers.routes.EvaluationController.index())
+          .flashing("success" -> rs.messages("eval.jobs.reevaluateall.message"))
+    }
+  }}
+
   def registerVM: Action[NodeSeq] = requirePermission(Internal, parse.xml) { _ => Action[NodeSeq](parse.xml) { implicit rs =>
 
     /*
