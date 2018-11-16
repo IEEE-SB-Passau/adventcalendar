@@ -45,7 +45,7 @@ class DBReader @Inject() (val dbConfigProvider: DatabaseConfigProvider,
       db.run(query.sortBy(_._1.asc).take(count).result).foreach { rawJobs =>
         val jobs = rawJobs.map { rawJob =>
           val uuid = UUID.randomUUID().toString
-          if (rawJob._11 /*stage*/ == 0) { // normal evaluation job
+          if (rawJob._11.get /*stage*/ == 0) { // normal evaluation job
             Messages.BaseJob(
               cpuFactor = FutureHelper.makeDuration(config.getOptional[String]("evaluator.eval.basetime").getOrElse("60 seconds")).mul(rawJob._2).toSeconds,
               memFactor = (rawJob._3 * config.getOptional[Int]("evaluator.eval.basemem").getOrElse(100)).floor.toInt,
