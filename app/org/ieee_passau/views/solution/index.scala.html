@@ -12,7 +12,7 @@
     <form style="display: inline" method="POST" class="form-horizontal" action="@org.ieee_passau.controllers.routes.EvaluationController.reEvalAll">
         <div class="form-group">
             @CSRF.formField
-            <button type="submit" onclick="return (window.confirm('@messages("eeval.jobs.reevaluateall.confirm")'))" class="btn btn-danger pull-right">
+            <button type="submit" onclick="return (window.confirm('@messages("eval.jobs.reevaluateall.confirm")'))" class="btn btn-danger pull-right">
             @messages("eval.jobs.reevaluateall.button")
             </button>
         </div>
