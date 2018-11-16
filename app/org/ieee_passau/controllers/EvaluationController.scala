@@ -16,6 +16,7 @@ import org.ieee_passau.models.{Admin, _}
 import org.ieee_passau.utils.{AkkaHelper, PasswordHasher}
 import org.ieee_passau.utils.FutureHelper.akkaTimeout
 import org.ieee_passau.utils.ListHelper._
+import org.ieee_passau.utils.UpdateReturning._
 import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms.{mapping, _}
@@ -87,7 +88,7 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
 
   def indexQueued: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     val testrunsQuery = for {
-      r <- Testruns if r.result === (Queued: models.Result) || r.stage.?.isDefined
+      r <- Testruns if r.result === (Queued: models.Result) || r.stage.isDefined
       s <- r.solution
       c <- r.testcase
       p <- c.problem
@@ -186,14 +187,31 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
   def cancel(id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     db.run(Testruns.byId(id).result.headOption) flatMap {
       case Some(job) =>
-        Testruns.update(id, job.copy(result = Canceled, vm = Some("_"), evalId = None, completed = new Date, stage = None)) map { _ =>
+        db.run(Testruns.filter(_.id === id).map(tr => (tr.result, tr.vm, tr.evalId, tr.completed, tr.stage))
+        .update((Canceled, Some("_"), None, new Date, None)).andThen(
+          Solutions.filter(_.id === job.solutionId).map(_.result).update(Canceled))) map { _ =>
           monitoringActor ! JobFinished(BaseJob(0, 0, "", id, job.evalId.getOrElse(""), "", "", "", ""))
           Redirect(org.ieee_passau.controllers.routes.EvaluationController.indexQueued())
-            .flashing("success" -> rs.messages("jobs.control.cancel.message"))
+            .flashing("success" -> rs.messages("eval.jobs.cancel.message"))
         }
       case _ =>
         Future.successful(Redirect(org.ieee_passau.controllers.routes.EvaluationController.indexQueued())
-          .flashing("warning" -> rs.messages("jobs.error.invalidjob")))
+          .flashing("warning" -> rs.messages("eval.jobs.cancel.invalidjob")))
+    }
+  }}
+
+  def cancelAll: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
+    db.run(Testruns.filter(_.result === (Queued: org.ieee_passau.models.Result))
+      .map(tr => (tr.id, tr.result, tr.vm, tr.evalId, tr.completed, tr.stage)).result) flatMap { testruns =>
+      testruns.foreach( tr => monitoringActor ! JobFinished(BaseJob(0, 0, "", tr._1 /* id */, tr._4.getOrElse("") /* eval_id */, "", "", "", "")))
+      db.run(
+        Solutions.filter(_.result === (Queued: org.ieee_passau.models.Result)).map(_.result).update(Canceled).andThen(
+        Testruns.filter(_.result === (Queued: org.ieee_passau.models.Result))
+          .map(tr => (tr.result, tr.vm, tr.evalId, tr.completed, tr.stage))
+          .update((Canceled, Some("_"), None, new Date, None)))) map { _ =>
+        Redirect(org.ieee_passau.controllers.routes.EvaluationController.indexQueued())
+          .flashing("success" -> rs.messages("eval.jobs.cancelall.message"))
+      }
     }
   }}
 
@@ -208,8 +226,17 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
           progRuntime = Some(0), progMemory = Some(0), compRuntime = Some(0), compMemory = Some(0)))
       }.toList)((_, it) => it) map {_ =>
         Redirect(org.ieee_passau.controllers.routes.EvaluationController.index())
-          .flashing("success" -> rs.messages("jobs.control.revaluate.message"))
+          .flashing("success" -> rs.messages("eval.jobs.reevaluate.message"))
       }
+    }
+  }}
+
+  def reEvalAll: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
+    db.run(Testruns.map(tr => (tr.result, tr.stage, tr.vm, tr.progRuntime, tr.progMemory, tr.compRuntime, tr.compMemory))
+      .update(Queued, Some(0), None, Some(0), Some(0), Some(0), Some(0)).andThen(
+        Solutions.map(sl => (sl.score, sl.result)).update(0, Queued))) map {_ =>
+        Redirect(org.ieee_passau.controllers.routes.EvaluationController.index())
+          .flashing("success" -> rs.messages("eval.jobs.reevaluateall.message"))
     }
   }}
 

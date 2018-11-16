@@ -18,31 +18,31 @@ case class Testrun(id: Option[Int], solutionId: Int, testcaseId: Int, progOut: O
 class Testruns(tag: Tag) extends TableWithId[Testrun](tag, "testruns") {
   def solutionId: Rep[Int] = column[Int]("solution_id")
   def testcaseId: Rep[Int] = column[Int]("testcase_id")
-  def progOut: Rep[String] = column[String]("prog_out")
-  def progErr: Rep[String] = column[String]("prog_err")
-  def progExit: Rep[Int] = column[Int]("prog_exit")
-  def progRuntime: Rep[Double] = column[Double]("prog_runtime")
-  def progMemory: Rep[Int] = column[Int]("prog_memory")
-  def compOut: Rep[String] = column[String]("comp_out")
-  def compErr: Rep[String] = column[String]("comp_err")
-  def compExit: Rep[Int] = column[Int]("comp_exit")
-  def compRuntime: Rep[Double] = column[Double]("comp_runtime")
-  def compMemory: Rep[Int] = column[Int]("comp_memory")
+  def progOut: Rep[Option[String]] = column[Option[String]]("prog_out")
+  def progErr: Rep[Option[String]] = column[Option[String]]("prog_err")
+  def progExit: Rep[Option[Int]] = column[Option[Int]]("prog_exit")
+  def progRuntime: Rep[Option[Double]] = column[Option[Double]]("prog_runtime")
+  def progMemory: Rep[Option[Int]] = column[Option[Int]]("prog_memory")
+  def compOut: Rep[Option[String]] = column[Option[String]]("comp_out")
+  def compErr: Rep[Option[String]] = column[Option[String]]("comp_err")
+  def compExit: Rep[Option[Int]] = column[Option[Int]]("comp_exit")
+  def compRuntime: Rep[Option[Double]] = column[Option[Double]]("comp_runtime")
+  def compMemory: Rep[Option[Int]] = column[Option[Int]]("comp_memory")
   def result: Rep[Result] = column[Result]("result")(Result.resultTypeMapper)
   def created: Rep[Date] = column[Date]("created")(DateSupport.dateMapper)
-  def stage: Rep[Int] = column[Int]("stage")
-  def vm: Rep[String] = column[String]("vm")
+  def stage: Rep[Option[Int]] = column[Option[Int]]("stage")
+  def vm: Rep[Option[String]] = column[Option[String]]("vm")
   def completed: Rep[Date] = column[Date]("completed")(DateSupport.dateMapper)
-  def score: Rep[Int] = column[Int]("score")
-  def evalId: Rep[String] = column[String]("eval_id")
+  def score: Rep[Option[Int]] = column[Option[Int]]("score")
+  def evalId: Rep[Option[String]] = column[Option[String]]("eval_id")
 
   def solution: ForeignKeyQuery[Solutions, Solution] = foreignKey("solution_fk", solutionId, Solutions)(_.id)
   def testcase: ForeignKeyQuery[Testcases, Testcase] = foreignKey("testcase_fk", testcaseId, Testcases)(_.id)
 
   override def * : ProvenShape[Testrun] = (id.?, solutionId, testcaseId,
-    progOut.?, progErr.?, progExit.?, progRuntime.?, progMemory.?,
-    compOut.?, compErr.?, compExit.?, compRuntime.?, compMemory.?,
-    result, score.?, created, stage.?, vm.?, evalId.?, completed) <> (Testrun.tupled, Testrun.unapply)
+    progOut, progErr, progExit, progRuntime, progMemory,
+    compOut, compErr, compExit, compRuntime, compMemory,
+    result, score, created, stage, vm, evalId, completed) <> (Testrun.tupled, Testrun.unapply)
 }
 
 object Testruns extends TableQuery(new Testruns(_)) {

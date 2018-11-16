@@ -48,7 +48,7 @@ class DBWriter @Inject() (val dbConfigProvider: DatabaseConfigProvider, val syst
 
           db.run(nextStageQuery).foreach { nextStage =>
             db.run(Solutions.filter(_.id === tr.solutionId).result.head).map { solution =>
-              db.run(Testruns.filter(r => r.solutionId === solution.id.get && r.id =!= eJob.job.testrunId).map(r => (r.result, r.stage.?)).result).map { results =>
+              db.run(Testruns.filter(r => r.solutionId === solution.id.get && r.id =!= eJob.job.testrunId).map(r => (r.result, r.stage)).result).map { results =>
                 val list = results :+ (eJob.result.getOrElse(Canceled), nextStage)
                 val result =
                      if (list.forall { case (res, _) => res == Passed })                    Passed

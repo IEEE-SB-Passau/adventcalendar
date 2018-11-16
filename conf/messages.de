@@ -217,11 +217,20 @@ eval.vms.load=Last
 eval.vms.memory=Speicher
 eval.vms.lastheartbeat=Letzte Rückmeldung
 
-eval.task.state.title=Status
-eval.task.state.assigned=Zugeteilt
-eval.task.state.pending=Ausstehend
-eval.task.resubmit.warning=Wirklich neu auswerten?
-eval.task.cancel.warning=Auswertung wirklich abbrechen?
+eval.jobs.state.title=Status
+eval.jobs.state.assigned=Zugeteilt
+eval.jobs.state.pending=Ausstehend
+eval.jobs.reevaluate.message=Testfall wird neu ausgewertet!
+eval.jobs.reevaluate.warning=Wirklich neu auswerten?
+eval.jobs.reevaluateall.button=Alles neu auswerten
+eval.jobs.reevaluateall.message=Alle Abgaben werden neu ausgewertet.
+eval.jobs.reevaluateall.warning=Wirklich alles neu auswerten?
+eval.jobs.cancel.confirm=Auswertung wirklich abbrechen?
+eval.jobs.cancel.message=Job wurde abgebrochen!
+eval.jobs.cancel.invalidjob=Dieser Job existiert nicht!
+eval.jobs.cancelall.button=Alle Jobs abbrechen
+eval.jobs.cancelall.confirm=Auswertung aller Jobs wirklich abbrechen?
+eval.jobs.cancelall.message=Alle Jobs wurden abgebrochen.
 
 status.notification.start=Benachrichtigung einschalten
 status.notification.stop=Benachrichtigung ausschalten
@@ -236,10 +245,6 @@ assets.add=Datei hochladen
 assets.download=Dateidownload testen
 assets.error=Datei konnte nicht hochgeladen werden!
 assets.success=Datei erfolgreich hochgeladen!
-
-jobs.error.invalidjob=Dieser Job existiert nicht!
-jobs.control.cancel.message=Job wurde abgebrochen!
-jobs.control.revaluate.message=Testfall wird neu ausgewertet!
 
 feedback.title=Feedback
 feedback.rating=Bewertung

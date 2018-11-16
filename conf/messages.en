@@ -52,9 +52,9 @@ submit.ratelimit.queue=You can submit only one solution every 15 minutes while y
 
 eval.status.update.message=Status was updated.
 
-jobs.error.invalidjob=This job does not exist!
-jobs.control.cancel.message=Job successfully canceled!
-jobs.control.revaluate.message=Test case will be reevaluated!
+eval.jobs.cancel.invalidjob=This job does not exist!
+eval.jobs.cancel.message=Job successfully canceled!
+eval.jobs.reevaluate.message=Test case will be re-evaluated!
 
 feedback.submit.message=Thank you for your feedback!
 
@@ -289,10 +289,10 @@ eval.vms.numberofusers=# of logged in users
 eval.vms.load=Load
 eval.vms.memory=Memory
 eval.vms.lastheartbeat=Last report
-eval.task.state.title=State
-eval.task.state.assigned=Assigned
-eval.task.state.pending=Pending
-eval.task.cancel.warning=Really cancel evaluation?
+eval.jobs.state.title=State
+eval.jobs.state.assigned=Assigned
+eval.jobs.state.pending=Pending
+eval.jobs.cancel.confirm=Really cancel evaluation?
 feedback.title=Feedback
 feedback.rating=Rating
 feedback.pro=Positive
@@ -307,7 +307,7 @@ status.canceled=Canceled
 eval.vms.uri=IP:Port
 general.pagination.forward=Forward
 general.pagination.back=Back
-eval.task.resubmit.warning=Really re-evaluate?
+eval.jobs.reevaluate.warning=Really re-evaluate?
 language.unsupported=This language is not supported!
 codelang.memory=Default memory
 codelang.time=Default runtime
@@ -360,3 +360,9 @@ eval.vms.title=Evaluation Clients
 evaltask.output.score.help=Writes an positive integer to file "score" (lower ist better), must be last task
 evaltask.output.checker.help=Output "WRONG" or "CORRECT" in file "check"
 assets.preview=Preview
+eval.jobs.cancelall.message=All jobs have been canceled.
+eval.jobs.cancelall.confirm=Really cancel all jobs?
+eval.jobs.cancelall.button=Cancel all jobs
+eval.jobs.reevaluateall.button=Re-evaluate all
+eval.jobs.reevaluateall.message=All Submissions will be re-evaluated.
+eval.jobs.reevaluateall.warning=Really re-evaluate all?
