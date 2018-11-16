@@ -69,7 +69,7 @@
                     </a>
                 </td>
                 <td>
-                    @list.filter(!_.lang.equals(LanguageHelper.defaultLanguage)).foreach { p =>
+                    @list.filter(!_.lang.equals(LanguageHelper.defaultLanguage)).map { p =>
                     @messagesApi("language.icon")(p.lang)
                     <a href="@org.ieee_passau.controllers.routes.CmsController.editPage(id, p.lang.code)" class="btn btn-default">
                         <span class="glyphicon glyphicon-pencil"></span>
