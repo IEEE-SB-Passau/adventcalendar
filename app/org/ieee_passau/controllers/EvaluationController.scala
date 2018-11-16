@@ -13,10 +13,9 @@ import org.ieee_passau.models
 import org.ieee_passau.models.DateSupport.dateMapper
 import org.ieee_passau.models.Result.resultTypeMapper
 import org.ieee_passau.models.{Admin, _}
-import org.ieee_passau.utils.{AkkaHelper, PasswordHasher}
 import org.ieee_passau.utils.FutureHelper.akkaTimeout
 import org.ieee_passau.utils.ListHelper._
-import org.ieee_passau.utils.UpdateReturning._
+import org.ieee_passau.utils.{AkkaHelper, PasswordHasher}
 import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms.{mapping, _}
