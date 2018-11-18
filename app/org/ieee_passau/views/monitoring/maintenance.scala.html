@@ -11,7 +11,7 @@
     @if(notificationActive) {
         <form style="display: inline" class="form-horizontal" method="POST" action="@org.ieee_passau.controllers.routes.CmsController.toggleNotification">
             <fieldset>
-                <div class="well">
+                <div class="well well-sm">
                     <div class="form-group">
                         @CSRF.formField
                         <input type="hidden" name="state" value="false">
@@ -27,7 +27,7 @@
     } else {
         <form style="display: inline" class="form-horizontal" method="POST" action="@org.ieee_passau.controllers.routes.CmsController.toggleNotification">
             <fieldset>
-                <div class="well alert-danger">
+                <div class="well well-sm alert-danger">
                     <div class="form-group">
                         @CSRF.formField
                         <input type="hidden" name="state" value="true">

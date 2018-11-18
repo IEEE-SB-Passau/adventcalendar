@@ -1,6 +1,6 @@
 @import helper._
 @import org.ieee_passau.controllers.Beans.SubmissionListEntry
-@import org.ieee_passau.models.{Admin, Canceled, Passed, Queued, User, Problem}
+@import org.ieee_passau.models.{Admin, Canceled, Passed, Queued, User}
 @import org.ieee_passau.utils.ViewHelper.isErrorResult
 @import org.ieee_passau.views.html.main
 @import play.api.mvc.Flash
@@ -9,29 +9,16 @@
 @(problemTitles: Map[Int, String], list: List[SubmissionListEntry], pages: Int, page: Int, ordering: String)(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
 
 @main(messages("submission.list.title")) {
-    <form style="display: inline" method="POST" class="form-horizontal" action="@org.ieee_passau.controllers.routes.EvaluationController.reEvalAll">
-        <div class="well well-sm">
-            <div class="form-group">
-                <div class="col-sm-9"></div>
-                <div class="col-sm-3">
-                    @CSRF.formField
-                    <button type="submit" onclick="return (window.confirm('@messages("eval.jobs.reevaluateall.confirm")'))" class="btn btn-danger pull-right">
-                    @messages("eval.jobs.reevaluateall.button")
-                    </button>
-                </div>
-            </div>
-        </div>
-    </form>
 
-    <form style="display: inline" method="POST" class="form-horizontal" action="@org.ieee_passau.controllers.routes.EvaluationController.reEvalProblem">
-        <fieldset>
-            <div class="well well-sm">
+    <div class="well well-sm">
+        <form style="display: inline" method="POST" class="form-horizontal" action="@org.ieee_passau.controllers.routes.EvaluationController.reEvalProblem">
+            <fieldset>
                 <div class="form-group">
                     <label class="col-sm-2 control-label">@messages("problem.title")</label>
                     <div class="col-sm-7">
                         <select id="pid" size="1" name="pid" class="form-control">
-                        @* warning is a false positive *@
                         @problemTitles.map { problem =>
+                            <!-- @* warning is a false positive *@ -->
                             <option value="@problem._1" @{ if(problem._1 == problemTitles.head._1) "selected" }>@problem._2</option>
                         }
                         </select>
@@ -44,9 +31,21 @@
                         </button>
                     </div>
                 </div>
+            </fieldset>
+        </form>
+
+        <form style="display: inline" method="POST" class="form-horizontal" action="@org.ieee_passau.controllers.routes.EvaluationController.reEvalAll">
+            <div class="form-group">
+                <div class="col-sm-9"></div>
+                <div class="col-sm-3">
+                    @CSRF.formField
+                    <button type="submit" onclick="return (window.confirm('@messages("eval.jobs.reevaluateall.confirm")'))" class="btn btn-danger pull-right">
+                    @messages("eval.jobs.reevaluateall.button")
+                    </button>
+                </div>
             </div>
-        </fieldset>
-    </form>
+        </form>
+    </div>
 
     <table class="table table-striped">
         <thead>

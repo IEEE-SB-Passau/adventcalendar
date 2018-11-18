@@ -2,10 +2,16 @@
 @import org.ieee_passau.models.{Language, Problem, User}
 @import org.ieee_passau.views.html.main
 @import play.api.mvc.Flash
+
 @import scala.language.implicitConversions
 @(s: SolutionListEntry, languages: List[Language], user: User, problem: Problem)(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
 
 @main(messages("submission.title") + " " + s.solution.id.get) {
+    <ol class="breadcrumb">
+        <li><a href="@org.ieee_passau.controllers.routes.UserController.index">@messages("general.listoverview")</a></li>
+        <li class="active">@messages("solution.title")</li>
+    </ol>
+
     <div class="well">
         <p><label class="col-sm-2 control-label">@messages("user.title")</label>
             @user.username

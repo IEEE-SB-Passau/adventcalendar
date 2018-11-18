@@ -8,6 +8,11 @@
 @(ticket: (Ticket, User, Problem), answers: List[(Ticket, String)], ticketForm: Form[TicketText])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages, messagesApi: MessagesApi)
 
 @main(messages("ticket.list.show")) {
+    <ol class="breadcrumb">
+        <li><a href="@org.ieee_passau.controllers.routes.TicketController.index">@messages("general.listoverview")</a></li>
+        <li class="active">@messages("ticket.title")</li>
+    </ol>
+
     @defining((ticket._1, ticket._2.username) +: answers) { list: List[(Ticket, String)] =>
         @ticketView(list, expanded = true, admin = true)
     }

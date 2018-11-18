@@ -6,7 +6,11 @@
 @(files: Seq[String], highlight: String)(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages, messagesApi: MessagesApi)
 
 @main(messages("assets.title")) {
-    <h3>@messages("assets.title")</h3>
+    <ol class="breadcrumb">
+        <li><a href="@org.ieee_passau.controllers.routes.CmsController.maintenance">@messages("nav.admin.postings")</a></li>
+        <li class="active">@messages("assets.title")</li>
+    </ol>
+
     <table class="table table-striped">
         <thead>
             <tr>

@@ -7,6 +7,11 @@
 @(id: Int, user: Form[User], permissions: List[Permission])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
 
 @main(messages("user.edit")) {
+    <ol class="breadcrumb">
+        <li><a href="@org.ieee_passau.controllers.routes.UserController.index">@messages("general.listoverview")</a></li>
+        <li class="active">@messages("user.edit")</li>
+    </ol>
+
     @form(org.ieee_passau.controllers.routes.UserController.update(id), 'class -> "form-horizontal") {
         @CSRF.formField
         <fieldset>
