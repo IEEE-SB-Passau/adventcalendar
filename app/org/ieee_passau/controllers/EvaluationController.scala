@@ -40,6 +40,8 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
   val pageSize: Int = config.getOptional[Int]("pagination.size").getOrElse(50)
 
   def index(page: Int, ordering: String): Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
+    // TODO highlight inactive languages
+
     def sortDB(key: String, query: Query[((Rep[Int], Rep[String], Rep[String], Rep[Int], Rep[Int], Rep[Date], Rep[models.Result]), Rep[Int], Rep[Int]), ((Int, String, String, Int, Int, Date, models.Result), Int, Int), Seq]) = {
       key match {
         case "date" => query.sortBy(_._1._6.asc /*date*/)

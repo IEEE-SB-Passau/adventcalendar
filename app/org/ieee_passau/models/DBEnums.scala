@@ -2,8 +2,8 @@ package org.ieee_passau.models
 
 import slick.ast.BaseTypedType
 import slick.dbio.Effect
-import slick.jdbc.PostgresProfile.api._
 import slick.jdbc.JdbcType
+import slick.jdbc.PostgresProfile.api._
 import slick.lifted.ProvenShape
 
 import scala.concurrent.Future
@@ -32,7 +32,7 @@ class Results(tag: Tag) extends Table[Result](tag, "e_test_result") {
 }
 object Results extends TableQuery(new Results(_))
 
-case class Language(id: String, name: String, highlightClass: String, extension: String, cpuFactor: Float, memFactor: Float, comment: String)
+case class Language(id: String, name: String, highlightClass: String, extension: String, cpuFactor: Float, memFactor: Float, comment: String, active: Boolean)
 class Languages(tag: Tag) extends Table[Language](tag, "e_prog_lang") {
   def id: Rep[String] = column[String]("language")
   def name: Rep[String] = column[String]("name")
@@ -41,8 +41,9 @@ class Languages(tag: Tag) extends Table[Language](tag, "e_prog_lang") {
   def cpuFactor: Rep[Float] = column[Float]("cpu_factor")
   def memFactor: Rep[Float] = column[Float]("mem_factor")
   def comment: Rep[String] = column[String]("comment")
+  def active: Rep[Boolean] = column[Boolean]("active")
 
-  def * : ProvenShape[Language] = (id, name, highlightClass, extension, cpuFactor, memFactor, comment) <> (Language.tupled, Language.unapply)
+  def * : ProvenShape[Language] = (id, name, highlightClass, extension, cpuFactor, memFactor, comment, active) <> (Language.tupled, Language.unapply)
 }
 object Languages extends TableQuery(new Languages(_)) {
   def byLang(lang: String)(implicit db: Database): Future[Option[Language]] = db.run(this.filter(_.id === lang).result.headOption)

@@ -368,3 +368,4 @@ assets.add.error=File could not be uploaded!
 assets.remove.error=File could not be deleted!
 assets.add.success=File upload successful!
 assets.remove.success=File successfully deleted!
+codelang.active=Active

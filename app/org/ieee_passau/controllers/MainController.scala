@@ -100,7 +100,7 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                   (rs.messages("submit.ratelimit.message") + " " + rs.messages("submit.ratelimit.queue"))))
               case _ =>
                 Languages.byLang(rs.body.dataParts("lang").headOption.getOrElse("")).flatMap {
-                  case Some(codelang) =>
+                  case Some(codelang) if codelang.active =>
                     val fixedFilename =
                       // if it's jvm then that matches at least every valid classname and therefore filename, and all others don't matter that much anyway
                       if (!filename.isEmpty) filename.replaceAll("[^\\p{javaJavaIdentifierPart}.-]", "_")
@@ -203,7 +203,7 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
         if (!problem.readable) {
           Future.successful(Unauthorized(org.ieee_passau.views.html.errors.e404()))
         } else {
-          val langs = db.run(Languages.sortBy(_.name).to[List].result)
+          val langs = db.run(Languages.filter(_.active).sortBy(_.id).to[List].result)
           val uid = user.fold(-1)(u => u.id.get)
           val isMod = user.fold(false)(_.permission.includes(Moderator))
 

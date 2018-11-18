@@ -1,5 +1,6 @@
-@import org.ieee_passau.models.{Language, User}
+@@import org.ieee_passau.models.{Language, User}
 @import org.ieee_passau.utils.FutureHelper
+@import org.ieee_passau.utils.ViewHelper.showCheckmark
 @import org.ieee_passau.views.html.main
 @import play.api.Configuration
 @import play.api.mvc.RequestHeader
@@ -13,18 +14,20 @@
                 <th>@messages("codelang.name")</th>
                 <th>@messages("codelang.cpufactor", FutureHelper.makeDuration(config.getOptional[String]("evaluator.eval.basetime").getOrElse("60 seconds")).toSeconds)</th>
                 <th>@messages("codelang.memfactor", config.getOptional[Int]("evaluator.eval.basemem").getOrElse(100))</th>
+                <th>@messages("codelang.active")</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
-            @languages.map { lng =>
+            @languages.map { lang =>
                 <tr>
-                    <td>@lng.id</td>
-                    <td>@lng.name</td>
-                    <td>@lng.cpuFactor</td>
-                    <td>@lng.memFactor</td>
+                    <td>@lang.id</td>
+                    <td>@lang.name</td>
+                    <td>@lang.cpuFactor</td>
+                    <td>@lang.memFactor</td>
+                    <td>@showCheckmark(lang.active)</td>
                     <td>
-                        <a href="@org.ieee_passau.controllers.routes.LanguageController.edit(lng.id)" class="btn btn-default">
+                        <a href="@org.ieee_passau.controllers.routes.LanguageController.edit(lang.id)" class="btn btn-default">
                             <span class="glyphicon glyphicon-pencil"></span>
                         </a>
                     </td>

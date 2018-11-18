@@ -195,6 +195,7 @@ codelang.memfactor=Speicherlimit (in Referenz zur Basis von {0} MB)
 codelang.fileextension=Dateiendung
 codelang.fileextension.help=c (ohne ".")
 codelang.highlightclass=Syntaxhighlighing Klasse
+codelang.active=Aktiv
 
 eval.status.title=Evaluierungstatus
 eval.status.start=Evaluierung starten

@@ -25,7 +25,7 @@ class LanguageController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   }}
 
   def list: Action[AnyContent] = requirePermission(Everyone) { implicit user => Action.async { implicit rs =>
-    db.run(Languages.sortBy(_.id.asc).to[List].result).map { list =>
+    db.run(Languages.filter(_.active).sortBy(_.id.asc).to[List].result).map { list =>
       Ok(org.ieee_passau.views.html.language.languages(list))
     }
   }}
@@ -64,7 +64,8 @@ class LanguageController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
         },
 
         codelang => {
-          val newCodelang = lang.copy(name = codelang.name, cpuFactor = codelang.cpuFactor, memFactor = codelang.memFactor, comment = codelang.comment)
+          val newCodelang = lang.copy(name = codelang.name, cpuFactor = codelang.cpuFactor,
+            memFactor = codelang.memFactor, comment = codelang.comment, active = codelang.active)
           db.run(Languages.update(language, newCodelang)).map(_ =>
             Redirect(org.ieee_passau.controllers.routes.LanguageController.edit(language))
               .flashing("success" -> rs.messages("codelang.update.message", codelang.id))
@@ -84,7 +85,8 @@ class LanguageController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
       "cpuFactor" -> of[Float],
       "memFactor" -> of[Float],
       "comment" -> text
-    )(Language.apply)(Language.unapply)
+    )((id, name, highlightClass, extension, cpuFactor, memFactor, comment) => Language("", name, "", "", cpuFactor, memFactor, comment, active = true)
+    )((l: Language) => Some((l.id, l.name, l.highlightClass, l.extension, l.cpuFactor, l.memFactor, l.comment)))
   )
 
   val languageUpdateForm = Form(
@@ -92,8 +94,9 @@ class LanguageController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
       "name" -> text,
       "cpuFactor" -> of[Float],
       "memFactor" -> of[Float],
-      "comment" -> text
-    )((name, cpuFactor, memFactor, comment) => Language("", name, "", "", cpuFactor, memFactor, comment))
-    ((l: Language) => Some((l.name, l.cpuFactor, l.memFactor, l.comment)))
+      "comment" -> text,
+      "active" -> boolean
+    )((name, cpuFactor, memFactor, comment,  active) => Language("", name, "", "", cpuFactor, memFactor, comment, active))
+    ((l: Language) => Some((l.name, l.cpuFactor, l.memFactor, l.comment, l.active)))
   )
 }
