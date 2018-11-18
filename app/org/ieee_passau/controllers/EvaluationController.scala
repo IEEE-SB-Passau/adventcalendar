@@ -73,15 +73,14 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
         Case.If(y._8 === (Passed: models.Result)).Then(1).Else(0)).sum.getOrElse(0: Rep[Int]))
     }).drop((page - 1) * pageSize).take(pageSize).result
 
-    ProblemTranslations.problemTitleListByLang(rs.lang).flatMap { transList =>
+    ProblemTranslations.problemTitleListByLang(rs.lang).flatMap { problemTitles =>
       db.run(solutionsQuery).flatMap { rawSolutions: Seq[((Int, String, String, Int, Int, Date, models.Result), Int, Int)] =>
         db.run(Solutions.length.result).map { numSolutions =>
           val solutions = sortList(ordering, rawSolutions.map {
             case ((sid, pLang, user, pid, door, created, result), allTestcases, solvedTestcases) =>
-              SubmissionListEntry(sid, pLang, user, door, transList.getOrElse(pid, ""), created, solvedTestcases, allTestcases, result)
+              SubmissionListEntry(sid, pLang, user, door, problemTitles.getOrElse(pid, ""), created, solvedTestcases, allTestcases, result)
           }.toList)
-
-          Ok(org.ieee_passau.views.html.solution.index(solutions, (numSolutions / pageSize) + 1, page, ordering))
+          Ok(org.ieee_passau.views.html.solution.index(problemTitles, solutions, (numSolutions / pageSize) + 1, page, ordering))
         }
       }
     }
@@ -232,6 +231,28 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
     }
   }}
 
+  def reEvalProblem: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
+    reevalProblemForm.bindFromRequest.fold(
+      _ => {
+        Future.successful(Redirect(org.ieee_passau.controllers.routes.EvaluationController.index())
+          .flashing("warning" -> rs.messages("eval.jobs.reevaluateproblem.error")))
+      },
+      pid => {
+        db.run(
+          Solutions.filter(_.problemId === pid).map(sl => (sl.score, sl.result)).update(0, Queued).andThen(
+            Solutions.filter(_.problemId === pid).map(_.id).result)) flatMap { sids =>
+          db.run(Testruns.filter(_.solutionId inSet sids)
+            .map(tr => (tr.result, tr.stage, tr.vm, tr.progRuntime, tr.progMemory, tr.compRuntime, tr.compMemory))
+            .update(Queued, Some(0), None, Some(0), Some(0), Some(0), Some(0)))
+          ProblemTranslations.problemTitleListByLang(admin.get.lang) map { problems =>
+            Redirect(org.ieee_passau.controllers.routes.EvaluationController.index())
+              .flashing("success" -> rs.messages("eval.jobs.reevaluateproblem.message", problems(pid)))
+          }
+        }
+      }
+    )
+  }}
+
   def reEvalAll: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     db.run(Testruns.map(tr => (tr.result, tr.stage, tr.vm, tr.progRuntime, tr.progMemory, tr.compRuntime, tr.compMemory))
       .update(Queued, Some(0), None, Some(0), Some(0), Some(0), Some(0)).andThen(
@@ -296,5 +317,11 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
     mapping(
       "uid" -> number
     )((uid: Int) => uid)((uid: Int) => Some(uid))
+  )
+
+  val reevalProblemForm = Form(
+    mapping(
+      "pid" -> number
+    )((pid: Int) => pid)((pid: Int) => Some(pid))
   )
 }

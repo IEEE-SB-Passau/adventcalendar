@@ -54,7 +54,7 @@ eval.status.update.message=Status was updated.
 
 eval.jobs.cancel.invalidjob=This job does not exist!
 eval.jobs.cancel.message=Job successfully canceled!
-eval.jobs.reevaluate.message=Test case will be re-evaluated!
+eval.jobs.reevaluate.message=Test case will be reevaluated!
 
 feedback.submit.message=Thank you for your feedback!
 
@@ -307,7 +307,7 @@ status.canceled=Canceled
 eval.vms.uri=IP:Port
 general.pagination.forward=Forward
 general.pagination.back=Back
-eval.jobs.reevaluate.confirm=Really re-evaluate?
+eval.jobs.reevaluate.confirm=Really reevaluate?
 language.unsupported=This language is not supported!
 codelang.memory=Default memory
 codelang.time=Default runtime
@@ -361,11 +361,14 @@ assets.preview=Preview
 eval.jobs.cancelall.message=All jobs have been canceled.
 eval.jobs.cancelall.confirm=Really cancel all jobs?
 eval.jobs.cancelall.button=Cancel all jobs
-eval.jobs.reevaluateall.button=Re-evaluate all
-eval.jobs.reevaluateall.message=All Submissions will be re-evaluated.
-eval.jobs.reevaluateall.confirm=Really re-evaluate all?
+eval.jobs.reevaluateall.button=Reevaluate all
+eval.jobs.reevaluateall.message=All Submissions will be reevaluated.
+eval.jobs.reevaluateall.confirm=Really reevaluate all?
 assets.add.error=File could not be uploaded!
 assets.remove.error=File could not be deleted!
 assets.add.success=File upload successful!
 assets.remove.success=File successfully deleted!
+eval.jobs.reevaluateproblem.button=Reevaluate problem
+eval.jobs.reevaluateproblem.error=Problem could not be reevaluated.
+eval.jobs.reevaluateproblem.message=All submissions for task {0} will be reevaluated.
 codelang.active=Active
