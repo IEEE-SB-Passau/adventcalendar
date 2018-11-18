@@ -119,12 +119,15 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
     db.run(solutionsQuery.result).flatMap { solutionsList =>
       val sol = buildSolutionList(solutionsList).head
       val userQ = Users.filter(_.id === sol.solution.userId).result.head
-      val problemQ = Problems.filter(_.id === sol.solution.problemId).result.head
-      val languageQ = Languages.to[List].result
+      val problemQ = Problems.filter(_.id === sol.solution.problemId).map(_.door).result.head
+      val languageQ = Languages.filter(_.id === sol.solution.language).to[List].result
+      val titleQ = ProblemTranslations.byProblemLang(sol.solution.problemId, rs.lang)
       db.run(userQ).flatMap { user =>
         db.run(problemQ).flatMap { problem =>
-          db.run(languageQ).map { langs =>
-            Ok(org.ieee_passau.views.html.solution.solutionDetail(sol, langs, user, problem))
+          db.run(languageQ).flatMap { langs =>
+            titleQ.map { title =>
+              Ok(org.ieee_passau.views.html.solution.solutionDetail(sol, langs, user, problem, title.fold("")(_.title)))
+            }
           }
         }
       }
