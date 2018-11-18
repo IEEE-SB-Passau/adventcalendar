@@ -41,6 +41,7 @@ class VMClient(host: String, port: Int, name:String) extends EvaluationActor {
 
   // read timeout should be smaller than await timeout so the socket closes first
   private val connection = context.actorOf(TCPActor.props(host, port, timeout.duration.minus(FutureHelper.makeDuration("5 seconds")).toMillis.toInt))
+  private val dbWriter = context.actorSelection(AkkaHelper.evalPath + classOf[DBWriter].getSimpleName)
 
   override def supervisorStrategy: SupervisorStrategy = OneForOneStrategy() {
     case _ => Escalate
@@ -57,6 +58,30 @@ class VMClient(host: String, port: Int, name:String) extends EvaluationActor {
 
   //noinspection RedundantBlock
   private def runJob(job: Job): EvaluatedJob = {
+    def checkError(resultXml: Elem): Unit = {
+      if (!(resultXml \\ "successful").text.toBoolean) {
+        if (!(resultXml \\ "recoverable").headOption.fold(false)(_.text.toBoolean)) {
+          val canceledResult = EvaluatedJob(
+            job = job,
+            progOut = None,
+            progErr = None,
+            progExit = None,
+            progRuntime = None,
+            progMemory = None,
+            compOut = None,
+            compErr = None,
+            compExit = None,
+            compRuntime = None,
+            compMemory = None,
+            result = Some(Canceled),
+            score = None
+          )
+          dbWriter ! EvaluatedJobM(canceledResult)
+        }
+        throw new RuntimeException("Received no valid result from eval. " + base64Decode((resultXml \\ "message").text))
+      }
+    }
+
     // Beans to store the result of compilation and evaluation
     val compilerResult: ExecutionResult = new ExecutionResult
     val evaluationResult: ExecutionResult = new ExecutionResult
@@ -67,6 +92,7 @@ class VMClient(host: String, port: Int, name:String) extends EvaluationActor {
       <run>
         <evalId>b6177f18-4ed7-453e-b1c1-d9679daac2a7</evalId>
         <successful>True</successful>
+        <recoverable></recoverable>
         <message></message>
         <outputs>
           <compilation>
@@ -136,7 +162,7 @@ class VMClient(host: String, port: Int, name:String) extends EvaluationActor {
         val resultXml = Await.result((connection ? data) (timeout).mapTo[Elem], timeout.duration)
         log.debug("%s successfully deployed sourcecode for %s".format(this, job))
 
-        if (!(resultXml \\ "successful").text.toBoolean) throw new RuntimeException("Received no valid result from eval. " + (resultXml \\ "reason").text + "\n" + (resultXml \\ "message").text)
+        checkError(resultXml)
 
         // Compile result
         compilerResult.exitCode = if ((resultXml \\ "outputs" \ "compilation" \ "returnCode").text.isEmpty) None
@@ -242,7 +268,7 @@ class VMClient(host: String, port: Int, name:String) extends EvaluationActor {
         val resultXml = Await.result((connection ? data) (timeout).mapTo[Elem], timeout.duration)
         log.debug("%s successfully deployed binary file for %s".format(this, job))
 
-        if (!(resultXml \\ "successful").text.toBoolean) throw new RuntimeException("Received no valid result from eval. " + (resultXml \\ "reason").text + "\n" + (resultXml \\ "message").text)
+        checkError(resultXml)
 
         // Evaluation result
         evaluationResult.exitCode = if ((resultXml \\ "outputs" \ "evaluation" \ "returnCode").text.isEmpty) None
@@ -293,14 +319,14 @@ class VMClient(host: String, port: Int, name:String) extends EvaluationActor {
         eJob = runJob(job)
       } catch {
         case e: Exception =>
-          log.error("%s encountered an exception while processing %s: %s".format(this.toString, job, e), e)
+          log.error("%s encountered an exception while processing %s: %s {}".format(this.toString, job, e), e)
           context.system.eventStream.publish(JobFailure(job))
-          throw new RuntimeException("Timeout, shutting down actor", e)
+          throw new RuntimeException("Error, shutting down actor", e)
       }
 
       log.info("%s finished %s".format(this, job))
 
-      context.actorSelection(AkkaHelper.evalPath + classOf[DBWriter].getSimpleName) ! EvaluatedJobM(eJob)
+      dbWriter ! EvaluatedJobM(eJob)
   }
 }
 
@@ -336,7 +362,7 @@ class TCPActor(host: String, port: Int, timeout: Int) extends EvaluationActor {
             val is = new BufferedSource(socket.getInputStream)
             val result = xml.XML.loadString(is.mkString)
             if (!(result \\ "successful").text.toBoolean) {
-              log.info("Error in vm %s: %s", this, base64Decode((result \\ "message").text))
+              log.info("Error in vm %s: %s".format(this, base64Decode((result \\ "message").text)))
             }
             sender ! result
           } catch {
@@ -345,8 +371,8 @@ class TCPActor(host: String, port: Int, timeout: Int) extends EvaluationActor {
                 <ieee-advent-calendar>
                   <run>
                     <successful>False</successful>
-                    <reason>{e.getMessage}</reason>
-                    <message>{e.getStackTrace}</message>
+                    <recoverable>True</recoverable>
+                    <message>{base64Encode(e.getMessage + "\n" + e.getStackTrace)}</message>
                   </run>
                 </ieee-advent-calendar>
               sender ! error
