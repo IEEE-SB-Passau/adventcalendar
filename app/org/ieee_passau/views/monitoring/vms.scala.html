@@ -11,7 +11,7 @@
     @if(running) {
         <form style="display: inline" method="POST" class="form-horizontal" action="@org.ieee_passau.controllers.routes.EvaluationController.toggleEvalState">
             <fieldset>
-                <div class="well">
+                <div class="well well-sm">
                     <div class="form-group">
                         @CSRF.formField
                         <input type="hidden" name="state" value="false">
@@ -27,7 +27,7 @@
     } else {
         <form style="display: inline" method="POST" class="form-horizontal" action="@org.ieee_passau.controllers.routes.EvaluationController.toggleEvalState">
             <fieldset>
-                <div class="well alert-danger">
+                <div class="well well-sm alert-danger">
                     <div class="form-group">
                         @CSRF.formField
                         <input type="hidden" name="state" value="true">
@@ -71,7 +71,7 @@
     <h3>@messages("eval.token.reset.title")</h3>
     <form style="display: inline" method="POST" class="form-horizontal" action="@org.ieee_passau.controllers.routes.EvaluationController.resetBackendToken">
         <fieldset>
-            <div class="well">
+            <div class="well well-sm">
                 <div class="form-group">
                     <label class="col-sm-2 control-label">@messages("user.title")</label>
                     <div class="col-sm-7">
