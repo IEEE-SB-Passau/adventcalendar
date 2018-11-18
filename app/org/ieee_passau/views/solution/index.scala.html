@@ -6,7 +6,7 @@
 @import play.api.mvc.Flash
 
 @import scala.language.implicitConversions
-@(problemTitles: Map[Int, String], list: List[SubmissionListEntry], pages: Int, page: Int, ordering: String)(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
+@(problemTitles: List[(Int, String)], list: List[SubmissionListEntry], pages: Int, page: Int, ordering: String)(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
 
 @main(messages("submission.list.title")) {
 
@@ -18,7 +18,6 @@
                     <div class="col-sm-7">
                         <select id="pid" size="1" name="pid" class="form-control">
                         @problemTitles.map { problem =>
-                            <!-- @* warning is a false positive *@ -->
                             <option value="@problem._1" @{ if(problem._1 == problemTitles.head._1) "selected" }>@problem._2</option>
                         }
                         </select>

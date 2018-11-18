@@ -80,7 +80,7 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
             case ((sid, pLang, user, pid, door, created, result), allTestcases, solvedTestcases) =>
               SubmissionListEntry(sid, pLang, user, door, problemTitles.getOrElse(pid, ""), created, solvedTestcases, allTestcases, result)
           }.toList)
-          Ok(org.ieee_passau.views.html.solution.index(problemTitles, solutions, (numSolutions / pageSize) + 1, page, ordering))
+          Ok(org.ieee_passau.views.html.solution.index(problemTitles.toList.sorted, solutions, (numSolutions / pageSize) + 1, page, ordering))
         }
       }
     }
