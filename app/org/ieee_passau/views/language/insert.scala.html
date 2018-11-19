@@ -1,10 +1,12 @@
 @import helper._
 @import org.ieee_passau.models.{Language, User}
+@import org.ieee_passau.utils.FutureHelper
 @import org.ieee_passau.views.html.bootstrap3.{buttonSave, number, text}
 @import org.ieee_passau.views.html.main
+@import play.api.Configuration
 @import play.api.data.Form
 @import play.api.mvc.{Flash, RequestHeader}
-@(language: Form[Language])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
+@(language: Form[Language])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages, config: Configuration)
 
 @main(messages("codelang.create")) {
 
@@ -21,8 +23,8 @@
                 @text(language("name"), label = messages("codelang.name") , placeholder = "C, gcc")
                 @text(language("extension"), label = messages("codelang.fileextension"), placeholder = messages("codelang.fileextension"), help = messages("codelang.fileextension.help"))
                 @text(language("highlightClass"), label = messages("codelang.highlightclass"), placeholder = "c")
-                @number(language("cpuFactor"), label = messages("codelang.cpufactor"), step=0.1f)
-                @number(language("memFactor"), label = messages("codelang.memfactor"), step=0.1f)
+                @number(language("cpuFactor"), label = messages("codelang.cpufactor", FutureHelper.makeDuration(config.getOptional[String]("evaluator.eval.basetime").getOrElse("60 seconds")).toSeconds), step=0.1f)
+                @number(language("memFactor"), label = messages("codelang.memfactor", config.getOptional[Int]("evaluator.eval.basemem").getOrElse(100)), step=0.1f)
                 @text(language("comment"), label = messages("codelang.comment"))
 
                 @buttonSave()
