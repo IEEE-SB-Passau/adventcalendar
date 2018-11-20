@@ -85,7 +85,7 @@ class LanguageController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
       "cpuFactor" -> of[Float],
       "memFactor" -> of[Float],
       "comment" -> text
-    )((id, name, highlightClass, extension, cpuFactor, memFactor, comment) => Language("", name, "", "", cpuFactor, memFactor, comment, active = true)
+    )((id, name, highlightClass, extension, cpuFactor, memFactor, comment) => Language(id, name, highlightClass, extension, cpuFactor, memFactor, comment, active = true)
     )((l: Language) => Some((l.id, l.name, l.highlightClass, l.extension, l.cpuFactor, l.memFactor, l.comment)))
   )
 
