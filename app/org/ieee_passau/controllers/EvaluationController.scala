@@ -62,11 +62,11 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
     }
 
     val solutionsQuery = sortDB(ordering, (for {
-      s <- Solutions
-      tr <- Testruns if tr.solutionId === s.id
-      p <- Problems if p.id === s.problemId
-      u <- Users if u.id === s.userId
-    } yield (s.id, s.language, u.username, p.id, p.door, s.created, s.result, tr.result),
+      tr <- Testruns
+      s <- tr.solution
+      p <- s.problem
+      u <- s.user
+    } yield (s.id, s.languageId, u.username, p.id, p.door, s.created, s.result, tr.result),
       ).groupBy(x => (x._1, x._2, x._3, x._4, x._5, x._6, x._7)).map { case (sol, tcs) =>
       (sol, tcs.length, tcs.map(y =>
         // trick the query builder, because a filter does not work here
@@ -93,6 +93,7 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
       c <- r.testcase
       p <- c.problem
       u <- s.user
+    // TODO materialize less
     } yield (r, c, p, s, u)
 
     (monitoringActor ? RunningJobsQ).mapTo[List[(Job, Date)]].flatMap { jobs =>
@@ -100,11 +101,11 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
         val runningList = for {
           j <- jobs
           r <- testruns if r._1 /*testrun*/ .id.get == j._1 /*job*/ .testrunId
-        } yield (r._1.id.get, r._4.id.get, r._2.position, r._1.stage.get, r._4.language, r._5.username, r._3.door, r._3.title, r._4.created, Some(j._2))
+        } yield (r._1.id.get, r._4.id.get, r._2.position, r._1.stage.get, r._4.languageId, r._5.username, r._3.door, r._3.title, r._4.created, Some(j._2))
         val running = runningList.map(t => t._1)
         val list = runningList ++ (for {
           r <- testruns if !running.contains(r._1.id.get)
-        } yield (r._1.id.get, r._4.id.get, r._2.position, r._1.stage.get, r._4.language, r._5.username, r._3.door, r._3.title, r._4.created, None))
+        } yield (r._1.id.get, r._4.id.get, r._2.position, r._1.stage.get, r._4.languageId, r._5.username, r._3.door, r._3.title, r._4.created, None))
         Ok(org.ieee_passau.views.html.monitoring.indexQueued(list.sortBy(_._9)(Ordering[Date]).sortBy(_._10)(Ordering[Option[Date]].reverse)))
       }
     }
@@ -112,22 +113,20 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
 
   def details(id: Int): Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
     val solutionsQuery = for {
-      s <- Solutions if s.id === id
-      tr <- Testruns if tr.solutionId === s.id
-      tc <- Testcases if tc.id === tr.testcaseId
-    } yield (s, tc, tr)
-    db.run(solutionsQuery.result).flatMap { solutionsList =>
-      val sol = buildSolutionList(solutionsList).head
+      tr <- Testruns if tr.solutionId === id
+      s <- tr.solution
+      tc <- tr.testcase
+      l <- s.language
+    } yield (s, tc, tr, l)
+    db.run(solutionsQuery.result.head).flatMap { s =>
+      val sol = buildSolutionList(List((s._1, s._2, s._3))).head
       val userQ = Users.filter(_.id === sol.solution.userId).result.head
       val problemQ = Problems.filter(_.id === sol.solution.problemId).map(_.door).result.head
-      val languageQ = Languages.filter(_.id === sol.solution.language).to[List].result
       val titleQ = ProblemTranslations.byProblemLang(sol.solution.problemId, rs.lang)
       db.run(userQ).flatMap { user =>
         db.run(problemQ).flatMap { problem =>
-          db.run(languageQ).flatMap { langs =>
-            titleQ.map { title =>
-              Ok(org.ieee_passau.views.html.solution.solutionDetail(sol, langs, user, problem, title.fold("")(_.title)))
-            }
+          titleQ.map { title =>
+            Ok(org.ieee_passau.views.html.solution.solutionDetail(sol, List(s._4), user, problem, title.fold("")(_.title)))
           }
         }
       }

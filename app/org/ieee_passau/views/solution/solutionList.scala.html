@@ -32,11 +32,11 @@
 
                 <p><button type="button" class="btn" data-toggle="collapse" data-target="#code@s.position">
                     <span class="glyphicon glyphicon-eye-open"></span>
-                    @messages("submission.program_source") (@languages.filter(_.id == s.solution.language).map{l=>@l.name})
+                    @messages("submission.program_source") (@languages.filter(_.id == s.solution.languageId).map{l=>@l.name})
                 </button></p>
 
                 <div id="code@s.position" class="collapse">
-                    <pre><code class="@languages.filter(_.id == s.solution.language).map{l=>@l.highlightClass}">@s.solution.program</code></pre>
+                    <pre><code class="@languages.filter(_.id == s.solution.languageId).map{l=>@l.highlightClass}">@s.solution.program</code></pre>
                 </div>
 
                 @s.testcases.map { t =>

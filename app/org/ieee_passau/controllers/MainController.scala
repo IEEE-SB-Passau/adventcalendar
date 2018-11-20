@@ -228,8 +228,8 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
           val lastLang: Future[String] = solutionsQuery.zip(lastAllSolutionQuery).map { tuple =>
             val solutions = tuple._1
             val lastAllSolution = tuple._2
-            if (solutions.nonEmpty) solutions.maxBy(_.solution.created).solution.language
-            else if (user.nonEmpty && lastAllSolution.nonEmpty) lastAllSolution.get.language
+            if (solutions.nonEmpty) solutions.maxBy(_.solution.created).solution.languageId
+            else if (user.nonEmpty && lastAllSolution.nonEmpty) lastAllSolution.get.languageId
             else "JAVA"
           }
 
