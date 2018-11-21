@@ -103,8 +103,11 @@ GET         /admin/ticket/:id                          org.ieee_passau.controlle
 POST        /admin/ticket/:id                          org.ieee_passau.controllers.TicketController.answerTicket(id: Int)
 POST        /admin/ticket/:id/delete                   org.ieee_passau.controllers.TicketController.delete(id: Int)
 
++ nocsrf
 POST        /admin/vms/register                        org.ieee_passau.controllers.EvaluationController.registerVM
++ nocsrf
 POST        /admin/vms/registerv2                      org.ieee_passau.controllers.EvaluationController.registerVM
++ nocsrf
 POST        /admin/vms/remove                          org.ieee_passau.controllers.EvaluationController.removeVM
 
 # Map static resources from the /public folder to the /assets URL path
