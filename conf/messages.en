@@ -64,7 +64,7 @@ language.name=English
 language.icon=🇺🇸
 
 #HTML--->
-page.title=IEEE SB Passau Advent Calendar 2017
+page.title=IEEE SB Passau Advent Calendar 2018
 page.footer=&copy; 2018 IEEE Student Branch Passau - <a href="https://advent.ieee.uni-passau.de/advent/contact#imprint">Imprint</a> and <a href="https://advent.ieee.uni-passau.de/advent/contact#privacy">privacy policy</a>
 frontpage.pic.source=Image source: <a href="http://klowner.com/wallpaper/christmas_tux_2012/">"Christmas Tux 2012"</a> by Mark Riedesel, <a href="https://creativecommons.org/licenses/by-sa/4.0/legalcode">Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)</a>
 #<---HTML
@@ -75,7 +75,7 @@ nav.info=Information
 nav.user.login=Login
 nav.user.logout=Logout
 nav.user.register=Register
-nav.user.greeting= Hello {1} {0}!
+nav.user.greeting=Hello {1} {0}!
 nav.admin.message=Admin
 nav.admin.stats=Statistics
 nav.admin.evalqueue=Queue
@@ -142,7 +142,7 @@ user.requestreset=Send reset-link
 user.edit=Edit user
 user.impersonate=Login as this user
 user.help.password=at least 6 characters
-user.help.register=The fields marked with <b>*</b> are mandatory.
+user.help.register=The fields marked with * are mandatory.
 ticket.list.show=Show question
 ticket.public=Public
 ticket.answer=Answer
@@ -301,8 +301,8 @@ feedback.freetext=Other comments
 general.count=Count
 general.sum=Sum
 general.lasthour=Last hour
-problem.cpufactor=Time limit factor (base {0})
-problem.memfactor=M limit factor (base {0})
+problem.cpufactor=Time limit factor (base {0} seconds)
+problem.memfactor=M limit factor (base {0} MB)
 status.canceled=Canceled
 eval.vms.uri=IP:Port
 general.pagination.forward=Forward

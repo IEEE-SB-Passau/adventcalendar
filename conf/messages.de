@@ -30,7 +30,7 @@ user.impersonate.message=Du bis nun als {0} angemeldet.
 user.login.message=Willkommen zurück {0}!
 user.login.error=Login fehlgeschlagen!
 user.help.password=mindestens 6 Zeichen
-user.help.register=Die mit <b>*</b> markierten Felder sind Pflichtangaben.
+user.help.register=Die mit * markierten Felder sind Pflichtangaben.
 user.notexist=Benutzername existiert nicht!
 user.logout.message=Bis bald {0}!
 user.register.error.existing=Benutzer {0} wurde angelegt. Bitte verifiziere deine E-Mailadresse mit dem zugesandten Link.
@@ -67,8 +67,8 @@ problem.description=Beschreibung
 problem.description.lang=Beschreibung in {0}
 problem.settings.title=Einstellungen
 problem.evalmode=Bewertungsmodus
-problem.cpufactor=Zeitlimit Faktor (Basis {0})
-problem.memfactor=Speicherlimit Faktor (Basis {0}MB)
+problem.cpufactor=Zeitlimit Faktor (Basis {0} Sekunden)
+problem.memfactor=Speicherlimit Faktor (Basis {0} MB)
 problem.readablestart=Sichtbar ab
 problem.readablestop=Sichtbar bis
 problem.solvablestart=Lösbar ab
@@ -272,7 +272,7 @@ language.icon=🇩🇪
 language.unsupported=Diese Sprache wird nicht unterstützt!
 
 #HTML--->
-page.title=IEEE SB Passau Adventskalender 2017
+page.title=IEEE SB Passau Adventskalender 2018
 page.footer=&copy; 2018 IEEE Student Branch Passau - <a href="https://advent.ieee.uni-passau.de/advent/contact#imprint">Impressum</a> und <a href="https://advent.ieee.uni-passau.de/advent/contact#privacy">Datenschutz</a>
 frontpage.pic.source=Bildquelle: <a href="http://klowner.com/wallpaper/christmas_tux_2012/">"Christmas Tux 2012"</a> von Mark Riedesel, <a href="https://creativecommons.org/licenses/by-sa/4.0/legalcode">Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)</a>
 #<---HTML
@@ -284,7 +284,7 @@ nav.user.login=Anmelden
 nav.user.logout=Abmelden
 nav.user.register=Registrieren
 nav.user.resetpassword=Passwort zurücksetzen
-nav.user.greeting= Hallo {1} {0}!
+nav.user.greeting=Hallo {1} {0}!
 nav.moderator.message=Moderator
 nav.admin.message=Admin
 nav.admin.stats=Statistiken
@@ -370,7 +370,7 @@ Das Adventskalender-Team
 email.answer.subject=Antwort bezüglich {0}
 
 # Notification
-notification.cookie.text=Der Adventskalender benötigt Cookies um zu funktionieren. Infos dazu gibts
+notification.cookie.text=Der Adventskalender benötigt Cookies um zu funktionieren. Infos dazu gibts 
 notification.cookie.link=hier.
 notification.cookie.button=Ok
 
