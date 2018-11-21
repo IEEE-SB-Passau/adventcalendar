@@ -273,7 +273,7 @@ language.unsupported=Diese Sprache wird nicht unterstützt!
 
 #HTML--->
 page.title=IEEE SB Passau Adventskalender 2018
-page.footer=&copy; 2018 IEEE Student Branch Passau - <a href="https://advent.ieee.uni-passau.de/advent/contact#imprint">Impressum</a> und <a href="https://advent.ieee.uni-passau.de/advent/contact#privacy">Datenschutz</a>
+page.footer=&copy; 2018 IEEE Student Branch Passau - <a href="/contact#imprint">Impressum</a> und <a href="/contact#privacy">Datenschutz</a>
 frontpage.pic.source=Bildquelle: <a href="http://klowner.com/wallpaper/christmas_tux_2012/">"Christmas Tux 2012"</a> von Mark Riedesel, <a href="https://creativecommons.org/licenses/by-sa/4.0/legalcode">Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)</a>
 #<---HTML
 
