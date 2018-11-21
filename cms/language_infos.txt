@@ -1,30 +1,32 @@
 language    | extension | highlight_class | cpu_factor | mem_factor | name                                                            |comment
 ------------|-----------|-----------------|------------|------------|-----------------------------------------------------------------|-----------------------------------------------------------
 C           | c         | c               | 1          | 10         | C, CLANG 7.0.0                                                  | Standard: C11, libraries: libm
-COBOL       | cobol     |                 | 1.5        | 10         |                                                                 |
+COBOL       | cobol     |                 | 1.5        | 10         | -                                                               |
 CPP         | cpp       | cpp             | 1.1        | 10         | C++, CLANG 7.0.0                                                | Standard: C++17, libraries: libm
 CSHARP      | cs        | cs              | 2          | 10         | C#, Mono C# compiler version 5.16.0                             | Mono Project
-D           | d         | d               | 2.0        | 10         |                                                                 |
-FORTH       | forth     |                 | 5.0        | 10         |                                                                 |
-FORTRAN     | f90       | f90             | 2          | 10         |                                                                 | Standard: Fortran 90
-FREEPASCAL  | pas       |                 | 1.2        | 10         |                                                                 |
-GO          | go        | go              | 2.2        | 10         |                                                                 |
-HASKELL     | hs        | hs              | 2.5        | 10         |                                                                 |
-INTERCAL    | i         |                 | 5          | 10         |                                                                 |
+D           | d         | d               | 2.0        | 10         | -                                                               |
+FORTH       | forth     |                 | 5.0        | 10         | -                                                               |
+FORTRAN     | f90       | f90             | 2          | 10         | -                                                               | Standard: Fortran 90
+FREEPASCAL  | pas       |                 | 1.2        | 10         | -                                                               |
+GO          | go        | go              | 2.2        | 10         | Go, golang 1.10.4                                               |
+HASKELL     | hs        | hs              | 2.5        | 10         | Haskell, GHC 8.2.2                                              |
+INTERCAL    | i         |                 | 5          | 10         | -                                                               |
 JAVA        | java      | java            | 2.5        | 10         | Java, OracleJDK jdk1.8.0_191                                    | Main class in default package!
-JAVASCRIPT  | js        | js              | 2.8        | 10         |                                                                 |
-KOTLIN      | kt        |                 | 3.5        | 10         |                                                                 |
-LUA         | lua       | lua             | 5          | 10         |                                                                 |
-MMIX        | mms       |                 | 3.0        | 10         |                                                                 |
-OBJECTIVEC  | m         | objectivec      | 1.1        | 10         |                                                                 | Standard: C99, libraries: libm, compiler argument -lobjc
-OCAML       | ml        | ml              | 1.5        | 10         |                                                                 |
-PERL        | pl        | pl              | 1.8        | 10         |                                                                 |
-PHP         | php       | php             | 4          | 10         |                                                                 | Zend Engine v3.0.0 with Zend OPCache v7.0.25
-PYTHON2     | py        | py              | 4          | 10         |                                                                 |
-PYTHON3     | py        | py              | 4          | 10         | Python 3, Python 3.7.1-1                                        |
-RUBY        | rb        | rb              | 5          | 10         |                                                                 |
-RUST        | rs        | rs              | 2.5        | 10         |                                                                 |
-SCALA       | scala     | scala           | 3.5        | 10         |                                                                 | Main class in default package!
-TCL         | tcl       | tcl             | 3.3        | 10         |                                                                 |
-VALA        | vala      | vala            | 5          | 10         |                                                                 |
-VISUALBASIC | vb        | vb              | 2.5        | 10         |                                                                 | Mono Project
+JAVASCRIPT  | js        | js              | 2.8        | 10         | JavaScript, nodejs 8.11.2                                       |
+KOTLIN      | kt        |                 | 3.5        | 10         | Kotlin, Kotlin 1.3.10                                           | Target JVM 1.8
+LUA         | lua       | lua             | 5          | 10         | -                                                               |
+MMIX        | mms       |                 | 3.0        | 10         | -                                                               |
+OBJECTIVEC  | m         | objectivec      | 1.1        | 10         | -                                                               | Standard: C99, libraries: libm, compiler argument -lobjc
+OCAML       | ml        | ml              | 1.5        | 10         | -                                                               |
+PERL        | pl        | pl              | 1.8        | 10         | Perl, Perl 5.28.0                                               |
+PHP         | php       | php             | 4          | 10         | PHP, PHP 7.2.9                                                  | TODO
+PYTHON2     | py        | py              | 4          | 10         | Python 3, Python 2.7.15                                         |
+PYTHON3     | py        | py              | 4          | 10         | Python 3, Python 3.7.1                                          |
+RUBY        | rb        | rb              | 5          | 10         | Ruby, Ruby 2.5.1                                                |
+RUST        | rs        | rs              | 2.5        | 10         | Rust, Rust 1.30.1                                               |
+SCALA       | scala     | scala           | 3.5        | 10         | Scala, Scala 1.12.7                                             | Target JVM 1.8, Main class in default package!
+TCL         | tcl       | tcl             | 3.3        | 10         | -                                                               |
+VALA        | vala      | vala            | 5          | 10         | -                                                               |
+VISUALBASIC | vb        | vb              | 2.5        | 10         | -                                                               | Mono Project
+
+*- = not available
