@@ -26,7 +26,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-mailer" % "6.0.1",
   "com.typesafe.play" %% "play-mailer-guice" % "6.0.1",
   "org.postgresql" % "postgresql" % "42.2.5",
-  "commons-io" % "commons-io" % "2.5"
+  "commons-io" % "commons-io" % "2.6"
 )
 
 includeFilter in (Assets, LessKeys.less) := "main.less"
