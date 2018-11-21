@@ -76,6 +76,14 @@ object Problems extends TableQuery(new Problems(_)) {
     db.run(Problems.filter(_.door === door).result).map(result => !result.exists(problem => problem.id.get != id))
   def doorAvailable(door: Int)(implicit db: Database, ec: ExecutionContext): Future[Boolean] =
     db.run(Problems.filter(_.door === door).result).map(result => result.isEmpty)
+
+  def reeval(pid: Int)(implicit db: Database, ec: ExecutionContext): Future[Int] = {
+    db.run(Solutions.filter(_.problemId === pid).map(_.id).result) flatMap { sids =>
+      db.run(Testruns.filter(_.solutionId inSet sids)
+        .map(tr => (tr.result, tr.stage, tr.vm, tr.progRuntime, tr.progMemory, tr.compRuntime, tr.compMemory))
+        .update(Queued, Some(0), None, Some(0), Some(0), Some(0), Some(0)))
+    }
+  }
 }
 
 case class ProblemTranslation(problemId: Int, language: Lang, title: String, description: String)

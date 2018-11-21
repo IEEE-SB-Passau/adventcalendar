@@ -240,13 +240,9 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
           .flashing("warning" -> rs.messages("eval.jobs.reevaluateproblem.error")))
       },
       pid => {
-        db.run(
-          Solutions.filter(_.problemId === pid).map(sl => (sl.score, sl.result)).update(0, Queued).andThen(
-            Solutions.filter(_.problemId === pid).map(_.id).result)) flatMap { sids =>
-          db.run(Testruns.filter(_.solutionId inSet sids)
-            .map(tr => (tr.result, tr.stage, tr.vm, tr.progRuntime, tr.progMemory, tr.compRuntime, tr.compMemory))
-            .update(Queued, Some(0), None, Some(0), Some(0), Some(0), Some(0)))
-          ProblemTranslations.problemTitleListByLang(admin.get.lang) map { problems =>
+        db.run(Solutions.filter(_.problemId === pid).map(sl => (sl.score, sl.result)).update(0, Queued)).flatMap { _ =>
+          Problems.reeval(pid)
+          ProblemTranslations.problemTitleListByLang(admin.get.lang).map { problems =>
             Redirect(org.ieee_passau.controllers.routes.EvaluationController.index())
               .flashing("success" -> rs.messages("eval.jobs.reevaluateproblem.message", problems(pid)))
           }

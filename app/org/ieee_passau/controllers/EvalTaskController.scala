@@ -1,7 +1,7 @@
 package org.ieee_passau.controllers
 
 import com.google.inject.Inject
-import org.ieee_passau.models.{Admin, EvalTask, EvalTasks}
+import org.ieee_passau.models._
 import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms.{mapping, number, optional, _}
@@ -28,6 +28,7 @@ class EvalTaskController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
   def delete(pid: Int, id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     db.run(EvalTasks.filter(_.id === id).delete).map { _ =>
+      Problems.reeval(pid)
       Redirect(org.ieee_passau.controllers.routes.ProblemController.edit(pid))
     }
   }}
@@ -47,6 +48,7 @@ class EvalTaskController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
           rs.body.file("program").map { program =>
             val newTask: EvalTask = newTaskRaw.copy(filename = program.filename, file = new File(program.ref.path.toFile).toByteArray())
             db.run((EvalTasks returning EvalTasks.map(_.id)) += newTask).map { newTaskId =>
+              Problems.reeval(pid)
               Redirect(org.ieee_passau.controllers.routes.EvalTaskController.edit(pid, newTaskId)).flashing("success" -> rs.messages("evaltask.create.message", newTaskRaw.position))
             }
           } getOrElse {
@@ -69,6 +71,7 @@ class EvalTaskController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
           rs.body.file("program").map { program =>
             val newTask = task.copy(filename = program.filename, file = new File(program.ref.path.toFile).toByteArray())
             EvalTasks.update(id, newTask)
+            Problems.reeval(pid)
             Future.successful(Redirect(org.ieee_passau.controllers.routes.EvalTaskController.edit(pid, id)).flashing("success" -> rs.messages("evaltask.update.message", task.position)))
           } getOrElse {
             db.run(EvalTasks.byId(id).result.head).map { ot =>
