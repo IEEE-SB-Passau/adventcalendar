@@ -6,6 +6,7 @@ import akka.actor.ActorSystem
 import com.google.inject.Inject
 import org.ieee_passau.evaluation.Messages._
 import org.ieee_passau.models._
+import org.ieee_passau.utils.ListHelper.reduceResult
 import org.ieee_passau.utils.StringHelper.stripNull
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
@@ -49,16 +50,7 @@ class DBWriter @Inject() (val dbConfigProvider: DatabaseConfigProvider, val syst
           db.run(nextStageQuery).foreach { nextStage =>
             db.run(Solutions.filter(_.id === tr.solutionId).result.head).map { solution =>
               db.run(Testruns.filter(r => r.solutionId === solution.id.get && r.id =!= eJob.job.testrunId).map(r => (r.result, r.stage)).result).map { results =>
-                val list = results :+ (eJob.result.getOrElse(Canceled), nextStage)
-                val result =
-                     if (list.forall { case (res, _) => res == Passed })                    Passed
-                else if (list.exists { case (res, s) => res == Queued   || s.isDefined   }) Queued
-                else if (list.forall { case (res, _) => res == Canceled || res == Passed }) Canceled
-                else if (list.exists { case (res, _) => res == CompileError })              CompileError
-                else if (list.exists { case (res, _) => res == ProgramError })              ProgramError
-                else if (list.exists { case (res, _) => res == RuntimeExceeded })           RuntimeExceeded
-                else if (list.exists { case (res, _) => res == MemoryExceeded })            MemoryExceeded
-                else                                                                        WrongAnswer
+                val result = reduceResult(results :+ (eJob.result.getOrElse(Canceled), nextStage))
 
                 if (eJob.result.fold(false)(_ == Passed) && nextStage.isEmpty) { // only last updates score, and only if it passed
                   db.run(Testcases.filter(_.id === tr.testcaseId).map(_.points).result.head).map { points =>

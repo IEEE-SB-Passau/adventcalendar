@@ -18,4 +18,15 @@ object ListHelper {
       SolutionListEntry(pos + 1, solution, tre)
     }.sortBy(-_.position)
   }
+
+  def reduceResult(list: Seq[(Result, Option[Int])]): Result = {
+         if (list.forall { case (res, _) => res == Passed })                    Passed
+    else if (list.exists { case (res, s) => res == Queued   || s.isDefined   }) Queued
+    else if (list.forall { case (res, _) => res == Canceled || res == Passed }) Canceled
+    else if (list.exists { case (res, _) => res == CompileError })              CompileError
+    else if (list.exists { case (res, _) => res == ProgramError })              ProgramError
+    else if (list.exists { case (res, _) => res == RuntimeExceeded })           RuntimeExceeded
+    else if (list.exists { case (res, _) => res == MemoryExceeded })            MemoryExceeded
+    else                                                                        WrongAnswer
+  }
 }

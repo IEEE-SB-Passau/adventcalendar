@@ -32,6 +32,7 @@ class TestcaseController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   def delete(pid: Int, id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     db.run(Testcases.filter(_.id === id).delete).map { _ =>
       Problems.updatePoints(pid)
+      Solutions.updateResult(pid)
       Redirect(org.ieee_passau.controllers.routes.ProblemController.edit(pid))
     }
   }}

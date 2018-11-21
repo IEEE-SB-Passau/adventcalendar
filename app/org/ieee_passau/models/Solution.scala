@@ -3,10 +3,11 @@ package org.ieee_passau.models
 import java.util.Date
 
 import org.ieee_passau.models.DateSupport.dateMapper
+import org.ieee_passau.utils.ListHelper.reduceResult
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{ForeignKeyQuery, ProvenShape}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 case class Solution(id: Option[Int], userId: Int, problemId: Int, languageId: String, program: String,
                     programName: String, created: Date, score: Int, result: Result) extends Entity[Solution] {
@@ -40,4 +41,20 @@ object Solutions extends TableQuery(new Solutions(_)) {
 
   def update(id: Int, solution: Solution)(implicit db: Database): Future[Int] =
     db.run(this.filter(_.id === id).update(solution.withId(id)))
+
+  def updateResult(pid: Int)(implicit db: Database, ec: ExecutionContext): Future[Int] = {
+    val query = (for {
+      tr <- Testruns
+      tc <- tr.testcase
+      s <- tr.solution if s.problemId === pid
+    } yield (s.id, tr.result, tr.stage, tc.points)).result
+    db.run(query).flatMap { list =>
+      val view = list.view
+      Future.reduceLeft(view.groupBy(_._1).map { s =>
+        val points = s._2.filter(x => x._2 == Passed && x._3.isEmpty).map(_._4).sum
+        val result = reduceResult(s._2.map(x => (x._2, x._3)))
+        db.run(Solutions.filter(_.id === s._1).map(s => (s.score, s.result)).update((points, result)))
+      }.toList)((_, x) => x)
+    }
+  }
 }
