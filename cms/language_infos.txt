@@ -19,8 +19,8 @@ MMIX        | mms       |                 | 3.0        | 10         | -         
 OBJECTIVEC  | m         | objectivec      | 1.1        | 10         | -                                                               | Standard: C99, libraries: libm, compiler argument -lobjc
 OCAML       | ml        | ml              | 1.5        | 10         | -                                                               |
 PERL        | pl        | pl              | 1.8        | 10         | Perl, Perl 5.28.0                                               |
-PHP         | php       | php             | 4          | 10         | PHP, PHP 7.2.9                                                  | TODO
-PYTHON2     | py        | py              | 4          | 10         | Python 3, Python 2.7.15                                         |
+PHP         | php       | php             | 4          | 10         | PHP, PHP 7.2.9                                                  | Zend Engine v3.2.0
+PYTHON2     | py        | py              | 4          | 10         | Python 2, Python 2.7.15                                         |
 PYTHON3     | py        | py              | 4          | 10         | Python 3, Python 3.7.1                                          |
 RUBY        | rb        | rb              | 5          | 10         | Ruby, Ruby 2.5.1                                                |
 RUST        | rs        | rs              | 2.5        | 10         | Rust, Rust 1.30.1                                               |
