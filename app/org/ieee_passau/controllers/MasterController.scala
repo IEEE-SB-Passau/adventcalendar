@@ -5,11 +5,12 @@ import java.nio.file.Paths
 import com.google.inject.Inject
 import org.ieee_passau.models.{Everyone, Guest, Permission, User}
 import org.ieee_passau.utils.UserHelper
-import play.api.Configuration
+import play.api.Mode.Prod
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import play.api.routing.JavaScriptReverseRouter
+import play.api.{Configuration, Environment}
 import slick.jdbc.JdbcProfile
 import slick.jdbc.PostgresProfile.api._
 
@@ -18,7 +19,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class MasterController @Inject()(private val dbConfigProvider: DatabaseConfigProvider,
                                  private val components: MessagesControllerComponents,
                                  implicit private val ec: ExecutionContext,
-                                 private val config: Configuration
+                                 private val config: Configuration,
+                                 private val env: Environment
                                 ) extends MessagesAbstractController(components) with I18nSupport {
   implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
 
@@ -55,14 +57,14 @@ class MasterController @Inject()(private val dbConfigProvider: DatabaseConfigPro
   }
 
   def javascriptRoutes: Action[AnyContent] = Action { implicit request =>
-    Ok(
-      JavaScriptReverseRouter("jsRoutes")(
-        org.ieee_passau.controllers.routes.javascript.MainController.codeEditor,
-        org.ieee_passau.controllers.routes.javascript.CmsController.calendar,
-        org.ieee_passau.controllers.routes.javascript.CmsController.content,
-        org.ieee_passau.controllers.routes.javascript.UserController.dismissNotification
-      )
-    ).as("text/javascript")
+    val res = Ok(JavaScriptReverseRouter("jsRoutes")(
+      org.ieee_passau.controllers.routes.javascript.MainController.codeEditor,
+      org.ieee_passau.controllers.routes.javascript.CmsController.calendar,
+      org.ieee_passau.controllers.routes.javascript.CmsController.content,
+      org.ieee_passau.controllers.routes.javascript.UserController.dismissNotification
+    )).as("text/javascript")
+    if (env.mode == Prod) res.withHeaders(CACHE_CONTROL -> "public, max-age=21600")
+    else res
   }
 
   /**
@@ -74,7 +76,9 @@ class MasterController @Inject()(private val dbConfigProvider: DatabaseConfigPro
     config.getOptional[String]("play.assets.staticPath")
       .fold(NotFound(org.ieee_passau.views.html.errors.e404())) { source =>
         val file = Paths.get(source, filename).toFile
-        if (file.exists()) Ok.sendFile(file)
+        if (file.exists())
+          if (env.mode == Prod) Ok.sendFile(file).withHeaders(CACHE_CONTROL -> "public, max-age=21600")
+          else Ok.sendFile(file)
         else NotFound(org.ieee_passau.views.html.errors.e404())
       }
   }}

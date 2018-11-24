@@ -12,7 +12,7 @@ import org.ieee_passau.models.DateSupport.dateMapper
 import org.ieee_passau.models._
 import org.ieee_passau.utils.FutureHelper.akkaTimeout
 import org.ieee_passau.utils.{AkkaHelper, FormHelper, ListHelper}
-import play.api.Configuration
+import play.api.{Configuration, Environment}
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.i18n.Lang
 import play.api.libs.Files.TemporaryFile
@@ -30,10 +30,11 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                                val components: MessagesControllerComponents,
                                implicit val ec: ExecutionContext,
                                val config: Configuration,
+                               val env: Environment,
                                val system: ActorSystem,
                                @Named(AkkaHelper.monitoringActor) val monitoringActor: ActorRef,
                                @Named(AkkaHelper.rankingActor) val rankingActor: ActorRef
-                              ) extends MasterController(dbConfigProvider, components, ec, config) {
+                              ) extends MasterController(dbConfigProvider, components, ec, config, env) {
 
   def problems: Action[AnyContent] = requirePermission(Everyone) { implicit user => Action.async { implicit rs =>
     val lang = rs.lang

@@ -2,7 +2,7 @@ package org.ieee_passau.controllers
 
 import com.google.inject.Inject
 import org.ieee_passau.models._
-import play.api.Configuration
+import play.api.{Configuration, Environment}
 import play.api.data.Form
 import play.api.data.Forms.{mapping, of, _}
 import play.api.data.format.Formats._
@@ -15,8 +15,9 @@ import scala.concurrent.{ExecutionContext, Future}
 class LanguageController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                                    val components: MessagesControllerComponents,
                                    implicit val ec: ExecutionContext,
-                                   implicit val config: Configuration
-                                  ) extends MasterController(dbConfigProvider, components, ec, config) {
+                                   implicit val config: Configuration,
+                                   val env: Environment
+                                  ) extends MasterController(dbConfigProvider, components, ec, config, env) {
 
   def index: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     db.run(Languages.sortBy(_.id.asc).to[List].result).map { list =>

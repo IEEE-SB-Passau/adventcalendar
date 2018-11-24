@@ -7,7 +7,7 @@ import org.ieee_passau.controllers.Beans.UpdateRankingM
 import org.ieee_passau.models.{EvalMode, Problem, ProblemTranslation, Problems, _}
 import org.ieee_passau.utils.{AkkaHelper, FutureHelper, LanguageHelper}
 import org.ieee_passau.utils.LanguageHelper.LangTypeMapper
-import play.api.Configuration
+import play.api.{Configuration, Environment}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.format.Formats._
@@ -24,9 +24,10 @@ class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                                   val components: MessagesControllerComponents,
                                   implicit val ec: ExecutionContext,
                                   implicit val config: Configuration,
+                                  val env: Environment,
                                   val system: ActorSystem,
                                   @Named(AkkaHelper.rankingActor) val rankingActor: ActorRef
-                                 ) extends MasterController(dbConfigProvider, components, ec, config) {
+                                 ) extends MasterController(dbConfigProvider, components, ec, config, env) {
 
   def index: Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
     ProblemTranslations.problemTitleListByLang(admin.get.lang).flatMap { transList =>

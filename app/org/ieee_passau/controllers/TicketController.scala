@@ -7,7 +7,7 @@ import org.ieee_passau.models.DateSupport.dateMapper
 import org.ieee_passau.models._
 import org.ieee_passau.utils.FormHelper
 import org.ieee_passau.utils.StringHelper.encodeEmailName
-import play.api.Configuration
+import play.api.{Configuration, Environment}
 import play.api.data.Form
 import play.api.data.Forms.{mapping, number, optional, text}
 import play.api.db.slick.DatabaseConfigProvider
@@ -21,8 +21,9 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                                  val components: MessagesControllerComponents,
                                  val mailerClient: MailerClient,
                                  implicit val ec: ExecutionContext,
-                                 val config: Configuration
-                                ) extends MasterController(dbConfigProvider, components, ec, config) {
+                                 val config: Configuration,
+                                 val env: Environment
+                                ) extends MasterController(dbConfigProvider, components, ec, config, env) {
 
   def index: Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
     val responsesQuery = for {

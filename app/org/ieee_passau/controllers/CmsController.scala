@@ -15,7 +15,7 @@ import org.ieee_passau.models._
 import org.ieee_passau.utils.FutureHelper.akkaTimeout
 import org.ieee_passau.utils.LanguageHelper.LangTypeMapper
 import org.ieee_passau.utils.{AkkaHelper, LanguageHelper}
-import play.api.Configuration
+import play.api.{Configuration, Environment}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.db.slick.DatabaseConfigProvider
@@ -31,9 +31,10 @@ class CmsController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                               val components: MessagesControllerComponents,
                               implicit val ec: ExecutionContext,
                               val config: Configuration,
+                              val env: Environment,
                               val system: ActorSystem,
                               @Named(AkkaHelper.monitoringActor) val monitoringActor: ActorRef
-                             ) extends MasterController(dbConfigProvider, components, ec, config) {
+                             ) extends MasterController(dbConfigProvider, components, ec, config, env) {
 
   def maintenance: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     val displayLang: Lang = rs.lang

@@ -4,7 +4,7 @@ import com.google.inject.Inject
 import org.apache.commons.mail.EmailException
 import org.ieee_passau.models.{Admin, _}
 import org.ieee_passau.utils.{CaptchaHelper, LanguageHelper, PasswordHasher}
-import play.api.Configuration
+import play.api.{Configuration, Environment}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.db.slick.DatabaseConfigProvider
@@ -21,8 +21,9 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                                val captchaHelper: CaptchaHelper,
                                val mailerClient: MailerClient,
                                implicit val ec: ExecutionContext,
-                               implicit val config: Configuration
-                              ) extends MasterController(dbConfigProvider, components, ec, config) {
+                               implicit val config: Configuration,
+                               val env: Environment
+                              ) extends MasterController(dbConfigProvider, components, ec, config, env) {
 
   def index: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     db.run(Users.sortBy(_.id).to[List].result).map { userList => Ok(org.ieee_passau.views.html.user.index(userList))}

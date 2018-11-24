@@ -16,7 +16,7 @@ import org.ieee_passau.models.{Admin, _}
 import org.ieee_passau.utils.FutureHelper.akkaTimeout
 import org.ieee_passau.utils.ListHelper._
 import org.ieee_passau.utils.{AkkaHelper, PasswordHasher}
-import play.api.Configuration
+import play.api.{Configuration, Environment}
 import play.api.data.Form
 import play.api.data.Forms.{mapping, _}
 import play.api.db.slick.DatabaseConfigProvider
@@ -32,10 +32,11 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
                                      val components: MessagesControllerComponents,
                                      implicit val ec: ExecutionContext,
                                      val config: Configuration,
+                                     val env: Environment,
                                      val system: ActorSystem,
                                      @Named(AkkaHelper.monitoringActor) val monitoringActor: ActorRef,
                                      @Named(AkkaHelper.rankingActor) val rankingActor: ActorRef
-                                    ) extends MasterController(dbConfigProvider, components, ec, config) {
+                                    ) extends MasterController(dbConfigProvider, components, ec, config, env) {
 
   val pageSize: Int = config.getOptional[Int]("pagination.size").getOrElse(50)
 
