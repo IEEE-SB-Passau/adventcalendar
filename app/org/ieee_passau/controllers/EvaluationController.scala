@@ -127,7 +127,7 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
 
     db.run(solutionsQuery.result).flatMap { s =>
       val sol = buildSolutionList(s).head
-      val titleQ = ProblemTranslations.byProblemLang(sol.solution.problemId, rs.lang)
+      val titleQ = ProblemTranslations.byProblemOption(sol.solution.problemId, rs.lang)
       db.run(detailsQ.result.head).flatMap { solDetails =>
         titleQ.map { title =>
           Ok(org.ieee_passau.views.html.solution.solutionDetail(sol, List(solDetails._2), solDetails._1, solDetails._3, title.fold("")(_.title)))
