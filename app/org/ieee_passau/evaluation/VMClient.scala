@@ -118,7 +118,9 @@ class VMClient(host: String, port: Int, name:String) extends EvaluationActor {
         </outputs>
         <utilization>
           <compilation>
+            <!-- bytes -->
             <memory>0.0</memory>
+            <!-- seconds -->
             <runtime>0.0</runtime>
           </compilation>
           <evaluation>
