@@ -374,7 +374,7 @@ class TCPActor(host: String, port: Int, timeout: Int) extends EvaluationActor {
                   <run>
                     <successful>False</successful>
                     <recoverable>True</recoverable>
-                    <message>{base64Encode(e.getMessage + "\n" + e.getStackTrace)}</message>
+                    <message>{base64Encode(e.getMessage + "\n" + e.getStackTrace.toString)}</message>
                   </run>
                 </ieee-advent-calendar>
               sender ! error
