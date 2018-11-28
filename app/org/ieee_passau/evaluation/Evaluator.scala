@@ -1,6 +1,6 @@
 package org.ieee_passau.evaluation
 
-import akka.actor.ActorSystem
+import akka.actor.{Actor, ActorContext, ActorRef, ActorSystem, Props}
 import com.google.inject.Inject
 import org.ieee_passau.utils.FutureHelper
 import play.api.Configuration
@@ -33,5 +33,9 @@ class Evaluator @Inject() (val dbConfigProvider: DatabaseConfigProvider,
   override def preStart(): Unit = {
     super.preStart()
     this.start
+  }
+
+  override def injectedChild(create: => Actor, name: String, props: Props => Props = identity)(implicit context: ActorContext): ActorRef = {
+    context.actorOf(props(Props(create).withDispatcher("evaluator.context")), name)
   }
 }

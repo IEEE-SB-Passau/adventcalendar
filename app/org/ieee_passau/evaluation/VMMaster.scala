@@ -34,7 +34,7 @@ class VMMaster extends EvaluationActor with AkkaScopingHelper {
 
   private def addChild(conf: Config): ActorRef = {
     val actor = context.actorOf(
-      VMClient.props(conf.host, conf.port, conf.actorName),
+      VMClient.props(conf.host, conf.port, conf.actorName).withDispatcher("evaluator.context"),
       name = conf.actorName
     )
 
