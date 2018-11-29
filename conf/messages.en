@@ -372,3 +372,4 @@ eval.jobs.reevaluateproblem.button=Reevaluate problem
 eval.jobs.reevaluateproblem.error=Problem could not be reevaluated.
 eval.jobs.reevaluateproblem.message=All submissions for task {0} will be reevaluated.
 codelang.active=Active
+error.real=Input is not a number

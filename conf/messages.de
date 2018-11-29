@@ -321,6 +321,7 @@ general.pagination.forward=Weiter
 error.invalid=Eingabe ist ungültig
 error.required=Erforderlich
 error.number=Eingabe ist keine Zahl
+error.real=Eingabe ist keine Zahl
 error.min=Eingegebener Wert ist zu klein
 error.max=Eingegebener Wert is zu groß
 error.minLength=Eingabe ist zu kurz
