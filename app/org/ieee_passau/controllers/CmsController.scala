@@ -84,7 +84,7 @@ class CmsController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
         Future.successful(BadRequest(org.ieee_passau.views.html.monitoring.pageEditor(id, "", errorForm)))
       },
       posting => {
-        Postings.byIdOption(id, posting.lang).flatMap {
+        db.run(Postings.byIdLang(id, posting.lang).result.headOption).flatMap {
           case Some(_) => Future.successful(BadRequest(org.ieee_passau.views.html.monitoring.pageEditor(id, "", postingForm.fill(posting))))
           case _ =>
           db.run(Postings += posting).map(_ =>

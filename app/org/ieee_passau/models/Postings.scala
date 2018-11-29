@@ -58,6 +58,10 @@ object Postings extends TableQuery(new Postings(_)) {
     }.flatMap { postings => Future.successful(postings.headOption) }
   }
 
+  def byIdLang(id: Int, lang: Lang): Query[Postings, Posting, Seq] = {
+    this.filter(p => p.id === id && p.lang === lang)
+  }
+
   def update(id: Int, lang: String, post: Posting)(implicit db: Database): Future[Int] =
     db.run(this.filter(p => p.id === id && p.lang === Lang(lang)).update(post.withId(id)))
 }
