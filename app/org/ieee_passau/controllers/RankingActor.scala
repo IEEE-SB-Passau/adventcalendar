@@ -260,7 +260,7 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
     case ProblemsQ(uid, maybeLang) =>
       val now = new Date()
 
-      db.run(Users.byId(uid).result.headOption).map { sessionUser =>
+      db.run(Users.byId(uid).result.headOption).flatMap { sessionUser =>
 
         val lang = sessionUser.map(_.lang).orElse(maybeLang).orElse(Some(LanguageHelper.defaultLanguage)).get
         val problemList = for {
@@ -297,7 +297,7 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
       val localPtr = userCorrectSolutions
       simplify(Users.to[List].result).map { users =>
         val sessionUserIsHidden = users.get(uid).fold(false)(_.hidden)
-        val rank = ranking(sessionUserIsHidden).map { case (u, pl) =>
+        ranking(sessionUserIsHidden).map { case (u, pl) =>
           val user = users(u)
           (pl.foldLeft(0d) { case (points: Double, (_: Int, (_: Int, actualPoints: Double, _: Boolean, _: EvalMode))) =>
             points + actualPoints
