@@ -40,7 +40,7 @@
                             <input type="text" name="title" id="title" class="form-control"/>
                         } else {
                             <input type="text" class="form-control" disabled
-                                   value="@messagesApi(title)(Lang(post("lang").value.get))"/>
+                                   value="@messagesApi(title)(post("lang").value.fold(LanguageHelper.defaultLanguage)(Lang(_)))"/>
                             <input type="hidden" name="title" id="title" value="@title" />
                         }
 

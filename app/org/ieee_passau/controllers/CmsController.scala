@@ -68,13 +68,13 @@ class CmsController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   def editPage(id: Int, lang: String): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     db.run(Postings.byIdLang(id, Lang(lang)).result.headOption).flatMap {
       case Some(post) =>
-        Future.successful(Ok(org.ieee_passau.views.html.monitoring.pageEditor(id, lang, postingForm.fill(post))))
+        Future.successful(Ok(org.ieee_passau.views.html.monitoring.pageEditor(id, lang, postingForm.fill(post), post.title)))
       case _ =>
         Postings.byIdOption(id, LanguageHelper.defaultLanguage).flatMap {
           case Some(fallback) =>
             val post = Posting(Some(id), Lang(lang), fallback.title, "", new Date)
             db.run(Postings += post).map(_ =>
-              Ok(org.ieee_passau.views.html.monitoring.pageEditor(id, lang, postingForm.fill(post)))
+              Ok(org.ieee_passau.views.html.monitoring.pageEditor(id, lang, postingForm.fill(post), fallback.title))
             )
           case _ => Future.successful(Ok(org.ieee_passau.views.html.monitoring.pageEditor(id, "", postingForm)))
         }
