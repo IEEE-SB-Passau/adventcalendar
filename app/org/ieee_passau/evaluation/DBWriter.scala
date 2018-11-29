@@ -30,6 +30,8 @@ class DBWriter @Inject() (val dbConfigProvider: DatabaseConfigProvider, val syst
 
   override def receive: Receive = {
     case EvaluatedJobM(eJob) =>
+      val source = sender
+
       log.debug("DBWriter is saving %s to database".format(eJob.job))
 
       // Update testrun in database with evaluation results
@@ -93,7 +95,7 @@ class DBWriter @Inject() (val dbConfigProvider: DatabaseConfigProvider, val syst
                 completed   = new Date(),
 
                 evalId      = Some(eJob.job.evalId),
-                vm          = Some((oldTr.vm match { case Some(vms) => vms + " " case None => ""}) + sender.path.name)
+                vm          = Some((oldTr.vm match { case Some(vms) => vms + " " case None => ""}) + source.path.name)
               ))
             }
 

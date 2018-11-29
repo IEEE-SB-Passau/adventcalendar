@@ -3,6 +3,7 @@ package org.ieee_passau.evaluation
 import java.util.UUID
 
 import akka.actor.ActorSystem
+import akka.pattern.pipe
 import com.google.inject.Inject
 import org.ieee_passau.evaluation.Messages._
 import org.ieee_passau.models._
@@ -32,7 +33,6 @@ class DBReader @Inject() (val dbConfigProvider: DatabaseConfigProvider,
 
   override def receive: Receive = {
     case ReadJobsDB(count) =>
-      val source = sender
       log.debug("DBReader received request for %d jobs".format(count))
 
       val query = for {
@@ -56,7 +56,7 @@ class DBReader @Inject() (val dbConfigProvider: DatabaseConfigProvider,
         /*12*/ tr.id,
         /*13*/ tr.stage)
 
-      db.run(query.sortBy(_._1.asc).take(count).result).foreach { rawJobs =>
+      db.run(query.sortBy(_._1.asc).take(count).result).map { rawJobs =>
         val jobs = rawJobs.map { rawJob =>
           val uuid = UUID.randomUUID().toString
           if (rawJob._13.get /*stage*/ == 0) { // normal evaluation job
@@ -94,7 +94,7 @@ class DBReader @Inject() (val dbConfigProvider: DatabaseConfigProvider,
         }
 
         log.debug("DBReader is sending %d jobs to InputRegulator".format(jobs.length))
-        source ! JobsM(jobs.toList)
-      }
+        JobsM(jobs.toList)
+      } pipeTo sender
   }
 }

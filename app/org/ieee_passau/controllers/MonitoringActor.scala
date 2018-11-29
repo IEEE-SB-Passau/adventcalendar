@@ -40,17 +40,15 @@ class MonitoringActor @Inject() (val system: ActorSystem, val config: Configurat
       vmMaster ! StatusM(state)
       inputRegulator ! StatusM(state)
     case RunningJobsQ =>
-      val source = sender
-      pipe (inputRegulator ? RunningJobsQ) to source
+      pipe (inputRegulator ? RunningJobsQ) to sender
     case RunningVMsQ =>
-      val source = sender
       pipe ((vmMaster ? RunningVMsQ).flatMap {
         case list: List[(String, Int) @unchecked] => Future {
           list.map {
             vm: (String, Int) => (vm._1, vm._2, nodes.getOrElse(vm._1, VMStatus(vm._1, "", 0, 0, 0, 0, new Date)))
           }
         }
-      }) to source
+      }) to sender
     case VMStatusM(state) => nodes += ((state.actorName, state))
     case NewVM(cfg) => vmMaster forward NewVM(cfg)
     case RemoveVM(name) => vmMaster forward RemoveVM(name)

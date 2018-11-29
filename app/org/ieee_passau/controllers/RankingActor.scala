@@ -3,6 +3,7 @@ package org.ieee_passau.controllers
 import java.util.Date
 
 import akka.actor.{Actor, ActorSystem}
+import akka.pattern.pipe
 import com.google.inject.Inject
 import org.ieee_passau.controllers.Beans._
 import org.ieee_passau.models.DateSupport.dateMapper
@@ -257,7 +258,6 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
       buildStats()
 
     case ProblemsQ(uid, maybeLang) =>
-      val source = sender
       val now = new Date()
 
       db.run(Users.byId(uid).result.headOption).map { sessionUser =>
@@ -269,7 +269,7 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
 
         ProblemTranslations.problemTitleListByLang(lang).flatMap { transList =>
           db.run(problemList.result).map { list =>
-            val problems = list.map {
+            list.map {
               case (id, door, mode, points) =>
                 val submissionCounts = problemCounts(sessionUser.fold(false)(_.hidden))(id)
                 ProblemInfo(id,
@@ -285,17 +285,15 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
                   sessionUser.fold(false)(u => ranking(u.hidden)(u.id.get)(id)._3)
                 )
             }.sortBy(_.door)
-            source ! problems
           }
         }
-      }
+      } pipeTo sender
 
     case RankingQ(uid) =>
       def simplify[A <: Entity[A]](query: PostgresProfile.StreamingProfileAction[scala.Seq[A], A, Effect.Read]) = {
         db.run(query).map(l => l.groupBy(u => u.id.get).map { case (id, u) => (id, u.head) })
       }
 
-      val source = sender
       val localPtr = userCorrectSolutions
       simplify(Users.to[List].result).map { users =>
         val sessionUserIsHidden = users.get(uid).fold(false)(_.hidden)
@@ -309,8 +307,7 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
             ((points: Double, username: String, isHidden: Boolean, userId: Int), _: Int) <- rankingPos
           } yield (rankingPos.head._2 + 1, username, isHidden, points.floor.toInt, localPtr(userId))
         }.toList.sortBy(x => (x._1, -x._5))
-        source ! rank
-      }
+      } pipeTo sender
 
     case StatsQ =>
       sender ! stats
