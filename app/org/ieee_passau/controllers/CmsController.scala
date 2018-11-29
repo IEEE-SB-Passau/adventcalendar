@@ -61,20 +61,23 @@ class CmsController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   def createPage(id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     Postings.byIdOption(id, LanguageHelper.defaultLanguage).map {
       case Some(post) => Ok(org.ieee_passau.views.html.monitoring.pageEditor(id, "", postingForm, post.title))
-      // TODO
       case _ => Ok(org.ieee_passau.views.html.monitoring.pageEditor(id, "", postingForm))
     }
   }}
 
   def editPage(id: Int, lang: String): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
-    Postings.byIdOption(id, Lang(lang)).flatMap {
+    db.run(Postings.byIdLang(id, Lang(lang)).result.headOption).flatMap {
       case Some(post) =>
         Future.successful(Ok(org.ieee_passau.views.html.monitoring.pageEditor(id, lang, postingForm.fill(post))))
       case _ =>
-        val post = Posting(Some(id), Lang(lang), "", "", new Date)
-        db.run(Postings += post).map(_ =>
-          Ok(org.ieee_passau.views.html.monitoring.pageEditor(id, lang, postingForm.fill(post)))
-        )
+        Postings.byIdOption(id, LanguageHelper.defaultLanguage).flatMap {
+          case Some(fallback) =>
+            val post = Posting(Some(id), Lang(lang), fallback.title, "", new Date)
+            db.run(Postings += post).map(_ =>
+              Ok(org.ieee_passau.views.html.monitoring.pageEditor(id, lang, postingForm.fill(post)))
+            )
+          case _ => Future.successful(Ok(org.ieee_passau.views.html.monitoring.pageEditor(id, "", postingForm)))
+        }
     }
   }}
 
@@ -85,9 +88,9 @@ class CmsController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
       },
       posting => {
         db.run(Postings.byIdLang(id, posting.lang).result.headOption).flatMap {
-          case Some(_) => Future.successful(BadRequest(org.ieee_passau.views.html.monitoring.pageEditor(id, "", postingForm.fill(posting))))
-          case _ =>
-          db.run(Postings += posting).map(_ =>
+          case Some(existing) => Future.successful(Redirect(org.ieee_passau.controllers.routes.CmsController.editPage(id, existing.lang.code))
+            .flashing("error" -> rs.messages("posting.translationexists.message")))
+          case _ => db.run(Postings += posting).map(_ =>
             Redirect(org.ieee_passau.controllers.routes.CmsController.maintenance())
               .flashing("success" -> rs.messages("posting.update.message"))
           )

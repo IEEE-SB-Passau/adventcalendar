@@ -26,8 +26,7 @@
                     <div class="col-sm-10">
                         <select id="lang" size="1" name="lang" class="col-sm-10 form-control">
                         @LanguageHelper.langs.map { l =>
-                            <option value="@l.code"
-                                @{if(Lang.get(lng).isDefined && Lang(lng) == l) "selected"}
+                            <option value="@l.code" @{if(Lang.get(lng).isDefined && Lang(lng) == l) "selected"}
                             >@messagesApi("language.name")(l)</option>
                         }
                         </select>
@@ -37,13 +36,13 @@
                 <div class="form-group">
                     <label class="col-sm-2 control-label">@messages("posting.post.title")</label>
                     <div class="col-sm-10">
-                        <input type="text"
-                               class="form-control"
-                               id="title"
-                               name="title"
-                               value="@if(post("lang").value.isDefined) { @messagesApi(post("title").value.getOrElse(""))(Lang(post("lang").value.get)) } else { @title }"
-                               disabled/>
-                        <input type="hidden" name="title" value="@post("title").value.getOrElse("")" />
+                        @if(title.isEmpty) {
+                            <input type="text" name="title" id="title" class="form-control"/>
+                        } else {
+                            <input type="text" class="form-control" disabled
+                                   value="@messagesApi(title)(Lang(post("lang").value.get))"/>
+                            <input type="hidden" name="title" id="title" value="@title" />
+                        }
 
                         <span class="help-block"></span>
                     </div>
