@@ -3,7 +3,6 @@ package org.ieee_passau.controllers
 import java.util.Date
 
 import akka.actor.{Actor, ActorSystem}
-import akka.pattern.pipe
 import com.google.inject.Inject
 import org.ieee_passau.controllers.Beans._
 import org.ieee_passau.models.DateSupport.dateMapper
@@ -20,7 +19,8 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util.Try
 
-class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val system: ActorSystem) extends Actor {
+//noinspection ActorMutableStateInspection all state is due to caching
+class RankingActor @Inject()(val dbConfigProvider: DatabaseConfigProvider, val system: ActorSystem) extends Actor {
   private val dbConfig = dbConfigProvider.get[JdbcProfile]
   implicit private val db: Database = dbConfig.db
   implicit private val evalContext: ExecutionContext = system.dispatchers.lookup("evaluator.context")
@@ -258,6 +258,8 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
       buildStats()
 
     case ProblemsQ(uid, maybeLang) =>
+      // do not convert to pipeTo, because exceptions propagate instead of resulting in timeouts
+      val source = sender
       val now = new Date()
 
       db.run(Users.byId(uid).result.headOption).flatMap { sessionUser =>
@@ -269,7 +271,7 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
 
         ProblemTranslations.problemTitleListByLang(lang).flatMap { transList =>
           db.run(problemList.result).map { list =>
-            list.map {
+            source ! list.map {
               case (id, door, mode, points) =>
                 val submissionCounts = problemCounts(sessionUser.fold(false)(_.hidden))(id)
                 ProblemInfo(id,
@@ -287,17 +289,19 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
             }.sortBy(_.door)
           }
         }
-      } pipeTo sender
+      }
 
     case RankingQ(uid) =>
       def simplify[A <: Entity[A]](query: PostgresProfile.StreamingProfileAction[scala.Seq[A], A, Effect.Read]) = {
         db.run(query).map(l => l.groupBy(u => u.id.get).map { case (id, u) => (id, u.head) })
       }
 
+      // do not convert to pipeTo, because exceptions propagate instead of resulting in timeouts
+      val source = sender
       val localPtr = userCorrectSolutions
       simplify(Users.to[List].result).map { users =>
         val sessionUserIsHidden = users.get(uid).fold(false)(_.hidden)
-        ranking(sessionUserIsHidden).map { case (u, pl) =>
+        source ! ranking(sessionUserIsHidden).map { case (u, pl) =>
           val user = users(u)
           (pl.foldLeft(0d) { case (points: Double, (_: Int, (_: Int, actualPoints: Double, _: Boolean, _: EvalMode))) =>
             points + actualPoints
@@ -307,7 +311,7 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
             ((points: Double, username: String, isHidden: Boolean, userId: Int), _: Int) <- rankingPos
           } yield (rankingPos.head._2 + 1, username, isHidden, points.floor.toInt, localPtr(userId))
         }.toList.sortBy(x => (x._1, -x._5))
-      } pipeTo sender
+      }
 
     case StatsQ =>
       sender ! stats
