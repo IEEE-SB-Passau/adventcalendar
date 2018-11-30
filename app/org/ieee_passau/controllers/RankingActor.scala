@@ -164,7 +164,7 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
             // This would be the number of tries for a problem for each user
             // val userXproblemXcount = allS.groupBy(_._3).map { case (u, pl) => u -> pl.groupBy(_._1).map { case (p, sl) => p -> sl.length } }
             val dynamicChallengeFactor = modeList.filter(_._2._1 == Dynamic).map { case (p, (_, points)) =>
-              p -> (calculateChallengeFactor(points) _).tupled(submissionCounts(p))
+              p -> (calculateChallengeFactor(points) _).tupled(submissionCounts.getOrElse(p, (0, 0, 0)))
             }.toMap
             val bestChallengeFactor = modeList.filter(_._2._1 == Best).map { case (p, _) =>
               p -> calculateChallengeRank(problemXuserXbest(p).values.map(_.fold(0)(_._1)).toList)
