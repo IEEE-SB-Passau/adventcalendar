@@ -264,7 +264,7 @@ class RankingActor @Inject() (val dbConfigProvider: DatabaseConfigProvider, val 
 
         val lang = sessionUser.map(_.lang).orElse(maybeLang).orElse(Some(LanguageHelper.defaultLanguage)).get
         val problemList = for {
-          p <- Problems if (p.readableStart < (now: Date) && p.readableStop > (now: Date)) || sessionUser.fold(false)(_.hidden)
+          p <- Problems if p.readableStart < (now: Date) && p.readableStop > (now: Date)
         } yield (p.id, p.door, p.evalMode, p.points)
 
         ProblemTranslations.problemTitleListByLang(lang).flatMap { transList =>
