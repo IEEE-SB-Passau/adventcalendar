@@ -4,8 +4,10 @@ import java.util.Date
 
 import org.ieee_passau.models.DateSupport.dateMapper
 import org.ieee_passau.utils.ListHelper.reduceResult
+import slick.dbio.Effect
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{ForeignKeyQuery, ProvenShape}
+import slick.sql.FixedSqlAction
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -39,8 +41,8 @@ object Solutions extends TableQuery(new Solutions(_)) {
     db.run(Solutions.filter(_.userId === userId).filter(_.problemId === problemId).sortBy(_.created.desc).result.headOption)
   }
 
-  def update(id: Int, solution: Solution)(implicit db: Database): Future[Int] =
-    db.run(this.filter(_.id === id).update(solution.withId(id)))
+  def update(id: Int, solution: Solution): FixedSqlAction[Int, NoStream, Effect.Write] =
+    this.filter(_.id === id).update(solution.withId(id))
 
   def updateResult(pid: Int)(implicit db: Database, ec: ExecutionContext): Future[Int] = {
     val query = (for {

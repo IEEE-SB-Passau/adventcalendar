@@ -89,7 +89,7 @@ class TestcaseController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
           solutions.foreach(s =>
             db.run(Testruns.bySolutionIdTestcaseId(s, id).result.headOption).foreach {
               case Some(existing) =>
-                Testruns.update(id, existing.copy(result = Queued, stage = Some(0)))
+                db.run(Testruns.update(id, existing.copy(result = Queued, stage = Some(0))))
               case _ =>
                 db.run(Testruns += Testrun(None, s, id, None, None, None, None, None, None, None, None, None, None, Queued, None, now, Some(0), None, None, now))
             }

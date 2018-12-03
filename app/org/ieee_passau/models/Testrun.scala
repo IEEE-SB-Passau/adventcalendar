@@ -4,8 +4,7 @@ import java.util.Date
 
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{CompiledFunction, ForeignKeyQuery, ProvenShape}
-
-import scala.concurrent.Future
+import slick.sql.FixedSqlAction
 
 case class Testrun(id: Option[Int], solutionId: Int, testcaseId: Int, progOut: Option[String], progErr: Option[String],
                    progExit: Option[Int], progRuntime: Option[Double], progMemory: Option[Int], compOut: Option[String],
@@ -51,6 +50,6 @@ object Testruns extends TableQuery(new Testruns(_)) {
   def byId: CompiledFunction[Rep[Int] => Query[Testruns, Testrun, Seq], Rep[Int], Int, Query[Testruns, Testrun, Seq], Seq[Testrun]] =
     this.findBy(_.id)
 
-  def update(id: Int, testrun: Testrun)(implicit db: Database): Future[Int] =
-    db.run(this.byId(id).update(testrun.withId(id)))
+  def update(id: Int, testrun: Testrun): FixedSqlAction[Int, NoStream, Effect.Write] =
+    this.byId(id).update(testrun.withId(id))
 }
