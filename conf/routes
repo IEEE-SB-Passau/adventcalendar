@@ -24,6 +24,7 @@ GET         /login                                     org.ieee_passau.controlle
 POST        /login                                     org.ieee_passau.controllers.UserController.authenticate
 
 GET         /language/:lang                            org.ieee_passau.controllers.UserController.updateLang(lang: String)
++ nocsrf
 POST        /notification                              org.ieee_passau.controllers.UserController.dismissNotification
 
 GET         /register                                  org.ieee_passau.controllers.UserController.register
@@ -68,7 +69,7 @@ POST        /admin/problem/:pid/task/:id/delete        org.ieee_passau.controlle
 GET         /admin/submission                          org.ieee_passau.controllers.EvaluationController.index(page: Int ?= 1, order: String ?="date")
 GET         /admin/submission/:id                      org.ieee_passau.controllers.EvaluationController.details(id: Int)
 POST        /admin/submission/:id/rerun                org.ieee_passau.controllers.EvaluationController.reEval(id: Int)
-POST        /admin/submission/rerunproblem         org.ieee_passau.controllers.EvaluationController.reEvalProblem
+POST        /admin/submission/rerunproblem             org.ieee_passau.controllers.EvaluationController.reEvalProblem
 POST        /admin/submission/rerunall                 org.ieee_passau.controllers.EvaluationController.reEvalAll
 
 GET         /admin/monitoring/queued                   org.ieee_passau.controllers.EvaluationController.indexQueued
