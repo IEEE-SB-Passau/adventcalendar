@@ -85,9 +85,9 @@ problem.translation.title=Übersetzung
 problem.translation.list.title=Problembeschreibung
 problem.translation.create=Übersetzung hinzufügen
 problem.translation.edit=Übersetzung editieren
-problem.translation.create.error.exists=Diese Übersetzung existiert bereites!
+problem.translation.create.error.exists=Diese Übersetzung existiert bereits!
 problem.translation.create.message=Übersetzung nach {1} für Aufgabe {0} wurde angelegt.
-problem.translation.update.message=Übersetung nach {1} für Aufgabe {0} wurde aktualisiert.
+problem.translation.update.message=Übersetzung nach {1} für Aufgabe {0} wurde aktualisiert.
 
 testcase.title=Testfall
 testcase.list.title=Testfälle
@@ -297,7 +297,7 @@ posting.post.title=Titel
 posting.post.content=Inhalt
 posting.post.default=Standardversion
 posting.post.trans=Übersetzungen
-posting.translationexists.message=Diese Übesetzung existert bereits!
+posting.translationexists.message=Diese Übersetzung existiert bereits!
 posting.update.message=Meldung wurde geändert.
 posting.post.missing=Dieser Post muss erst angelegt werden.
 
@@ -362,7 +362,7 @@ Das Adventskalender-Team
 email.passwordreset.subject=Benutzerservice
 email.passwordreset.body=Hallo {0},\n\
 \n\
-Klicke bitte folgenden Link um deinen Passowort beim IEEE Adventskalender zu zurückzusetzen:\n\
+Klicke bitte folgenden Link um deinen Passwort beim IEEE Adventskalender zu zurückzusetzen:\n\
 {1}\n\
 \n\
 Weiterhin viel Spaß beim Mitmachen,\n\
@@ -371,7 +371,7 @@ Das Adventskalender-Team
 email.answer.subject=Antwort bezüglich {0}
 
 # Notification
-notification.cookie.text=Der Adventskalender benötigt Cookies um zu funktionieren. Infos dazu gibts 
+notification.cookie.text=Der Adventskalender benötigt Cookies um zu funktionieren. Infos dazu gibt's 
 notification.cookie.link=hier.
 notification.cookie.button=Ok
 
