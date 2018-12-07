@@ -44,19 +44,21 @@ object Solutions extends TableQuery(new Solutions(_)) {
   def update(id: Int, solution: Solution): FixedSqlAction[Int, NoStream, Effect.Write] =
     this.filter(_.id === id).update(solution.withId(id))
 
-  def updateResult(pid: Int)(implicit db: Database, ec: ExecutionContext): Future[Int] = {
-    val query = (for {
-      tr <- Testruns
-      tc <- tr.testcase
-      s <- tr.solution if s.problemId === pid
-    } yield (s.id, tr.result, tr.stage, tc.points)).result
-    db.run(query).flatMap { list =>
-      val view = list.view
-      Future.reduceLeft(view.groupBy(_._1).map { s =>
-        val points = s._2.filter(x => x._2 == Passed && x._3.isEmpty).map(_._4).sum
-        val result = reduceResult(s._2.map(x => (x._2, x._3)))
-        db.run(Solutions.filter(_.id === s._1).map(s => (s.score, s.result)).update((points, result)))
-      }.toList)((_, x) => x)
-    }
+  def updateResult(pid: Int)(implicit ec: ExecutionContext): DBIOAction[Unit, NoStream, Effect.Read with Effect with Effect with Effect.Write] = {
+    for {
+      list <- (for {
+        tr <- Testruns
+        tc <- tr.testcase
+        s <- tr.solution if s.problemId === pid
+      } yield (s.id, tr.result, tr.stage, tc.points)).result
+      _ <- DBIO.sequence {
+        list.view.groupBy(_._1).map { s =>
+          for {
+            points <- DBIO.successful(s._2.filter(x => x._2 == Passed && x._3.isEmpty).map(_._4).sum)
+            result <- DBIO.successful(reduceResult(s._2.map(x => (x._2, x._3))))
+            _ <- Solutions.filter(_.id === s._1).map(s => (s.score, s.result)).update((points, result))
+          } yield ()}
+      }
+    } yield ()
   }
 }

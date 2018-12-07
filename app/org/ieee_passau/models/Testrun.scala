@@ -45,8 +45,6 @@ class Testruns(tag: Tag) extends TableWithId[Testrun](tag, "testruns") {
 }
 
 object Testruns extends TableQuery(new Testruns(_)) {
-  def bySolutionIdTestcaseId(solutionId: Int, testcaseId: Int): Query[Testruns, Testrun, Seq] =
-    filter(r => r.solutionId === solutionId && r.testcaseId === testcaseId)
   def byId: CompiledFunction[Rep[Int] => Query[Testruns, Testrun, Seq], Rep[Int], Int, Query[Testruns, Testrun, Seq], Seq[Testrun]] =
     this.findBy(_.id)
 

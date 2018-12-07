@@ -4,11 +4,12 @@ import java.util.Date
 
 import com.google.inject.Inject
 import org.ieee_passau.models._
-import play.api.{Configuration, Environment}
+import org.ieee_passau.utils.DbHelper
 import play.api.data.Form
 import play.api.data.Forms.{mapping, number, optional, _}
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.mvc._
+import play.api.{Configuration, Environment}
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -31,11 +32,14 @@ class TestcaseController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   }}
 
   def delete(pid: Int, id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
-    db.run(Testcases.filter(_.id === id).delete).map { _ =>
-      Problems.updatePoints(pid)
-      Solutions.updateResult(pid)
+    DbHelper.retry(for {
+      _ <- Testcases.filter(_.id === id).delete
+      _ <- Testruns.filter(_.testcaseId === id).delete
+      _ <- Problems.updatePoints(pid)
+      _ <- Solutions.updateResult(pid)
+    } yield ()).map(_ =>
       Redirect(org.ieee_passau.controllers.routes.ProblemController.edit(pid))
-    }
+    )
   }}
 
   def insert(pid: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
@@ -54,19 +58,18 @@ class TestcaseController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
       newTestcase => {
         val now = new Date()
-        val solutionsQuery = for {
-          s <- Solutions if s.problemId === pid
-        } yield s.id
-
-        db.run((Testcases returning Testcases.map(_.id)) += newTestcase).zip(db.run(solutionsQuery.result)).map {
-          case (testcase, testruns) =>
-            Problems.updatePoints(pid)
-            testruns.map(s =>
-              db.run(Testruns += Testrun(None, s, testcase, None, None, None, None, None, None, None, None, None, None, Queued, None, now, Some(0), None, None, now))
-            )
-            Redirect(org.ieee_passau.controllers.routes.TestcaseController.edit(pid, testcase))
-              .flashing("success" -> rs.messages("testcase.create.message", newTestcase.position))
-        }
+        DbHelper.retry(for {
+          newId <- (Testcases returning Testcases.map(_.id)) += newTestcase
+          solutions <- Solutions.filter(_.problemId === pid).map(_.id).result
+          _ <- Problems.updatePoints(pid)
+          _ <- DBIO.sequence { solutions.map { s => for {
+            _ <- Testruns += Testrun(None, s, newId, None, None, None, None, None, None, None, None, None, None, Queued, None, now, Some(0), None, None, now)
+          } yield ()}}
+          _ <- Solutions.updateResult(pid)
+        } yield newId).map(testcase =>
+          Redirect(org.ieee_passau.controllers.routes.TestcaseController.edit(pid, testcase))
+            .flashing("success" -> rs.messages("testcase.create.message", newTestcase.position))
+        )
       }
     )
   }}
@@ -80,24 +83,18 @@ class TestcaseController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
       },
 
       testcase => {
-        val now = new Date()
-        Testcases.update(id, testcase).foreach(_ => Problems.updatePoints(pid))
-        val solutionsQuery = for {
-          s <- Solutions if s.problemId === pid
-        } yield s.id
-        db.run(solutionsQuery.result).map { solutions =>
-          solutions.foreach(s =>
-            db.run(Testruns.bySolutionIdTestcaseId(s, id).result.headOption).foreach {
-              case Some(existing) =>
-                db.run(Testruns.update(id, existing.copy(result = Queued, stage = Some(0))))
-              case _ =>
-                db.run(Testruns += Testrun(None, s, id, None, None, None, None, None, None, None, None, None, None, Queued, None, now, Some(0), None, None, now))
-            }
-          )
-
+        DbHelper.retry(for {
+          _ <- Testcases.update(id, testcase)
+          _ <- Problems.updatePoints(pid)
+          solutions <- Solutions.filter(_.problemId === pid).map(_.id).result
+          _ <- DBIO.sequence(solutions.map(s =>
+            Testruns.filter(r => r.testcaseId === id && r.solutionId === s).map(r => (r.result, r.stage)).update((Queued, Some(0)))
+          ))
+          _ <- Solutions.updateResult(pid)
+        } yield ()).map(_ =>
           Redirect(org.ieee_passau.controllers.routes.TestcaseController.edit(pid, id))
             .flashing("success" -> rs.messages("testcase.update.message", testcase.position))
-        }
+        )
       }
     )
   }}

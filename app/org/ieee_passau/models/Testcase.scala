@@ -1,9 +1,8 @@
 package org.ieee_passau.models
 
+import slick.dbio.Effect
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{CompiledFunction, ForeignKeyQuery, ProvenShape}
-
-import scala.concurrent.Future
 
 case class Testcase (id: Option[Int], problemId: Int, position: Int, visibility: Visibility, input: String,
                      expectedOutput: String, points: Int) extends Entity[Testcase] {
@@ -27,6 +26,6 @@ object Testcases extends TableQuery(new Testcases(_)) {
   def byId: CompiledFunction[Rep[Int] => Query[Testcases, Testcase, Seq], Rep[Int], Int, Query[Testcases, Testcase, Seq], Seq[Testcase]] =
     this.findBy(_.id)
 
-  def update(id: Int, testcase: Testcase)(implicit db: Database): Future[Int] =
-    db.run(this.byId(id).update(testcase.withId(id)))
+  def update(id: Int, testcase: Testcase)(implicit db: Database): DBIOAction[Int, NoStream, Effect.Write] =
+    this.byId(id).update(testcase.withId(id))
 }

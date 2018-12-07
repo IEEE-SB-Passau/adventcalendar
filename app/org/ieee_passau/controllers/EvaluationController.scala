@@ -15,7 +15,7 @@ import org.ieee_passau.models.Result.resultTypeMapper
 import org.ieee_passau.models.{Admin, _}
 import org.ieee_passau.utils.FutureHelper.akkaTimeout
 import org.ieee_passau.utils.ListHelper._
-import org.ieee_passau.utils.{AkkaHelper, PasswordHasher}
+import org.ieee_passau.utils.{AkkaHelper, DbHelper, PasswordHasher}
 import play.api.{Configuration, Environment}
 import play.api.data.Form
 import play.api.data.Forms.{mapping, _}
@@ -192,13 +192,15 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
   def cancel(id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     db.run(Testruns.byId(id).result.headOption) flatMap {
       case Some(job) =>
-        db.run(Testruns.filter(_.id === id).map(tr => (tr.result, tr.vm, tr.evalId, tr.completed, tr.stage))
-        .update((Canceled, Some("_"), None, new Date, None)).andThen(
-          Solutions.filter(_.id === job.solutionId).map(_.result).update(Canceled))) map { _ =>
-          monitoringActor ! JobFinished(BaseJob(0, 0, "", id, job.evalId.getOrElse(""), "", "", "", ""))
+        DbHelper.retry(for {
+          _ <- DBIO.successful(monitoringActor ! JobFinished(BaseJob(0, 0, "", id, job.evalId.getOrElse(""), "", "", "", "")))
+          _ <- Solutions.filter(_.id === job.solutionId).map(_.result).update(Canceled)
+          _ <- Testruns.filter(_.id === id).map(tr => (tr.result, tr.vm, tr.evalId, tr.completed, tr.stage))
+            .update((Canceled, Some("_"), None, new Date, None))
+        } yield ()).map(_ =>
           Redirect(org.ieee_passau.controllers.routes.EvaluationController.indexQueued())
             .flashing("success" -> rs.messages("eval.jobs.cancel.message"))
-        }
+        )
       case _ =>
         Future.successful(Redirect(org.ieee_passau.controllers.routes.EvaluationController.indexQueued())
           .flashing("warning" -> rs.messages("eval.jobs.cancel.invalidjob")))
@@ -206,34 +208,35 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
   }}
 
   def cancelAll: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
-    db.run(Testruns.filter(_.result === (Queued: org.ieee_passau.models.Result))
-      .map(tr => (tr.id, tr.result, tr.vm, tr.evalId, tr.completed, tr.stage)).result) flatMap { testruns =>
-      testruns.foreach( tr => monitoringActor ! JobFinished(BaseJob(0, 0, "", tr._1 /* id */, tr._4.getOrElse("") /* eval_id */, "", "", "", "")))
-      db.run(
-        Solutions.filter(_.result === (Queued: org.ieee_passau.models.Result)).map(_.result).update(Canceled).andThen(
-        Testruns.filter(_.result === (Queued: org.ieee_passau.models.Result))
-          .map(tr => (tr.result, tr.vm, tr.evalId, tr.completed, tr.stage))
-          .update((Canceled, Some("_"), None, new Date, None)))) map { _ =>
-        Redirect(org.ieee_passau.controllers.routes.EvaluationController.indexQueued())
-          .flashing("success" -> rs.messages("eval.jobs.cancelall.message"))
-      }
-    }
+    DbHelper.retry(for {
+      testruns <- Testruns.filter(_.result === (Queued: org.ieee_passau.models.Result))
+        .map(tr => (tr.id, tr.result, tr.vm, tr.evalId, tr.completed, tr.stage)).result
+      _ <- DBIO.successful(testruns.foreach(tr => monitoringActor ! JobFinished(BaseJob(0, 0, "", tr._1 /* id */ , tr._4.getOrElse("") /* eval_id */ , "", "", "", ""))))
+      _ <- Solutions.filter(_.result === (Queued: org.ieee_passau.models.Result)).map(_.result).update(Canceled)
+      _ <- Testruns.filter(_.result === (Queued: org.ieee_passau.models.Result))
+        .map(tr => (tr.result, tr.vm, tr.evalId, tr.completed, tr.stage))
+        .update((Canceled, Some("_"), None, new Date, None))
+    } yield ()).map(_ =>
+      Redirect(org.ieee_passau.controllers.routes.EvaluationController.indexQueued())
+        .flashing("success" -> rs.messages("eval.jobs.cancelall.message"))
+    )
   }}
 
   def reEval(id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
-    db.run((for {
-      r <- Testruns
-      s <- r.solution if s.id === id
-    } yield (r, s)).result) flatMap { testruns =>
-      Future.reduceLeft(testruns.map { case (testrun, solution) =>
-        db.run(Solutions.update(solution.id.get, solution.copy(score = 0, result = Queued)))
-        db.run(Testruns.update(testrun.id.get, testrun.copy(result = Queued, stage = Some(0), vm = None,
-          progRuntime = Some(0), progMemory = Some(0), compRuntime = Some(0), compMemory = Some(0))))
-      }.toList)((_, it) => it) map {_ =>
-        Redirect(org.ieee_passau.controllers.routes.EvaluationController.index())
-          .flashing("success" -> rs.messages("eval.jobs.reevaluate.message"))
-      }
-    }
+    DbHelper.retry(for {
+      testruns <- (for {
+        r <- Testruns
+        s <- r.solution if s.id === id
+      } yield (r, s)).result
+      _ <- DBIO.sequence { testruns.map { case (testrun, solution) => for {
+        _ <- Solutions.update(solution.id.get, solution.copy(score = 0, result = Queued))
+        _ <- Testruns.update(testrun.id.get, testrun.copy(result = Queued, stage = Some(0), vm = None,
+          progRuntime = Some(0), progMemory = Some(0), compRuntime = Some(0), compMemory = Some(0)))
+      } yield ()}}
+    } yield ()).map(_ =>
+      Redirect(org.ieee_passau.controllers.routes.EvaluationController.index())
+        .flashing("success" -> rs.messages("eval.jobs.reevaluate.message"))
+    )
   }}
 
   def reEvalProblem: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
@@ -243,24 +246,24 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
           .flashing("warning" -> rs.messages("eval.jobs.reevaluateproblem.error")))
       },
       pid => {
-        db.run(Solutions.filter(_.problemId === pid).map(sl => (sl.score, sl.result)).update(0, Queued)).flatMap { _ =>
-          Problems.reeval(pid)
-          ProblemTranslations.problemTitleListByLang(admin.get.lang).map { problems =>
+        DbHelper.retry(Problems.reeval(pid)).flatMap( _ =>
+          ProblemTranslations.problemTitleListByLang(admin.get.lang).map(problems =>
             Redirect(org.ieee_passau.controllers.routes.EvaluationController.index())
               .flashing("success" -> rs.messages("eval.jobs.reevaluateproblem.message", problems(pid)))
-          }
-        }
+          ))
       }
     )
   }}
 
   def reEvalAll: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
-    db.run(Testruns.map(tr => (tr.result, tr.stage, tr.vm, tr.progRuntime, tr.progMemory, tr.compRuntime, tr.compMemory))
-      .update(Queued, Some(0), None, Some(0), Some(0), Some(0), Some(0)).andThen(
-        Solutions.map(sl => (sl.score, sl.result)).update(0, Queued))) map {_ =>
-        Redirect(org.ieee_passau.controllers.routes.EvaluationController.index())
-          .flashing("success" -> rs.messages("eval.jobs.reevaluateall.message"))
-    }
+    DbHelper.retry(for {
+      _ <- Solutions.map(sl => (sl.score, sl.result)).update(0, Queued)
+      _ <- Testruns.map(tr => (tr.result, tr.stage, tr.vm, tr.progRuntime, tr.progMemory, tr.compRuntime, tr.compMemory))
+        .update(Queued, Some(0), None, Some(0), Some(0), Some(0), Some(0))
+    } yield ()).map(_ =>
+      Redirect(org.ieee_passau.controllers.routes.EvaluationController.index())
+        .flashing("success" -> rs.messages("eval.jobs.reevaluateall.message"))
+    )
   }}
 
   def registerVM: Action[NodeSeq] = requirePermission(Internal, parse.xml) { _ => Action[NodeSeq](parse.xml) { implicit rs =>

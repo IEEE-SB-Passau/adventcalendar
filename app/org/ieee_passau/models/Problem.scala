@@ -6,6 +6,7 @@ import org.ieee_passau.utils.LanguageHelper
 import org.ieee_passau.utils.LanguageHelper.LangTypeMapper
 import play.api.i18n.Lang
 import slick.dbio.Effect
+import slick.jdbc.PostgresProfile
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{CompiledFunction, ForeignKeyQuery, ProvenShape, TableQuery}
 
@@ -65,24 +66,26 @@ object Problems extends TableQuery(new Problems(_)) {
       }
     ))
 
-  def updatePoints(id: Int)(implicit db: Database, ec: ExecutionContext): Future[Int] =
-    db.run(Testcases.filter(_.problemId === id).map(_.points).sum.result.flatMap(
+  def updatePoints(id: Int)(implicit ec: ExecutionContext): DBIOAction[Int, PostgresProfile.api.NoStream, Effect.Read with Effect.Write] =
+    Testcases.filter(_.problemId === id).map(_.points).sum.result.flatMap(
       _.fold(DBIO.successful(0): DBIOAction[Int, NoStream, Effect.Write]) { points =>
         Problems.filter(_.id === id).map(_.points).update(points)
       }
-    ))
+    )
 
   def doorAvailable(door: Int, id: Int)(implicit db: Database, ec: ExecutionContext): Future[Boolean] =
     db.run(Problems.filter(_.door === door).result).map(result => !result.exists(problem => problem.id.get != id))
   def doorAvailable(door: Int)(implicit db: Database, ec: ExecutionContext): Future[Boolean] =
     db.run(Problems.filter(_.door === door).result).map(result => result.isEmpty)
 
-  def reeval(pid: Int)(implicit db: Database, ec: ExecutionContext): Future[Int] = {
-    db.run(Solutions.filter(_.problemId === pid).map(_.id).result) flatMap { sids =>
-      db.run(Testruns.filter(_.solutionId inSet sids)
+  def reeval(pid: Int)(implicit ec: ExecutionContext): DBIOAction[Unit, NoStream, Effect.Read with Effect.Write] = {
+    for {
+      solutions <- Solutions.filter(_.problemId === pid).map(_.id).result
+      _ <- Solutions.filter(_.problemId === pid).map(sl => (sl.score, sl.result)).update(0, Queued)
+      _ <- Testruns.filter(_.solutionId inSet solutions)
         .map(tr => (tr.result, tr.stage, tr.vm, tr.progRuntime, tr.progMemory, tr.compRuntime, tr.compMemory))
-        .update(Queued, Some(0), None, Some(0), Some(0), Some(0), Some(0)))
-    }
+        .update(Queued, Some(0), None, Some(0), Some(0), Some(0), Some(0))
+    } yield ()
   }
 }
 

@@ -10,7 +10,7 @@ import play.api.db.slick.DatabaseConfigProvider
 import play.api.i18n.I18nSupport
 import play.api.mvc._
 import play.api.routing.JavaScriptReverseRouter
-import play.api.{Configuration, Environment}
+import play.api.{Configuration, Environment, Logger}
 import slick.jdbc.JdbcProfile
 import slick.jdbc.PostgresProfile.api._
 
@@ -23,6 +23,7 @@ class MasterController @Inject()(private val dbConfigProvider: DatabaseConfigPro
                                  private val env: Environment
                                 ) extends MessagesAbstractController(components) with I18nSupport {
   implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
+  implicit val log = Logger(this.getClass)
 
   /**
     * Requires the given permission level to execute the given action

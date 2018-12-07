@@ -6,15 +6,15 @@ import akka.actor.ActorSystem
 import com.google.inject.Inject
 import org.ieee_passau.evaluation.Messages._
 import org.ieee_passau.models._
+import org.ieee_passau.utils.DbHelper.retry
 import org.ieee_passau.utils.ListHelper.reduceResult
 import org.ieee_passau.utils.StringHelper.stripNull
+import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
 import slick.jdbc.PostgresProfile.api._
-import slick.jdbc.TransactionIsolation.RepeatableRead
 
 import scala.concurrent.ExecutionContext
-import scala.util.{Failure, Success}
 
 object DBWriter {
   trait Factory {
@@ -28,6 +28,7 @@ object DBWriter {
 class DBWriter @Inject()(val dbConfigProvider: DatabaseConfigProvider, val system: ActorSystem) extends EvaluationActor {
   private implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
   private implicit val evalContext: ExecutionContext = system.dispatchers.lookup("evaluator.context")
+  private implicit val logger = Logger(this.getClass)
 
   override def receive: Receive = {
     case EvaluatedJobM(eJob) =>
@@ -99,7 +100,7 @@ class DBWriter @Inject()(val dbConfigProvider: DatabaseConfigProvider, val syste
           db.run(nextStageQ(tr)).foreach {
             case None =>
               if (eJob.result.fold(false)(_ == Passed)) {
-                db.run((for {
+                retry(for {
                   results <- otherResults(tr)
                   points <- Testcases.filter(_.id === tr.testcaseId).map(_.points).result.head
                   score <- Solutions.filter(_.id === tr.solutionId).map(_.score).result.head
@@ -111,13 +112,10 @@ class DBWriter @Inject()(val dbConfigProvider: DatabaseConfigProvider, val syste
                   testrun <- DBIO.successful(copyTrFromOld(oldTr, None))
 
                   _ <- Solutions.filter(_.id === tr.solutionId).map(sol => (sol.score, sol.result)).update((newScore, result))
-                  _ <- Testruns.byId(oldTr.id.get).update(testrun.withId(oldTr.id.get))
-                } yield ()).transactionally.withTransactionIsolation(RepeatableRead).asTry.flatMap {
-                  case Failure(e: Throwable) => DBIO.successful(log.error(e, "Error writing to database"))
-                  case Success(_) => DBIO.successful(log.debug("Update successful"))
-                })
+                  _ <- Testruns.update(oldTr.id.get, testrun.withId(oldTr.id.get))
+                } yield ())
               } else {
-                db.run((for {
+                retry(for {
                   results <- otherResults(tr)
                   result <- DBIO.successful(newResult(results))
 
@@ -126,12 +124,8 @@ class DBWriter @Inject()(val dbConfigProvider: DatabaseConfigProvider, val syste
 
                   _ <- Solutions.filter(_.id === tr.solutionId).map(_.result).update(result)
                   _ <- Testruns.byId(oldTr.id.get).update(testrun.withId(oldTr.id.get))
-                } yield ()).transactionally.withTransactionIsolation(RepeatableRead).asTry.flatMap {
-                  case Failure(e: Throwable) => DBIO.successful(log.error(e, "Error writing to database"))
-                  case Success(_) => DBIO.successful(log.debug("Update successful"))
-                })
+                } yield ())
               }
-
             case _ =>
           }
         case _ =>

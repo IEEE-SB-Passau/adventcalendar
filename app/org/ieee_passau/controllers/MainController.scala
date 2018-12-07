@@ -11,20 +11,21 @@ import org.ieee_passau.controllers.Beans._
 import org.ieee_passau.models.DateSupport.dateMapper
 import org.ieee_passau.models._
 import org.ieee_passau.utils.FutureHelper.akkaTimeout
-import org.ieee_passau.utils.{AkkaHelper, FormHelper, ListHelper}
-import play.api.{Configuration, Environment}
+import org.ieee_passau.utils.{AkkaHelper, DbHelper, FormHelper, ListHelper}
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.i18n.Lang
 import play.api.libs.Files.TemporaryFile
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{JsPath, Json, Writes}
 import play.api.mvc.{Result, _}
+import play.api.{Configuration, Environment}
 import slick.jdbc.PostgresProfile.api._
 
 import scala.collection.SeqView
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 import scala.reflect.io.File
+import scala.util.{Success, Try}
 
 class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                                val components: MessagesControllerComponents,
@@ -110,24 +111,23 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
                     val pid = problem.id.get
 
-                    try {
-                      val solution: Future[Int] = db.run((Solutions returning Solutions.map(_.id)) +=
-                        Solution(None, user.get.id.get, pid, codelang.id, sourcecode, fixedFilename, now, 0, Queued))
-                      solution.flatMap { solutionId =>
-                        db.run(Testcases.filter(_.problemId === pid).map(_.id).result).map { testcases =>
-                          testcases.foreach(t =>
-                            db.run(Testruns += Testrun(None, solutionId, t, None, None, None, None, None, None, None, None, None, None, Queued, None, now, Some(0), None, None, now))
-                          )
-                        }
-                      }
-                    } catch {
-                      case _ /*pokemon*/ : Throwable => // ignore
-                        Future.successful(Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
-                          .flashing("danger" -> (rs.messages("submit.error.message") + " " + rs.messages("submit.error.fileformat"))))
+                    DbHelper.retry(for {
+                      sid <- (Solutions returning Solutions.map(_.id)) +=
+                        Solution(None, user.get.id.get, pid, codelang.id, sourcecode, fixedFilename, now, 0, Queued)
+                      tcs <- Testcases.filter(_.problemId === pid).map(_.id).result
+                      _ <- DBIO.sequence(tcs.map(tc =>
+                        Testruns += Testrun(None, sid, tc, None, None, None, None, None, None, None, None, None, None, Queued, None, now, Some(0), None, None, now)
+                      ))
+                    } yield ()).transform {
+                      case Success(_) => Try(
+                        Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door).url + "#latest")
+                          .flashing("success" -> rs.messages("submit.success.message"))
+                      )
+                      case _ /*pokemon*/ => Try(
+                        Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door))
+                          .flashing("danger" -> (rs.messages("submit.error.message") + " " + rs.messages("submit.error.fileformat")))
+                      )
                     }
-
-                    Future.successful(Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door).url + "#latest")
-                      .flashing("success" -> rs.messages("submit.success.message")))
 
                   case _ => Future.successful(Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door)).flashing("danger" ->
                     (rs.messages("submit.error.message") + " " + rs.messages("submit.error.invalidlang"))))
