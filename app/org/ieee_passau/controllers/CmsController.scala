@@ -89,7 +89,7 @@ class CmsController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
       posting => {
         db.run(Postings.byIdLang(id, posting.lang).result.headOption).flatMap {
           case Some(existing) => Future.successful(Redirect(org.ieee_passau.controllers.routes.CmsController.editPage(id, existing.lang.code))
-            .flashing("error" -> rs.messages("posting.translationexists.message")))
+            .flashing("danger" -> rs.messages("posting.translationexists.message")))
           case _ => db.run(Postings += posting).map(_ =>
             Redirect(org.ieee_passau.controllers.routes.CmsController.maintenance())
               .flashing("success" -> rs.messages("posting.update.message"))
@@ -128,11 +128,11 @@ class CmsController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
           .flashing("success" ->  rs.messages("assets.add.success"))
       } catch {
         case _: IOException => Redirect(org.ieee_passau.controllers.routes.CmsController.listFiles())
-          .flashing("error" ->  rs.messages("assets.add.error"))
+          .flashing("danger" ->  rs.messages("assets.add.error"))
       }
     }.getOrElse {
       Redirect(org.ieee_passau.controllers.routes.CmsController.listFiles())
-        .flashing("error" ->  rs.messages("assets.add.error"))
+        .flashing("danger" ->  rs.messages("assets.add.error"))
     }
   }}
 
@@ -143,7 +143,7 @@ class CmsController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
         FileUtils.forceDelete(new File(dir, filename))
       } catch {
         case _: IOException => Redirect(org.ieee_passau.controllers.routes.CmsController.listFiles())
-          .flashing("error" -> rs.messages("assets.remove.error"))
+          .flashing("danger" -> rs.messages("assets.remove.error"))
       }
       Redirect(org.ieee_passau.controllers.routes.CmsController.listFiles())
         .flashing("success" -> rs.messages("assets.remove.success"))
