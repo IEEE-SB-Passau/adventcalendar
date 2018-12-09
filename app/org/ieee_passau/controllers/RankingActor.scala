@@ -305,11 +305,11 @@ class RankingActor @Inject()(val dbConfigProvider: DatabaseConfigProvider, val s
           val user = users(u)
           (pl.foldLeft(0d) { case (points: Double, (_: Int, (_: Int, actualPoints: Double, _: Boolean, _: EvalMode))) =>
             points + actualPoints
-          }, user.username, user.hidden, user.id.get)
+          }.floor.toInt, user.username, user.hidden, user.id.get)
         }.toList.sortBy(-_._1 /*points*/).zipWithIndex.groupBy(_._1._1 /*points*/).flatMap {
-          case (_, rankingPos: List[((Double, String, Boolean, Int), Int)]) => for {
-            ((points: Double, username: String, isHidden: Boolean, userId: Int), _: Int) <- rankingPos
-          } yield (rankingPos.head._2 + 1, username, isHidden, points.floor.toInt, localPtr(userId))
+          case (_, rankingPos: List[((Int, String, Boolean, Int), Int)]) => for {
+            ((points: Int, username: String, isHidden: Boolean, userId: Int), _: Int) <- rankingPos
+          } yield (rankingPos.head._2 + 1, username, isHidden, points, localPtr(userId))
         }.toList.sortBy(x => (x._1, -x._5))
       }
 
