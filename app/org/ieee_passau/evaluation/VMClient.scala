@@ -200,8 +200,9 @@ class VMClient(host: String, port: Int, name:String) extends EvaluationActor {
           ProgramError
         } else {
           // Magic newline handling
-          val outLines = evaluationResult.stdout.getOrElse("").split("(\\n|\\r\\n|\\r)")
-          val expLines = expout.split("(\\n|\\r\\n|\\r)")
+          val evalout = evaluationResult.stdout.getOrElse("")
+          val outLines = if (evalout.isEmpty) Iterator("") else  evaluationResult.stdout.getOrElse("").lines
+          val expLines = if (expout.isEmpty) Iterator("") else expout.lines
           //noinspection CorrespondsUnsorted
           if (!outLines.sameElements(expLines)) {
             WrongAnswer
