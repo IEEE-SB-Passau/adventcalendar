@@ -12,7 +12,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 object DbHelper {
-  def retry[T, E <: Effect](action:  DBIOAction[T, NoStream, E], tries: Int = 3)(implicit db: Database, ec: ExecutionContext, log: Logger): Future[T] = {
+  def retry[T, E <: Effect](action:  DBIOAction[T, NoStream, E], tries: Int = 5)(implicit db: Database, ec: ExecutionContext, log: Logger): Future[T] = {
     db.run(retry0(action, tries))
   }
 
@@ -22,7 +22,7 @@ object DbHelper {
         tries match {
           case 0 =>
             log.error("Error writing to database.", t)
-            DBIO.failed(new SQLException("Could not write to database after 3 retries."))
+            DBIO.failed(new SQLException("Could not write to database after 5 retries."))
           case _ => retry0[T, E](action, tries - 1)
         }
       case Success(x) =>

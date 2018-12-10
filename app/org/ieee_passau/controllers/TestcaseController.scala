@@ -62,9 +62,9 @@ class TestcaseController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
           newId <- (Testcases returning Testcases.map(_.id)) += newTestcase
           solutions <- Solutions.filter(_.problemId === pid).map(_.id).result
           _ <- Problems.updatePoints(pid)
-          _ <- DBIO.sequence { solutions.map { s => for {
-            _ <- Testruns += Testrun(None, s, newId, None, None, None, None, None, None, None, None, None, None, Queued, None, now, Some(0), None, None, now)
-          } yield ()}}
+          _ <- DBIO.sequence(solutions.map(s =>
+            Testruns += Testrun(None, s, newId, None, None, None, None, None, None, None, None, None, None, Queued, None, now, Some(0), None, None, now)
+          ))
           _ <- Solutions.updateResult(pid)
         } yield newId).map(testcase =>
           Redirect(org.ieee_passau.controllers.routes.TestcaseController.edit(pid, testcase))
