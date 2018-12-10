@@ -1,16 +1,17 @@
 @import helper._
-@import org.ieee_passau.models.{Feedback, User}
+@import org.ieee_passau.models.User
+@import org.ieee_passau.controllers.Beans.FeedbackText
 @import org.ieee_passau.views.html.bootstrap3._
 @import org.ieee_passau.views.html.main
 @import play.api.data.Form
 @import play.api.mvc.{Flash, RequestHeader}
-@(feedback: Form[Feedback])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
+@(feedback: Form[FeedbackText])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
 
 @main(messages("feedback.title")) {
     @form(org.ieee_passau.controllers.routes.TicketController.submitFeedback, 'class -> "form-horizontal") {
         @CSRF.formField
         <div class="well">
-            @radiobuttons(feedback("rating"), label = messages("feedback.rating"), buttonNameList = List("1", "2", "3", "4", "5"))
+            @stars(feedback("rating"), messages("feedback.rating"), 5)
             @textareaBs(feedback("pro"), label = messages("feedback.pro"))
             @textareaBs(feedback("con"), label = messages("feedback.contra"))
             @textareaBs(feedback("freetext"), label = messages("feedback.freetext"))

@@ -22,6 +22,8 @@ object Beans {
 
   case class TicketText(text: String, public: Boolean)
 
+  case class FeedbackText(rating: Int, pro: Option[String], con: Option[String], freetext: Option[String])
+
   case class VMStatus(actorName: String, uri: String, users: Int, load: Float, mem: Float, swap: Float, ts: Date)
 
   case class SolutionJSON(id: Int, status: String, html: String)

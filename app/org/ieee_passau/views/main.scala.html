@@ -48,6 +48,7 @@
                                     <li @if(title == messages(Page.news.toString))  { class="active" }><a href="@org.ieee_passau.controllers.routes.CmsController.content(Page.news.toString)" >@messages(Page.news.toString)</a></li>
                                     <li @if(title == messages(Page.faq.toString))   { class="active" }><a href="@org.ieee_passau.controllers.routes.CmsController.content(Page.faq.toString)"  >@messages(Page.faq.toString)</a></li>
                                     <li @if(title == messages(Page.rules.toString)) { class="active" }><a href="@org.ieee_passau.controllers.routes.CmsController.content(Page.rules.toString)">@messages(Page.rules.toString)</a></li>
+                                    <li @if(title == messages("nav.feedback")) { class="active" }><a href="@org.ieee_passau.controllers.routes.TicketController.feedback()">@messages("nav.feedback")</a></li>
                                 </ul>
                             </li>
                             @if(sessionUser.isDefined && sessionUser.get.permission.includes(Admin)) {

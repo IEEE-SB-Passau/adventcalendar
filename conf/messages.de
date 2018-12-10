@@ -258,7 +258,8 @@ feedback.rating=Bewertung
 feedback.pro=Positives
 feedback.contra=Negatives
 feedback.freetext=Weitere Kommentare
-feedback.submit.message=Vielen Danke für deine Rückmeldung!
+feedback.submit.message=Vielen Danke für dein Feedback!
+feedback.submit.error=Feedback konnte nicht gespeichert werden!
 
 frontpage.greeting=Viel Spaß beim Knobeln!
 
@@ -280,6 +281,7 @@ frontpage.pic.source=Bildquelle: <a href="http://http://klowner.com/wallpaper/ch
 nav.problems=Aufgaben
 nav.ranking=Rangliste
 nav.info=Informationen
+nav.feedback=Feedback
 nav.user.login=Anmelden
 nav.user.logout=Abmelden
 nav.user.register=Registrieren

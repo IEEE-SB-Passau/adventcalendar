@@ -8,6 +8,7 @@ import org.ieee_passau.models._
 import org.ieee_passau.utils.FormHelper
 import org.ieee_passau.utils.StringHelper.encodeEmailName
 import play.api.{Configuration, Environment}
+import org.ieee_passau.controllers.Beans.FeedbackText
 import play.api.data.Form
 import play.api.data.Forms.{mapping, number, optional, text}
 import play.api.db.slick.DatabaseConfigProvider
@@ -156,7 +157,8 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   def submitFeedback: Action[AnyContent] = requirePermission(Contestant) { implicit user => Action.async { implicit rs =>
     feedbackForm.bindFromRequest.fold(
       errorForm => {
-        Future.successful(BadRequest(org.ieee_passau.views.html.general.feedback(errorForm)))
+        Future.successful(BadRequest(org.ieee_passau.views.html.general.feedback(errorForm))
+          .flashing("error" -> rs.messages("feedback.submit.message")))
       },
       fb => {
         db.run(Feedbacks += Feedback(None, user.get.id.get, fb.rating, fb.pro, fb.con, fb.freetext)).map(_ =>
@@ -169,12 +171,10 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
   val feedbackForm = Form(
     mapping(
-      "id" -> optional(number),
-      "user_id" -> number,
-      "rating" -> number(1, 5),
+      "rating" -> number(0, 5),
       "pro" -> optional(text),
       "con" -> optional(text),
       "freetext" -> optional(text)
-    )(Feedback.apply)(Feedback.unapply)
+    )(FeedbackText.apply)(FeedbackText.unapply)
   )
 }
