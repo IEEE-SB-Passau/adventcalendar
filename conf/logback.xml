@@ -29,6 +29,15 @@
     <logger name="scala.slick" level="INFO"/>
     <logger name="net.schmizz.sshj" level="WARN"/>
 
+    <logger name="org.ieee-passau" level="DEBUG" />
+
+    <!-- activate these for database debugging -->
+    <!--
+    <logger name="slick.jdbc.JdbcBackend.statement" level="DEBUG"/>
+    <logger name="slick.jdbc.JdbcBackend.parameter" level="DEBUG"/>
+    <logger name="slick.jdbc.StatementInvoker.result" level="DEBUG"/>
+    -->
+
     <!-- Off these ones as they are annoying, and anyway we manage configuration ourself -->
     <logger name="com.avaje.ebean.config.PropertyMapLoader" level="OFF"/>
     <logger name="com.avaje.ebeaninternal.server.core.XmlConfigLoader" level="OFF"/>
