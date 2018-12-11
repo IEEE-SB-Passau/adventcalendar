@@ -65,7 +65,7 @@ language.icon=🇺🇸
 
 #HTML--->
 page.title=IEEE SB Passau Advent Calendar 2018
-page.footer=&copy; 2018 IEEE Student Branch Passau - <a href="/contact#imprint">Imprint</a> and <a href="/contact#privacy">privacy policy</a>
+page.footer=&copy; 2018 IEEE Student Branch Passau - <a href="{0}#imprint">Imprint</a> and <a href="{0}#privacy">privacy policy</a>
 frontpage.pic.source=Image source: <a href="http://klowner.com/wallpaper/christmas_tux_2017/">"Christmas Tux 2017"</a> by Mark Riedesel, <a href="https://creativecommons.org/licenses/by-sa/4.0/legalcode">Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)</a>
 #<---HTML
 
