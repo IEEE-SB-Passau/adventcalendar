@@ -20,15 +20,36 @@
             <h3 class="panel-title">
                 @feedback._2.username
                 <span class="pull-right">
-                    @starViewer(feedback._1.rating, 5)
+                @starViewer(feedback._1.rating, 5)
                 </span>
             </h3>
         </div>
 
         <div class="panel-body">
-            <p>@feedback._1.pro</p>
-            <p>@feedback._1.con</p>
-            <p>@feedback._1.freetext</p>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">@messages("feedback.pro")</h4>
+                </div>
+                <div class="panel-body">
+                    <p>@feedback._1.pro</p>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">@messages("feedback.contra")</h4>
+                </div>
+                <div class="panel-body">
+                    <p>@feedback._1.con</p>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">@messages("feedback.freetext")</h4>
+                </div>
+                <div class="panel-body">
+                    <p>@feedback._1.freetext</p>
+                </div>
+            </div>
         </div>
     </div>
 }
