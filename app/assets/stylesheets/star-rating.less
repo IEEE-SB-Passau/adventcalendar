@@ -9,9 +9,9 @@
 @checked-star: '\2605';
 @checked-color: #e52;
 
-.star-cb-group {
+.star-rating-select {
   /* remove inline-block whitespace */
-  //font-size: 0;
+  font-size: 0;
   /* flip the order so we can use the + and ~ combinators */
   unicode-bidi: bidi-override;
   direction: rtl;
@@ -22,7 +22,7 @@
       display: inline-block;
       overflow: hidden;
       text-indent: 9999px;
-      font-size: 3.5rem;
+      font-size: 3rem;
       width: 1em;
       white-space: nowrap;
       cursor: pointer;
@@ -43,12 +43,12 @@
   }
 
   /* the hidden clearer */
-  & > .star-cb-clear + label {
+  & > .star-rating-clear + label {
     text-indent: -9999px;
     width: 0.5em;
     margin-left: -0.5em;
   }
-  & > .star-cb-clear + label:before {
+  & > .star-rating-clear + label:before {
     width: 0.5em;
   }
 
@@ -62,5 +62,37 @@
     content: @checked-star;
     color: @checked-color;
     text-shadow: 0 0 1px #333;
+  }
+}
+
+.star-rating-show {
+  /* remove inline-block whitespace */
+  //font-size: 0;
+  /* flip the order so we can use the + and ~ combinators */
+  unicode-bidi: bidi-override;
+  direction: rtl;
+  & > input {
+    display: none;
+    & + label {
+      /* only enough room for the star */
+      display: inline-block;
+      overflow: hidden;
+      text-indent: 9999px;
+      font-size: 2.5rem;
+      width: 1em;
+      white-space: nowrap;
+      cursor: default;
+      &:before {
+        display: inline-block;
+        text-indent: -9999px;
+        content: @unchecked-star;
+        color: @unchecked-color;
+      }
+    }
+    &:checked ~ label:before {
+      content: @checked-star;
+      color: @checked-color;
+      text-shadow: 0 0 1px #333;
+    }
   }
 }

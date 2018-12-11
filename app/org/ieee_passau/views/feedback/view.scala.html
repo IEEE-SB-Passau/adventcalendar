@@ -1,0 +1,34 @@
+@import org.ieee_passau.controllers.Beans.TicketText
+@import org.ieee_passau.models.{Problem, Ticket, User}
+@import org.ieee_passau.views.html.bootstrap3.starViewer
+@import org.ieee_passau.views.html.main
+@import play.api.data.Form
+@import play.api.mvc.{Flash, RequestHeader}
+@import views.html.helper.{CSRF, form}
+@import org.ieee_passau.models.Feedback
+@(feedback: (Feedback, User))(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages, messagesApi: MessagesApi)
+
+@main(messages("feedback.title")) {
+    <ol class="breadcrumb">
+        <li><a href="@org.ieee_passau.controllers.routes.TicketController.indexFeedback">@messages("general.listoverview")</a></li>
+        <li class="active">@messages("feedback.title")</li>
+    </ol>
+
+    <div class="panel panel-default">
+        @* Panel Header *@
+        <div class="panel-heading">
+            <h3 class="panel-title">
+                @feedback._2.username
+                <span class="pull-right">
+                    @starViewer(feedback._1.rating, 5)
+                </span>
+            </h3>
+        </div>
+
+        <div class="panel-body">
+            <p>@feedback._1.pro</p>
+            <p>@feedback._1.con</p>
+            <p>@feedback._1.freetext</p>
+        </div>
+    </div>
+}

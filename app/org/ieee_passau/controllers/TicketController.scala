@@ -161,12 +161,47 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
           .flashing("error" -> rs.messages("feedback.submit.message")))
       },
       fb => {
-        db.run(Feedbacks += Feedback(None, user.get.id.get, fb.rating, fb.pro, fb.con, fb.freetext)).map(_ =>
+        db.run(Feedbacks += Feedback(None, user.get.id.get, fb.rating, fb.pro, fb.con, fb.freetext)).map { id =>
+          val email = Email(
+            subject = rs.messages("email.header") + " " +  rs.messages("email.feedback.subject"),
+            from = encodeEmailName(user.get.username) + " @ " + config.getOptional[String]("email.from").getOrElse("adventskalender@ieee.uni-passau.de"),
+            to = List(config.getOptional[String]("email.from").getOrElse("adventskalender@ieee.uni-passau.de")),
+            bodyText = Some(rs.messages("email.feedback.body",
+              fb.rating.toString, fb.pro.getOrElse(""), fb.con.getOrElse(""), fb.freetext.getOrElse(""),
+              org.ieee_passau.controllers.routes.TicketController.viewFeedback(id)
+                .absoluteURL(config.getOptional[Boolean]("application.https").getOrElse(false))))
+          )
+          mailerClient.send(email)
+
           Redirect(org.ieee_passau.controllers.routes.CmsController.calendar())
-          .flashing("success" -> rs.messages("feedback.submit.message"))
-        )
+            .flashing("success" -> rs.messages("feedback.submit.message"))
+        }
       }
     )
+  }}
+
+  def indexFeedback: Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
+    val feedbackListQuery = for {
+      f <- Feedbacks
+      u <- f.user
+    } yield (f, u)
+    // TODO join in one query?
+    db.run(feedbackListQuery.result).map { feedbacks =>
+      Ok(org.ieee_passau.views.html.feedback.index(feedbacks.toList))
+    }
+  }}
+
+  def viewFeedback(id: Int): Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
+    val feedbackQuery = for {
+      f <- Feedbacks if f.id === id
+      u <- f.user
+    } yield (f, u)
+
+    db.run(feedbackQuery.result.headOption).map {
+      case Some((feedback, user)) =>
+        Ok(org.ieee_passau.views.html.feedback.view((feedback, user)))
+      case _ => NotFound(org.ieee_passau.views.html.errors.e404())
+    }
   }}
 
   val feedbackForm = Form(

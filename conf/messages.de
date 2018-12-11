@@ -260,6 +260,7 @@ feedback.contra=Negatives
 feedback.freetext=Weitere Kommentare
 feedback.submit.message=Vielen Danke für dein Feedback!
 feedback.submit.error=Feedback konnte nicht gespeichert werden!
+feedback.list.title=Feedbacks
 
 frontpage.greeting=Viel Spaß beim Knobeln!
 
@@ -371,6 +372,13 @@ Weiterhin viel Spaß beim Mitmachen,\n\
 Das Adventskalender-Team
 
 email.answer.subject=Antwort bezüglich {0}
+email.feedback.subject=Feedback
+email.feedback.body=Bewertung: {0} Sterne\n\
+Positives: {1}\n\
+Negatives: {2}\n\
+Sonstiges: {3}\n\
+\n\
+Ansehen: {4}
 
 # Notification
 notification.cookie.text=Der Adventskalender benötigt Cookies um zu funktionieren. Infos dazu gibt's 

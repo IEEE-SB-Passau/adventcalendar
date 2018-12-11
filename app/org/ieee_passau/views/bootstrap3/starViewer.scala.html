@@ -1,0 +1,12 @@
+@(stars: Int, maxStars: Int)
+
+<span class="star-rating-show">
+    @for(i <- maxStars to 1 by -1) {
+        <input type="radio"
+        name="rating-@i"
+        id="rating-@i"
+        value="@i"
+        @if(i <= stars) { checked } else { disabled }/>
+        <label for="rating-@i">@i</label>
+    }
+</span>

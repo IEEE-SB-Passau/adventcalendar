@@ -375,3 +375,9 @@ codelang.active=Active
 error.real=Input is not a number
 nav.feedback=Feedback
 feedback.submit.error=Feedback could not be saved!
+email.feedback.subject=Feedback
+email.feedback.body=Rating: {0} Stars\n\
+Positive: {1}\n\
+Negative: {2}\n\
+Other   : {3}\n
+feedback.list.title=Feedbacks

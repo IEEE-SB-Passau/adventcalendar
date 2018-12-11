@@ -1,0 +1,36 @@
+@import helper._
+@import org.ieee_passau.models.{Problem, Ticket, User}
+@import org.ieee_passau.utils.ViewHelper._
+@import org.ieee_passau.views.html.main
+@import play.api.mvc.{Flash, RequestHeader}
+@import scala.language.implicitConversions
+@import org.ieee_passau.models.Feedback
+@import org.ieee_passau.views.html.bootstrap3.starViewer
+@(feedbacks: List[(Feedback, User)])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
+
+@main(messages("feedback.list.title")) {
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>@messages("general.id")</th>
+                <th>@messages("user.title")</th>
+                <th>@messages("feedback.rating")</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @feedbacks.map { case (f: Feedback, u: User) =>
+            <tr>
+                <td>@f.id</td>
+                <td>@u.username</td>
+                <td>@starViewer(f.rating, 5)</td>
+                <td>
+                    <a href="@org.ieee_passau.controllers.routes.TicketController.viewFeedback(f.id.get)" class="btn btn-default">
+                        <span class="glyphicon glyphicon-eye-open"></span>
+                    </a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

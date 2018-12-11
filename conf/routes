@@ -104,6 +104,9 @@ GET         /admin/ticket/:id                          org.ieee_passau.controlle
 POST        /admin/ticket/:id                          org.ieee_passau.controllers.TicketController.answerTicket(id: Int)
 POST        /admin/ticket/:id/delete                   org.ieee_passau.controllers.TicketController.delete(id: Int)
 
+GET         /admin/feedbacks                           org.ieee_passau.controllers.TicketController.indexFeedback
+GET         /admin/feedback/:id                        org.ieee_passau.controllers.TicketController.viewFeedback(id: Int)
+
 + nocsrf
 POST        /admin/vms/register                        org.ieee_passau.controllers.EvaluationController.registerVM
 + nocsrf
