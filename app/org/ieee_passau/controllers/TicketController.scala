@@ -161,7 +161,7 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
           .flashing("error" -> rs.messages("feedback.submit.message")))
       },
       fb => {
-        db.run(Feedbacks += Feedback(None, user.get.id.get, fb.rating, fb.pro, fb.con, fb.freetext)).map { id =>
+        db.run(Feedbacks += Feedback(None, user.get.id.get, fb.rating, fb.pro, fb.con, fb.freetext, new Date())).map { id =>
           val email = Email(
             subject = rs.messages("email.header") + " " +  rs.messages("email.feedback.subject"),
             from = encodeEmailName(user.get.username) + " @ " + config.getOptional[String]("email.from").getOrElse("adventskalender@ieee.uni-passau.de"),

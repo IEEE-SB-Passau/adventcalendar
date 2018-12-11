@@ -18,7 +18,7 @@
         @* Panel Header *@
         <div class="panel-heading">
             <h3 class="panel-title">
-                @feedback._2.username
+                @feedback._2.username (@feedback._1.created.format("yyyy-MM-dd HH:mm"))
                 <span class="pull-right">
                 @starViewer(feedback._1.rating, 5)
                 </span>

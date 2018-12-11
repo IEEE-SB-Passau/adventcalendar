@@ -381,3 +381,6 @@ Positive: {1}\n\
 Negative: {2}\n\
 Other   : {3}\n
 feedback.list.title=Feedbacks
+feedback.pro.help=Tell us what you liked best about the advent calendar.
+feedback.freetext.help=Here is room for additional feedback
+feedback.contra.help=Tell us what we can improve.
