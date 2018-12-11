@@ -6,17 +6,14 @@
         <span class="star-rating-select">
             @for(i <- maxStars to 0 by -1) {
                 <input type="radio"
-                name="@field.name"
-                id="rating-@i"
-                value="@i"
-                @if(i == 0) { class="star-rating-clear" } />
+                       name="@field.name"
+                       id="rating-@i"
+                       value="@i"
+                       @if(i == 0) { class="star-rating-clear" } />
                 <label for="rating-@i">@i</label>
             }
         </span>
         <span class="help-block">@help</span>
-        <span class="help-block">@{
-                field.error.map { error => messages(error.message) }
-            }
-        </span>
+        <span class="help-block">@{ field.error.map { error => messages(error.message) }}</span>
     </div>
 </div>

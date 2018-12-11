@@ -151,13 +151,13 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   }}
 
   def feedback: Action[AnyContent] = requirePermission(Contestant) { implicit user => Action { implicit rs =>
-    Ok(org.ieee_passau.views.html.general.feedback(feedbackForm))
+    Ok(org.ieee_passau.views.html.feedback.submit(feedbackForm))
   }}
 
   def submitFeedback: Action[AnyContent] = requirePermission(Contestant) { implicit user => Action.async { implicit rs =>
     feedbackForm.bindFromRequest.fold(
       errorForm => {
-        Future.successful(BadRequest(org.ieee_passau.views.html.general.feedback(errorForm))
+        Future.successful(BadRequest(org.ieee_passau.views.html.feedback.submit(errorForm))
           .flashing("error" -> rs.messages("feedback.submit.message")))
       },
       fb => {
@@ -185,9 +185,8 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
       f <- Feedbacks
       u <- f.user
     } yield (f, u)
-    // TODO join in one query?
-    db.run(feedbackListQuery.result).map { feedbacks =>
-      Ok(org.ieee_passau.views.html.feedback.index(feedbacks.toList))
+    db.run(feedbackListQuery.to[List].result).map { feedbacks =>
+      Ok(org.ieee_passau.views.html.feedback.index(feedbacks))
     }
   }}
 
