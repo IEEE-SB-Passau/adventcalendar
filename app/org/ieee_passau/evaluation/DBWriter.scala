@@ -99,6 +99,7 @@ class DBWriter @Inject()(val dbConfigProvider: DatabaseConfigProvider, val syste
         case Some(tr) =>
           db.run(nextStageQ(tr)).foreach {
             case None =>
+              // only update results if last stage
               if (eJob.result.fold(false)(_ == Passed)) {
                 retry(for {
                   results <- otherResults(tr)
@@ -126,7 +127,13 @@ class DBWriter @Inject()(val dbConfigProvider: DatabaseConfigProvider, val syste
                   _ <- Testruns.byId(oldTr.id.get).update(testrun.withId(oldTr.id.get))
                 } yield ())
               }
-            case _ =>
+            case Some(stage) =>
+              // update only output and advance stage
+              retry(for {
+                oldTr <- Testruns.byId(eJob.job.testrunId).result.head
+                testrun <- DBIO.successful(copyTrFromOld(oldTr, Some(stage)))
+                _ <- Testruns.byId(oldTr.id.get).update(testrun.withId(oldTr.id.get))
+              } yield ())
           }
         case _ =>
 
