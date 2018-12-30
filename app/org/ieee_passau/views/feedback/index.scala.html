@@ -23,7 +23,7 @@
             <tr>
                 <td>@f.id</td>
                 <td>@u.username</td>
-                <td>@starViewer(f.rating, 5)</td>
+                <td>@starViewer(f.rating, 5, f.id.get + "-")</td>
                 <td>
                     <a href="@org.ieee_passau.controllers.routes.TicketController.viewFeedback(f.id.get)" class="btn btn-default">
                         <span class="glyphicon glyphicon-eye-open"></span>
