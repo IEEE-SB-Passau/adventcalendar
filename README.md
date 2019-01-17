@@ -2,8 +2,7 @@
 
 ## Installation 
 
-* Go to [https://www.typesafe.com/activator/download](https://www.typesafe.com/activator/download) and download the activator toolchain
-* Start the activator tool in the root of this repository and run the application
+* Download sbt and start it in the root of this repository to run the application
 * Connect to evaluation service via the heartbeat/eval deamon from [https://github.com/IEEE-SB-Passau/adventcalendar-evaluation](https://github.com/IEEE-SB-Passau/adventcalendar-evaluation). This deamon is currently not available to the public since the codebase needs some serious cleanup. If you are interested in helping us, please create an issue. 
 * Open webbrowser and use the app.
 
