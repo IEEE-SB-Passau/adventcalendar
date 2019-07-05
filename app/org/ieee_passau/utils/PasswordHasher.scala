@@ -4,7 +4,7 @@ import java.security.SecureRandom
 
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
-import sun.misc.{BASE64Decoder, BASE64Encoder}
+import java.util.Base64
 
 /**
   * Utility class to hash and verify passwords with PBKDF2.
@@ -17,8 +17,8 @@ object PasswordHasher {
   val MAX_PASSWORD_LENGTH: Int = 128
 
   private val rng = new SecureRandom()
-  private val encoder = new BASE64Encoder()
-  private val decoder = new BASE64Decoder()
+  private val encoder = Base64.getEncoder
+  private val decoder = Base64.getDecoder
 
   /**
     * Generate a new hash from a password.
@@ -31,7 +31,7 @@ object PasswordHasher {
     val truncatedPassword = this.truncatePassword(password)
     val salt = this.generateSalt()
     val hash = this.hash(truncatedPassword, salt)
-    this.encoder.encode(hash)
+    this.encoder.encodeToString(hash)
   }
 
   /**
@@ -43,7 +43,7 @@ object PasswordHasher {
     */
   def verifyPassword(password: String, hash: String): Boolean = {
     val truncatedPassword = this.truncatePassword(password)
-    val hashBytes = this.decoder.decodeBuffer(hash)
+    val hashBytes = this.decoder.decode(hash)
     val salt = this.extractSalt(hashBytes)
     val computedHash = this.hash(truncatedPassword, salt)
     this.secureCompare(hashBytes, computedHash)
@@ -89,6 +89,6 @@ object PasswordHasher {
   def generateUrlString(): String = {
     val salt = new Array[Byte](265/8)
     this.rng.nextBytes(salt)
-    encoder.encode(salt).replace("/","_").replace("+", "_").replace("=","")
+    encoder.encodeToString(salt).replace("/","_").replace("+", "_").replace("=","")
   }
 }
