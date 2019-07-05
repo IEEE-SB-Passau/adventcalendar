@@ -13,7 +13,7 @@
         <li class="active">@messages("ticket.title")</li>
     </ol>
 
-    @defining((ticket._1, ticket._2.username) +: answers) { list: List[(Ticket, String)] =>
+     @defining((ticket._1, ticket._2.username) +: answers) { list =>
         @ticketView(list, expanded = true, admin = true)
     }
 

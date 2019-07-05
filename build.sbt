@@ -1,7 +1,7 @@
 name := """ieee-passau-advent-frontend"""
 version := "2018-BASE"
 
-scalaVersion := "2.12.7"
+scalaVersion := "2.12.8"
 
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala)
@@ -19,14 +19,15 @@ libraryDependencies ++= Seq(
   ws,
   filters,
   guice,
-  "com.typesafe.play" %% "play" % "2.6.20",
-  "com.typesafe.play" %% "play-slick" % "3.0.3",
-  "com.typesafe.play" %% "play-slick-evolutions" % "3.0.3",
-  "com.typesafe.slick" %% "slick" % "3.2.3",
-  "com.typesafe.play" %% "play-mailer" % "6.0.1",
-  "com.typesafe.play" %% "play-mailer-guice" % "6.0.1",
-  "org.postgresql" % "postgresql" % "42.2.5",
-  "commons-io" % "commons-io" % "2.6"
+  "com.typesafe.play" %% "play" % "2.7.3",
+  "com.typesafe.play" %% "play-slick" % "4.0.2",
+  "com.typesafe.play" %% "play-slick-evolutions" % "4.0.2",
+  "com.typesafe.slick" %% "slick" % "3.3.1",
+  "com.typesafe.play" %% "play-mailer" % "7.0.1",
+  "com.typesafe.play" %% "play-mailer-guice" % "7.0.1",
+  "org.postgresql" % "postgresql" % "42.2.6",
+  "commons-io" % "commons-io" % "2.6",
+  "commons-codec" % "commons-codec" % "1.12"
 )
 
 includeFilter in (Assets, LessKeys.less) := "main.less"
