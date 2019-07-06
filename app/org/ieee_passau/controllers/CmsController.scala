@@ -183,7 +183,12 @@ class CmsController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   def calendar: Action[AnyContent] = requirePermission(Everyone) { implicit user =>  Action.async { implicit rs =>
     val displayLang = rs.lang
     val now = new Date()
-    val problemsQuery: Future[List[Problem]] = db.run(Problems.filter(_.readableStart <= now).filter(_.readableStop > now).sortBy(_.door.asc).to[List].result)
+    // query for active problems
+    val problemsQuery: Future[List[Problem]] = db.run(
+      Problems
+        .filter(_.readableStart <= now)
+        .filter(_.readableStop > now)
+        .sortBy(_.door.asc).to[List].result)
     val postingQuery: Future[Posting] = Postings.byId(Page.calendar.id, displayLang)
     problemsQuery.zip(postingQuery).flatMap {
       case (problems, posting) => (monitoringActor ? NotificationQ).mapTo[NotificationM].flatMap {
