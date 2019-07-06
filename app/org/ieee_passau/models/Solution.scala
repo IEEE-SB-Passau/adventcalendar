@@ -3,13 +3,12 @@ package org.ieee_passau.models
 import java.util.Date
 
 import org.ieee_passau.models.DateSupport.dateMapper
-import org.ieee_passau.utils.ListHelper.reduceResult
 import slick.dbio.Effect
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{ForeignKeyQuery, ProvenShape}
 import slick.sql.FixedSqlAction
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 case class Solution(id: Option[Int], userId: Int, problemId: Int, languageId: String, program: String,
                     programName: String, created: Date, score: Int, result: Result) extends Entity[Solution] {
@@ -43,22 +42,4 @@ object Solutions extends TableQuery(new Solutions(_)) {
 
   def update(id: Int, solution: Solution): FixedSqlAction[Int, NoStream, Effect.Write] =
     this.filter(_.id === id).update(solution.withId(id))
-
-  def updateResult(pid: Int)(implicit ec: ExecutionContext): DBIOAction[Unit, NoStream, Effect.Read with Effect with Effect with Effect.Write] = {
-    for {
-      list <- (for {
-        tr <- Testruns
-        tc <- tr.testcase
-        s <- tr.solution if s.problemId === pid
-      } yield (s.id, tr.result, tr.stage, tc.points)).result
-      _ <- DBIO.sequence {
-        list.view.groupBy(_._1).map { s =>
-          for {
-            points <- DBIO.successful(s._2.filter(x => x._2 == Passed && x._3.isEmpty).map(_._4).sum)
-            result <- DBIO.successful(reduceResult(s._2.map(x => (x._2, x._3))))
-            _ <- Solutions.filter(_.id === s._1).map(s => (s.score, s.result)).update((points, result))
-          } yield ()}
-      }
-    } yield ()
-  }
 }

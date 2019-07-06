@@ -6,7 +6,6 @@ import org.ieee_passau.utils.LanguageHelper
 import org.ieee_passau.utils.LanguageHelper.LangTypeMapper
 import play.api.i18n.Lang
 import slick.dbio.Effect
-import slick.jdbc.PostgresProfile
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{CompiledFunction, ForeignKeyQuery, ProvenShape, TableQuery}
 
@@ -65,13 +64,6 @@ object Problems extends TableQuery(new Problems(_)) {
         Problems.filter(_.id === id).update(problem.withId(id).copy(points = points))
       }
     ))
-
-  def updatePoints(id: Int)(implicit ec: ExecutionContext): DBIOAction[Int, PostgresProfile.api.NoStream, Effect.Read with Effect.Write] =
-    Testcases.filter(_.problemId === id).map(_.points).sum.result.flatMap(
-      _.fold(DBIO.successful(0): DBIOAction[Int, NoStream, Effect.Write]) { points =>
-        Problems.filter(_.id === id).map(_.points).update(points)
-      }
-    )
 
   def doorAvailable(door: Int, id: Int)(implicit db: Database, ec: ExecutionContext): Future[Boolean] =
     db.run(Problems.filter(_.door === door).result).map(result => !result.exists(problem => problem.id.get != id))

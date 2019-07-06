@@ -16,11 +16,11 @@ import org.ieee_passau.models.{Admin, _}
 import org.ieee_passau.utils.FutureHelper.akkaTimeout
 import org.ieee_passau.utils.ListHelper._
 import org.ieee_passau.utils.{AkkaHelper, DbHelper, PasswordHasher}
-import play.api.{Configuration, Environment}
 import play.api.data.Form
 import play.api.data.Forms.{mapping, _}
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.mvc._
+import play.api.{Configuration, Environment}
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -194,7 +194,6 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
       case Some(job) =>
         DbHelper.retry(for {
           _ <- DBIO.successful(monitoringActor ! JobFinished(BaseJob(0, 0, "", id, job.evalId.getOrElse(""), "", "", "", "")))
-          _ <- Solutions.filter(_.id === job.solutionId).map(_.result).update(Canceled)
           _ <- Testruns.filter(_.id === id).map(tr => (tr.result, tr.vm, tr.evalId, tr.completed, tr.stage))
             .update((Canceled, Some("_"), None, new Date, None))
         } yield ()).map(_ =>
@@ -212,7 +211,6 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
       testruns <- Testruns.filter(_.result === (Queued: org.ieee_passau.models.Result))
         .map(tr => (tr.id, tr.result, tr.vm, tr.evalId, tr.completed, tr.stage)).result
       _ <- DBIO.successful(testruns.foreach(tr => monitoringActor ! JobFinished(BaseJob(0, 0, "", tr._1 /* id */ , tr._4.getOrElse("") /* eval_id */ , "", "", "", ""))))
-      _ <- Solutions.filter(_.result === (Queued: org.ieee_passau.models.Result)).map(_.result).update(Canceled)
       _ <- Testruns.filter(_.result === (Queued: org.ieee_passau.models.Result))
         .map(tr => (tr.result, tr.vm, tr.evalId, tr.completed, tr.stage))
         .update((Canceled, Some("_"), None, new Date, None))
@@ -223,17 +221,9 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
   }}
 
   def reEval(id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
-    DbHelper.retry(for {
-      testruns <- (for {
-        r <- Testruns
-        s <- r.solution if s.id === id
-      } yield (r, s)).result
-      _ <- DBIO.sequence { testruns.map { case (testrun, solution) => for {
-        _ <- Solutions.update(solution.id.get, solution.copy(score = 0, result = Queued))
-        _ <- Testruns.update(testrun.id.get, testrun.copy(result = Queued, stage = Some(0), vm = None,
-          progRuntime = Some(0), progMemory = Some(0), compRuntime = Some(0), compMemory = Some(0)))
-      } yield ()}}
-    } yield ()).map(_ =>
+    db.run(Testruns.filter(_.id === id).map(r => (r.result, r.stage, r.vm, r.progRuntime, r.progMemory, r.compRuntime, r.compMemory))
+      .update((Queued, Some(0), None, Some(0), Some(0), Some(0), Some(0)))
+    ).map(_ =>
       Redirect(org.ieee_passau.controllers.routes.EvaluationController.index())
         .flashing("success" -> rs.messages("eval.jobs.reevaluate.message"))
     )
@@ -257,7 +247,6 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
 
   def reEvalAll: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     DbHelper.retry(for {
-      _ <- Solutions.map(sl => (sl.score, sl.result)).update(0, Queued)
       _ <- Testruns.map(tr => (tr.result, tr.stage, tr.vm, tr.progRuntime, tr.progMemory, tr.compRuntime, tr.compMemory))
         .update(Queued, Some(0), None, Some(0), Some(0), Some(0), Some(0))
     } yield ()).map(_ =>

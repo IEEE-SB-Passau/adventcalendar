@@ -35,8 +35,6 @@ class TestcaseController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
     DbHelper.retry(for {
       _ <- Testcases.filter(_.id === id).delete
       _ <- Testruns.filter(_.testcaseId === id).delete
-      _ <- Problems.updatePoints(pid)
-      _ <- Solutions.updateResult(pid)
     } yield ()).map(_ =>
       Redirect(org.ieee_passau.controllers.routes.ProblemController.edit(pid))
     )
@@ -61,11 +59,9 @@ class TestcaseController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
         DbHelper.retry(for {
           newId <- (Testcases returning Testcases.map(_.id)) += newTestcase
           solutions <- Solutions.filter(_.problemId === pid).map(_.id).result
-          _ <- Problems.updatePoints(pid)
           _ <- DBIO.sequence(solutions.map(s =>
             Testruns += Testrun(None, s, newId, None, None, None, None, None, None, None, None, None, None, Queued, None, now, Some(0), None, None, now)
           ))
-          _ <- Solutions.updateResult(pid)
         } yield newId).map(testcase =>
           Redirect(org.ieee_passau.controllers.routes.TestcaseController.edit(pid, testcase))
             .flashing("success" -> rs.messages("testcase.create.message", newTestcase.position))
@@ -85,12 +81,10 @@ class TestcaseController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
       testcase => {
         DbHelper.retry(for {
           _ <- Testcases.update(id, testcase)
-          _ <- Problems.updatePoints(pid)
           solutions <- Solutions.filter(_.problemId === pid).map(_.id).result
           _ <- DBIO.sequence(solutions.map(s =>
             Testruns.filter(r => r.testcaseId === id && r.solutionId === s).map(r => (r.result, r.stage)).update((Queued, Some(0)))
           ))
-          _ <- Solutions.updateResult(pid)
         } yield ()).map(_ =>
           Redirect(org.ieee_passau.controllers.routes.TestcaseController.edit(pid, id))
             .flashing("success" -> rs.messages("testcase.update.message", testcase.position))
