@@ -69,7 +69,8 @@ CREATE OR REPLACE RULE insert_solution AS
          new.created,
          new.language,
          new.program,
-         new.program_name;
+         new.program_name
+        RETURNING new.id;
 
 CREATE OR REPLACE RULE update_solution AS
   ON UPDATE TO solutions
@@ -139,7 +140,8 @@ CREATE OR REPLACE RULE insert_problem AS
          new.solvable_stop,
          new.eval_mode,
          new.cpu_factor,
-         new.mem_factor;
+         new.mem_factor
+        RETURNING new.id;
 
 CREATE OR REPLACE RULE update_solution AS
   ON UPDATE TO problems
