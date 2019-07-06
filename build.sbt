@@ -9,7 +9,7 @@ lazy val root = (project in file("."))
 
 pipelineStages := Seq(digest, gzip)
 LessKeys.compress in Assets := true
-includeFilter in gzip := "*.html" || "*.css" || "*.js" || "*.jpg"
+includeFilter in gzip := "*.html" || "*.css" || "*.js" || "*.ico"
 
 scalacOptions in ThisBuild ++= Seq("-unchecked", "-deprecation", "-feature")
 
