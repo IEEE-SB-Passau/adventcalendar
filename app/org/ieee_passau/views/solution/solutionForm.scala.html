@@ -38,36 +38,26 @@
             </div>
         </div>
 
-        <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-2">
-                <input id="defaultSubmit" type="submit" value="@messages("submit.submit")" class="btn btn-primary"/>
-            </div>
+        <div id="editor">
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-2">
+                    <input id="defaultSubmit" type="submit" value="@messages("submit.submit")" class="btn btn-primary"/>
+                </div>
 
-            <div class="col-sm-2">
-                <button id="loadEditor" type="button" onclick="loadCodeEditor();" class="btn btn-primary">@messages("submit.codeeditor.load")</button>
+                <div class="col-sm-2">
+                    <button id="loadEditor" type="button" onclick="loadCodeEditor();" class="btn btn-primary">@messages("submit.codeeditor.load")</button>
+                </div>
             </div>
         </div>
-
-        <div id="codeEditor"></div>
     </fieldset>
 
     <script type="text/javascript">
-        var reloadMessage = '@messages("submit.codeeditor.reload")';
-        var buttonMessage = '@messages("submit.codeeditor.defaultButton")';
-
         function loadCodeEditor() {
             $.ajax(
                 jsRoutes.org.ieee_passau.controllers.MainController.codeEditor('@door', lang.value)
             ).done(function (data) {
-                $("#codeEditor").html(data);
+                $("#editor").html(data);
             });
-
-            var defaultSubmitButton = $("#defaultSubmit")[0];
-            defaultSubmitButton.classList = "btn btn-default";
-            defaultSubmitButton.innerHTML = buttonMessage;
-            var editorButton = $("#loadEditor")[0];
-            editorButton.classList = "btn btn-warning";
-            editorButton.innerHTML = reloadMessage;
         }
     </script>
 </form>
