@@ -7,7 +7,6 @@ import com.google.inject.Inject
 import org.ieee_passau.evaluation.Messages._
 import org.ieee_passau.models._
 import org.ieee_passau.utils.DbHelper.retry
-import org.ieee_passau.utils.ListHelper.reduceResult
 import org.ieee_passau.utils.StringHelper.stripNull
 import play.api.Logger
 import play.api.db.slick.DatabaseConfigProvider
@@ -28,7 +27,7 @@ object DBWriter {
 class DBWriter @Inject()(val dbConfigProvider: DatabaseConfigProvider, val system: ActorSystem) extends EvaluationActor {
   private implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
   private implicit val evalContext: ExecutionContext = system.dispatchers.lookup("evaluator.context")
-  private implicit val logger = Logger(this.getClass)
+  private implicit val logger: Logger = Logger(this.getClass)
 
   override def receive: Receive = {
     case EvaluatedJobM(eJob) =>
@@ -63,23 +62,6 @@ class DBWriter @Inject()(val dbConfigProvider: DatabaseConfigProvider, val syste
         )
       }
 
-      def getNewScore(current: Int, points: Int) = {
-        eJob.job match {
-          // we need to consider the scoring factor determined by the backend
-          case NextStageJob(_, _, _, _, _, _, _, _, _, _, true, _, _) =>
-            // points * (1 / score) for score >= 1, => lower score results in higher points
-            current + (points.toDouble / (if (eJob.score.isEmpty || eJob.score.get == 0) 1d else eJob.score.get.toDouble)).floor.toInt
-          // no need to consider score, because it's only one stage, or the last stage does not score so we just add the points directly
-          case _ => current + points
-        }
-      }
-
-      def otherResults(tr: Testrun) =
-        Testruns.filter(r => r.solutionId === tr.solutionId && r.id =!= eJob.job.testrunId).map(r => (r.result, r.stage)).result
-
-      def newResult(other: Seq[(Result, Option[Int])]) =
-        reduceResult(other :+ (eJob.result.getOrElse(Canceled), None))
-
       /**
         * @return `None` if there is no stage left or else the stage number to queue next
         */
@@ -100,33 +82,11 @@ class DBWriter @Inject()(val dbConfigProvider: DatabaseConfigProvider, val syste
           db.run(nextStageQ(tr)).foreach {
             case None =>
               // only update results if last stage
-              if (eJob.result.fold(false)(_ == Passed)) {
-                retry(for {
-                  results <- otherResults(tr)
-                  points <- Testcases.filter(_.id === tr.testcaseId).map(_.points).result.head
-                  score <- Solutions.filter(_.id === tr.solutionId).map(_.score).result.head
-
-                  result <- DBIO.successful(newResult(results))
-                  newScore <- DBIO.successful(getNewScore(score, points))
-
-                  oldTr <- Testruns.byId(eJob.job.testrunId).result.head
-                  testrun <- DBIO.successful(copyTrFromOld(oldTr, None))
-
-                  _ <- Solutions.filter(_.id === tr.solutionId).map(sol => (sol.score, sol.result)).update((newScore, result))
-                  _ <- Testruns.update(oldTr.id.get, testrun.withId(oldTr.id.get))
-                } yield ())
-              } else {
-                retry(for {
-                  results <- otherResults(tr)
-                  result <- DBIO.successful(newResult(results))
-
-                  oldTr <- Testruns.byId(eJob.job.testrunId).result.head
-                  testrun <- DBIO.successful(copyTrFromOld(oldTr, None))
-
-                  _ <- Solutions.filter(_.id === tr.solutionId).map(_.result).update(result)
-                  _ <- Testruns.byId(oldTr.id.get).update(testrun.withId(oldTr.id.get))
-                } yield ())
-              }
+              retry(for {
+                oldTr <- Testruns.byId(eJob.job.testrunId).result.head
+                testrun <- DBIO.successful(copyTrFromOld(oldTr, None))
+                _ <- Testruns.update(oldTr.id.get, testrun.withId(oldTr.id.get))
+              } yield ())
             case Some(stage) =>
               // update only output and advance stage
               retry(for {
