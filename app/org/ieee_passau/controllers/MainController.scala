@@ -239,12 +239,16 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
           val transProblem = transQuery.map(pt => pt.fold(problem)(trans => problem.copy(title = trans.title, description = trans.description)))
           val status = (monitoringActor ? StatusQ).mapTo[StatusM].flatMap {
             case StatusM(false) => // running == false
-              Postings.byId(Page.status.id, displayLang).map(_.content).map(status => "system" -> status)
+              for {
+                c <- for {p <- Postings.byId(Page.status.id, displayLang)} yield p.content
+              } yield "system" -> c
             case _ => Future.successful("" -> "")
           }
           val notification = (monitoringActor ? NotificationQ).mapTo[NotificationM].flatMap {
             case NotificationM(true) =>
-              Postings.byId(Page.notification.id, displayLang).map(_.content).map(notif => "notification" -> notif)
+              for {
+                c <- for {p <- Postings.byId (Page.notification.id, displayLang)} yield p.content
+              } yield "notification" -> c
             case _ => Future.successful("" -> "")
           }
           val flash = status.zip(notification).map(tuple => Map(tuple._1, tuple._2))
