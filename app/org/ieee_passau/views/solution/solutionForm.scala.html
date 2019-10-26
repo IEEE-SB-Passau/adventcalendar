@@ -52,6 +52,16 @@
     </fieldset>
 
     <script type="text/javascript">
+        function updateSubmitButton() { // set the submit-button disabled if no file is entered
+            $('#defaultSubmit').prop('disabled', $('#solution').val() === '');
+        }
+        window.onload = function() { // wait for jQuery to load
+            $('#solution').on('change', function(){
+                updateSubmitButton();
+            });
+            updateSubmitButton();
+        };
+
         function loadCodeEditor() {
             $.ajax(
                 jsRoutes.org.ieee_passau.controllers.MainController.codeEditor('@door', lang.value)
