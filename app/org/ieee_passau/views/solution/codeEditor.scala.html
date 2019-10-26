@@ -63,5 +63,7 @@
     });
 
     updateLang();
-    loadSource(solution);
+    if (solution.files.length > 0) {
+        loadSource(solution);
+    }
 </script>
