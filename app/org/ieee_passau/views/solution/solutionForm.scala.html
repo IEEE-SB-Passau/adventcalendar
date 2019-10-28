@@ -52,15 +52,14 @@
     </fieldset>
 
     <script type="text/javascript">
-        function updateSubmitButton() { // set the submit-button disabled if no file is entered
-            $('#defaultSubmit').prop('disabled', $('#solution').val() === '');
-        }
-        window.onload = function() { // wait for jQuery to load
-            $('#solution').on('change', function(){
-                updateSubmitButton();
-            });
-            updateSubmitButton();
-        };
+        window.addEventListener('load', function () { // wait for jQuery to load
+            var updateSubmitButton = function () { // set the submit-button disabled if no file is entered
+                $('#defaultSubmit').prop('disabled', $(this)[0].files[0] === undefined);
+            };
+            var solutionElement = $('#solution');
+            solutionElement.on('change', updateSubmitButton);
+            solutionElement.each(updateSubmitButton);
+        });
 
         function loadCodeEditor() {
             $.ajax(
