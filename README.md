@@ -16,3 +16,4 @@
   * [Stephan Lukasczyk](https://github.com/stephanlukasczyk)
   * [Sebastian Böhm](https://github.com/boehmseb)
   * [Inyokus](https://github.com/inyokus)
+  * [Matthias Bay](https://github.com/Mat2095)
