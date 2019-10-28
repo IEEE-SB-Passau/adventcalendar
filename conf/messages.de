@@ -27,21 +27,21 @@ user.requestreset=Rücksetzlink zusenden
 user.edit=Benutzer bearbeiten
 user.impersonate=Als dieser Benutzer anmelden
 user.impersonate.message=Du bis nun als {0} angemeldet.
-user.login.message=Willkommen zurück {0}!
+user.login.message=Willkommen zurück, {0}!
 user.login.error=Login fehlgeschlagen!
 user.help.password=mindestens 6 Zeichen
 user.help.register=Die mit * markierten Felder sind Pflichtangaben.
 user.notexist=Benutzername existiert nicht!
-user.logout.message=Bis bald {0}!
+user.logout.message=Bis bald, {0}!
 user.register.error.existing=Benutzer {0} wurde angelegt. Bitte verifiziere deine E-Mailadresse mit dem zugesandten Link.
-user.register.message=Willkommen {0}!
+user.register.message=Willkommen, {0}!
 user.register.verify.message=Es wurde eine E-Mail an die angegeben Adresse gesendet. Bitte benutze den Link um dein Passwort zurückzusetzen.
 user.update.message=Benutzer {0} wurde aktualisiert.
 user.update.password=Leer lassen um aktuelles Passwort bei zu behalten.
 user.error.usernametake=Benutzername bereits in Verwendung!
 user.error.emailtaken=E-Mail wird bereits für einen anderen Account verwendet!
 user.error.passwordsnomatch=Passwörter stimmen nicht überein!
-user.error.captcha=Captcha wurde nicht richtig gelöst
+user.error.captcha=Captcha wurde nicht richtig gelöst!
 user.registered=Registrierte Benutzer
 user.submitted=Benutzer mit Abgaben
 
@@ -104,7 +104,7 @@ testcase.create.message=Testfall {0} wurde angelegt.
 testcase.update.message=Testfall {0} wurde aktualisiert.
 
 evaltask.title=Auswertungsschritt
-evaltask.list.title=Auswertungsschritt
+evaltask.list.title=Auswertungsschritte
 evaltask.edit=Auswertungsschritt bearbeiten
 evaltask.create=Auswertungsschritt hinzufügen
 evaltask.create.message=Auswertungsschritt {0} wurde angelegt.
@@ -144,7 +144,7 @@ submit.ratelimit.timer=Es kann nur eine Lösung pro Minute eingereicht werden!
 submit.ratelimit.queue=Solange deine letzte Lösung noch nicht ausgewertet wurde, kannst du nur alle 15 Minuten eine Lösung einreichen!
 #<--- HTML
 submit.notice.codelang=*Bei Java und Scala bitte kein Package verwenden und im Editor die Main-Methode in der Klasse bzw. dem Objekt "Solution" einreichen.
-submit.notice.help=Falls dir dein Programm Probleme bereitet, werfe doch einen Blick in die <a href="{0})">FAQ</a> oder seh dir unsere <a href="{1}">Beispielprogramme</a> an.
+submit.notice.help=Falls dir dein Programm Probleme bereitet, werfe doch einen Blick in die <a href="{0})">FAQ</a> oder sieh dir unsere <a href="{1}">Beispielprogramme</a> an.
 #---> HTML
 
 problemdetails.qna=Fragen und Antworten
@@ -194,10 +194,10 @@ codelang.cpufactor=Zeitlimit (in Referenz zur Basis von {0} Sekunden)
 codelang.memfactor=Speicherlimit (in Referenz zur Basis von {0} MB)
 codelang.fileextension=Dateiendung
 codelang.fileextension.help=c (ohne ".")
-codelang.highlightclass=Syntaxhighlighing Klasse
+codelang.highlightclass=Syntaxhighlighting Klasse
 codelang.active=Aktiv
 
-eval.status.title=Evaluierungstatus
+eval.status.title=Evaluierungsstatus
 eval.status.start=Evaluierung starten
 eval.status.stop=Evaluierung anhalten
 eval.status.update.message=Status wurde geändert.
@@ -206,7 +206,7 @@ eval.status.message=Die Auswertung ist im Moment angehalten, bitte habe etwas Ge
 eval.token.reset.title=Evaluierungssystem Zugangstoken
 eval.token.reset=Zugangstoken zurücksetzen
 eval.token.reset.confirm=Token wirklich zurücksetzen?
-eval.token.reset.message=Das neue Zugangstoken des Internen Benutzers {0} lautet {1}.
+eval.token.reset.message=Das neue Zugangstoken des internen Benutzers {0} lautet {1}.
 eval.token.reset.error=Das Zugangstoken des Backend Benutzers konnte nicht zurückgesetzt werden.
 
 eval.title=Evaluation
@@ -257,9 +257,9 @@ feedback.rating=Bewertung
 feedback.pro=Positives
 feedback.pro.help=Hier kannst du uns mitteilen, was dir besonders gut gefallen hat.
 feedback.contra=Negatives
-feedback.contra.help=Hier kannst du uns Verbesserunsvorschläge mitteilen.
+feedback.contra.help=Hier kannst du uns Verbesserungsvorschläge mitteilen.
 feedback.freetext=Weitere Kommentare
-feedback.freetext.help=Hier kannst du und weitere Kommentare zukommen lassen.
+feedback.freetext.help=Hier kannst du uns weitere Kommentare zukommen lassen.
 feedback.submit.message=Vielen Danke für dein Feedback!
 feedback.submit.error=Feedback konnte nicht gespeichert werden!
 feedback.list.title=Feedbacks
@@ -345,7 +345,7 @@ error.404.short=Seite nicht gefunden
 error.500.short=Interner Fehler
 error.custom.short=Fehler
 #HTML---->
-error.403.long=Du scheinst keine Berechtigung zu haben diese Seite aufzurufen.
+error.403.long=Du scheinst keine Berechtigung zu haben, diese Seite aufzurufen.
 error.404.long=Hier scheint nichts zu sein.<br>\
 Falls du hier trotzdem etwas erwartet hast, lass es uns <a href="{0}">wissen</a>.
 error.500.long=Oha, da ist wohl etwas schief gelaufen.<br>\
@@ -383,7 +383,7 @@ Sonstiges: {3}\n\
 Ansehen: {4}
 
 # Notification
-notification.cookie.text=Der Adventskalender benötigt Cookies um zu funktionieren. Infos dazu gibt's 
+notification.cookie.text=Der Adventskalender benötigt Cookies, um zu funktionieren. Infos dazu gibt's 
 notification.cookie.link=hier.
 notification.cookie.button=Ok
 
@@ -406,7 +406,7 @@ hidden=Versteckt
 static=Statisch
 dynamic=Dynamisch
 best=Nach Bewertung
-no_eval=Nicht Gewertet
+no_eval=Nicht gewertet
 
 # List of permission levels in lower case
 everyone=Unbestimmt [NICHT BENUTZEN]
@@ -424,6 +424,6 @@ wrong_answer=Lösung enthält Fehler
 program_error=Laufzeitfehler im Program
 memory_exceeded=Speicherlimit überschritten
 runtime_exceeded=Laufzeit überschritten
-compiler_error=Fehler beim kompilieren
+compiler_error=Fehler beim Kompilieren
 canceled=Auswertung wurde vom Adventskalender-Team abgebrochen, melde dich bei <a href="{0}">uns</a>, um zu erfahren was passiert ist
 # ---> HTML
