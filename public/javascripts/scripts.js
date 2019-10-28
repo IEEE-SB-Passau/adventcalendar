@@ -12,13 +12,14 @@ $(document).ready(function () {
 });
 
 // activate pretty file input
-$(document).on('change', '.btn-file :file', function() {
-    $(this).trigger('fileselect', $(this).val().replace(/\\/g, '/').replace(/.*\//, ''));
-});
-$(document).ready(function() {
-    $('.btn-file :file').on('fileselect', function(event, label) {
-        $(this).parents('.input-group').find(':text').val(label);
-    });
+$(document).ready(function () {
+    var fileinputFilenameUpdate = function () {
+        var file = $(this)[0].files[0];
+        $(this).next('.fileinput-fake').find('.fileinput-filename').text(file !== undefined ? file.name : '');
+    };
+    var fileinputElements = $('.fileinput-input');
+    fileinputElements.on('change', fileinputFilenameUpdate);
+    fileinputElements.each(fileinputFilenameUpdate);
 });
 
 // Enable summernote on all textareas with class 'wysiwyg'
