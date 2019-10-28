@@ -372,7 +372,6 @@ Klicke bitte folgenden Link um deinen Passwort beim IEEE Adventskalender zu zur�
 \n\
 Weiterhin viel Spaß beim Mitmachen,\n\
 Das Adventskalender-Team
-
 email.answer.subject=Antwort bezüglich {0}
 email.feedback.subject=Feedback
 email.feedback.body=Bewertung: {0} Sterne\n\
@@ -425,5 +424,5 @@ program_error=Laufzeitfehler im Program
 memory_exceeded=Speicherlimit überschritten
 runtime_exceeded=Laufzeit überschritten
 compiler_error=Fehler beim Kompilieren
-canceled=Auswertung wurde vom Adventskalender-Team abgebrochen, melde dich bei <a href="{0}">uns</a>, um zu erfahren was passiert ist
+canceled=Auswertung wurde vom Adventskalender-Team abgebrochen, melde dich bei <a href="{0}">uns</a>, um zu erfahren, was passiert ist.
 # ---> HTML

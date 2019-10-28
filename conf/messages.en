@@ -1,132 +1,5 @@
-#TODO
-user.list.title=User list
-user.impersonate.message=You are now logged in as {0}.
-user.login.message=Welcome back, {0}!
-user.login.error=Login failed!
-user.notexist=Username does not exist!
-user.logout.message=See you soon, {0}!
-user.register.error.existing=User {0} was created. Please verify your email address with the link we sent you.
-user.register.message=Welcome, {0}!
-user.register.verify.message=We sent an email to the provided address. Please use the contained link to reset your password.
-user.update.message=User {0} was updated.
-
-user.error.usernametake=Username already in use!
-user.error.emailtaken=There already exists an account with this email address!
-user.error.passwordsnomatch=Passwords do not match!
-
-ticket.list.title=Questions
-
-ticket.create.error=There was an error while creating your question!
-ticket.create.message=We will take a look at your question.
-ticket.answer.error=There was an error answering the question!
-ticket.answer.message=The answer was successfully saved!
-problem.title=Problem
-problem.list.title=Problem list
-problem.create.message=Created problem {0}.
-problem.update.message=Updated problem {0}.
-
-problem.readablestart=Visible from
-problem.readablestop=Visible until
-problem.solvablestart=Solvable from
-problem.solvablestop=Solvable until
-
-problem.create.error.door=This door already has another problem!
-problem.translation.create.message=Created {1} translation for problem {0}.
-problem.translation.update.message=Updated {1} translation for problem {0}.
-
-testcase.create.message=Created test case {0}.
-testcase.update.message=Updated test case {0}.
-
-evaltask.create.message=Created evaluation task {0}.
-evaltask.create.error.filemissing=A file must be provided!
-evaltask.update.message=Updated evaluation task {0}.
-
-submit.success.message=Solution successfully submitted.
-submit.error.message=Solution could not be submitted.
-submit.error.filesize=The file is too big!
-submit.error.fileformat=The file can not be read as a valid program!
-submit.error.invalidlang=The given language is not supported!
-submit.ratelimit.message=You cannot submit a solution right now.
-submit.ratelimit.timer=You may only submit one solution per minute!
-submit.ratelimit.queue=You can submit only one solution every 15 minutes while your last solution is under evaluation!
-
-eval.status.update.message=Status was updated.
-
-eval.jobs.cancel.invalidjob=This job does not exist!
-eval.jobs.cancel.message=Job successfully canceled!
-eval.jobs.reevaluate.message=Test case will be reevaluated!
-
-feedback.submit.message=Thank you for your feedback!
-
-frontpage.greeting=Merry coding!
-
-language.name=English
-language.icon=🇺🇸
-
-#HTML--->
-page.title=IEEE SB Passau Advent Calendar 2019
-page.footer=&copy; 2019 IEEE Student Branch Passau - <a href="{0}#imprint">Imprint</a> and <a href="{0}#privacy">privacy policy</a>
-frontpage.pic.source=Image source: <a href="http://klowner.com/wallpaper/christmas_tux_2017/">"Christmas Tux 2017"</a> by Mark Riedesel, <a href="https://creativecommons.org/licenses/by-sa/4.0/legalcode">Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)</a>
-#<---HTML
-
-nav.problems=Tasks
-nav.ranking=Scoreboard
-nav.info=Information
-nav.user.login=Login
-nav.user.logout=Logout
-nav.user.register=Register
-nav.user.greeting=Hello {1} {0}!
-nav.admin.message=Admin
-nav.admin.stats=Statistics
-nav.admin.evalqueue=Queue
-nav.admin.postings=Edit page
-posting.edit=Edit page
-posting.page=Page
-posting.post.title=Title
-posting.post.default=Default version
-posting.post.trans=Translations
-posting.update.message=Updated message text.
-
-general.save=Save
-general.selectvalue=Please select
-
-error.invalid=Invalid input
-error.required=Required
-error.number=Input is not a number
-error.min=Value is too small
-error.max=Value is too big
-error.minLength=Input too short
-error.maxLength=Input too long
-error.email=Not a valid email address
-error.expected.date=Not a valid date
-error.expected.jodadate.format=Not a valid date
-error.date.reverse=''{0}'' must be after ''{1}''!
-error.path.empty=Empty path
-error.csrf=The form has expired. Please refresh the page!
-error.invalidlink=This link is invalid!
-
-error.403.short=Permission denied
-error.404.short=Page not found
-error.500.short=Internal error
-error.403.long=You seem to have no permission to visit this page.
-error.custom.short=Error
-#HTML---->
-error.404.long=Nothing seems to be here.<br>\
-If you expected something here, <a href="{0}">let us know</a>.
-error.500.long=Ooops, something went wrong.<br>\
-Whatever you have done, try it again in a few minutes. If you encounter this error again, <a href="{0}">let us know</a>.
-error.500.code=Please mention the error code <strong>{0}</strong> in your email!
-#<---HTML
-
-calendar=Advent calendar
-news=Announcements
-faq=FAQ
-rules=Rules
-examples=Examples
-contact=Contact
-status=Evaluation state
-evaltask.mask.list=Input <strong>'{'stdIn'}'</strong>, expected output <strong>'{'expOut'}'</strong>, program output <strong>'{'progOut'}'</strong>, source code <strong>'{'program'}'</strong>
 user.title=User
+user.list.title=User list
 user.username=Username
 user.password=Password
 user.password.repeat=Repeat password
@@ -137,27 +10,76 @@ user.hidden=Not ranked
 user.school=University or school
 user.semester=Semester or grade
 user.studysubject=Course of studies or specialization
+user.useragent=User agent
+user.ip=IP address
+#HTML
 user.resetpassword.text=If you forgot your password, you can reset it <a href="{0}">here</a>.
 user.requestreset=Send reset-link
 user.edit=Edit user
 user.impersonate=Login as this user
+user.impersonate.message=You are now logged in as {0}.
+user.login.message=Welcome back, {0}!
+user.login.error=Login failed!
 user.help.password=at least 6 characters
 user.help.register=The fields marked with * are mandatory.
+user.notexist=Username does not exist!
+user.logout.message=See you soon, {0}!
+user.register.error.existing=User {0} was created. Please verify your email address with the link we sent you.
+user.register.message=Welcome, {0}!
+user.register.verify.message=We sent an email to the provided address. Please use the contained link to reset your password.
+user.update.message=User {0} was updated.
+user.update.password=Leave empty to keep current password.
+user.error.usernametake=Username already in use!
+user.error.emailtaken=There already exists an account with this email address!
+user.error.passwordsnomatch=Passwords do not match!
+user.error.captcha=Captcha was wrong
+user.registered=Registered users
+user.submitted=Users with submissions
+
+ticket.title=Question
+ticket.list.title=Questions
 ticket.list.show=Show question
 ticket.public=Public
 ticket.answer=Answer
 ticket.answers.list.title=Answers
 ticket.answers.title=Answer
+ticket.create.error=There was an error while creating your question!
+ticket.create.message=We will take a look at your question.
+ticket.answer.error=There was an error answering the question!
+ticket.answer.message=The answer was successfully saved!
+
+problem.title=Problem
+problem.list.title=Problem list
+#HTML
+problem.list.empty=It seems that there are no tasks to solve yet.
 problem.name=Title
 problem.door=Door
 problem.description=Description
 problem.description.lang=Description in {0}
+problem.settings.title=Settings
 problem.evalmode=Valuation mode
+problem.cpufactor=Time limit factor (base {0} seconds)
+problem.memfactor=Memory limit factor (base {0} MB)
+problem.readablestart=Visible from
+problem.readablestop=Visible until
+problem.solvablestart=Solvable from
+problem.solvablestop=Solvable until
 problem.create=Add problem
+problem.edit=Edit task
+problem.create.message=Created problem {0}.
+problem.create.error.door=This door already has another problem!
+problem.create.error.datereverse.vis='Visible from' needs to be before 'Visible until'
+problem.create.error.datereverse.solve='Solvable from' needs to be before 'Solvable until'
+problem.update.message=Updated problem {0}.
+
 problem.translation.title=Translation
 problem.translation.list.title=Problem Description
 problem.translation.create=Add translation
 problem.translation.edit=Edit translation
+problem.translation.create.error.exists=This translation does already exist!
+problem.translation.create.message=Created {1} translation for problem {0}.
+problem.translation.update.message=Updated {1} translation for problem {0}.
+
 testcase.title=Test case
 testcase.list.title=Test cases
 testcase.position=Position
@@ -165,19 +87,30 @@ testcase.visibility=Visibility
 testcase.loadfile=Load file
 testcase.input=Input
 testcase.output=Expected output
+testcase.output.limitnote=Note: output is checked only up to 20 MB
 testcase.points=Score
 testcase.edit=Edit test case
 testcase.create=Create test case
+testcase.create.message=Created test case {0}.
+testcase.update.message=Updated test case {0}.
+
 evaltask.title=Evaluation task
 evaltask.list.title=Evaluation tasks
 evaltask.edit=Edit evaluation task
 evaltask.create=Add evaluation task
+evaltask.create.message=Created evaluation task {0}.
+evaltask.create.error.filemissing=A file must be provided!
+evaltask.update.message=Updated evaluation task {0}.
 evaltask.position=Position
 evaltask.mask.description=The following inputs are available for evaluation (order via input mask)
+#HTML
+evaltask.mask.list=Input <strong>'{'stdIn'}'</strong>, expected output <strong>'{'expOut'}'</strong>, program output <strong>'{'progOut'}'</strong>, source code <strong>'{'program'}'</strong>
 evaltask.mask=Input mask
 evaltask.output.description=The following outputs will be produced
 evaltask.output.checker=Further evaluates the program output
+evaltask.output.checker.help=Output "WRONG" or "CORRECT" in file "check"
 evaltask.output.score=Computes a score
+evaltask.output.score.help=Writes an positive integer to file "score" (lower ist better), must be last task
 evaltask.condition.description=Settings for preconditions
 evaltask.condition.passed=Runs if preceding result was "passed"
 evaltask.condition.failed=Runs if preceding result was "wrong answer"
@@ -186,91 +119,58 @@ evaltask.program=Program
 evaltask.useroutput=User output
 evaltask.validate=Validate
 evaltask.evaluate=Evaluate
+
 submit.submit=Submit
 submit.codeeditor=Code editor
 submit.codeeditor.load=Load editor
 submit.codeeditor.reload=Reload editor
-eval.status.update.error=Status could not be updated.
-eval.status.title=Evaluation status
-eval.status.start=Start evaluation
-eval.status.stop=Stop evaluation
-nav.user.resetpassword=Reset password
-posting.post.content=Content
-posting.post.missing=This post first has to be created.
-general.file=File
-general.delete.confirm=Really delete?
-general.id=ID
-general.language=Language
-general.listoverview=Overview
-ticket.title=Question
-canceled=Cancelled by team
-compiler_error=Compiler error
-runtime_exceeded=Runtime limit exceeded
-memory_exceeded=Memory limit exceeded
-program_error=Program error
-wrong_answer=Wrong output
-passed=Passed
-queued=Queued
-no_eval=Not valuated
-public=Public
-private=Private
-hidden=Hidden
-static=Static
-dynamic=Dynamic
-email.header=[IEEE Advent Calendar]
-email.register.subject=Registration
-email.answer.subject=Answer to question {0}
-email.passwordreset.subject=User service
-general.createdate=Created
-posting.translationexists.message=This translation does already exist!
-ranking.solves=Solved tasks
-ranking.position=Rank
-submissions.tries=Tries
-submissions.solves=Solutions
-submissions.solved=Solved
-submission.title=Submission
-submission.list.title=List of submissions
-problem.list.empty=It seems that there are no tasks to solve yet.
-problem.edit=Edit task
-problem.translation.create.error.exists=This translation does already exist!
-ranking.empty=It seems that nobody has solved a problem yet. See the <a href="{0}">list of tasks</a> and be the first to solve a problem.
-email.register.body=Hi {0},\n\
-\n\
-click the following link to activate your account at the IEEE Advent Calendar:\n\
-{1}\n\
-\n\
-Have fun participating,\n\
-Your Advent Calendar Team
-email.passwordreset.body=Hi {0},\n\
-\n\
-click the following link to reset your password at the IEEE Advent Calendar:\n\
-{1}\n\
-\n\
-Have fun participating,\n\
-Your Advent Calendar Team
-best=By evaluation
-submission.expected_output=Expected output
-submission.program_error=Program error
-submission.program_return=Program return value
-submission.program_output=Program output
-submission.program_input=Program input
-submission.compiler_error=Compiler error
-submission.compiler_output=Compiler output
-submission.compiler_return=Compiler return value
-user.useragent=User agent
-user.ip=IP address
+submit.codeeditor.defaultButton=Submit file
+submit.success.message=Solution successfully submitted.
+submit.error.message=Solution could not be submitted.
+submit.error.filesize=The file is too big!
+submit.error.fileformat=The file can not be read as a valid program!
+submit.error.invalidlang=The given language is not supported!
+submit.ratelimit.message=You cannot submit a solution right now.
+submit.ratelimit.timer=You may only submit one solution per minute!
+submit.ratelimit.queue=You can submit only one solution every 15 minutes while your last solution is under evaluation!
+#<--- HTML
 submit.notice.codelang=*For Java and Scala, please do not use a package and when using the editor, the main method needs to be in the class or object "Solution".
 submit.notice.help=If your program is not behaving as expected, you can look at the <a href="{0})">FAQs</a> or our selection of <a href="{1}">example programs</a>
+#--> HTML
+
 problemdetails.qna=Questions and answers
 problemdetails.submit=Submit a solution
 problemdetails.submissionlist=Your solutions
+#<--- HTML
 problemdetails.notice.ticket=Please log in to submit a question...
 problemdetails.notice.submit.login=Please log in to submit a solution...
 problemdetails.notice.submit.notsolvable=Currently, no solutions can be submitted for this problem...
 problemdetails.notice.submit.errormsg=If you don't know what the specific error messages mean, have a look at the <a href="{0}">FAQs</a>.
+#---> HTML
+
+submission.title=Submission
+submission.list.title=List of submissions
+submission.compiler_return=Compiler return value
+submission.compiler_output=Compiler output
+submission.compiler_error=Compiler error
 submission.program_source=Source code
+submission.program_input=Program input
+submission.program_output=Program output
+submission.program_return=Program return value
+submission.program_runtime=Program runtime
+submission.program_memory=Program memory usage
+submission.program_error=Program error
+submission.expected_output=Expected output
+submission.evalid=Backend Id
+submission.completed=Time of evaluation
+
+submissions.tries=Tries
+submissions.solves=Solutions
+submissions.solved=Solved
+
 solution.title=Solution
 solution.state=State
+
 codelang.title=Programming language
 codelang.list.title=Programming languages
 codelang.create=Add a programming language
@@ -278,109 +178,242 @@ codelang.create.message=Programming language {0} has been added.
 codelang.edit=Edit properties of programming language
 codelang.update.message=Properties of programming language {0} have been updated.
 codelang.name=Version info
+codelang.time=Default runtime
+codelang.memory=Default memory
+codelang.comment=Comments
 codelang.cpufactor=Time limit (compared to a base of {0} seconds)
 codelang.memfactor=Memory limit (compared to a base of {0} MB)
 codelang.fileextension=File extension
+codelang.fileextension.help=c (without a ".")
 codelang.highlightclass=Syntax highlighting class
-status.paused=The evaluation system is currently paused
-eval.vms.id=VM name
+codelang.active=Active
+
+eval.status.title=Evaluation status
+eval.status.start=Start evaluation
+eval.status.stop=Stop evaluation
+eval.status.update.message=Status was updated.
+eval.status.update.error=Status could not be updated.
+eval.status.message=The evaluation is currently paused. The team is working on it, please be patient.
+eval.token.reset.title=Evaluation system access token
+eval.token.reset=Reset access token
+eval.token.reset.confirm=Really reset token?
+eval.token.reset.message=The new access token of the internal user {0} is {1}.
+eval.token.reset.error=The backend user's access token could not be reset.
+
 eval.title=Evaluation
+eval.vms.title=Evaluation clients
+eval.vms.id=VM name
 eval.vms.numberofusers=# of logged in users
+eval.vms.uri=IP:Port
 eval.vms.load=Load
 eval.vms.memory=Memory
 eval.vms.lastheartbeat=Last report
+
 eval.jobs.state.title=State
 eval.jobs.state.assigned=Assigned
 eval.jobs.state.pending=Pending
+eval.jobs.reevaluate.message=Test case will be reevaluated!
+eval.jobs.reevaluate.confirm=Really reevaluate?
+eval.jobs.reevaluateproblem.button=Reevaluate problem
+eval.jobs.reevaluateproblem.message=All submissions for task {0} will be reevaluated.
+eval.jobs.reevaluateproblem.error=Problem could not be reevaluated.
+eval.jobs.reevaluateall.button=Reevaluate all
+eval.jobs.reevaluateall.message=All Submissions will be reevaluated.
+eval.jobs.reevaluateall.confirm=Really reevaluate all?
 eval.jobs.cancel.confirm=Really cancel evaluation?
+eval.jobs.cancel.message=Job successfully canceled!
+eval.jobs.cancel.invalidjob=This job does not exist!
+eval.jobs.cancelall.button=Cancel all jobs
+eval.jobs.cancelall.confirm=Really cancel all jobs?
+eval.jobs.cancelall.message=All jobs have been canceled.
+
+status.notification.start=Turn notification on
+status.notification.stop=Turn notification off
+status.notification.state.on=Notification was turned on
+status.notification.state.off=Notification was turned off
+status.paused=The evaluation system is currently paused
+status.canceled=Canceled
+
+assets.title=Static files
+assets.preview=Preview
+assets.add=Upload file
+assets.download=Test file download
+assets.add.error=File could not be uploaded!
+assets.add.success=File upload successful!
+assets.remove.success=File successfully deleted!
+assets.remove.error=File could not be deleted!
+
 feedback.title=Feedback
 feedback.rating=Rating
 feedback.pro=Positive
+feedback.pro.help=Tell us what you liked best about the advent calendar.
 feedback.contra=Negative
+feedback.contra.help=Tell us what we can improve.
 feedback.freetext=Other comments
+feedback.freetext.help=Here is room for additional feedback
+feedback.submit.message=Thank you for your feedback!
+feedback.submit.error=Feedback could not be saved!
+feedback.list.title=Feedbacks
+
+frontpage.greeting=Merry coding!
+
+ranking.position=Rank
+ranking.solves=Solved tasks
+#HTML
+ranking.empty=It seems that nobody has solved a problem yet. See the <a href="{0}">list of tasks</a> and be the first to solve a problem.
+
+language.name=English
+language.icon=🇺🇸
+language.unsupported=This language is not supported!
+
+#HTML--->
+page.title=IEEE SB Passau Advent Calendar 2019
+page.footer=&copy; 2019 IEEE Student Branch Passau - <a href="{0}#imprint">Imprint</a> and <a href="{0}#privacy">privacy policy</a>
+frontpage.pic.source=Image source: <a href="http://klowner.com/wallpaper/christmas_tux_2017/">"Christmas Tux 2017"</a> by Mark Riedesel, <a href="https://creativecommons.org/licenses/by-sa/4.0/legalcode">Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)</a>
+#<---HTML
+
+nav.problems=Tasks
+nav.ranking=Scoreboard
+nav.info=Information
+nav.feedback=Feedback
+nav.user.login=Login
+nav.user.logout=Logout
+nav.user.register=Register
+nav.user.resetpassword=Reset password
+nav.user.greeting=Hello {1} {0}!
+nav.moderator.message=Moderator
+nav.admin.message=Admin
+nav.admin.stats=Statistics
+nav.admin.evalqueue=Queue
+nav.admin.postings=Edit page
+
+posting.edit=Edit page
+posting.page=Page
+posting.post.title=Title
+posting.post.content=Content
+posting.post.default=Default version
+posting.post.trans=Translations
+posting.update.message=Updated message text.
+posting.translationexists.message=This translation does already exist!
+posting.post.missing=This post first has to be created.
+
+general.save=Save
+general.selectvalue=Please select
+general.file=File
+general.link=Link
+general.delete.confirm=Really delete?
+general.id=ID
+general.language=Language
+general.listoverview=Overview
+general.createdate=Created
 general.count=Count
 general.sum=Sum
 general.lasthour=Last hour
-problem.cpufactor=Time limit factor (base {0} seconds)
-problem.memfactor=Memory limit factor (base {0} MB)
-status.canceled=Canceled
-eval.vms.uri=IP:Port
-general.pagination.forward=Forward
-general.pagination.back=Back
-eval.jobs.reevaluate.confirm=Really reevaluate?
-language.unsupported=This language is not supported!
-codelang.memory=Default memory
-codelang.time=Default runtime
 general.seconds=seconds
 general.edit=Edit
-submission.program_runtime=Program runtime
-submission.program_memory=Program memory usage
-submission.completed=Time of evaluation
-submission.evalid=Backend Id
-codelang.comment=Comments
-eval.status.message=The evaluation is currently paused. The team is working on it, please be patient.
-codelang.fileextension.help=c (without a ".")
-testcase.output.limitnote=Note: output is checked only up to 20 MB
-user.update.password=Leave empty to keep current password.
+general.pagination.back=Back
+general.pagination.forward=Forward
+
+error.invalid=Invalid input
+error.required=Required
+error.number=Input is not a number
+error.real=Input is not a number
+error.min=Value is too small
+error.max=Value is too big
+error.minLength=Input is too short
+error.maxLength=Input is too long
+error.email=Not a valid email address
+error.expected.date=Not a valid date
+error.expected.jodadate.format=Not a valid date
+error.date.reverse=''{0}'' must be after ''{1}''!
+error.path.empty=Empty path
+error.csrf=The form has expired. Please refresh the page!
+error.invalidlink=This link is invalid!
+error.rebuild=The system needs to evaluate, please try again in a few seconds!
+
+error.403.short=Permission denied
+error.404.short=Page not found
+error.500.short=Internal error
+error.custom.short=Error
+#HTML---->
+error.403.long=You seem to have no permission to visit this page.
+error.404.long=Nothing seems to be here.<br>\
+If you expected something here, <a href="{0}">let us know</a>.
+error.500.long=Ooops, something went wrong.<br>\
+Whatever you have done, try it again in a few minutes.\
+If you encounter this error again, <a href="{0}">let us know</a>.
+error.500.code=Please mention the error code <strong>{0}</strong> in your email!
+#<---HTML
+
+# Emails
+email.header=[IEEE Advent Calendar]
+email.register.subject=Registration
+email.register.body=Hi {0},\n\
+\n\
+click the following link to activate your account at the IEEE Advent Calendar:\n\
+{1}\n\
+\n\
+Have fun participating,\n\
+Your Advent Calendar Team
+email.passwordreset.subject=User service
+email.passwordreset.body=Hi {0},\n\
+\n\
+click the following link to reset your password at the IEEE Advent Calendar:\n\
+{1}\n\
+\n\
+Have fun participating,\n\
+Your Advent Calendar Team
+email.answer.subject=Answer to question {0}
+email.feedback.subject=Feedback
+email.feedback.body=Rating: {0} Stars\n\
+Positive: {1}\n\
+Negative: {2}\n\
+Other   : {3}\n\
+\n\
+View: {4}
+
+# Notification
 notification.cookie.text=The advent calendar needs cookies to work properly. More information can be found 
 notification.cookie.link=here.
 notification.cookie.button=Ok
+
+# List of postings/pages in lower case
+calendar=Advent calendar
+news=Announcements
+faq=FAQ
+rules=Rules
+examples=Examples
+contact=Contact
+status=Evaluation state
+notification=Notification
+
+# List of visibilities in lower case
+public=Public
+private=Private
+hidden=Hidden
+
+# List of eval modes in lower case
+static=Static
+dynamic=Dynamic
+best=By evaluation
+no_eval=Not valuated
+
+# List of permission levels in lower case
+everyone=Undetermined [DO NOT USE]
 guest=Guest [DO NOT USE]
 contestant=User
 moderator=Moderator
 admin=Administrator
 internal=System
-user.error.captcha=Captcha was wrong
-everyone=Undetermined [DO NOT USE]
-status.notification.start=Turn notification on
-status.notification.stop=Turn notification off
-status.notification.state.off=Notification was turned off
-status.notification.state.on=Notification was turned on
-notification=Notification
-nav.moderator.message=Moderator
-problem.settings.title=Settings
-submit.codeeditor.defaultButton=Submit file
-problem.create.error.datereverse.vis='Visible from' needs to be before 'Visible until'
-problem.create.error.datereverse.solve='Solvable from' needs to be before 'Solvable until'
-error.rebuild=The system needs to evaluate, please try again in a few seconds!
-user.submitted=Users with submissions
-user.registered=Registered users
-assets.title=Static files
-assets.add=Upload file
-assets.download=Test file download
-general.link=Link
-eval.token.reset.message=The new access token of the internal user {0} is {1}.
-eval.token.reset.error=The backend user's access token could not be reset.
-eval.token.reset=Reset access token
-eval.token.reset.confirm=Really reset token?
-eval.token.reset.title=Evaluation system access token
-eval.vms.title=Evaluation clients
-evaltask.output.score.help=Writes an positive integer to file "score" (lower ist better), must be last task
-evaltask.output.checker.help=Output "WRONG" or "CORRECT" in file "check"
-assets.preview=Preview
-eval.jobs.cancelall.message=All jobs have been canceled.
-eval.jobs.cancelall.confirm=Really cancel all jobs?
-eval.jobs.cancelall.button=Cancel all jobs
-eval.jobs.reevaluateall.button=Reevaluate all
-eval.jobs.reevaluateall.message=All Submissions will be reevaluated.
-eval.jobs.reevaluateall.confirm=Really reevaluate all?
-assets.add.error=File could not be uploaded!
-assets.remove.error=File could not be deleted!
-assets.add.success=File upload successful!
-assets.remove.success=File successfully deleted!
-eval.jobs.reevaluateproblem.button=Reevaluate problem
-eval.jobs.reevaluateproblem.error=Problem could not be reevaluated.
-eval.jobs.reevaluateproblem.message=All submissions for task {0} will be reevaluated.
-codelang.active=Active
-error.real=Input is not a number
-nav.feedback=Feedback
-feedback.submit.error=Feedback could not be saved!
-email.feedback.subject=Feedback
-email.feedback.body=Rating: {0} Stars\n\
-Positive: {1}\n\
-Negative: {2}\n\
-Other   : {3}\n
-feedback.list.title=Feedbacks
-feedback.pro.help=Tell us what you liked best about the advent calendar.
-feedback.freetext.help=Here is room for additional feedback
-feedback.contra.help=Tell us what we can improve.
+
+# List of results in lower case
+# <--- HTML
+queued=Queued
+passed=Passed
+wrong_answer=Wrong output
+program_error=Program error
+memory_exceeded=Memory limit exceeded
+runtime_exceeded=Runtime limit exceeded
+compiler_error=Compiler error
+canceled=Cancelled by team. Contact <a href="{0}">us</a> to get to know what happened.
+# ---> HTML
