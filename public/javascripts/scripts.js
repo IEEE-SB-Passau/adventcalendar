@@ -31,16 +31,18 @@ $(document).ready(function () {
 function loadFileAsText(input, textarea) {
     var fileToLoad = input.files[0];
 
-    var fileReader = new FileReader();
-    fileReader.onload = function (fileLoadedEvent) {
-        // special handling for wysiwyg editor
-        if (textarea.classList.contains("wysiwyg")) {
-            $('.wysiwyg').summernote('code', fileLoadedEvent.target.result);
-        } else {
-            textarea.value = fileLoadedEvent.target.result;
-        }
-    };
-    fileReader.readAsText(fileToLoad, "UTF-8");
+    if (fileToLoad !== undefined) {
+        var fileReader = new FileReader();
+        fileReader.onload = function (fileLoadedEvent) {
+            // special handling for wysiwyg editor
+            if (textarea.classList.contains("wysiwyg")) {
+                $('.wysiwyg').summernote('code', fileLoadedEvent.target.result);
+            } else {
+                textarea.value = fileLoadedEvent.target.result;
+            }
+        };
+        fileReader.readAsText(fileToLoad, "UTF-8");
+    }
 }
 
 // fix summernote link mangling
