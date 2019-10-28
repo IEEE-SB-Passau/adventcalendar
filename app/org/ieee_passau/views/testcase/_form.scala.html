@@ -3,7 +3,7 @@
 @import play.api.data.Form
 @(pid: Int, testcase: Form[Testcase], visibilities: List[Visibility])(implicit messages: Messages)
 
-<fieldset>
+<fieldset id="testcase-fieldset">
     <input type="hidden" name="problemId" value="@pid" />
     @number(testcase("position"), label = messages("testcase.position"), placeholder = messages("testcase.position"))
 
@@ -29,3 +29,19 @@
 
     @buttonSave()
 </fieldset>
+<script type="text/javascript">
+    window.addEventListener('load', function () {
+        $('#testcase-fieldset button.load-file-btn').on('click', function () {
+            // fill position, points and visibility from filename, if possible
+            var file = $(this).parent().parent().find('.fileinput-input')[0].files[0];
+            if (file !== undefined){
+                var match = file.name.match(/^tc(\d+)\.(\d*)\.(pub|priv)\.(?:in|out)$/);
+                if (match !== null && match.length === 4) {
+                    $('#testcase-fieldset #@testcase("position").id').val(match[1]);
+                    $('#testcase-fieldset #@testcase("points").id').val(match[2]);
+                    $('#testcase-fieldset #visibility').val(match[3] === 'pub' ? 'PUBLIC' : 'PRIVATE');
+                }
+            }
+        });
+    });
+</script>
