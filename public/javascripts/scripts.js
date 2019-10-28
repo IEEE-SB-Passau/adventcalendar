@@ -23,7 +23,7 @@ $(document).ready(function () {
 });
 
 // Enable summernote on all textareas with class 'wysiwyg'
-$(document).ready(function() {
+$(document).ready(function () {
     $('textarea.wysiwyg').summernote();
 });
 
@@ -32,12 +32,12 @@ function loadFileAsText(input, textarea) {
     var fileToLoad = input.files[0];
 
     var fileReader = new FileReader();
-    fileReader.onload = function(fileLoadedEvent) {
+    fileReader.onload = function (fileLoadedEvent) {
         // special handling for wysiwyg editor
         if (textarea.classList.contains("wysiwyg")) {
             $('.wysiwyg').summernote('code', fileLoadedEvent.target.result);
         } else {
-        textarea.value = fileLoadedEvent.target.result;
+            textarea.value = fileLoadedEvent.target.result;
         }
     };
     fileReader.readAsText(fileToLoad, "UTF-8");
@@ -54,7 +54,7 @@ $('.wysiwyg').summernote({
 });
 
 // activate cookie notice
-window.addEventListener("load", function(){
+window.addEventListener("load", function () {
     window.cookieconsent.initialise({
         "palette": {
             "popup": {
