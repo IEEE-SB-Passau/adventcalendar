@@ -13,7 +13,7 @@
         <li class="active">@messages("problem.title")</li>
     </ol>
 
-    @form(org.ieee_passau.controllers.routes.ProblemController.save, 'class -> "form-horizontal") {
+    @form(org.ieee_passau.controllers.routes.ProblemController.save, Symbol("class") -> "form-horizontal") {
         @CSRF.formField
         <div class="well">
             @_form(problem, evalModes)

@@ -13,7 +13,7 @@
         <script src='https://www.google.com/recaptcha/api.js'></script>
     }
     <div class="well col-md-8 col-md-offset-2">
-        @form(org.ieee_passau.controllers.routes.UserController.create, 'class -> "form-horizontal") {
+        @form(org.ieee_passau.controllers.routes.UserController.create, Symbol("class") -> "form-horizontal") {
             @CSRF.formField
             <fieldset>
                 @text(registrationForm("username"), label = messages("user.username") + "*", placeholder = messages("user.username"), offset = "col-sm-3", width = "col-sm-9")

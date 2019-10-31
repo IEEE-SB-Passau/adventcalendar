@@ -17,7 +17,7 @@
             </div>
         }
 
-        @form(org.ieee_passau.controllers.routes.UserController.authenticate, 'class -> "form-horizontal") {
+        @form(org.ieee_passau.controllers.routes.UserController.authenticate, Symbol("class") -> "form-horizontal") {
             @CSRF.formField
             <fieldset>
                 @text(loginForm("username"), label = messages("user.username"), offset = "col-sm-3", width = "col-sm-9", required = true)

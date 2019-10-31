@@ -15,7 +15,7 @@
         <li class="active">@messages("codelang.title")</li>
     </ol>
 
-    @form(org.ieee_passau.controllers.routes.LanguageController.save, 'class -> "form-horizontal") {
+    @form(org.ieee_passau.controllers.routes.LanguageController.save, Symbol("class") -> "form-horizontal") {
         @CSRF.formField
         <fieldset>
             <div class="well">

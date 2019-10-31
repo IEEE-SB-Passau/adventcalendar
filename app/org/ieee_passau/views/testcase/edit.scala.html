@@ -13,7 +13,7 @@
         <li class="active">@messages("testcase.title")</li>
     </ol>
 
-    @form(org.ieee_passau.controllers.routes.TestcaseController.update(pid, id), 'class -> "form-horizontal") {
+    @form(org.ieee_passau.controllers.routes.TestcaseController.update(pid, id), Symbol("class") -> "form-horizontal") {
         @CSRF.formField
         <fieldset>
             <div class="well">

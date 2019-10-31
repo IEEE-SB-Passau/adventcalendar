@@ -13,7 +13,7 @@
         <li class="active">@messages("problem.translation.title")</li>
     </ol>
 
-    @form(org.ieee_passau.controllers.routes.ProblemController.saveTranslation(pid), 'class -> "form-horizontal") {
+    @form(org.ieee_passau.controllers.routes.ProblemController.saveTranslation(pid), Symbol("class") -> "form-horizontal") {
         @CSRF.formField
         <fieldset>
             <div class="well">

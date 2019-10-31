@@ -17,7 +17,7 @@
         @ticketView(list, expanded = true, admin = true)
     }
 
-    @form(org.ieee_passau.controllers.routes.TicketController.answerTicket(ticket._1.id.get), 'class -> "form-horizontal") {
+    @form(org.ieee_passau.controllers.routes.TicketController.answerTicket(ticket._1.id.get), Symbol("class") -> "form-horizontal") {
         @CSRF.formField
         <div class="well">
             <div class="form-group">

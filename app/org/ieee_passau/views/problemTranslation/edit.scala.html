@@ -14,7 +14,7 @@
         <li class="active">@messages("problem.translation.title")</li>
     </ol>
 
-    @form(routes.ProblemController.updateTranslation(pid, trans("language").value.get), 'class -> "form-horizontal") {
+    @form(routes.ProblemController.updateTranslation(pid, trans("language").value.get), Symbol("class") -> "form-horizontal") {
         @CSRF.formField
         <fieldset>
             <div class="well">

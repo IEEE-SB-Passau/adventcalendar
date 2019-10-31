@@ -22,7 +22,7 @@
 
     @if(sessionUser.isDefined && sessionUser.get.permission.includes(Admin)) {
         <h3>@messages("problem.settings.title")</h3>
-        @form(routes.ProblemController.update(pid), 'class -> "form-horizontal") {
+        @form(routes.ProblemController.update(pid), Symbol("class") -> "form-horizontal") {
             @CSRF.formField
             <input type="hidden" name="id" id="id" value="@pid"/>
             <div class="well">

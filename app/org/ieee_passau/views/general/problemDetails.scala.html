@@ -16,7 +16,7 @@
     @ticketView(tickets)
 
     @if(sessionUser.isDefined) {
-        @form(org.ieee_passau.controllers.routes.TicketController.submitTicket(problem.door), 'class -> "form-horizontal") {
+        @form(org.ieee_passau.controllers.routes.TicketController.submitTicket(problem.door), Symbol("class") -> "form-horizontal") {
             @CSRF.formField
             <div class="well">
                 @textareaBs(ticketForm("text"), label = messages("ticket.title"), required = true)

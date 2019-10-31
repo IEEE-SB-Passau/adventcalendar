@@ -12,7 +12,7 @@
         <li class="active">@messages("user.edit")</li>
     </ol>
 
-    @form(org.ieee_passau.controllers.routes.UserController.update(id), 'class -> "form-horizontal") {
+    @form(org.ieee_passau.controllers.routes.UserController.update(id), Symbol("class") -> "form-horizontal") {
         @CSRF.formField
         <fieldset>
             <div class="well">

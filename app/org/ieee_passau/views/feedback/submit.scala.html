@@ -8,7 +8,7 @@
 @(feedback: Form[FeedbackText])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
 
 @main(messages("feedback.title")) {
-    @form(org.ieee_passau.controllers.routes.TicketController.submitFeedback, 'class -> "form-horizontal") {
+    @form(org.ieee_passau.controllers.routes.TicketController.submitFeedback, Symbol("class") -> "form-horizontal") {
         @CSRF.formField
         <div class="well">
             @starSelector(feedback("rating"), messages("feedback.rating"), 5)
