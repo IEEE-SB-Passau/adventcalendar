@@ -13,7 +13,7 @@ SELECT s.id,
        s.user_id,
        s.problem_id,
        s.created,
-       s.language,
+       s."language",
        s.program,
        s.program_name,
        0          score,
@@ -27,7 +27,7 @@ CREATE OR REPLACE RULE "_RETURN" AS
          s.user_id,
          s.problem_id,
          s.created,
-         s.language,
+         s."language",
          s.program,
          s.program_name,
          coalesce(tc1.sumPoints::INTEGER, 0) score,
@@ -62,15 +62,23 @@ CREATE OR REPLACE RULE insert_solution AS
   ON INSERT TO solutions
   DO INSTEAD
   INSERT INTO solutions_no_score (id, user_id, problem_id, created,
-                                  language, program, program_name)
+                                  "language", program, program_name)
   SELECT new.id,
          new.user_id,
          new.problem_id,
          new.created,
-         new.language,
+         new."language",
          new.program,
          new.program_name
-        RETURNING new.id;
+  RETURNING solutions_no_score.id,
+            solutions_no_score.user_id,
+            solutions_no_score.problem_id,
+            solutions_no_score.created,
+            solutions_no_score."language",
+            solutions_no_score.program,
+            solutions_no_score.program_name,
+            0,
+            'CANCELED';
 
 CREATE OR REPLACE RULE update_solution AS
   ON UPDATE TO solutions
@@ -79,7 +87,7 @@ CREATE OR REPLACE RULE update_solution AS
   SET user_id      = new.user_id,
       problem_id   = new.problem_id,
       created      = new.created,
-      language     = new.language,
+      "language"   = new."language",
       program      = new.program,
       program_name = new.program_name
   WHERE id = new.id;
@@ -141,7 +149,16 @@ CREATE OR REPLACE RULE insert_problem AS
          new.eval_mode,
          new.cpu_factor,
          new.mem_factor
-        RETURNING new.id;
+  RETURNING problems_no_points.id,
+            problems_no_points.door,
+            problems_no_points.readable_start,
+            problems_no_points.readable_stop,
+            problems_no_points.solvable_start,
+            problems_no_points.solvable_stop,
+            problems_no_points.eval_mode,
+            problems_no_points.cpu_factor,
+            problems_no_points.mem_factor,
+            0;
 
 CREATE OR REPLACE RULE update_solution AS
   ON UPDATE TO problems
