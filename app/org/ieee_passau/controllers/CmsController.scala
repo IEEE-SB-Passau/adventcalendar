@@ -38,19 +38,15 @@ class CmsController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
   def maintenance: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     val displayLang: Lang = rs.lang
-    db.run((for {p <- Postings} yield (p.id.?, p.lang, p.title, p.content, p.date)).to[List].result)
-      .flatMap { list: List[(Option[Int], Lang, String, String, Date)] =>
-        val posts = list
-          .groupBy(_._1 /*id*/)
-          .map(l => (l._1.get, l._2.sortBy(_._2 /*lang*/)(LanguageHelper.ordering(LanguageHelper.defaultLanguage)).map(p => Posting.tupled(p))))
-        (monitoringActor ? NotificationQ).mapTo[NotificationM].flatMap { notificationState =>
-          (for {
-            p <- Postings.byId(Page.notification.id, displayLang)
-          } yield p.content).map(notification =>
-            Ok(org.ieee_passau.views.html.monitoring.maintenance(notificationState.run, notification, posts))
-          )
+    db.run(Postings.map(p => (p.id.?, p.lang, p.title, p.content, p.date)).to[List].result).flatMap { list: List[(Option[Int], Lang, String, String, Date)] =>
+      val posts = list.groupBy(_._1 /*id*/).map(l =>
+        (l._1.get, l._2.sortBy(_._2 /*lang*/)(LanguageHelper.ordering(LanguageHelper.defaultLanguage)).map(p => Posting.tupled(p))))
+      (monitoringActor ? NotificationQ).mapTo[NotificationM].flatMap { notificationState =>
+        Postings.byId(Page.notification.id, displayLang).map(_.content).map { notification =>
+          Ok(org.ieee_passau.views.html.monitoring.maintenance(notificationState.run, notification, posts))
         }
       }
+    }
   }}
 
   def toggleNotification: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
