@@ -42,9 +42,9 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
     val suid = if (user.isDefined) user.get.id.get else -1
     (rankingActor ? ProblemsQ(suid, Some(lang))).mapTo[Seq[ProblemInfo]].flatMap { list =>
       (monitoringActor ? NotificationQ).mapTo[NotificationM].flatMap {
-        case NotificationM(true) => for {
-          c <- for { p <- Postings.byId(Page.notification.id, lang)} yield p.content
-        } yield Ok(org.ieee_passau.views.html.general.problemList(list, "notification" -> c))
+        case NotificationM(true) => Postings.byId(Page.notification.id, lang).map(_.content).map { notification =>
+          Ok(org.ieee_passau.views.html.general.problemList(list, "notification" -> notification))
+        }
         case _ => Future.successful(Ok(org.ieee_passau.views.html.general.problemList(list, "" -> "")))
       }
     } recover {
@@ -56,9 +56,9 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
     val suid = if (user.isDefined) user.get.id.get else -1
     (rankingActor ? RankingQ(suid)).mapTo[List[(Int, String, Boolean, Int, Int)]].flatMap { ranking =>
       (monitoringActor ? NotificationQ).mapTo[NotificationM].flatMap {
-        case NotificationM(true) => for {
-          c <- for { p <- Postings.byId(Page.notification.id, rs.lang)} yield p.content
-        } yield Ok(org.ieee_passau.views.html.general.ranking(ranking, "notification" -> c))
+        case NotificationM(true) => Postings.byId(Page.notification.id, rs.lang).map(_.content).map { notification =>
+          Ok(org.ieee_passau.views.html.general.ranking(ranking, "notification" -> notification))
+        }
         case _ => Future.successful(Ok(org.ieee_passau.views.html.general.ranking(ranking, "" -> "")))
       }
     } recover {
