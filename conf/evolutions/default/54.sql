@@ -13,7 +13,7 @@ SELECT s.id,
        s.user_id,
        s.problem_id,
        s.created,
-       s."language",
+       s.language,
        s.program,
        s.program_name,
        0          score,
@@ -27,7 +27,7 @@ CREATE OR REPLACE RULE "_RETURN" AS
          s.user_id,
          s.problem_id,
          s.created,
-         s."language",
+         s.language,
          s.program,
          s.program_name,
          coalesce(tc1.sumPoints::INTEGER, 0) score,
@@ -40,9 +40,9 @@ CREATE OR REPLACE RULE "_RETURN" AS
             WHEN 'MEMORY_EXCEEDED' = ANY (tc2.result) THEN 'MEMORY_EXCEEDED'
             WHEN 'CANCELED' = ANY (tc2.result) THEN 'CANCELED'
             ELSE 'WRONG_ANSWER'
-           END) AS                           result
+           END) AS result
   FROM solutions_no_score s
-         LEFT OUTER JOIN (
+  LEFT OUTER JOIN (
     SELECT r.solution_id, sum(c.points)::INTEGER sumPoints
     FROM testcases c,
          testruns r
@@ -50,7 +50,7 @@ CREATE OR REPLACE RULE "_RETURN" AS
       AND r.result = 'PASSED'
     GROUP BY r.solution_id
   ) tc1 ON (s.id = tc1.solution_id)
-         LEFT OUTER JOIN (
+  LEFT OUTER JOIN (
     SELECT r.solution_id, array_agg(r.result) result
     FROM testcases c,
          testruns r
@@ -61,24 +61,19 @@ CREATE OR REPLACE RULE "_RETURN" AS
 CREATE OR REPLACE RULE insert_solution AS
   ON INSERT TO solutions
   DO INSTEAD
-  INSERT INTO solutions_no_score (id, user_id, problem_id, created,
-                                  "language", program, program_name)
-  SELECT new.id,
-         new.user_id,
-         new.problem_id,
-         new.created,
-         new."language",
-         new.program,
-         new.program_name
+  INSERT INTO solutions_no_score (user_id, problem_id, created,
+                                  language, program, program_name)
+  VALUES (new.user_id, new.problem_id, new.created,
+          new.language, new.program, new.program_name)
   RETURNING solutions_no_score.id,
             solutions_no_score.user_id,
             solutions_no_score.problem_id,
             solutions_no_score.created,
-            solutions_no_score."language",
+            solutions_no_score.language,
             solutions_no_score.program,
             solutions_no_score.program_name,
-            0,
-            'CANCELED';
+            0        score,
+            'QUEUED' result;
 
 CREATE OR REPLACE RULE update_solution AS
   ON UPDATE TO solutions
@@ -87,7 +82,7 @@ CREATE OR REPLACE RULE update_solution AS
   SET user_id      = new.user_id,
       problem_id   = new.problem_id,
       created      = new.created,
-      "language"   = new."language",
+      language     = new.language,
       program      = new.program,
       program_name = new.program_name
   WHERE id = new.id;
@@ -129,7 +124,7 @@ CREATE OR REPLACE RULE "_RETURN" AS
          p.mem_factor,
          coalesce(tc1.sumPoints::INTEGER, 0) points
   FROM problems_no_points p
-         LEFT OUTER JOIN (
+  LEFT OUTER JOIN (
     SELECT c.problem_id, sum(c.points)::INTEGER sumPoints
     FROM testcases c
     GROUP BY c.problem_id
@@ -138,17 +133,10 @@ CREATE OR REPLACE RULE "_RETURN" AS
 CREATE OR REPLACE RULE insert_problem AS
   ON INSERT TO problems
   DO INSTEAD
-  INSERT INTO problems_no_points (id, door, readable_start, readable_stop, solvable_start,
+  INSERT INTO problems_no_points (door, readable_start, readable_stop, solvable_start,
                                   solvable_stop, eval_mode, cpu_factor, mem_factor)
-  SELECT new.id,
-         new.door,
-         new.readable_start,
-         new.readable_stop,
-         new.solvable_start,
-         new.solvable_stop,
-         new.eval_mode,
-         new.cpu_factor,
-         new.mem_factor
+  VALUES (new.door, new.readable_start, new.readable_stop, new.solvable_start,
+          new.solvable_stop, new.eval_mode, new.cpu_factor, new.mem_factor)
   RETURNING problems_no_points.id,
             problems_no_points.door,
             problems_no_points.readable_start,
@@ -158,7 +146,7 @@ CREATE OR REPLACE RULE insert_problem AS
             problems_no_points.eval_mode,
             problems_no_points.cpu_factor,
             problems_no_points.mem_factor,
-            0;
+            0 points;
 
 CREATE OR REPLACE RULE update_solution AS
   ON UPDATE TO problems
