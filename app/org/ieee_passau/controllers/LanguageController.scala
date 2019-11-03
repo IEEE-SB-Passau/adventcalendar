@@ -6,6 +6,7 @@ import play.api.{Configuration, Environment}
 import play.api.data.Form
 import play.api.data.Forms.{mapping, of, _}
 import play.api.data.format.Formats._
+import play.api.data.validation.Constraints.pattern
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.mvc._
 import slick.jdbc.PostgresProfile.api._
@@ -79,10 +80,10 @@ class LanguageController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
   val languageNewForm = Form(
     mapping(
-      "id" -> text,
-      "name" -> text,
-      "highlightClass" -> text,
-      "extension" -> text,
+      "id" -> nonEmptyText(maxLength = 30),
+      "name" -> text(maxLength = 196).verifying(pattern(""".*, .*""".r, error = "codelang.name_and_version.error.pattern")),
+      "highlightClass" -> text(maxLength = 30),
+      "extension" -> nonEmptyText(maxLength = 10),
       "cpuFactor" -> of[Float],
       "memFactor" -> of[Float],
       "comment" -> text
@@ -92,7 +93,7 @@ class LanguageController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
   val languageUpdateForm = Form(
     mapping(
-      "name" -> text,
+      "name" -> nonEmptyText(maxLength = 196).verifying(pattern(""".*, .*""".r, error = "codelang.name_and_version.error.pattern")),
       "cpuFactor" -> of[Float],
       "memFactor" -> of[Float],
       "comment" -> text,
