@@ -19,6 +19,7 @@
         @CSRF.formField
         <fieldset>
             <div class="well">
+                @text(language("id"), label = messages("general.id"), placeholder = "C")
                 @text(language("name"), label = messages("codelang.name_and_version"), placeholder = "C, gcc")
                 @text(language("extension"), label = messages("codelang.fileextension"), placeholder = messages("codelang.fileextension"), help = messages("codelang.fileextension.help"))
                 @text(language("highlightClass"), label = messages("codelang.highlightclass"), placeholder = "c")
