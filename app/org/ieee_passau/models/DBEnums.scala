@@ -1,12 +1,13 @@
 package org.ieee_passau.models
 
+import org.ieee_passau.utils.FutureHelper
 import slick.ast.BaseTypedType
 import slick.dbio.Effect
 import slick.jdbc.JdbcType
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.ProvenShape
 
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
 
 object Result {
   implicit val resultTypeMapper: JdbcType[Result] with BaseTypedType[Result] = MappedColumnType.base[Result, String] (
@@ -50,6 +51,8 @@ object Languages extends TableQuery(new Languages(_)) {
 
   def update(id: String, lang: Language): DBIOAction[Int, NoStream, Effect.Write] =
     this.filter(_.id === id).update(lang)
+  def idAvailable(id: String)(implicit db: Database): Boolean =
+    Await.result(db.run(Query(Languages.filter(_.id === id).length).result), FutureHelper.dbTimeout).head == 0
 }
 
 object Visibility {

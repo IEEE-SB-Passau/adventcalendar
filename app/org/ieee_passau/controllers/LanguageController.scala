@@ -40,7 +40,7 @@ class LanguageController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   }}
 
   def insert: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action { implicit rs =>
-    Ok(org.ieee_passau.views.html.language.insert(languageNewForm))
+    Ok(org.ieee_passau.views.html.language.insert(languageNewForm.bind(Map("active" -> "true")).discardingErrors))
   }}
 
   def save: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
@@ -80,15 +80,16 @@ class LanguageController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
   val languageNewForm = Form(
     mapping(
-      "id" -> nonEmptyText(maxLength = 30),
+      "id" -> nonEmptyText(maxLength = 30).verifying("codelang.id.error.taken", id => Languages.idAvailable(id)),
       "name" -> text(maxLength = 196).verifying(pattern(""".*, .*""".r, error = "codelang.name_and_version.error.pattern")),
       "highlightClass" -> text(maxLength = 30),
       "extension" -> nonEmptyText(maxLength = 10),
       "cpuFactor" -> of[Float],
       "memFactor" -> of[Float],
-      "comment" -> text
-    )((id, name, highlightClass, extension, cpuFactor, memFactor, comment) => Language(id, name, highlightClass, extension, cpuFactor, memFactor, comment, active = true)
-    )((l: Language) => Some((l.id, l.name, l.highlightClass, l.extension, l.cpuFactor, l.memFactor, l.comment)))
+      "comment" -> text,
+      "active"-> boolean
+    )((id, name, highlightClass, extension, cpuFactor, memFactor, comment, active) => Language(id, name, highlightClass, extension, cpuFactor, memFactor, comment, active)
+    )((l: Language) => Some((l.id, l.name, l.highlightClass, l.extension, l.cpuFactor, l.memFactor, l.comment, l.active)))
   )
 
   val languageUpdateForm = Form(
