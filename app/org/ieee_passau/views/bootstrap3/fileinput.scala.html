@@ -1,0 +1,6 @@
+@(id: String, name: String = null)(implicit messages: Messages)
+<input id="@id" class="fileinput-input" type="file" @if(name != null) { name="@name" }>
+<div class="input-group fileinput-fake">
+    <span class="input-group-addon fileinput-label">@messages("general.file")</span>
+    <div class="form-control fileinput-filename"></div>
+</div>

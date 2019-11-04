@@ -1,6 +1,6 @@
 @import helper._
 @import org.ieee_passau.models.User
-@import org.ieee_passau.views.html.bootstrap3.buttonSave
+@import org.ieee_passau.views.html.bootstrap3.{buttonSave, fileinput}
 @import org.ieee_passau.views.html.main
 @import play.api.mvc.{Flash, RequestHeader}
 @()(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages, messagesApi: MessagesApi)
@@ -19,11 +19,7 @@
                     <div class="form-group">
                         <label class="col-sm-2 control-label">@messages("general.file")</label>
                         <div class="col-sm-10">
-                            <input id="file" class="fileinput-input" type="file" name="file">
-                            <div class="input-group fileinput-fake">
-                                <span class="input-group-addon fileinput-label">@messages("general.file")</span>
-                                <div class="form-control fileinput-filename"></div>
-                            </div>
+                            @fileinput("file", "file")
                         </div>
                     </div>
 

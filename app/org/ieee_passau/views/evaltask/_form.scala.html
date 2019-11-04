@@ -1,5 +1,5 @@
 @import org.ieee_passau.models.EvalTask
-@import org.ieee_passau.views.html.bootstrap3.{buttonSave, checkboxBs, number, textareaBs}
+@import org.ieee_passau.views.html.bootstrap3.{buttonSave, checkboxBs, fileinput, number, textareaBs}
 @import play.api.data.Form
 @import play.twirl.api.Html
 @(pid: Int, task: Form[EvalTask])(implicit messages: Messages)
@@ -14,11 +14,7 @@
     <div class="form-group" >
         <label class="col-sm-2 control-label">@messages("evaltask.file")</label>
         <div class="col-sm-10">
-            <input id="program" class="fileinput-input" type="file" name="program">
-            <div class="input-group fileinput-fake">
-                <span class="input-group-addon fileinput-label">@messages("general.file")</span>
-                <div class="form-control fileinput-filename"></div>
-            </div>
+            @fileinput("program", "program")
         </div>
     </div>
 

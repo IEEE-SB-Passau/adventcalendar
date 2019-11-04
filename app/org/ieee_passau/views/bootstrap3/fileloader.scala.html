@@ -1,13 +1,10 @@
+@import org.ieee_passau.views.html.bootstrap3.fileinput
 @(textarea: String)(implicit messages: Messages)
 <div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
         <div class="row">
             <div class="col-sm-8 col-md-9 col-lg-10">
-                <input id="@(textarea + "Input")" class="fileinput-input" type="file">
-                <div class="input-group fileinput-fake">
-                    <span class="input-group-addon fileinput-label">@messages("general.file")</span>
-                    <div class="form-control fileinput-filename"></div>
-                </div>
+                @fileinput(textarea + "Input")
             </div>
             <div class="col-sm-4 col-md-3 col-lg-2">
                 <button class="btn btn-info load-file-btn" type="button" onclick="loadFileAsText(@(textarea + "Input"), @textarea)" style="width: 100%;">@messages("testcase.loadfile")</button>
