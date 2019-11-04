@@ -2,13 +2,13 @@ package org.ieee_passau.controllers
 
 import com.google.inject.Inject
 import org.ieee_passau.models._
-import play.api.{Configuration, Environment}
 import play.api.data.Form
 import play.api.data.Forms.{mapping, of, _}
 import play.api.data.format.Formats._
 import play.api.data.validation.Constraints.pattern
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.mvc._
+import play.api.{Configuration, Environment}
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -66,8 +66,8 @@ class LanguageController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
         },
 
         codelang => {
-          val newCodelang = lang.copy(name = codelang.name, cpuFactor = codelang.cpuFactor,
-            memFactor = codelang.memFactor, comment = codelang.comment, active = codelang.active)
+          val newCodelang = lang.copy(name = codelang.name, highlightClass = codelang.highlightClass, extension = codelang.extension,
+            cpuFactor = codelang.cpuFactor, memFactor = codelang.memFactor, comment = codelang.comment, active = codelang.active)
           db.run(Languages.update(language, newCodelang)).map(_ =>
             Redirect(org.ieee_passau.controllers.routes.LanguageController.edit(language))
               .flashing("success" -> rs.messages("codelang.update.message", codelang.id))
@@ -95,11 +95,13 @@ class LanguageController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   val languageUpdateForm = Form(
     mapping(
       "name" -> nonEmptyText(maxLength = 196).verifying(pattern(""".*, .*""".r, error = "codelang.name_and_version.error.pattern")),
+      "highlightClass" -> text(maxLength = 30),
+      "extension" -> nonEmptyText(maxLength = 10),
       "cpuFactor" -> of[Float],
       "memFactor" -> of[Float],
       "comment" -> text,
       "active" -> boolean
-    )((name, cpuFactor, memFactor, comment,  active) => Language("", name, "", "", cpuFactor, memFactor, comment, active))
-    ((l: Language) => Some((l.name, l.cpuFactor, l.memFactor, l.comment, l.active)))
+    )((name, highlightClass, extension, cpuFactor, memFactor, comment, active) => Language("", name, highlightClass, extension, cpuFactor, memFactor, comment, active))
+    ((l: Language) => Some((l.name, l.highlightClass, l.extension, l.cpuFactor, l.memFactor, l.comment, l.active)))
   )
 }
