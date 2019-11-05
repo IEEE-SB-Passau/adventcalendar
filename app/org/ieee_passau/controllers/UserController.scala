@@ -1,18 +1,22 @@
 package org.ieee_passau.controllers
 
+import java.util.concurrent.TimeUnit
+
 import com.google.inject.Inject
 import org.apache.commons.mail.EmailException
 import org.ieee_passau.models.{Admin, _}
 import org.ieee_passau.utils.{CaptchaHelper, LanguageHelper, PasswordHasher}
-import play.api.{Configuration, Environment}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.db.slick.DatabaseConfigProvider
+import play.api.http.HttpEntity
 import play.api.i18n.{Lang, Langs}
 import play.api.libs.mailer._
-import play.api.mvc._
+import play.api.mvc.{Result, Session, _}
+import play.api.{Configuration, Environment}
 import slick.jdbc.PostgresProfile.api._
 
+import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
 
 class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
@@ -72,10 +76,14 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
       userLogin => {
         val user: User = userLogin.user.get
         val uid = user.id.get.toString
-        Redirect(org.ieee_passau.controllers.routes.CmsController.calendar())
+        var result = Redirect(org.ieee_passau.controllers.routes.CmsController.calendar())
           .flashing("success" -> rs.messages("user.login.message", user.username))
           .withSession("user" -> uid)
           .withCookies(Cookie(messagesApi.langCookieName, user.lang.code))
+        if (true) { // TODO: if checkbox set
+          result = new MyResult(result)
+        }
+        result
       }
     )
   }}
@@ -260,6 +268,47 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   def dismissNotification: Action[AnyContent] = requirePermission(Contestant) { implicit user => Action.async { implicit rs =>
     Users.update(user.get.id, user.get.copy(notificationDismissed = true)).map(_ => Ok(""))
   }}
+
+  class MyResult(
+      header: ResponseHeader,
+      body: HttpEntity,
+      newSession: Option[Session] = None,
+      newFlash: Option[Flash] = None,
+      newCookies: Seq[Cookie] = Seq.empty
+  ) extends Result(header, body, newSession, newFlash, newCookies) {
+
+    def this(result: Result) = this(result.header, result.body, result.newSession, result.newFlash, result.newCookies)
+
+    override def copy(
+        header: ResponseHeader = this.header,
+        body: HttpEntity = this.body,
+        newSession: Option[Session] = this.newSession,
+        newFlash: Option[Flash] = this.newFlash,
+        newCookies: Seq[Cookie] = this.newCookies
+    ): MyResult = new MyResult(header, body, newSession, newFlash, newCookies)
+
+    override def bakeCookies(
+        cookieHeaderEncoding: CookieHeaderEncoding = new DefaultCookieHeaderEncoding(),
+        sessionBaker: CookieBaker[Session] = new DefaultSessionCookieBaker(),
+        flashBaker: CookieBaker[Flash] = new DefaultFlashCookieBaker(),
+        requestHasFlash: Boolean = false
+    ): MyResult = {
+      var mySessionBaker: CookieBaker[Session] = null
+      sessionBaker match {
+        case defaultSessionBaker: DefaultSessionCookieBaker =>
+          val extendedConfig = defaultSessionBaker.config.copy(maxAge = Option(FiniteDuration(60, TimeUnit.SECONDS)))
+          mySessionBaker = new DefaultSessionCookieBaker(extendedConfig, defaultSessionBaker.secretConfiguration, defaultSessionBaker.signedCodec.cookieSigner)
+        case legacySessionCookieBaker: LegacySessionCookieBaker =>
+          val extendedConfig = legacySessionCookieBaker.config.copy(maxAge = Option(FiniteDuration(60, TimeUnit.SECONDS)))
+          mySessionBaker = new LegacySessionCookieBaker(extendedConfig, legacySessionCookieBaker.cookieSigner)
+        case _ =>
+          log.error("Unknown SessionBaker is being used: " + sessionBaker.getClass.getName)
+          mySessionBaker = sessionBaker
+      }
+
+      new MyResult(super.bakeCookies(cookieHeaderEncoding, mySessionBaker, flashBaker, requestHasFlash))
+    }
+  }
 
   val userForm = Form(
     mapping(
