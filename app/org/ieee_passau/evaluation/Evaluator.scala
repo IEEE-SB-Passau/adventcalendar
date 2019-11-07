@@ -7,14 +7,14 @@ import play.api.Configuration
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.libs.concurrent.InjectedActorSupport
 
-class Evaluator @Inject() (val dbConfigProvider: DatabaseConfigProvider,
-                           val config: Configuration,
-                           val system: ActorSystem,
-                           val dbReaderFactory: DBReader.Factory,
-                           val dbWriterFactory: DBWriter.Factory,
-                           val vmMasterFactory: VMMaster.Factory,
-                           val inputRegulatorFactory: InputRegulator.Factory
-                          ) extends EvaluationActor with InjectedActorSupport {
+class Evaluator @Inject()(val dbConfigProvider: DatabaseConfigProvider,
+                          val config: Configuration,
+                          val system: ActorSystem,
+                          val dbReaderFactory: DBReader.Factory,
+                          val dbWriterFactory: DBWriter.Factory,
+                          val vmMasterFactory: VMMaster.Factory,
+                          val inputRegulatorFactory: InputRegulator.Factory
+                         ) extends EvaluationActor with InjectedActorSupport {
 
   override def receive: Receive = {
     case _ => // Ignored

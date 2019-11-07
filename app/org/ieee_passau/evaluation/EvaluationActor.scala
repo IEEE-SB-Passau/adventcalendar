@@ -1,14 +1,14 @@
 package org.ieee_passau.evaluation
 
 import akka.actor._
-import akka.event.Logging
+import akka.event.{Logging, LoggingAdapter}
 import org.ieee_passau.evaluation.Messages._
 
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
 abstract class EvaluationActor extends Actor {
-  val log = Logging(context.system, this)
+  val log: LoggingAdapter = Logging(context.system, this)
   val MAX_RETRIES = 10
   val RESTART_WINDOW: FiniteDuration = 60 seconds
 

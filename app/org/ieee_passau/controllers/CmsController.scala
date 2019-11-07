@@ -200,7 +200,7 @@ class CmsController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
     }
   }}
 
-  val postingForm = Form(
+  val postingForm: Form[Posting] = Form(
     mapping(
       "id" -> optional(number),
       "lang" -> text,

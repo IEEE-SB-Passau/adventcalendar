@@ -93,8 +93,7 @@
                                         <li @if(title == messages("nav.admin.stats"))       { class="active" }><a href="@org.ieee_passau.controllers.routes.EvaluationController.stats"  >@messages("nav.admin.stats")</a></li>
                                     </ul>
                                 </li>
-                            }
-                            }
+                            }}
                             <li @if(title == messages(Page.contact.toString)) { class="active" }><a href="@org.ieee_passau.controllers.routes.CmsController.content(Page.contact.toString)">@messages(Page.contact.toString)</a></li>
                         </ul>
                         <ul class="nav navbar-nav navbar-right">

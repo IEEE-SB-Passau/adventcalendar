@@ -25,13 +25,13 @@
     </div>
     @dateManualError(problem("readableStart"), label =  messages("problem.readablestart"), placeholder = "2013-12-01 00:00")
     @{
-        val (hasError, error) = ViewHelper.checkAmbiguesKey("vis", problem)
+        val (hasError, error) = ViewHelper.checkAmbiguousKey("vis", problem)
         dateManualError(problem("readableStop"), label =  messages("problem.readablestop"), placeholder = "2013-12-01 00:00",
             hasError = hasError, errorMsg = messages(error, messages("problem.readablestop"), messages("problem.readablestart")))
     }
     @dateManualError(problem("solvableStart"), label = messages("problem.solvablestart"), placeholder = "2013-12-01 00:00")
     @{
-        val (hasError, error) = ViewHelper.checkAmbiguesKey("vis", problem)
+        val (hasError, error) = ViewHelper.checkAmbiguousKey("vis", problem)
         dateManualError(problem("solvableStop"), label =  messages("problem.solvablestop"), placeholder = "2013-12-01 00:00",
             hasError = hasError, errorMsg = messages(error, messages("problem.solvablestop"), messages("problem.solvablestart")))
     }

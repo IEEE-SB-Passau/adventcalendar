@@ -170,7 +170,7 @@ class RankingActor @Inject()(val dbConfigProvider: DatabaseConfigProvider, val s
               p -> calculateChallengeRank(problemXuserXbest(p).values.map(_.fold(0)(_._1)).toList)
             }.toMap
 
-            problemCounts(includeHidden) = submissionCounts.withDefaultValue((0,0,0))
+            problemCounts(includeHidden) = submissionCounts.withDefaultValue((0, 0, 0))
 
             ranking(includeHidden) = ranking(includeHidden).map { case (u, pl) =>
               u -> pl.map { case (p, (score, _, _, mode)) =>
@@ -277,7 +277,7 @@ class RankingActor @Inject()(val dbConfigProvider: DatabaseConfigProvider, val s
                 ProblemInfo(id,
                   door,
                   transList.getOrElse(id, ""),
-                  (calculateMaxProblemPoints(mode, points) _).tupled(submissionCounts).floor.toInt ,
+                  (calculateMaxProblemPoints(mode, points) _).tupled(submissionCounts).floor.toInt,
                   sessionUser.map(u => ranking(u.hidden)(u.id.get)(id)._2.floor.toInt).getOrElse(0),
                   mode,
                   // Variant with user tires

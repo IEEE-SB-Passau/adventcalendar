@@ -21,6 +21,7 @@ object StringHelper {
   def base64Encode(data: String): String = {
     Base64.encodeBase64String(data.getBytes(Charset.forName("UTF-8")))
   }
+
   def base64Decode(data: String): String = {
     new String(Base64.decodeBase64(data), Charset.forName("UTF-8"))
   }

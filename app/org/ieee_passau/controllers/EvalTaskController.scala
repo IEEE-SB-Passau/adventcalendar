@@ -101,7 +101,7 @@ class EvalTaskController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
     }
   }
 
-  val evalTaskForm = Form(
+  val evalTaskForm: Form[EvalTask] = Form(
     mapping(
       "id" -> optional(number),
       "problemId" -> number,

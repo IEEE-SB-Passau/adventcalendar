@@ -25,7 +25,7 @@ object VMClient {
     Props(new VMClient(host, port, name))
 }
 
-class VMClient(host: String, port: Int, name:String) extends EvaluationActor {
+class VMClient(host: String, port: Int, name: String) extends EvaluationActor {
 
   private val timeout = Timeout(FutureHelper.makeDuration("30 minutes"))
 
@@ -192,7 +192,7 @@ class VMClient(host: String, port: Int, name:String) extends EvaluationActor {
 
         val result = if (evaluationResult.terminationResult.getOrElse("").contains("time")) {
           RuntimeExceeded
-        } else if (evaluationResult.terminationResult.getOrElse("").contains("memory"))  {
+        } else if (evaluationResult.terminationResult.getOrElse("").contains("memory")) {
           MemoryExceeded
         } else if (!compilerResult.exitCode.contains(0)) {
           CompileError
@@ -201,7 +201,7 @@ class VMClient(host: String, port: Int, name:String) extends EvaluationActor {
         } else {
           // Magic newline handling
           val evalout = evaluationResult.stdout.getOrElse("")
-          val outLines = if (evalout.isEmpty) Iterator("") else  evaluationResult.stdout.getOrElse("").lines
+          val outLines = if (evalout.isEmpty) Iterator("") else evaluationResult.stdout.getOrElse("").lines
           val expLines = if (expout.isEmpty) Iterator("") else expout.lines
           //noinspection CorrespondsUnsorted
           if (!outLines.sameElements(expLines)) {

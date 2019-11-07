@@ -87,8 +87,8 @@ object PasswordHasher {
   }
 
   def generateUrlString(): String = {
-    val salt = new Array[Byte](265/8)
+    val salt = new Array[Byte](265 / 8)
     this.rng.nextBytes(salt)
-    encoder.encodeToString(salt).replace("/","_").replace("+", "_").replace("=","")
+    encoder.encodeToString(salt).replace("/", "_").replace("+", "_").replace("=", "")
   }
 }

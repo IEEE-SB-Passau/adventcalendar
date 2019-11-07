@@ -21,7 +21,7 @@ object ViewHelper {
     }
   }
 
-  def checkAmbiguesKey(prefix: String, form: Form[_]): (Boolean, String) = {
+  def checkAmbiguousKey(prefix: String, form: Form[_]): (Boolean, String) = {
     var hasError = false
     var error = ""
     if(form.errors.nonEmpty) {

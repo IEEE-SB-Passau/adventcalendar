@@ -16,7 +16,7 @@ import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 
-class MonitoringActor @Inject() (val system: ActorSystem, val config: Configuration) extends Actor {
+class MonitoringActor @Inject()(val system: ActorSystem, val config: Configuration) extends Actor {
   implicit private val evalContext: ExecutionContext = system.dispatchers.lookup("evaluator.context")
 
   private var notification = false
@@ -40,10 +40,10 @@ class MonitoringActor @Inject() (val system: ActorSystem, val config: Configurat
       vmMaster ! StatusM(state)
       inputRegulator ! StatusM(state)
     case RunningJobsQ =>
-      pipe (inputRegulator ? RunningJobsQ) to sender
+      pipe(inputRegulator ? RunningJobsQ) to sender
     case RunningVMsQ =>
-      pipe ((vmMaster ? RunningVMsQ).flatMap {
-        case list: List[(String, Int) @unchecked] => Future {
+      pipe((vmMaster ? RunningVMsQ).flatMap {
+        case list: List[(String, Int)@unchecked] => Future {
           list.map {
             vm: (String, Int) => (vm._1, vm._2, nodes.getOrElse(vm._1, VMStatus(vm._1, "", 0, 0, 0, 0, new Date)))
           }

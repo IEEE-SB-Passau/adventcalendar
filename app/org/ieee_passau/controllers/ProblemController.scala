@@ -176,7 +176,7 @@ class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
     )
   }}
 
-  val problemForm = Form(
+  val problemForm: Form[Problem] = Form(
     mapping(
       "id" -> optional(text),
       "door" -> number, //(1, 24)
@@ -205,7 +205,7 @@ class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
     )
   )
 
-  val problemTranslationForm = Form(
+  val problemTranslationForm: Form[ProblemTranslation] = Form(
     mapping(
       "problemId" -> number,
       "language" -> nonEmptyText,

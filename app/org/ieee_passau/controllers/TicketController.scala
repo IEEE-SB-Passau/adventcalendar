@@ -203,7 +203,7 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
     }
   }}
 
-  val feedbackForm = Form(
+  val feedbackForm: Form[FeedbackText] = Form(
     mapping(
       "rating" -> number(0, 5),
       "pro" -> optional(text),
