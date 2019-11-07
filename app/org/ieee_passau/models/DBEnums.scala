@@ -51,6 +51,7 @@ object Languages extends TableQuery(new Languages(_)) {
 
   def update(id: String, lang: Language): DBIOAction[Int, NoStream, Effect.Write] =
     this.filter(_.id === id).update(lang)
+
   def idAvailable(id: String)(implicit db: Database): Boolean =
     Await.result(db.run(Query(Languages.filter(_.id === id).length).result), FutureHelper.dbTimeout).head == 0
 }
