@@ -1,7 +1,5 @@
 package org.ieee_passau.controllers
 
-import java.util.concurrent.TimeUnit
-
 import com.google.inject.Inject
 import org.apache.commons.mail.EmailException
 import org.ieee_passau.models.{Admin, _}
@@ -80,8 +78,8 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
           .flashing("success" -> rs.messages("user.login.message", user.username))
           .withSession("user" -> uid)
           .withCookies(Cookie(messagesApi.langCookieName, user.lang.code))
-        if (true) { // TODO: if checkbox set
-          result = new MyResult(result)
+        if (userLogin.stayLoggedIn) {
+          result = new ResultWithPersistentSessionCookie(result)
         }
         result
       }
@@ -269,7 +267,8 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
     Users.update(user.get.id, user.get.copy(notificationDismissed = true)).map(_ => Ok(""))
   }}
 
-  class MyResult(
+  // hack, that allows us to programmatically set the maxAge for the session-cookie (playframework doesn't have that functionality)
+  class ResultWithPersistentSessionCookie(
       header: ResponseHeader,
       body: HttpEntity,
       newSession: Option[Session] = None,
@@ -279,34 +278,36 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
     def this(result: Result) = this(result.header, result.body, result.newSession, result.newFlash, result.newCookies)
 
+    // override copy, since it is used in the Result class, but we want that this class will be returned
     override def copy(
         header: ResponseHeader = this.header,
         body: HttpEntity = this.body,
         newSession: Option[Session] = this.newSession,
         newFlash: Option[Flash] = this.newFlash,
         newCookies: Seq[Cookie] = this.newCookies
-    ): MyResult = new MyResult(header, body, newSession, newFlash, newCookies)
+    ): ResultWithPersistentSessionCookie = new ResultWithPersistentSessionCookie(header, body, newSession, newFlash, newCookies)
 
     override def bakeCookies(
         cookieHeaderEncoding: CookieHeaderEncoding = new DefaultCookieHeaderEncoding(),
         sessionBaker: CookieBaker[Session] = new DefaultSessionCookieBaker(),
         flashBaker: CookieBaker[Flash] = new DefaultFlashCookieBaker(),
         requestHasFlash: Boolean = false
-    ): MyResult = {
-      var mySessionBaker: CookieBaker[Session] = null
-      sessionBaker match {
+    ): ResultWithPersistentSessionCookie = {
+      val maxAge = config.get[Option[FiniteDuration]]("persistentSession.maxAge")
+
+      val actualSessionBaker: CookieBaker[Session] = sessionBaker match {
         case defaultSessionBaker: DefaultSessionCookieBaker =>
-          val extendedConfig = defaultSessionBaker.config.copy(maxAge = Option(FiniteDuration(60, TimeUnit.SECONDS)))
-          mySessionBaker = new DefaultSessionCookieBaker(extendedConfig, defaultSessionBaker.secretConfiguration, defaultSessionBaker.signedCodec.cookieSigner)
+          val extendedConfig = defaultSessionBaker.config.copy(maxAge = maxAge)
+          new DefaultSessionCookieBaker(extendedConfig, defaultSessionBaker.secretConfiguration, defaultSessionBaker.signedCodec.cookieSigner)
         case legacySessionCookieBaker: LegacySessionCookieBaker =>
-          val extendedConfig = legacySessionCookieBaker.config.copy(maxAge = Option(FiniteDuration(60, TimeUnit.SECONDS)))
-          mySessionBaker = new LegacySessionCookieBaker(extendedConfig, legacySessionCookieBaker.cookieSigner)
+          val extendedConfig = legacySessionCookieBaker.config.copy(maxAge = maxAge)
+          new LegacySessionCookieBaker(extendedConfig, legacySessionCookieBaker.cookieSigner)
         case _ =>
           log.error("Unknown SessionBaker is being used: " + sessionBaker.getClass.getName)
-          mySessionBaker = sessionBaker
+          sessionBaker
       }
 
-      new MyResult(super.bakeCookies(cookieHeaderEncoding, mySessionBaker, flashBaker, requestHasFlash))
+      new ResultWithPersistentSessionCookie(super.bakeCookies(cookieHeaderEncoding, actualSessionBaker, flashBaker, requestHasFlash))
     }
   }
 
@@ -346,7 +347,8 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   val loginForm = Form(
     mapping(
       "username" -> nonEmptyText(3, 30),
-      "password" -> nonEmptyText(6, 128)
+      "password" -> nonEmptyText(6, 128),
+      "stayLoggedIn" -> boolean
     )(UserLogin.apply)(UserLogin.unapply)
       verifying("user.login.error", login => login.authenticate().isDefined)
   )

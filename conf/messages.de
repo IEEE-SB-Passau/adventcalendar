@@ -21,6 +21,8 @@ user.semester=Semester oder Jahrgangstufe
 user.studysubject=Studiengang oder Fachrichtung
 user.useragent=User Agent
 user.ip=IP Adresse
+user.stay_logged_in=Eingeloggt bleiben
+user.stay_logged_in.help=Verwendet persistenten Cookie
 #HTML
 user.resetpassword.text=Falls du dein Passwort vergessen hast, kannst du es <a href="{0}">hier</a> zurücksetzen.
 user.requestreset=Rücksetzlink zusenden

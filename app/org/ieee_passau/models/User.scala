@@ -60,7 +60,7 @@ object Users extends TableQuery(new Users(_)) {
     Await.result(db.run(Query(Users.filter(_.email === email).length).result), FutureHelper.dbTimeout).head == 0
 }
 
-case class UserLogin(username: String, password: String) {
+case class UserLogin(username: String, password: String, stayLoggedIn: Boolean) {
   private var _user: Option[User] = None
   def user: Option[User] = _user
 

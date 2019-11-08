@@ -1,6 +1,6 @@
 @import helper._
 @import org.ieee_passau.models.{User, UserLogin}
-@import org.ieee_passau.views.html.bootstrap3.{password, text}
+@import org.ieee_passau.views.html.bootstrap3.{password, text, checkboxBs}
 @import org.ieee_passau.views.html.main
 @import play.api.data.Form
 @import play.api.mvc.{Flash, RequestHeader}
@@ -22,6 +22,8 @@
             <fieldset>
                 @text(loginForm("username"), label = messages("user.username"), offset = "col-sm-3", width = "col-sm-9", required = true)
                 @password(loginForm("password"), label = messages("user.password"), offset = "col-sm-3", width = "col-sm-9")
+                @checkboxBs(loginForm("stayLoggedIn"), label = messages("user.stay_logged_in"), help = messages("user.stay_logged_in.help"),
+                    offset = "col-sm-3", width = "col-sm-9")
 
                 <div class="form-group">
                     <div class="col-sm-offset-3 col-sm-9">
