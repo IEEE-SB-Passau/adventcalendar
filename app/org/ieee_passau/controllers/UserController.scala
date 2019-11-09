@@ -12,7 +12,6 @@ import play.api.i18n.{Lang, Langs}
 import play.api.libs.mailer._
 import play.api.mvc.{Result, Session, _}
 import play.api.{Configuration, Environment}
-import play.filters.csrf.CSRF
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.duration.FiniteDuration
@@ -79,10 +78,6 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
           .flashing("success" -> rs.messages("user.login.message", user.username))
           .withSession("user" -> uid)
           .withCookies(Cookie(messagesApi.langCookieName, user.lang.code))
-
-        // we need to keep the CSRF-Token. Otherwise a new token would be added later which would reset the cookie-maxAge
-        CSRF.getToken.foreach { token => result = result.addingToSession(token.name -> token.value) }
-
         if (userLogin.stayLoggedIn) {
           result = new ResultWithPersistentSessionCookie(result)
         }
