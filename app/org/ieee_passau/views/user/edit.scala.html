@@ -37,7 +37,7 @@
         </fieldset>
     }
     <p class="text-right">
-        <a class="btn btn-default" @if(user("active").value.contains("true")){ href="@org.ieee_passau.controllers.routes.UserController.impersonate(id)" } else { disabled }>
+        <a class="btn btn-default" @if(user.value.isDefined && user.value.get.active){ href="@org.ieee_passau.controllers.routes.UserController.impersonate(id)" } else { disabled }>
             <span class="glyphicon glyphicon-user"></span> @messages("user.impersonate")
         </a>
     </p>
