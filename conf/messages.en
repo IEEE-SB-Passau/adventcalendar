@@ -13,7 +13,7 @@ user.studysubject=Course of studies or specialization
 user.useragent=User agent
 user.ip=IP address
 user.stay_logged_in=Stay logged in
-user.stay_logged_in.help=Uses persistent cookie
+user.stay_logged_in.help=Uses persistent cookies
 #HTML
 user.resetpassword.text=If you forgot your password, you can reset it <a href="{0}">here</a>.
 user.requestreset=Send reset-link

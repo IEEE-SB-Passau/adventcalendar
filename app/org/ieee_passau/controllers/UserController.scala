@@ -74,17 +74,26 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
       userLogin => {
         val user: User = userLogin.user.get
         val uid = user.id.get.toString
-        var result = Redirect(org.ieee_passau.controllers.routes.CmsController.calendar())
+        var intermediateResult = Redirect(org.ieee_passau.controllers.routes.CmsController.calendar())
           .flashing("success" -> rs.messages("user.login.message", user.username))
-          .withSession("user" -> uid)
-          .withCookies(Cookie(messagesApi.langCookieName, user.lang.code))
+          .withSession("user" -> uid, "stayLoggedIn" -> userLogin.stayLoggedIn.toString)
+          .withCookies(generateLangCookie(user.lang.code, userLogin.stayLoggedIn))
         if (userLogin.stayLoggedIn) {
-          result = new ResultWithPersistentSessionCookie(result)
+          intermediateResult = new ResultWithPersistentSessionCookie(intermediateResult)
         }
-        result
+        intermediateResult
       }
     )
   }}
+
+  private def generateLangCookie(lang: String, persistent: Boolean)(implicit config: Configuration): Cookie = {
+    if (persistent) {
+      val maxAge = config.get[Option[FiniteDuration]]("persistentSession.maxAge").map(_.toSeconds.toInt)
+      Cookie(messagesApi.langCookieName, lang, maxAge = maxAge)
+    } else {
+      Cookie(messagesApi.langCookieName, lang)
+    }
+  }
 
   def logout: Action[AnyContent] = requirePermission(Contestant) { implicit user => Action { implicit rs =>
     Redirect(org.ieee_passau.controllers.routes.CmsController.calendar())
@@ -233,11 +242,11 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
       }
 
       val refererUrl = rs.headers.get("referer")
-      val cookie = Cookie(messagesApi.langCookieName, lang)
+      val langCookie = generateLangCookie(lang, rs.session.get("stayLoggedIn").contains("true"))
       if (refererUrl.nonEmpty) {
-        Redirect(refererUrl.get, 303).withCookies(cookie)
+        Redirect(refererUrl.get, 303).withCookies(langCookie)
       } else {
-        Redirect(org.ieee_passau.controllers.routes.CmsController.calendar()).withCookies(cookie)
+        Redirect(org.ieee_passau.controllers.routes.CmsController.calendar()).withCookies(langCookie)
       }
     }
   }}
