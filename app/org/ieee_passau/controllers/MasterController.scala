@@ -23,7 +23,7 @@ class MasterController @Inject()(private val dbConfigProvider: DatabaseConfigPro
                                  private val env: Environment
                                 ) extends MessagesAbstractController(components) with I18nSupport {
   implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
-  implicit val log = Logger(this.getClass)
+  implicit val log: Logger = Logger(this.getClass)
 
   /**
     * Requires the given permission level to execute the given action

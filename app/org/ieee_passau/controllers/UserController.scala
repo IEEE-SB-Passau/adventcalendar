@@ -320,7 +320,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
     }
   }
 
-  val userForm = Form(
+  val userForm: Form[User] = Form(
     mapping(
       "id" -> optional(number),
       "username" -> nonEmptyText(3, 30),
@@ -336,7 +336,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
     ((user: User) => Some(user.id, user.username, Some(""), user.email, user.active, user.hidden, user.permission.name))
   )
 
-  val registrationForm = Form(
+  val registrationForm: Form[UserRegistration] = Form(
     mapping(
       "username" -> nonEmptyText(3, 30).verifying("user.error.usernametake", u => Users.usernameAvailable(u)),
       "password" -> tuple(
@@ -353,7 +353,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
   )
 
-  val loginForm = Form(
+  val loginForm: Form[UserLogin] = Form(
     mapping(
       "username" -> nonEmptyText(3, 30),
       "password" -> nonEmptyText(6, 128),
@@ -362,7 +362,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
       verifying("user.login.error", login => login.authenticate().isDefined)
   )
 
-  val passwordForm = Form(
+  val passwordForm: Form[String] = Form(
     mapping(
       "password" -> tuple(
         "main" -> nonEmptyText(6, 128),
@@ -371,7 +371,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
     )((password: (String, String)) => password._1)((_: String) => Some("",""))
   )
 
-  val usernameForm = Form(
+  val usernameForm: Form[String] = Form(
     mapping(
       "username" -> nonEmptyText(3, 30)
     )((username: String) => username)((username: String) => Some(username))

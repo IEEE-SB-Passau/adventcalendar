@@ -13,10 +13,10 @@ import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class CSRFFilterErrorHandler @Inject() (val dbConfigProvider: DatabaseConfigProvider,
-                                        implicit val messagesApi: MessagesApi,
-                                        implicit val ec: ExecutionContext
-                                       ) extends CSRF.ErrorHandler with I18nSupport {
+class CSRFFilterErrorHandler @Inject()(val dbConfigProvider: DatabaseConfigProvider,
+                                       implicit val messagesApi: MessagesApi,
+                                       implicit val ec: ExecutionContext
+                                      ) extends CSRF.ErrorHandler with I18nSupport {
   implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
 
   override def handle(request: RequestHeader, msg: String): Future[Result] = {

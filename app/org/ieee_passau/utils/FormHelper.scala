@@ -6,7 +6,7 @@ import play.api.data.Forms.{boolean, mapping, nonEmptyText}
 
 object FormHelper {
 
-  val ticketForm = Form(
+  val ticketForm: Form[TicketText] = Form(
     mapping(
       "text" -> nonEmptyText,
       "public" -> boolean

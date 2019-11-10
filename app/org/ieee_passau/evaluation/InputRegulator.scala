@@ -27,11 +27,11 @@ object InputRegulator {
   * Controls the number of jobs entering the system.
   * Forwards jobs to the job router.
   */
-class InputRegulator @Inject() (@Assisted val jobLimit: Int,
-                                @Assisted val jobLifetime: Duration,
-                                val config: Configuration,
-                                val system: ActorSystem
-                               ) extends EvaluationActor {
+class InputRegulator @Inject()(@Assisted val jobLimit: Int,
+                               @Assisted val jobLifetime: Duration,
+                               val config: Configuration,
+                               val system: ActorSystem
+                              ) extends EvaluationActor {
   implicit private val evalContext: ExecutionContext = system.dispatchers.lookup("evaluator.context")
 
   val STARTUP_DELAY: FiniteDuration = FutureHelper.makeDuration(config.getOptional[String]("evaluator.inputregulator.startupdelay").getOrElse("2 minutes"))

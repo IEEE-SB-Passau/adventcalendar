@@ -78,7 +78,7 @@ class LanguageController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
     }
   }}
 
-  val languageNewForm = Form(
+  val languageNewForm: Form[Language] = Form(
     mapping(
       "id" -> nonEmptyText(maxLength = 30).verifying("codelang.id.error.taken", id => Languages.idAvailable(id)),
       "name" -> text(maxLength = 196).verifying(pattern(""".*, .*""".r, error = "codelang.name_and_version.error.pattern")),
@@ -92,7 +92,7 @@ class LanguageController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
     )((l: Language) => Some((l.id, l.name, l.highlightClass, l.extension, l.cpuFactor, l.memFactor, l.comment, l.active)))
   )
 
-  val languageUpdateForm = Form(
+  val languageUpdateForm: Form[Language] = Form(
     mapping(
       "name" -> nonEmptyText(maxLength = 196).verifying(pattern(""".*, .*""".r, error = "codelang.name_and_version.error.pattern")),
       "cpuFactor" -> of[Float],

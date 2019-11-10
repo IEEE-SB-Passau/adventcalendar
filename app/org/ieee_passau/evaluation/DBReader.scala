@@ -25,9 +25,9 @@ object DBReader {
 /**
   * If prompted by InputRegulator, reads jobs from the database and sends them to InputRegulator.
   */
-class DBReader @Inject() (val dbConfigProvider: DatabaseConfigProvider,
-                          val config: Configuration,
-                          val system: ActorSystem) extends EvaluationActor {
+class DBReader @Inject()(val dbConfigProvider: DatabaseConfigProvider,
+                         val config: Configuration,
+                         val system: ActorSystem) extends EvaluationActor {
   private implicit val db: Database = dbConfigProvider.get[JdbcProfile].db
   private implicit val evalContext: ExecutionContext = system.dispatchers.lookup("evaluator.context")
 

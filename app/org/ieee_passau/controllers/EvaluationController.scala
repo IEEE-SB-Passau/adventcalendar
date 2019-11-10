@@ -300,19 +300,19 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
     Ok("")
   }}
 
-  val statusForm = Form(
+  val statusForm: Form[Boolean] = Form(
     mapping(
       "state" -> text
     )((state: String) => state == "true")((status: Boolean) => Some(status.toString))
   )
 
-  val resetTokenForm = Form(
+  val resetTokenForm: Form[Int] = Form(
     mapping(
       "uid" -> number
     )((uid: Int) => uid)((uid: Int) => Some(uid))
   )
 
-  val reevalProblemForm = Form(
+  val reevalProblemForm: Form[Int] = Form(
     mapping(
       "pid" -> number
     )((pid: Int) => pid)((pid: Int) => Some(pid))

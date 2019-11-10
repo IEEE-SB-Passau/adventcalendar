@@ -93,7 +93,7 @@ class TestcaseController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
     )
   }}
 
-  val testcaseForm = Form(
+  val testcaseForm: Form[Testcase] = Form(
     mapping(
       "id" -> optional(number),
       "problemId" -> number,

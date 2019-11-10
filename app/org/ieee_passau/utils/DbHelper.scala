@@ -12,11 +12,11 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 object DbHelper {
-  def retry[T, E <: Effect](action:  DBIOAction[T, NoStream, E], tries: Int = 5)(implicit db: Database, ec: ExecutionContext, log: Logger): Future[T] = {
+  def retry[T, E <: Effect](action: DBIOAction[T, NoStream, E], tries: Int = 5)(implicit db: Database, ec: ExecutionContext, log: Logger): Future[T] = {
     db.run(retry0(action, tries))
   }
 
-  private def retry0[T, E <: Effect](action:  DBIOAction[T, NoStream, E], tries: Int)(implicit db: Database, ec: ExecutionContext, log: Logger): DBIOAction[T, NoStream, E with Transactional] = {
+  private def retry0[T, E <: Effect](action: DBIOAction[T, NoStream, E], tries: Int)(implicit db: Database, ec: ExecutionContext, log: Logger): DBIOAction[T, NoStream, E with Transactional] = {
     action.transactionally.withTransactionIsolation(RepeatableRead).asTry.flatMap {
       case Failure(t: Throwable) =>
         tries match {
