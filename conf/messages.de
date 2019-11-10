@@ -387,7 +387,7 @@ Sonstiges: {3}\n\
 Ansehen: {4}
 
 # Notification
-notification.cookie.text=Der Adventskalender benötigt Cookies, um zu funktionieren. Infos dazu gibt's 
+notification.cookie.text=Der Adventskalender verwendet nur Cookies, die technisch notwändig sind. Außerdem enthalten Sie entweder keine personenbezogenen Daten oder werden (falls nicht explizit die Erlaubnis zum Persistieren erteilt wird) beim Schließen des Browsers automatisch gelöscht. Weitere Infos gibt''s
 notification.cookie.link=hier.
 notification.cookie.button=Ok
 

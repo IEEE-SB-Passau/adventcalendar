@@ -378,7 +378,7 @@ Other   : {3}\n\
 View: {4}
 
 # Notification
-notification.cookie.text=The advent calendar needs cookies to work properly. More information can be found 
+notification.cookie.text=The advent calendar uses only cookies that are technically required. Also, they either don''t store personal data or automatically get deleted when closing the browser (unless the permission to persist cookies has explicitly been granted). More information can be found
 notification.cookie.link=here.
 notification.cookie.button=Ok
 
