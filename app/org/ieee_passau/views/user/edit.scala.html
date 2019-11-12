@@ -37,6 +37,8 @@
         </fieldset>
     }
     <p class="text-right">
-        <a class="btn btn-default" href="@org.ieee_passau.controllers.routes.UserController.impersonate(id)"><span class="glyphicon glyphicon-user"></span> @messages("user.impersonate")</a>
+        <a class="btn btn-default" @if(user.value.isDefined && user.value.get.active){ href="@org.ieee_passau.controllers.routes.UserController.impersonate(id)" } else { disabled }>
+            <span class="glyphicon glyphicon-user"></span> @messages("user.impersonate")
+        </a>
     </p>
 }

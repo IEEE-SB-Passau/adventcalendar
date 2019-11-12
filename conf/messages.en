@@ -12,6 +12,8 @@ user.semester=Semester or grade
 user.studysubject=Course of studies or specialization
 user.useragent=User agent
 user.ip=IP address
+user.stay_logged_in=Stay logged in
+user.stay_logged_in.help=Uses persistent cookies
 #HTML
 user.resetpassword.text=If you forgot your password, you can reset it <a href="{0}">here</a>.
 user.requestreset=Send reset-link
@@ -376,7 +378,7 @@ Other   : {3}\n\
 View: {4}
 
 # Notification
-notification.cookie.text=The advent calendar needs cookies to work properly. More information can be found 
+notification.cookie.text=The advent calendar uses only cookies that are technically required. Also, they either don''t store personal data or automatically get deleted when closing the browser (unless the permission to persist cookies has explicitly been granted). More information can be found
 notification.cookie.link=here.
 notification.cookie.button=Ok
 

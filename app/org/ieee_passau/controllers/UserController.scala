@@ -7,12 +7,14 @@ import org.ieee_passau.utils.{CaptchaHelper, LanguageHelper, PasswordHasher}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.db.slick.DatabaseConfigProvider
+import play.api.http.HttpEntity
 import play.api.i18n.{Lang, Langs}
 import play.api.libs.mailer._
-import play.api.mvc._
+import play.api.mvc.{Result, Session, _}
 import play.api.{Configuration, Environment}
 import slick.jdbc.PostgresProfile.api._
 
+import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
 
 class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
@@ -72,13 +74,26 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
       userLogin => {
         val user: User = userLogin.user.get
         val uid = user.id.get.toString
-        Redirect(org.ieee_passau.controllers.routes.CmsController.calendar())
+        var intermediateResult = Redirect(org.ieee_passau.controllers.routes.CmsController.calendar())
           .flashing("success" -> rs.messages("user.login.message", user.username))
-          .withSession("user" -> uid)
-          .withCookies(Cookie(messagesApi.langCookieName, user.lang.code))
+          .withSession("user" -> uid, "stayLoggedIn" -> userLogin.stayLoggedIn.toString)
+          .withCookies(generateLangCookie(user.lang.code, userLogin.stayLoggedIn))
+        if (userLogin.stayLoggedIn) {
+          intermediateResult = new ResultWithPersistentSessionCookie(intermediateResult)
+        }
+        intermediateResult
       }
     )
   }}
+
+  private def generateLangCookie(lang: String, persistent: Boolean)(implicit config: Configuration): Cookie = {
+    if (persistent) {
+      val maxAge = config.get[Option[FiniteDuration]]("persistentSession.maxAge").map(_.toSeconds.toInt)
+      Cookie(messagesApi.langCookieName, lang, maxAge = maxAge)
+    } else {
+      Cookie(messagesApi.langCookieName, lang)
+    }
+  }
 
   def logout: Action[AnyContent] = requirePermission(Contestant) { implicit user => Action { implicit rs =>
     Redirect(org.ieee_passau.controllers.routes.CmsController.calendar())
@@ -227,11 +242,11 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
       }
 
       val refererUrl = rs.headers.get("referer")
-      val cookie = Cookie(messagesApi.langCookieName, lang)
+      val langCookie = generateLangCookie(lang, rs.session.get("stayLoggedIn").contains("true"))
       if (refererUrl.nonEmpty) {
-        Redirect(refererUrl.get, 303).withCookies(cookie)
+        Redirect(refererUrl.get, 303).withCookies(langCookie)
       } else {
-        Redirect(org.ieee_passau.controllers.routes.CmsController.calendar()).withCookies(cookie)
+        Redirect(org.ieee_passau.controllers.routes.CmsController.calendar()).withCookies(langCookie)
       }
     }
   }}
@@ -260,6 +275,50 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   def dismissNotification: Action[AnyContent] = requirePermission(Contestant) { implicit user => Action.async { implicit rs =>
     Users.update(user.get.id, user.get.copy(notificationDismissed = true)).map(_ => Ok(""))
   }}
+
+  // hack, that allows us to programmatically set the maxAge for the session-cookie (playframework doesn't have that functionality)
+  class ResultWithPersistentSessionCookie(
+      header: ResponseHeader,
+      body: HttpEntity,
+      newSession: Option[Session] = None,
+      newFlash: Option[Flash] = None,
+      newCookies: Seq[Cookie] = Seq.empty
+  ) extends Result(header, body, newSession, newFlash, newCookies) {
+
+    def this(result: Result) = this(result.header, result.body, result.newSession, result.newFlash, result.newCookies)
+
+    // override copy, since it is used in the Result class, but we want that this class will be returned
+    override def copy(
+        header: ResponseHeader = this.header,
+        body: HttpEntity = this.body,
+        newSession: Option[Session] = this.newSession,
+        newFlash: Option[Flash] = this.newFlash,
+        newCookies: Seq[Cookie] = this.newCookies
+    ): ResultWithPersistentSessionCookie = new ResultWithPersistentSessionCookie(header, body, newSession, newFlash, newCookies)
+
+    override def bakeCookies(
+        cookieHeaderEncoding: CookieHeaderEncoding = new DefaultCookieHeaderEncoding(),
+        sessionBaker: CookieBaker[Session] = new DefaultSessionCookieBaker(),
+        flashBaker: CookieBaker[Flash] = new DefaultFlashCookieBaker(),
+        requestHasFlash: Boolean = false
+    ): ResultWithPersistentSessionCookie = {
+      val maxAge = config.get[Option[FiniteDuration]]("persistentSession.maxAge")
+
+      val actualSessionBaker: CookieBaker[Session] = sessionBaker match {
+        case defaultSessionBaker: DefaultSessionCookieBaker =>
+          val extendedConfig = defaultSessionBaker.config.copy(maxAge = maxAge)
+          new DefaultSessionCookieBaker(extendedConfig, defaultSessionBaker.secretConfiguration, defaultSessionBaker.signedCodec.cookieSigner)
+        case legacySessionCookieBaker: LegacySessionCookieBaker =>
+          val extendedConfig = legacySessionCookieBaker.config.copy(maxAge = maxAge)
+          new LegacySessionCookieBaker(extendedConfig, legacySessionCookieBaker.cookieSigner)
+        case _ =>
+          log.error("Unknown SessionBaker is being used: " + sessionBaker.getClass.getName)
+          sessionBaker
+      }
+
+      new ResultWithPersistentSessionCookie(super.bakeCookies(cookieHeaderEncoding, actualSessionBaker, flashBaker, requestHasFlash))
+    }
+  }
 
   val userForm: Form[User] = Form(
     mapping(
@@ -297,7 +356,8 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   val loginForm: Form[UserLogin] = Form(
     mapping(
       "username" -> nonEmptyText(3, 30),
-      "password" -> nonEmptyText(6, 128)
+      "password" -> nonEmptyText(6, 128),
+      "stayLoggedIn" -> boolean
     )(UserLogin.apply)(UserLogin.unapply)
       verifying("user.login.error", login => login.authenticate().isDefined)
   )
