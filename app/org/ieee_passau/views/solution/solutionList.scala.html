@@ -8,7 +8,7 @@
  *@
 
 @solutions.map { s =>
-    <div id="@s.solution.id" data-state="@s.solution.result">
+    <div id="@s.solution.id" data-state="@s.solution.result.name">
         <div class="panel @if(s.solution.result == Passed) { panel-success } @if(s.solution.result == Queued) { panel-info }
             @if(isErrorResult(s.solution.result)) { panel-danger } @if(s.solution.result == Canceled) { panel-warning }">
             @* Create an anchor for the first solution *@
@@ -26,7 +26,7 @@
 
             <div id="solution@s.position" class="panel-collapse collapse @if(first && solutions.head == s) { in }"><div class="panel-body">
                 <p>
-                    <Strong>@messages("solution.state"):</Strong>
+                    <strong>@messages("solution.state"):</strong>
                     @Html(messages(s.solution.result.toString, org.ieee_passau.controllers.routes.CmsController.content(Page.contact.toString)))
                 </p>
 

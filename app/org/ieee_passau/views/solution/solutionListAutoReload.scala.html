@@ -34,8 +34,12 @@
                         if (solution.status === '@Queued.name' || solution.status !== solutionInfo.result) {
                             solution.status = solutionInfo.result;
 
-                            if (solution.element.html() !== solutionInfo.html) {
+                            if (solution.unprocessedHtml === undefined || solution.unprocessedHtml !== solutionInfo.html){
+                                solution.unprocessedHtml = solutionInfo.html;
                                 solution.element.html(solutionInfo.html);
+
+                                // add syntax-highlighting
+                                hljs.highlightBlock(solution.element.find("pre code")[0]);
 
                                 var expected = solution.element.find(".expected-output")[0];
                                 var actual = solution.element.find(".actual-output")[0];
@@ -61,10 +65,9 @@
             (function () {
                 var queuedSolutionPresent = false;
 
-                $.each(solutions, function (solution) {
+                $.each(solutions, function (i, solution) {
                     if (solution.status === '@Queued.name') {
                         queuedSolutionPresent = true;
-                        return false;
                     }
                 });
 
