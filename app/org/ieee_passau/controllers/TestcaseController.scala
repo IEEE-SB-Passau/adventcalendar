@@ -47,7 +47,11 @@ class TestcaseController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   }}
 
   def save(pid: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
-    testcaseForm.bindFromRequest.fold(
+    var filledForm = testcaseForm.bindFromRequest()
+    if (!Testcases.isPositionAvailable(pid, filledForm.get.position)) {
+      filledForm = filledForm.withError("position", "testcase.position.error.taken")
+    }
+    filledForm.fold(
       errorForm => {
         db.run(Visibilities.to[List].result).map { visibilities =>
           BadRequest(org.ieee_passau.views.html.testcase.insert(pid, visibilities, errorForm))
@@ -71,7 +75,11 @@ class TestcaseController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   }}
 
   def update(pid: Int, id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
-    testcaseForm.bindFromRequest.fold(
+    var filledForm = testcaseForm.bindFromRequest()
+    if (!Testcases.isPositionAvailable(id, pid, filledForm.get.position)) {
+      filledForm = filledForm.withError("position", "testcase.position.error.taken")
+    }
+    filledForm.fold(
       errorForm => {
         db.run(Visibilities.to[List].result).map { visibilities =>
           BadRequest(org.ieee_passau.views.html.testcase.edit(pid, id, visibilities, errorForm))
@@ -97,7 +105,7 @@ class TestcaseController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
     mapping(
       "id" -> optional(number),
       "problemId" -> number,
-      "position" -> number, // TODO check uniqueness for problem
+      "position" -> number,
       "visibility" -> text,
       "input" -> text,
       "output" -> text,

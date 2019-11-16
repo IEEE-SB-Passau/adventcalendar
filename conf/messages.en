@@ -85,6 +85,7 @@ problem.translation.update.message=Updated {1} translation for problem {0}.
 testcase.title=Test case
 testcase.list.title=Test cases
 testcase.position=Position
+testcase.position.error.taken=Position already in use!
 testcase.visibility=Visibility
 testcase.loadfile=Load file
 testcase.input=Input

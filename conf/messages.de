@@ -94,6 +94,7 @@ problem.translation.update.message=Übersetzung nach {1} für Aufgabe {0} wurde 
 testcase.title=Testfall
 testcase.list.title=Testfälle
 testcase.position=Position
+testcase.position.error.taken=Position bereits in Verwendung!
 testcase.visibility=Sichtbarkeit
 testcase.loadfile=Datei laden
 testcase.input=Eingabe
