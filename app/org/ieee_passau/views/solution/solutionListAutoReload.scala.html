@@ -8,7 +8,7 @@
 
 <script type="text/javascript">
     (function () {
-        var whileQueuedInterval = 1000, noneQueuedInterval =  10000;
+        var whileQueuedInterval = 1000, noneQueuedInterval = 10000;
         var solutions = {};
 
         window.addEventListener("load", function () {
@@ -18,7 +18,17 @@
                 solutions[element.attr("id")] = {status: element.data("state"), element: element};
             });
 
-            function checkSolutionUpdates () {
+            function setExpandedStateTo(jqSelector, expanded) {
+                if (expanded && jqSelector.attr("aria-expanded") !== "true") {
+                    jqSelector.addClass("in");
+                    jqSelector.attr("aria-expanded", "true");
+                } else if (!expanded && jqSelector.attr("aria-expanded") === "true") {
+                    jqSelector.removeClass("in");
+                    jqSelector.attr("aria-expanded", "false");
+                }
+            }
+
+            function checkSolutionUpdates() {
                 $.ajax({
                     url: "@org.ieee_passau.controllers.routes.MainController.getUserProblemSolutions(door)"
                 }).done(function (data) {
@@ -34,13 +44,33 @@
                         if (solution.status === '@Queued.name' || solution.status !== solutionInfo.result) {
                             solution.status = solutionInfo.result;
 
-                            if (solution.unprocessedHtml === undefined || solution.unprocessedHtml !== solutionInfo.html){
+                            if (solution.unprocessedHtml === undefined || solution.unprocessedHtml !== solutionInfo.html) {
+
+                                // save expanded-states
+                                var wasExpanded = solution.element.find("#solution" + solutionInfo.id).attr("aria-expanded") === "true";
+                                var wasSourceExpanded = solution.element.find("#code" + solutionInfo.id).attr("aria-expanded") === "true";
+                                var wasTestcaseExpanded = {};
+                                solution.element.find("#solution" + solutionInfo.id + " .testcase-collapse").each(function (i, element) {
+                                    wasTestcaseExpanded[element.id] = $(this).attr("aria-expanded") === "true";
+                                });
+
+                                // update HTML
                                 solution.unprocessedHtml = solutionInfo.html;
                                 solution.element.html(solutionInfo.html);
 
-                                // add syntax-highlighting
+                                // restore expanded-states
+                                setExpandedStateTo(solution.element.find("#solution" + solutionInfo.id), wasExpanded);
+                                setExpandedStateTo(solution.element.find("#code" + solutionInfo.id), wasSourceExpanded);
+                                solution.element.find("#solution" + solutionInfo.id + " .testcase-collapse").each(function (i, element) {
+                                    if (wasTestcaseExpanded[element.id] !== undefined) {
+                                        setExpandedStateTo($(this), wasTestcaseExpanded[element.id]);
+                                    }
+                                });
+
+                                // re-add syntax-highlighting
                                 hljs.highlightBlock(solution.element.find("pre code")[0]);
 
+                                // re-calculate diff
                                 var expected = solution.element.find(".expected-output")[0];
                                 var actual = solution.element.find(".actual-output")[0];
                                 if (actual != null && expected != null) {

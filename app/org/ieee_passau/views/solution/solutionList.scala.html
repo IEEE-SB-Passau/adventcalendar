@@ -24,7 +24,7 @@
                 </a>
             </h3></div>
 
-            <div id="solution@s.position" class="panel-collapse collapse @if(first && solutions.head == s) { in }"><div class="panel-body">
+            <div id="solution@s.position" class="panel-collapse collapse @if(first && solutions.head == s) { in }" aria-expanded="@if(first && solutions.head == s) {true} else {false}"><div class="panel-body">
                 <p>
                     <strong>@messages("solution.state"):</strong>
                     @Html(messages(s.solution.result.toString, org.ieee_passau.controllers.routes.CmsController.content(Page.contact.toString)))
@@ -35,7 +35,7 @@
                     @messages("submission.program_source") (@languages.filter(_.id == s.solution.languageId).map{l=>@l.name})
                 </button></p>
 
-                <div id="code@s.position" class="collapse">
+                <div id="code@s.position" class="collapse" aria-expanded="false">
                     <pre><code class="@languages.filter(_.id == s.solution.languageId).map{l=>@l.highlightClass}">@s.solution.program</code></pre>
                 </div>
 
@@ -52,7 +52,7 @@
                             </a>
                         </h3></div>
 
-                        <div id="solution@(s.position)_@(t.position)" class="panel-collapse collapse @if(t.testrun.result != Passed) { in }"><div class="panel-body">
+                        <div id="solution@(s.position)_@(t.position)" class="testcase-collapse panel-collapse collapse @if(t.testrun.result != Passed) { in }" aria-expanded="@if(t.testrun.result != Passed) {true} else {false}"><div class="panel-body">
                             <p>
                                 <strong>Status:</strong>
                                 @if(t.testrun.stage.isDefined) { @Html(messages(Queued.toString)) } else { @Html(messages(t.testrun.result.toString, org.ieee_passau.controllers.routes.CmsController.content(Page.contact.toString))) }
