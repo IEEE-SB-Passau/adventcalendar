@@ -1,10 +1,14 @@
-(function () {
-    const whileQueuedInterval = 1000, noneQueuedInterval = 10000;
+"use strict";
+
+(() => {
+    const reloadIntervalFast = 1000, reloadIntervalSlow = 10000;
     const solutions = {};
+    let queuedSolutionPresent = false;
+    let evalRunning = true;
 
-    window.addEventListener("load", function () {
+    window.addEventListener("load", () => {
 
-        $("#solutionlist").find(">div").each(function (i, element) {
+        $("#solutionlist").find(">div").each((i, element) => {
             element = $(element);
             solutions[element.attr("id")] = {status: element.data("state"), element: element};
         });
@@ -22,13 +26,13 @@
         function checkSolutionUpdates() {
             $.ajax({
                 url: apiUrl
-            }).done(function (data) {
-                let queuedSolutionPresent = false;
+            }).done(data => {
+                queuedSolutionPresent = false;
+                evalRunning = data.evalRunning;
                 let solutionList = data.solutionList;
-                let evalRunning = data.evalRunning;
                 let flash = data.flash;
 
-                $.each(solutionList, function (i, solutionInfo) {
+                $.each(solutionList, (i, solutionInfo) => {
                     const solution = solutions[solutionInfo.id];
 
                     if (solution === undefined) {
@@ -55,7 +59,7 @@
                             // restore expanded-states
                             setExpandedStateTo(solution.element.find("#solution" + solutionInfo.id), wasExpanded);
                             setExpandedStateTo(solution.element.find("#code" + solutionInfo.id), wasSourceExpanded);
-                            solution.element.find("#solution" + solutionInfo.id + " .testcase-collapse").each(function (i, element) {
+                            solution.element.find("#solution" + solutionInfo.id + " .testcase-collapse").each((i, element) => {
                                 if (wasTestcaseExpanded[element.id] !== undefined) {
                                     setExpandedStateTo($(this), wasTestcaseExpanded[element.id]);
                                 }
@@ -82,20 +86,16 @@
             });
         }
 
-        function setTimer(queuedSolutionPresent) {
-            window.setTimeout(checkSolutionUpdates, (queuedSolutionPresent) ? whileQueuedInterval : noneQueuedInterval);
+        function setTimer() {
+            window.setTimeout(checkSolutionUpdates, (queuedSolutionPresent && evalRunning) ? reloadIntervalFast : reloadIntervalSlow);
         }
 
-        (function () {
-            let queuedSolutionPresent = false;
-
-            $.each(solutions, function (i, solution) {
-                if (solution.status === QUEUED) {
-                    queuedSolutionPresent = true;
-                }
-            });
-
-            setTimer(queuedSolutionPresent);
-        })();
+        queuedSolutionPresent = false;
+        $.each(solutions, (i, solution) => {
+            if (solution.status === QUEUED) {
+                queuedSolutionPresent = true;
+            }
+        });
+        setTimer();
     });
 })();
