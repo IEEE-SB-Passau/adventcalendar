@@ -75,10 +75,10 @@ window.addEventListener("load", function () {
             "link": cookieLink,
             "href": jsRoutes.org.ieee_passau.controllers.CmsController.content("contact").url
         }
-    })
+    });
 });
 
 // activate notification dismissal
 $('#flash-notification').on('close.bs.alert', function () {
-    $.post(jsRoutes.org.ieee_passau.controllers.UserController.dismissNotification().url)
+    $.post(jsRoutes.org.ieee_passau.controllers.UserController.dismissNotification().url);
 });

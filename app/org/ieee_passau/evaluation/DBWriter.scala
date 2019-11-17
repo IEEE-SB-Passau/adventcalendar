@@ -63,8 +63,11 @@ class DBWriter @Inject()(val dbConfigProvider: DatabaseConfigProvider, val syste
       }
 
       /**
-        * @return `None` if there is no stage left or else the stage number to queue next
-        */
+       * Gets the next stage.
+       *
+       * @param tr the relevant Testrun
+       * @return `None` if there is no stage left or else the stage number to queue next
+       */
       def nextStageQ(tr: Testrun) = (for {
         s <- Solutions if s.id === tr.solutionId
         p <- s.problem
