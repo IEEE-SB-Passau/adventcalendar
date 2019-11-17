@@ -9,8 +9,6 @@ lazy val root = (project in file("."))
   .enablePlugins(SbtWeb)
 
 pipelineStages := Seq(digest, gzip)
-LessKeys.compress in Assets := true
-includeFilter in gzip := "*.html" || "*.css" || "*.js" || "*.ico"
 
 scalacOptions in ThisBuild ++= Seq("-unchecked", "-deprecation", "-feature")
 
@@ -31,7 +29,11 @@ libraryDependencies ++= Seq(
   "commons-codec" % "commons-codec" % "1.13"
 )
 
+LessKeys.compress in Assets := true
+
+includeFilter in gzip := "*.html" || "*.css" || "*.js" || "*.ico"
 includeFilter in (Assets, LessKeys.less) := "main.less"
 excludeFilter in (Assets, LessKeys.less) := "_*.less"
+includeFilter in (Assets, JshintKeys.jshint) := "*.js"
 
 fork in run := true

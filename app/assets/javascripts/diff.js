@@ -1,5 +1,5 @@
 function diffNodes(nodeA, nodeB) {
-    if (nodeA.firstChild == null || nodeB.firstChild == null) {
+    if (nodeA.firstChild === null || nodeB.firstChild === null) {
         return;
     }
 
