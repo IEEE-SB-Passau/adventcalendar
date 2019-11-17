@@ -47,10 +47,10 @@
 
     <script type="text/javascript">
         window.addEventListener('load', function () { // wait for jQuery to load
-            var updateSubmitButton = function () { // set the submit-button disabled if no file is entered
+            const updateSubmitButton = function () { // set the submit-button disabled if no file is entered
                 $('#defaultSubmit').prop('disabled', $(this)[0].files[0] === undefined);
             };
-            var solutionElement = $('#solution');
+            const solutionElement = $('#solution');
             solutionElement.on('change', updateSubmitButton);
             solutionElement.each(updateSubmitButton);
         });

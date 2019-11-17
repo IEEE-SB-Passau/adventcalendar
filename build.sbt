@@ -1,5 +1,6 @@
 name := """ieee-passau-advent-frontend"""
 version := "2019-BASE"
+maintainer := "adventskalender@ieee.uni-passau.de"
 
 scalaVersion := "2.12.10"
 

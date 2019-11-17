@@ -41,10 +41,10 @@
 
                 @s.testcases.map { t =>
                     <div class="panel
-                        @if(t.testrun.result == Passed) { panel-success }
-                        @if(t.testrun.stage.isDefined) { panel-info }
-                        @if(t.testrun.result != Passed && t.testrun.stage.isEmpty && t.testrun.result != Canceled) { panel-danger }
-                        @if(t.testrun.result == Canceled) { panel-warning }">
+                        @if(t.testrun.result == Passed) { panel-success } else {
+                        @if(t.testrun.stage.isDefined || t.testrun.result == Queued) { panel-info } else {
+                        @if(t.testrun.result != Passed && t.testrun.stage.isEmpty && t.testrun.result != Canceled) { panel-danger } else {
+                        @if(t.testrun.result == Canceled) { panel-warning }}}}">
                         <div class="panel-heading"><h3 class="panel-title">
                             <a data-toggle="collapse" data-target="#solution@(s.position)_@(t.position)" href="#solution@(s.position)_@(t.position)">
                                 @messages("testcase.title") @t.position @if(t.testcase.visibility == Private) { (@messages(Private.toString)) }

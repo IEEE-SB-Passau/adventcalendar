@@ -275,14 +275,23 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
       case Some(problem) =>
         val langsQuery = db.run(Languages.result)
         val solutionListQuery = buildSolutionList(problem, user.get.id.get)
-        langsQuery.zip(solutionListQuery).map { tuple =>
+        langsQuery.zip(solutionListQuery).flatMap { tuple =>
           val langs = tuple._1.toList
           val solutionList = tuple._2
           val responseList = solutionList.take(1)
             .map(e => (e.solution.id.get, e.solution.result.name, org.ieee_passau.views.html.solution.solutionList(List(e), langs).toString())) ++ solutionList.drop(1)
             .map(e => (e.solution.id.get, e.solution.result.name, org.ieee_passau.views.html.solution.solutionList(List(e), langs, first = false).toString()))
-          val json = Json.toJson(responseList.map(e => SolutionJSON.tupled(e)))
-          Ok(json)
+          val list = Json.toJson(responseList.map(e => SolutionJSON.tupled(e)))
+          val status = (monitoringActor ? StatusQ).mapTo[StatusM].flatMap {
+            case StatusM(false) => // running == false
+              for {
+                c <- for {p <- Postings.byId(Page.status.id, rs.lang)} yield p.content
+              } yield (false, "system" -> c)
+            case _ => Future.successful(true, "" -> "")
+          }
+          status.map { case (state, flash) =>
+            Ok(Json.obj("evalRunning" -> state, "flash" -> flash, "solutionList" -> list))
+          }
         }
       case _ => Future.successful(NotFound(org.ieee_passau.views.html.errors.e404()))
     }

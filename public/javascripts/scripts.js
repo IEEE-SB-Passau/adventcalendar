@@ -13,11 +13,11 @@ $(document).ready(function () {
 
 // activate pretty file input
 $(document).ready(function () {
-    var fileinputFilenameUpdate = function () {
-        var file = $(this)[0].files[0];
+    const fileinputFilenameUpdate = function () {
+        const file = $(this)[0].files[0];
         $(this).next('.fileinput-fake').find('.fileinput-filename').text(file !== undefined ? file.name : '');
     };
-    var fileinputElements = $('.fileinput-input');
+    const fileinputElements = $('.fileinput-input');
     fileinputElements.on('change', fileinputFilenameUpdate);
     fileinputElements.each(fileinputFilenameUpdate);
 });
@@ -29,10 +29,10 @@ $(document).ready(function () {
 
 // file loader for loading text files into text areas
 function loadFileAsText(input, textarea) {
-    var fileToLoad = input.files[0];
+    const fileToLoad = input.files[0];
 
     if (fileToLoad !== undefined) {
-        var fileReader = new FileReader();
+        const fileReader = new FileReader();
         fileReader.onload = function (fileLoadedEvent) {
             // special handling for wysiwyg editor
             if (textarea.classList.contains("wysiwyg")) {
@@ -49,7 +49,7 @@ function loadFileAsText(input, textarea) {
 $('.wysiwyg').summernote({
     onCreateLink: function (url) {
         if (url.match(/(https?|mailto):\/\/?.*/)) return url;
-        var baseUrl = jsRoutes.org.ieee_passau.controllers.MainController.calendar().url;
+        const baseUrl = jsRoutes.org.ieee_passau.controllers.MainController.calendar().url;
         if (!url.startsWith(baseUrl)) url = baseUrl + url;
         return url;
     }

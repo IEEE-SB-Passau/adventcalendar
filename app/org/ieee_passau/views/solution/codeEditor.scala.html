@@ -31,39 +31,10 @@
 <script src="@routes.Assets.versioned("javascripts/ace/ace.js")" type="text/javascript" charset="utf-8"></script>
 <script src="@routes.Assets.versioned("javascripts/ace/ext-modelist.js")" type="text/javascript" charset="utf-8"></script>
 <script src="@routes.Assets.versioned("javascripts/ace/ext-language_tools.js")" type="text/javascript" charset="utf-8"></script>
+<script src="@routes.Assets.versioned("javascripts/codeEditor.js")" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript">
-    function loadSource(input) {
-        var fileToLoad = input.files[0];
-
-        var fileReader = new FileReader();
-        fileReader.onload = function (fileLoadedEvent) {
-            editor.setValue(fileLoadedEvent.target.result);
-            submissiontext.value = fileLoadedEvent.target.result;
-        };
-        fileReader.readAsText(fileToLoad, "UTF-8");
-    }
-
-    function updateLang() {
-        var mode = modelist.getModeForPath('file.@langExt').mode;
-        editor.session.setMode(mode);
-    }
-
-    ace.require("ace/ext/language_tools");
-    var modelist = ace.require("ace/ext/modelist");
+    var langExtension = "@langExt";
     var editor = ace.edit("preview");
-
-    editor.setOptions({
-        enableBasicAutocompletion: true,
-        enableSnippets: true,
-        enableLiveAutocompletion: false
-    });
-
-    editor.getSession().on("change", function () {
-        $('#submissiontext').val(editor.getSession().getValue());
-    });
-
-    updateLang();
-    if (solution.files.length > 0) {
-        loadSource(solution);
-    }
+    ace.config.set('basePath', '@routes.Assets.versioned("javascripts/ace")');
+    updateEditor();
 </script>
