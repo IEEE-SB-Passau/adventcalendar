@@ -71,7 +71,7 @@
                             // re-calculate diff
                             const expected = solution.element.find(".expected-output")[0];
                             const actual = solution.element.find(".actual-output")[0];
-                            if (actual !== null && expected !== null) {
+                            if (actual !== undefined && expected !== undefined) {
                                 diffNodes(expected, actual);
                             }
                         }
