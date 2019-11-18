@@ -1,10 +1,13 @@
-"use strict";
-
 (() => {
+    "use strict";
+    const knownAlertTypes = ["success", "info", "warning", "error"];
+    const emptyMessageJson = JSON.stringify(["", ""]);
     const reloadIntervalFast = 1000, reloadIntervalSlow = 10000;
     const solutions = {};
     let queuedSolutionPresent = false;
     let evalRunning = true;
+    let activeMessageJson;
+    let floatingMessageContainer;
 
     window.addEventListener("load", () => {
 
@@ -27,11 +30,32 @@
             $.ajax({
                 url: apiUrl
             }).done(data => {
-                queuedSolutionPresent = false;
                 evalRunning = data.evalRunning;
-                let solutionList = data.solutionList;
-                let flash = data.flash;
+                const message = data.flash;
+                const solutionList = data.solutionList;
 
+                const messageJson = JSON.stringify(message);
+                if (activeMessageJson !== messageJson) {
+                    activeMessageJson = messageJson;
+                    if (floatingMessageContainer !== undefined) {
+                        floatingMessageContainer.remove();
+                    }
+                    if (activeMessageJson !== emptyMessageJson) {
+                        const alertClass = "alert-" + (knownAlertTypes.includes(message[0]) ? message[0] : "info");
+                        const alertHtml = `<div class="floating-alert-container"><div class="alert ${alertClass}">${message[1]}</div></div>`;
+                        floatingMessageContainer = $("html > body > div.container > div.page-header").after(alertHtml)
+                            .find("+.floating-alert-container");
+
+                        // we need the stuck-attribute for styling, whenever the element is not in the normal position, but fixed
+                        const observer = new IntersectionObserver(
+                            ([e]) => e.target.toggleAttribute("stuck", e.intersectionRatio < 1),
+                            {threshold: 1}
+                        );
+                        observer.observe(floatingMessageContainer[0]);
+                    }
+                }
+
+                queuedSolutionPresent = false;
                 $.each(solutionList, (i, solutionInfo) => {
                     const solution = solutions[solutionInfo.id];
 
@@ -82,7 +106,7 @@
                     }
                 });
 
-                setTimer(queuedSolutionPresent);
+                setTimer();
             });
         }
 
@@ -90,12 +114,6 @@
             window.setTimeout(checkSolutionUpdates, (queuedSolutionPresent && evalRunning) ? reloadIntervalFast : reloadIntervalSlow);
         }
 
-        queuedSolutionPresent = false;
-        $.each(solutions, (i, solution) => {
-            if (solution.status === QUEUED) {
-                queuedSolutionPresent = true;
-            }
-        });
-        setTimer();
+        checkSolutionUpdates();
     });
 })();

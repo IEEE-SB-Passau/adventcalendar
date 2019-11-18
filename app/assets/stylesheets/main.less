@@ -5,8 +5,26 @@
 @import "bootstrap-checkboxes.less";
 @import "star-rating.less";
 
+
+.floating-alert-container {
+  position: sticky;
+  top: -1px;
+  margin-top: -15px;
+  padding-top: 15px;
+  z-index: 3;
+
+  .alert {
+    transition: box-shadow 0.1s;
+  }
+
+  &[stuck] > .alert {
+    box-shadow: 0 2px 4px 1px rgba(0, 0, 0, 0.4);
+  }
+}
+
+
 .glyphicon-refresh-animate {
-  -animation: spin .7s infinite linear;
+  animation: spin .7s infinite linear;
   -webkit-animation: spin2 .7s infinite linear;
 }
 

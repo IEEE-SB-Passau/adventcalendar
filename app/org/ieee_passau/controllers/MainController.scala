@@ -237,13 +237,6 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
           val displayLang: Lang = rs.lang
           val transQuery: Future[Option[ProblemTranslation]] = ProblemTranslations.byProblemOption(problem.id.get, displayLang)
           val transProblem = transQuery.map(pt => pt.fold(problem)(trans => problem.copy(title = trans.title, description = trans.description)))
-          val status = (monitoringActor ? StatusQ).mapTo[StatusM].flatMap {
-            case StatusM(false) => // running == false
-              for {
-                c <- for {p <- Postings.byId(Page.status.id, displayLang)} yield p.content
-              } yield "system" -> c
-            case _ => Future.successful("" -> "")
-          }
           val notification = (monitoringActor ? NotificationQ).mapTo[NotificationM].flatMap {
             case NotificationM(true) =>
               for {
@@ -251,7 +244,7 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
               } yield "notification" -> c
             case _ => Future.successful("" -> "")
           }
-          val flash = status.zip(notification).map(tuple => Map(tuple._1, tuple._2))
+          val flash = notification.map(f => Map(f))
 
           transProblem.flatMap(tp =>
             langs.flatMap(l =>
