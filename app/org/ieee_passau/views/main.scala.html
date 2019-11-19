@@ -121,29 +121,34 @@
             </div>
 
             @* Flash messages *@
-            @if(flash.get("success").isDefined) {
-                <div class="alert alert-success">@flash.get("success").get</div>
-            }
-            @if(flash.get("info").isDefined) {
-                <div class="alert alert-info">@flash.get("info").get</div>
-            }
-            @if(flash.get("warning").isDefined) {
-                <div class="alert alert-warning">@flash.get("warning").get</div>
-            }
-            @if(flash.get("danger").isDefined) {
-                <div class="alert alert-danger">@flash.get("danger").get</div>
-            }
-            @if(flash.get("system").isDefined) {
-                <div class="alert alert-info">@Html(flash.get("system").get)</div>
-            }
-            @if(flash.get("notification").isDefined && (sessionUser.isEmpty || !sessionUser.get.notificationDismissed)) {
-                <div class="alert alert-info @if(sessionUser.isDefined) { alert-dismissible }" id="flash-notification">
-                    @if(sessionUser.isDefined) {
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    }
-                    @Html(flash.get("notification").get)
-                </div>
-            }
+            <div id="flash-messages">
+                @if(flash.get("success").isDefined) {
+                    <div class="alert alert-success">@flash.get("success").get</div>
+                }
+                @if(flash.get("info").isDefined) {
+                    <div class="alert alert-info">@flash.get("info").get</div>
+                }
+                @if(flash.get("warning").isDefined) {
+                    <div class="alert alert-warning">@flash.get("warning").get</div>
+                }
+                @if(flash.get("danger").isDefined) {
+                    <div class="alert alert-danger">@flash.get("danger").get</div>
+                }
+                @if(flash.get("system").isDefined) {
+                    <div class="alert alert-info">@flash.get("system").get</div>
+                }
+                @if(flash.get("live-alert").isDefined) {
+                    <div class="alert alert-info live-alert">@Html(flash.get("live-alert").get)</div>
+                }
+                @if(flash.get("notification").isDefined && (sessionUser.isEmpty || !sessionUser.get.notificationDismissed)) {
+                    <div class="alert alert-info @if(sessionUser.isDefined) { alert-dismissible }" id="flash-notification">
+                        @if(sessionUser.isDefined) {
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        }
+                        @Html(flash.get("notification").get)
+                    </div>
+                }
+            </div>
 
             @if(hasTitle) {
                 <h3>@title</h3>

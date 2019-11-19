@@ -1,13 +1,10 @@
 (() => {
     "use strict";
-    const knownAlertTypes = ["success", "info", "warning", "error"];
-    const emptyMessageJson = JSON.stringify(["", ""]);
     const reloadIntervalFast = 1000, reloadIntervalSlow = 10000;
     const solutions = {};
     let queuedSolutionPresent = false;
     let evalRunning = true;
-    let activeMessageJson;
-    let floatingMessageContainer;
+    let activeMessage;
 
     window.addEventListener("load", () => {
 
@@ -31,27 +28,15 @@
                 url: apiUrl
             }).done(data => {
                 evalRunning = data.evalRunning;
-                const message = data.flash;
+                const message = data.flash[0] === "live-alert" ? data.flash[1] : undefined;
                 const solutionList = data.solutionList;
 
-                const messageJson = JSON.stringify(message);
-                if (activeMessageJson !== messageJson) {
-                    activeMessageJson = messageJson;
-                    if (floatingMessageContainer !== undefined) {
-                        floatingMessageContainer.remove();
-                    }
-                    if (activeMessageJson !== emptyMessageJson) {
-                        const alertClass = "alert-" + (knownAlertTypes.includes(message[0]) ? message[0] : "info");
-                        const alertHtml = `<div class="floating-alert-container"><div class="alert ${alertClass}">${message[1]}</div></div>`;
-                        floatingMessageContainer = $("html > body > div.container > div.page-header").after(alertHtml)
-                            .find("+.floating-alert-container");
 
-                        // we need the stuck-attribute for styling, whenever the element is not in the normal position, but fixed
-                        const observer = new IntersectionObserver(
-                            ([e]) => e.target.toggleAttribute("stuck", e.intersectionRatio < 1),
-                            {threshold: 1}
-                        );
-                        observer.observe(floatingMessageContainer[0]);
+                if (activeMessage !== message) {
+                    activeMessage = message;
+                    $("#flash-messages > .live-alert").remove();
+                    if (activeMessage !== undefined) {
+                        $("#flash-messages").append(`<div class="alert alert-info live-alert">${message}</div>`);
                     }
                 }
 
