@@ -221,7 +221,7 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
   }}
 
   def reEval(id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
-    db.run(Testruns.filter(_.id === id).map(r => (r.result, r.stage, r.vm, r.progRuntime, r.progMemory, r.compRuntime, r.compMemory))
+    db.run(Testruns.filter(_.solutionId === id).map(r => (r.result, r.stage, r.vm, r.progRuntime, r.progMemory, r.compRuntime, r.compMemory))
       .update((Queued, Some(0), None, Some(0), Some(0), Some(0), Some(0)))
     ).map(_ =>
       Redirect(org.ieee_passau.controllers.routes.EvaluationController.index())
