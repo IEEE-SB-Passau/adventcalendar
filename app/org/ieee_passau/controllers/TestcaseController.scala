@@ -13,6 +13,7 @@ import play.api.{Configuration, Environment}
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 class TestcaseController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                                    val components: MessagesControllerComponents,
@@ -48,9 +49,11 @@ class TestcaseController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
   def save(pid: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     var filledForm = testcaseForm.bindFromRequest()
-    if (!Testcases.isPositionAvailable(pid, filledForm.get.position)) {
-      filledForm = filledForm.withError("position", "testcase.position.error.taken")
-    }
+    filledForm.apply("position").value.foreach(position => {
+      if (Try(position.toInt).isSuccess && !Testcases.isPositionAvailable(pid, position.toInt)) {
+        filledForm = filledForm.withError("position", "testcase.position.error.taken")
+      }
+    })
     filledForm.fold(
       errorForm => {
         db.run(Visibilities.to[List].result).map { visibilities =>
@@ -76,9 +79,11 @@ class TestcaseController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
   def update(pid: Int, id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     var filledForm = testcaseForm.bindFromRequest()
-    if (!Testcases.isPositionAvailable(id, pid, filledForm.get.position)) {
-      filledForm = filledForm.withError("position", "testcase.position.error.taken")
-    }
+    filledForm.apply("position").value.foreach(position => {
+      if (Try(position.toInt).isSuccess && !Testcases.isPositionAvailable(id, pid, position.toInt)) {
+        filledForm = filledForm.withError("position", "testcase.position.error.taken")
+      }
+    })
     filledForm.fold(
       errorForm => {
         db.run(Visibilities.to[List].result).map { visibilities =>
