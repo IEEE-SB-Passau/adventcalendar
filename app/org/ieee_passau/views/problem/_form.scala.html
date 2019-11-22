@@ -31,7 +31,7 @@
     }
     @dateManualError(problem("solvableStart"), label = messages("problem.solvablestart"), placeholder = "2013-12-01 00:00")
     @{
-        val (hasError, error) = ViewHelper.checkAmbiguousKey("vis", problem)
+        val (hasError, error) = ViewHelper.checkAmbiguousKey("solve", problem)
         dateManualError(problem("solvableStop"), label =  messages("problem.solvablestop"), placeholder = "2013-12-01 00:00",
             hasError = hasError, errorMsg = messages(error, messages("problem.solvablestop"), messages("problem.solvablestart")))
     }
