@@ -21,13 +21,13 @@ object ViewHelper {
     }
   }
 
-  def checkAmbiguousKey(prefix: String, form: Form[_]): (Boolean, String) = {
+  def checkAmbiguousKey(suffix: String, form: Form[_]): (Boolean, String) = {
     var hasError = false
     var error = ""
     if(form.errors.nonEmpty) {
-      form.errors.foreach { e => if(e.messages.head.contains(prefix)) {
+      form.errors.foreach { e => if(e.messages.head.endsWith(suffix)) {
         hasError = true
-        error = e.message.substring(prefix.length)
+        error = e.message
       }}
     }
     (hasError, error)

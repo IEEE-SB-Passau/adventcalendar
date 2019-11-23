@@ -224,7 +224,7 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
           val allTickets = tickets.zip(answers).map(tuple => tuple._1 ++ tuple._2)
 
           val solutionsQuery = buildSolutionList(problem, uid)
-          val lastAllSolutionQuery = db.run(Solutions.filter(_.userId === uid).sortBy(_.created.asc).result.headOption)
+          val lastAllSolutionQuery = db.run(Solutions.filter(_.userId === uid).sortBy(_.created.desc).result.headOption)
           // default language shown in the language selector
           val lastLang: Future[String] = solutionsQuery.zip(lastAllSolutionQuery).map { tuple =>
             val solutions = tuple._1
