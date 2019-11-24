@@ -203,7 +203,7 @@ class VMClient(host: String, port: Int, name: String) extends EvaluationActor {
           val evalOut = evaluationResult.stdout.getOrElse("")
           val outLines = if (!evalOut.isEmpty) {
             val lines = evalOut.linesIterator.toList
-            if (lines.last.isEmpty) {
+            if (lines.length != 1 && lines.last.isEmpty) {
               lines.take(lines.length - 1).iterator
             } else {
               lines.iterator
