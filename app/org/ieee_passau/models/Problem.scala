@@ -60,9 +60,7 @@ object Problems extends TableQuery(new Problems(_)) {
 
   def update(id: Int, problem: Problem)(implicit db: Database, ec: ExecutionContext): Future[Int] =
     db.run(Testcases.filter(_.problemId === id).map(_.points).sum.result.flatMap(
-      _.fold(DBIO.successful(0): DBIOAction[Int, NoStream, Effect.Write]) { points =>
-        Problems.filter(_.id === id).update(problem.withId(id).copy(points = points))
-      }
+      points => Problems.filter(_.id === id).update(problem.withId(id).copy(points = points.getOrElse(0)))
     ))
 
   def doorAvailable(door: Int, id: Int)(implicit db: Database, ec: ExecutionContext): Future[Boolean] =
