@@ -133,7 +133,7 @@ class VMClient(host: String, port: Int, name: String) extends EvaluationActor {
     */
 
     job match {
-      case BaseJob(runtimeLimit, memLimit, lang, _, evalId, program, programName, stdin, expout) => {
+      case BaseJob(runtimeLimit, memLimit, lang, _, evalId, program, programName, stdin, expOut) => {
         // Deploy Job
         val data =
           <ieee-advent-calendar>
@@ -200,9 +200,19 @@ class VMClient(host: String, port: Int, name: String) extends EvaluationActor {
           ProgramError
         } else {
           // Magic newline handling
-          val evalout = evaluationResult.stdout.getOrElse("")
-          val outLines = if (evalout.isEmpty) Iterator("") else evaluationResult.stdout.getOrElse("").linesIterator
-          val expLines = if (expout.isEmpty) Iterator("") else expout.linesIterator
+          val evalOut = evaluationResult.stdout.getOrElse("")
+          val outLines = if (!evalOut.isEmpty) {
+            val lines = evalOut.linesIterator.toList
+            if (lines.last.isEmpty) {
+              lines.take(lines.length - 1).iterator
+            } else {
+              lines.iterator
+            }
+          } else {
+            Iterator("")
+          }
+          val expLines = if (expOut.isEmpty) Iterator("") else expOut.linesIterator
+
           //noinspection CorrespondsUnsorted
           if (!outLines.sameElements(expLines)) {
             WrongAnswer
