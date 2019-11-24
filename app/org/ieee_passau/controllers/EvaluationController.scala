@@ -95,8 +95,8 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
       p <- c.problem
       u <- s.user
       // TODO: get the actual problem-title (requires fallback, similar to byProblemOption)
-    } yield (r.id, r.stage, c.position, p.id, p.door, "", s.created, s.languageId, u.username)
-    //       1     2        3           4     5       6        7          8             9
+    } yield (r.id, r.stage, c.position, s.id, p.door, "", s.created, s.languageId, u.username)
+    //       1     2        3           4     5       6   7          8             9
 
     (monitoringActor ? RunningJobsQ).mapTo[List[(Job, Date)]].flatMap { jobs =>
       db.run(testrunsQuery.result).map { testruns =>
@@ -104,7 +104,7 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
           j <- jobs
           r <- testruns if r._1 /*testrunId*/ == j._1 /*job*/ .testrunId
         } yield (r._1, r._4, r._3, r._2.get, r._8,    r._9, r._5, r._6, r._7,   Some(j._2))
-        //       rid   sid   cid   stage     language user  door  title dateSub dateQueued
+        //       rid   sid   cpos  stage     language user  door  title dateSub dateQueued
         //       1     2     3     4         5        6     7     8     9       10
         val running = runningList.map(t => t._1)
         val list = runningList ++ (for {
