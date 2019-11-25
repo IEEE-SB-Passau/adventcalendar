@@ -4,8 +4,12 @@ import akka.AkkaScopingHelper
 import akka.actor.SupervisorStrategy.Stop
 import akka.actor._
 import akka.routing.{ActorRefRoutee, Router, SmallestMailboxRoutingLogic}
+import akka.util.Timeout
+import com.google.inject.Inject
 import org.ieee_passau.controllers.Beans.{RunningVMsQ, StatusM}
 import org.ieee_passau.evaluation.Messages._
+import org.ieee_passau.utils.FutureHelper
+import play.api.Configuration
 
 import scala.collection.mutable
 import scala.concurrent.duration._
@@ -20,7 +24,7 @@ object VMMaster {
 /**
   * Manages VMClients. Received jobs are relayed to a VMClient via a router.
   */
-class VMMaster extends EvaluationActor with AkkaScopingHelper {
+class VMMaster @Inject()(val config: Configuration) extends EvaluationActor with AkkaScopingHelper {
 
   override val MAX_RETRIES: Int = 2
   override val RESTART_WINDOW: FiniteDuration = 1 minute
@@ -34,7 +38,9 @@ class VMMaster extends EvaluationActor with AkkaScopingHelper {
 
   private def addChild(conf: Config): ActorRef = {
     val actor = context.actorOf(
-      VMClient.props(conf.host, conf.port, conf.actorName).withDispatcher("evaluator.context"),
+      VMClient.props(conf.host, conf.port, conf.actorName,
+        Timeout(FutureHelper.makeDuration(config.getOptional[String]("evaluator.eval.timeout").getOrElse("30 minutes")))
+      ).withDispatcher("evaluator.context"),
       name = conf.actorName
     )
 

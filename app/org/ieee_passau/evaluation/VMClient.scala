@@ -21,13 +21,11 @@ import scala.language.postfixOps
 import scala.xml.{Elem, Text}
 
 object VMClient {
-  def props(host: String, port: Int, name: String): Props =
-    Props(new VMClient(host, port, name))
+  def props(host: String, port: Int, name: String, timeout: Timeout): Props =
+    Props(new VMClient(host, port, name, timeout))
 }
 
-class VMClient(host: String, port: Int, name: String) extends EvaluationActor {
-
-  private val timeout = Timeout(FutureHelper.makeDuration("30 minutes"))
+class VMClient(host: String, port: Int, name: String, timeout: Timeout) extends EvaluationActor {
 
   private case class ExecutionResult(var duration: Duration = 0 seconds,
                                      var memory: Int = 0,
@@ -199,6 +197,7 @@ class VMClient(host: String, port: Int, name: String) extends EvaluationActor {
         } else if (!evaluationResult.stderr.getOrElse("").trim.isEmpty || !evaluationResult.exitCode.contains(0)) {
           ProgramError
         } else {
+
           // Magic newline handling
           val evalOut = evaluationResult.stdout.getOrElse("")
           val outLines = if (!evalOut.isEmpty) {
