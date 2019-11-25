@@ -233,6 +233,7 @@ eval.jobs.cancelall.button=Cancel all jobs
 eval.jobs.cancelall.confirm=Really cancel all jobs?
 eval.jobs.cancelall.message=All jobs have been canceled.
 
+status.notification.title=Notification
 status.notification.start=Turn notification on
 status.notification.stop=Turn notification off
 status.notification.state.on=Notification was turned on

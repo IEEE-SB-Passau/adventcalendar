@@ -242,6 +242,7 @@ eval.jobs.cancelall.button=Alle Jobs abbrechen
 eval.jobs.cancelall.confirm=Auswertung aller Jobs wirklich abbrechen?
 eval.jobs.cancelall.message=Alle Jobs wurden abgebrochen.
 
+status.notification.title=Benachrichtigun
 status.notification.start=Benachrichtigung einschalten
 status.notification.stop=Benachrichtigung ausschalten
 status.notification.state.on=Benachrichtigung wurde eingeschaltet
