@@ -120,7 +120,9 @@ class CmsController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   def uploadFile(): Action[MultipartFormData[TemporaryFile]] = requirePermission(Admin, parse.multipartFormData) { implicit admin => Action(parse.multipartFormData) { implicit rs =>
     rs.body.file("file").map { file =>
       val filename = Paths.get(file.filename).getFileName.toString.replaceAll("[^0-9A-z.\\-]", "_")
-      val target = new File(config.getOptional[String]("play.assets.staticPath").getOrElse("/tmp/"), filename)
+      val target = new File(config.getOptional[String]("play.assets.uploadPath").getOrElse(
+                            config.getOptional[String]("play.assets.staticPath").getOrElse(
+                              "/tmp/")), filename)
       try {
         FileUtils.copyFile(file.ref, target)
 
