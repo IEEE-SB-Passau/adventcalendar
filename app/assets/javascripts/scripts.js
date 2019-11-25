@@ -49,7 +49,7 @@ function loadFileAsText(input, textarea) {
 $('.wysiwyg').summernote({
     onCreateLink: function (url) {
         if (url.match(/(https?|mailto):\/\/?.*/)) return url;
-        const baseUrl = jsRoutes.org.ieee_passau.controllers.MainController.calendar().url;
+        const baseUrl = jsRoutes.org.ieee_passau.controllers.CmsController.calendar().url;
         if (!url.startsWith(baseUrl)) url = baseUrl + url;
         return url;
     }
