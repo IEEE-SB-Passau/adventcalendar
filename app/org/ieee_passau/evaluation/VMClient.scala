@@ -203,17 +203,16 @@ class VMClient(host: String, port: Int, name: String, timeout: Timeout) extends 
           val outLines = if (!evalOut.isEmpty) {
             val lines = evalOut.linesIterator.toList
             if (lines.length != 1 && lines.last.isEmpty) {
-              lines.take(lines.length - 1).iterator
+              lines.take(lines.length - 1)
             } else {
-              lines.iterator
+              lines
             }
           } else {
-            Iterator("")
+            List("")
           }
-          val expLines = if (expOut.isEmpty) Iterator("") else expOut.linesIterator
+          val expLines = if (expOut.isEmpty) List("") else expOut.linesIterator.toList
 
-          //noinspection CorrespondsUnsorted
-          if (!outLines.sameElements(expLines)) {
+          if (!expLines.equals(outLines) || expLines.equals(outLines ++ List(""))) {
             WrongAnswer
           } else {
             Passed
