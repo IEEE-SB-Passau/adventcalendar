@@ -26,4 +26,4 @@ function updateEditor() {
 }
 
 ace.require("ace/ext/language_tools");
-var modelist = ace.require("ace/ext/modelist");
+const modelist = ace.require("ace/ext/modelist");
