@@ -24,7 +24,7 @@
         <div class='container @if(isFullPage) { fullbody }'>
             <div class="page-header">
                 <h1>@Html(messages("page.title"))</h1>
-                <nav class="navbar navbar-default" role="navigation">
+                <nav class="navbar navbar-default">
                     @* Brand and toggle get grouped for better mobile display *@
                     <div class="navbar-header">
                         <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
@@ -38,7 +38,7 @@
                     @* Collect the nav links, forms, and other content for toggling *@
                     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                         <ul class="nav navbar-nav">
-                            <li @if(title == messages("calendar"))     { class="active" }><a href="@org.ieee_passau.controllers.routes.CmsController.calendar#doors">@messages("calendar")</a></li>
+                            <li @if(title == messages("calendar"))     { class="active" }><a href="@org.ieee_passau.controllers.routes.CmsController.calendar#calendar">@messages("calendar")</a></li>
                             <li @if(title == messages("nav.problems")) { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.problems"     >@messages("nav.problems")</a></li>
                             <li @if(title == messages("nav.ranking"))  { class="active" }><a href="@org.ieee_passau.controllers.routes.MainController.ranking"      >@messages("nav.ranking")</a></li>
                             <li class="dropdown @if(List(messages(Page.news.toString), messages(Page.rules.toString), messages(Page.faq.toString),
@@ -164,25 +164,25 @@
             </div>
         </div>
 
-        <script src="@routes.Assets.versioned("javascripts/jquery-3.4.1.min.js")" type="text/javascript"></script>
-        <script src="@routes.Assets.versioned("javascripts/timeago/jquery.timeago.js")" type="text/javascript"></script>
-        <script src="@{val locale = lang.code; routes.Assets.versioned(s"javascripts/timeago/jquery.timeago.$locale.js")}" type="text/javascript"></script>
-        <script src="@routes.Assets.versioned("javascripts/moment-with-locales.min.js")" type="text/javascript"></script>
-        <script src="@routes.Assets.versioned("javascripts/bootstrap/bootstrap.min.js")" type="text/javascript"></script>
-        <script src="@routes.Assets.versioned("javascripts/bootstrap/bootstrap-datetimepicker.min.js")" type="text/javascript"></script>
-        <script src="@routes.Assets.versioned("javascripts/highlight.pack.js")" type="text/javascript"></script>
-        <script src="@routes.Assets.versioned("javascripts/diff.js")" type="text/javascript"></script>
-        <script src="@routes.Assets.versioned("javascripts/summernote/summernote.min.js")" type="text/javascript"></script>
-        <script src="@routes.Assets.versioned("javascripts/cookieconsent/cookieconsent.min.js")" type="text/javascript"></script>
-        <script src="@org.ieee_passau.controllers.routes.MasterController.javascriptRoutes" type="text/javascript"></script>
+        <script src="@routes.Assets.versioned("javascripts/jquery-3.4.1.min.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/timeago/jquery.timeago.js")"></script>
+        <script src="@{val locale = lang.code; routes.Assets.versioned(s"javascripts/timeago/jquery.timeago.$locale.js")}"></script>
+        <script src="@routes.Assets.versioned("javascripts/moment-with-locales.min.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/bootstrap/bootstrap.min.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/bootstrap/bootstrap-datetimepicker.min.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/highlight.pack.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/diff.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/summernote/summernote.min.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/cookieconsent/cookieconsent.min.js")"></script>
+        <script src="@org.ieee_passau.controllers.routes.MasterController.javascriptRoutes"></script>
         @* <!--suppress JSUnusedLocalSymbols --> *@
-        <script type="text/javascript">
+        <script>
             const cookieText = "@messages("notification.cookie.text")";
             const cookieLink = "@messages("notification.cookie.link")";
             const cookieButton = "@messages("notification.cookie.button")";
         </script>
         @* This should always be the last import *@
-        <script src="@routes.Assets.versioned("javascripts/scripts.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.versioned("javascripts/scripts.js")"></script>
     </body>
 </html>
 }
