@@ -27,6 +27,10 @@ $(document).ready(function () {
     $('textarea.wysiwyg').summernote();
 });
 
+function shouldBePrefixed(url, baseUrl) {
+    return !url.match(/^(?:https?:\/\/|mailto:).*$/) && !url.startsWith(baseUrl);
+}
+
 // file loader for loading text files into text areas
 function loadFileAsText(input, textarea) {
     const fileToLoad = input.files[0];
@@ -39,7 +43,7 @@ function loadFileAsText(input, textarea) {
             const baseUrl = jsRoutes.org.ieee_passau.controllers.CmsController.calendar().url;
             let urlFixes = 0;
             $("a", domElement).attr("href", (i, url) => {
-                if (!url.match(/(https?|mailto):\/\/?.*/) && !url.startsWith(baseUrl)) {
+                if (shouldBePrefixed(url, baseUrl)) {
                     console.log(`changing "${url}" to "${baseUrl + url}"`);
                     urlFixes++;
                     url = baseUrl + url;
@@ -47,7 +51,7 @@ function loadFileAsText(input, textarea) {
                 return url;
             });
             $("img", domElement).attr("src", (i, url) => {
-                if (!url.match(/(https?|mailto):\/\/?.*/) && !url.startsWith(baseUrl)) {
+                if (shouldBePrefixed(url, baseUrl)) {
                     console.log(`changing "${url}" to "${baseUrl + url}"`);
                     urlFixes++;
                     url = baseUrl + url;
@@ -72,9 +76,10 @@ function loadFileAsText(input, textarea) {
 // fix summernote link mangling
 $('.wysiwyg').summernote({
     onCreateLink: function (url) {
-        if (url.match(/(https?|mailto):\/\/?.*/)) return url;
         const baseUrl = jsRoutes.org.ieee_passau.controllers.CmsController.calendar().url;
-        if (!url.startsWith(baseUrl)) url = baseUrl + url;
+        if (shouldBePrefixed(url, baseUrl)) {
+            url = baseUrl + url;
+        }
         return url;
     }
 });
