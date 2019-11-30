@@ -12,14 +12,14 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/bootstrap.min.css")">
-        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/bootstrap/bootstrap-datetimepicker.min.css")">
-        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/bootstrap/awesome-bootstrap-checkbox.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("lib/bootstrap/css/bootstrap.min.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("lib/bootstrap-datetimepicker/bootstrap-datetimepicker.min.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("lib/bootstrap-checkbox/awesome-bootstrap-checkbox.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("lib/highlight/idea.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("lib/languages/languages.min.css")"/>
+        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("lib/summernote/summernote.css")">
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("lib/cookieconsent/cookieconsent.min.css")" />
         <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.min.css")">
-        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/highlight/idea.css")">
-        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/languages.min.css")"/>
-        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("javascripts/summernote/summernote.css")">
-        <link rel="stylesheet" type="text/css" href="@routes.Assets.versioned("javascripts/cookieconsent/cookieconsent.min.css")" />
         <link rel="shortcut icon" type="image/x-icon" href="@routes.Assets.versioned("images/favicon.ico")">
         <title>@title</title>
     </head>
@@ -167,16 +167,16 @@
             </div>
         </div>
 
-        <script src="@routes.Assets.versioned("javascripts/jquery-3.4.1.min.js")"></script>
-        <script src="@routes.Assets.versioned("javascripts/timeago/jquery.timeago.js")"></script>
-        <script src="@{val locale = lang.code; routes.Assets.versioned(s"javascripts/timeago/jquery.timeago.$locale.js")}"></script>
-        <script src="@routes.Assets.versioned("javascripts/moment-with-locales.min.js")"></script>
-        <script src="@routes.Assets.versioned("javascripts/bootstrap/bootstrap.min.js")"></script>
-        <script src="@routes.Assets.versioned("javascripts/bootstrap/bootstrap-datetimepicker.min.js")"></script>
-        <script src="@routes.Assets.versioned("javascripts/highlight.pack.js")"></script>
+        <script src="@routes.Assets.versioned("lib/jquery/jquery-3.4.1.min.js")"></script>
+        <script src="@routes.Assets.versioned("lib/timeago/jquery.timeago.js")"></script>
+        <script src="@{val locale = lang.code; routes.Assets.versioned(s"lib/timeago/jquery.timeago.$locale.js")}"></script>
+        <script src="@routes.Assets.versioned("lib/moment/moment-with-locales.min.js")"></script>
+        <script src="@routes.Assets.versioned("lib/bootstrap/js/bootstrap.min.js")"></script>
+        <script src="@routes.Assets.versioned("lib/bootstrap-datetimepicker/bootstrap-datetimepicker.min.js")"></script>
+        <script src="@routes.Assets.versioned("lib/highlight/highlight.pack.js")"></script>
+        <script src="@routes.Assets.versioned("lib/summernote/summernote.min.js")"></script>
+        <script src="@routes.Assets.versioned("lib/cookieconsent/cookieconsent.min.js")"></script>
         <script src="@routes.Assets.versioned("javascripts/diff.js")"></script>
-        <script src="@routes.Assets.versioned("javascripts/summernote/summernote.min.js")"></script>
-        <script src="@routes.Assets.versioned("javascripts/cookieconsent/cookieconsent.min.js")"></script>
         <script src="@org.ieee_passau.controllers.routes.MasterController.javascriptRoutes"></script>
         @* <!--suppress JSUnusedLocalSymbols --> *@
         <script>
