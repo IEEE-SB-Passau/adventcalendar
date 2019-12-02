@@ -63,7 +63,7 @@ class RankingActor @Inject()(val dbConfigProvider: DatabaseConfigProvider, val s
     */
   private def calculateChallengeFactor(points: Int)(correct: Int, users: Int, total: Int): Double = {
     val baseLine = 0.5
-    val sr = Try(correct.toDouble / users.toDouble).getOrElse(0D)
+    val sr = if (users == 0) 0D else correct.toDouble / users.toDouble
     val cf = points * baseLine + (points - points * baseLine) * (if (correct == 1 && users == 1) 1 else 1 - sr)
     Try(cf / points).getOrElse(0D)
   }
