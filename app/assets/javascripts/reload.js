@@ -63,7 +63,9 @@
 
                             // update HTML
                             solution.unprocessedHtml = solutionInfo.html;
-                            solution.element.html(solutionInfo.html);
+                            const newElement = $(solutionInfo.html);
+                            solution.element.replaceWith(newElement);
+                            solution.element = newElement;
 
                             // restore expanded-states
                             setExpandedStateTo(solution.element.find(`#solution${solutionInfo.position}`), wasExpanded);
