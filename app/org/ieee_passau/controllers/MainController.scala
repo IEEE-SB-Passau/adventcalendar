@@ -279,8 +279,8 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
           val langs = tuple._1.toList
           val solutionList = tuple._2
           val responseList = solutionList.take(1)
-            .map(e => (e.solution.id.get, e.solution.result.name, org.ieee_passau.views.html.solution.solutionList(List(e), langs).toString())) ++ solutionList.drop(1)
-            .map(e => (e.solution.id.get, e.solution.result.name, org.ieee_passau.views.html.solution.solutionList(List(e), langs, first = false).toString()))
+            .map(e => (e.solution.id.get, e.position, e.solution.result.name, org.ieee_passau.views.html.solution.solutionList(List(e), langs).toString())) ++ solutionList.drop(1)
+            .map(e => (e.solution.id.get, e.position, e.solution.result.name, org.ieee_passau.views.html.solution.solutionList(List(e), langs, first = false).toString()))
           val list = Json.toJson(responseList.map(e => SolutionJSON.tupled(e)))
           val status = (monitoringActor ? StatusQ).mapTo[StatusM].flatMap {
             case StatusM(false) => // running == false
@@ -310,6 +310,7 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
   private implicit val SolutionJSONWrites: Writes[SolutionJSON] = (
     (JsPath \ "id").write[Int] and
+      (JsPath \ "position").write[Int] and
       (JsPath \ "result").write[String] and
       (JsPath \ "html").write[String]
     ) (unlift(SolutionJSON.unapply))

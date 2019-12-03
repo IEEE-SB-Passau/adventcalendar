@@ -26,7 +26,7 @@ object Beans {
 
   case class VMStatus(actorName: String, uri: String, users: Int, load: Float, mem: Float, swap: Float, ts: Date)
 
-  case class SolutionJSON(id: Int, status: String, html: String)
+  case class SolutionJSON(id: Int, position: Int, status: String, html: String)
 
   // Messages
   case class RunningJobsQ()

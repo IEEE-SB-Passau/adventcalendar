@@ -54,10 +54,10 @@
                         if (solution.unprocessedHtml === undefined || solution.unprocessedHtml !== solutionInfo.html) {
 
                             // save expanded-states
-                            const wasExpanded = solution.element.find("#solution" + solutionInfo.id).attr("aria-expanded") === "true";
-                            const wasSourceExpanded = solution.element.find("#code" + solutionInfo.id).attr("aria-expanded") === "true";
+                            const wasExpanded = solution.element.find(`#solution${solutionInfo.position}`).attr("aria-expanded") === "true";
+                            const wasCodeExpanded = solution.element.find(`#code${solutionInfo.position}`).attr("aria-expanded") === "true";
                             const wasTestcaseExpanded = {};
-                            solution.element.find("#solution" + solutionInfo.id + " .testcase-collapse").each(function (i, element) {
+                            solution.element.find(`#solution${solutionInfo.position} .testcase-collapse`).each(function (i, element) {
                                 wasTestcaseExpanded[element.id] = $(this).attr("aria-expanded") === "true";
                             });
 
@@ -66,9 +66,9 @@
                             solution.element.html(solutionInfo.html);
 
                             // restore expanded-states
-                            setExpandedStateTo(solution.element.find("#solution" + solutionInfo.id), wasExpanded);
-                            setExpandedStateTo(solution.element.find("#code" + solutionInfo.id), wasSourceExpanded);
-                            solution.element.find("#solution" + solutionInfo.id + " .testcase-collapse").each((i, element) => {
+                            setExpandedStateTo(solution.element.find(`#solution${solutionInfo.position}`), wasExpanded);
+                            setExpandedStateTo(solution.element.find(`#code${solutionInfo.position}`), wasCodeExpanded);
+                            solution.element.find(`#solution${solutionInfo.position} .testcase-collapse`).each(function (i, element) {
                                 if (wasTestcaseExpanded[element.id] !== undefined) {
                                     setExpandedStateTo($(this), wasTestcaseExpanded[element.id]);
                                 }
