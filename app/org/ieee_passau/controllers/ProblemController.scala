@@ -1,5 +1,7 @@
 package org.ieee_passau.controllers
 
+import java.util.IllformedLocaleException
+
 import akka.actor.{ActorRef, ActorSystem}
 import com.google.inject.Inject
 import com.google.inject.name.Named
@@ -147,11 +149,16 @@ class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   }}
 
   def editTranslation(problemId: Int, lang: String): Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
-    ProblemTranslations.byProblemLang(problemId, Lang(lang)).map {
-      case Some(trans) =>
-        Ok(org.ieee_passau.views.html.problemTranslation.edit(problemId, problemTranslationForm.fill(trans)))
-      case _ =>
-        NotFound(org.ieee_passau.views.html.errors.e404())
+    try {
+      ProblemTranslations.byProblemLang(problemId, Lang(lang)).map {
+        case Some(trans) =>
+          Ok(org.ieee_passau.views.html.problemTranslation.edit(problemId, problemTranslationForm.fill(trans)))
+        case _ =>
+          NotFound(org.ieee_passau.views.html.errors.e404())
+      }
+    } catch {
+      case _: IllformedLocaleException =>
+        Future.successful(NotFound(org.ieee_passau.views.html.errors.e404()))
     }
   }}
 
