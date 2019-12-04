@@ -28,13 +28,13 @@
 </div>
 <input name="submissiontext" id="submissiontext" type="hidden" value=""/>
 
-<script src="@routes.Assets.versioned("javascripts/ace/ace.js")" type="text/javascript" charset="utf-8"></script>
-<script src="@routes.Assets.versioned("javascripts/ace/ext-modelist.js")" type="text/javascript" charset="utf-8"></script>
-<script src="@routes.Assets.versioned("javascripts/ace/ext-language_tools.js")" type="text/javascript" charset="utf-8"></script>
+<script src="@routes.Assets.versioned("lib/ace/ace.js")" type="text/javascript" charset="utf-8"></script>
+<script src="@routes.Assets.versioned("lib/ace/ext-modelist.js")" type="text/javascript" charset="utf-8"></script>
+<script src="@routes.Assets.versioned("lib/ace/ext-language_tools.js")" type="text/javascript" charset="utf-8"></script>
 <script src="@routes.Assets.versioned("javascripts/codeEditor.js")" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript">
     var langExtension = "@langExt";
     var editor = ace.edit("preview");
-    ace.config.set('basePath', '@routes.Assets.versioned("javascripts/ace")');
+    ace.config.set('basePath', '@routes.Assets.versioned("lib/ace")');
     updateEditor();
 </script>
