@@ -138,7 +138,7 @@ submit.ratelimit.timer=You may only submit one solution per minute!
 submit.ratelimit.queue=You can submit only one solution every 15 minutes while your last solution is under evaluation!
 #<--- HTML
 submit.notice.codelang=*For Java and Scala, please do not use a package and when using the editor, the main method needs to be in the class or object "Solution".
-submit.notice.help=If your program is not behaving as expected, you can look at the <a href="{0})">FAQs</a> or our selection of <a href="{1}">example programs</a>
+submit.notice.help=If your program is not behaving as expected, you can look at the <a href="{0}">FAQs</a> or our selection of <a href="{1}">example programs</a>
 #--> HTML
 
 problemdetails.qna=Questions and answers
