@@ -26,4 +26,5 @@ function updateEditor() {
 }
 
 ace.require("ace/ext/language_tools");
-const modelist = ace.require("ace/ext/modelist");
+// This script will be loaded again when reloading the editor. Re-declaring variables is only possible for var, not for const and let.
+var modelist = ace.require("ace/ext/modelist"); // jshint ignore:line
