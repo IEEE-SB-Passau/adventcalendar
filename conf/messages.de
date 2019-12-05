@@ -14,6 +14,7 @@ user.password=Passwort
 user.password.repeat=Passwort wiederholen
 user.email=E-Mail
 user.active=Aktiv
+user.inactive=Inaktiv
 user.permission=Benutzertyp
 user.hidden=Nicht gewertet
 user.school=Universität oder Schule
@@ -46,6 +47,8 @@ user.error.passwordsnomatch=Passwörter stimmen nicht überein!
 user.error.captcha=Captcha wurde nicht richtig gelöst!
 user.registered=Registrierte Benutzer
 user.submitted=Benutzer mit Abgaben
+user.team=Mitglieder im Adventskalenderteam
+user.noncompeting=Ungewertete Benutzer
 
 ticket.title=Frage
 ticket.list.title=Fragenliste

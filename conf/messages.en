@@ -5,6 +5,7 @@ user.password=Password
 user.password.repeat=Repeat password
 user.email=Email
 user.active=Active
+user.inactive=Inactive
 user.permission=User type
 user.hidden=Not ranked
 user.school=University or school
@@ -37,6 +38,8 @@ user.error.passwordsnomatch=Passwords do not match!
 user.error.captcha=Captcha was wrong
 user.registered=Registered users
 user.submitted=Users with submissions
+user.team=Members in the advent calendar team
+user.noncompeting=Users not actively competing
 
 ticket.title=Question
 ticket.list.title=Questions

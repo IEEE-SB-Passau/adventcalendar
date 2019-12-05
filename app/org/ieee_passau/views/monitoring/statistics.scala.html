@@ -117,14 +117,12 @@
                 </tr>
             </thead>
             <tbody>
+                @stats.usersCount.map { case (msg, count) =>
                 <tr>
-                    <td>@messages("user.registered")</td>
-                    <td>@stats.usersCount._1</td>
+                    <td>@messages(msg)</td>
+                    <td>@count</td>
                 </tr>
-                <tr>
-                    <td>@messages("user.submitted")</td>
-                    <td>@stats.usersCount._2</td>
-                </tr>
+                }
             </tbody>
         </table>
     </div></div>

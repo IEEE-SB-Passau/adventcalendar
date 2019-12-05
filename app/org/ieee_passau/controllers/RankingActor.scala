@@ -46,7 +46,7 @@ class RankingActor @Inject()(val dbConfigProvider: DatabaseConfigProvider, val s
   // Variant with problem list tries = user tries
   // private var userXsubmissions: Map[Int /*userId*/ , (Int /*solved*/ , Map[Int /*problemId*/ , Int /*totalUser*/ ])] = Map(
 
-  private var stats: StatsM = StatsM(0, List(), List(), 0, List(), List(), (0, 0), List())
+  private var stats: StatsM = StatsM(0, List(), List(), 0, List(), List(), List(), List())
 
   /**
     * We suppose a problem has exactly `points` points, users get between `points` and `baseLine = 0.5 * points` points
@@ -200,49 +200,61 @@ class RankingActor @Inject()(val dbConfigProvider: DatabaseConfigProvider, val s
     val oneHAgo = System.currentTimeMillis() - 3600 * 1000
     val schoolQ = Schools.map(_.school.trim.getOrElse("": Rep[String]))
       .groupBy(x => x.toUpperCase).map(x => (x._1, x._2.length)).sortBy(_._1).result
-    db.run(schoolQ).foreach { rawSchools =>
-      db.run(Users.length.result).foreach { userCount: Int =>
-        db.run((for {
-          r <- Testruns if r.result =!= (Queued: org.ieee_passau.models.Result)
-          s <- r.solution
-        } yield (r.vm, r.completed, s.languageId)).result).foreach { rawJobs =>
-          val jobs = rawJobs.view.flatMap {
-            case job if job._1.getOrElse("").contains(" ") =>
-              job._1.get.split(" ").zipWithIndex.map {
-                case (vmName, idx) =>
-                  if (idx == 0) (vmName, job._2, job._3)
-                  else (vmName, job._2, "BINARY")
-              }.toList
-            case job => List((job._1.get, job._2, job._3))
-          }
+    val jobsQ = (for {
+      r <- Testruns if r.result =!= (Queued: org.ieee_passau.models.Result)
+      s <- r.solution
+    } yield (r.vm, r.completed, s.languageId, s.id)).result
 
-          val jobs1H = jobs.filter(_._2.getTime >= oneHAgo)
-          val numJobs1H = jobs1H.length
-          val vmRank1H = jobs1H.groupBy(_._1).map {
-            case (k, l) => (k, l.length)
-          }.toList.sortBy(-_._2)
-          val langRank1H = jobs1H.groupBy(_._3).map {
-            case (k, l) => (k, l.length)
-          }.toList.sortBy(-_._2)
+    db.run(for {
+      rawSchools <- schoolQ
+      rawJobs <- jobsQ
+      total <- Users.length.result
+      inactive <- Users.filter(!_.active).length.result
+      team <- Users.filter(_.permission =!= (Contestant: Permission)).length.result
+      hidden <- Users.filter(u => u.permission === (Contestant: Permission) && u.hidden).length.result
+    } yield (rawSchools, rawJobs, total, inactive, team, hidden)) map {
 
-          val numJobsFull = jobs.length
-          val vmRankFull = jobs.groupBy(_._1).map {
-            case (k, l) => (k, l.length)
-          }.toList.sortBy(-_._2)
-          val langRankFull = jobs.groupBy(_._3).map {
-            case (k, l) => (k, l.length)
-          }.toList.sortBy(-_._2)
-
-          val counts = (userCount, ranking(true).keySet.size)
-          val schools = rawSchools.view.map { case (name, count) =>
-            (name.toLowerCase.split(Array(' ', '-')).map(_.capitalize).mkString(" "), count)
-          }.groupBy(_._1).map {
-            case (name, cs) => (name, cs.map(_._2).sum)
-          }.toList.sorted
-
-          stats = StatsM(numJobs1H, vmRank1H, langRank1H, numJobsFull, vmRankFull, langRankFull, counts, schools)
+      case (rawSchools, rawJobs, total, inactive, team, hidden) =>
+        val jobs = rawJobs.view.flatMap {
+          case job if job._1.getOrElse("").contains(" ") =>
+            job._1.get.split(" ").zipWithIndex.map {
+              case (vmName, idx) =>
+                if (idx == 0) (vmName, job._2, job._3, job._4)
+                else (vmName, job._2, "BINARY", job._4)
+            }.toList
+          case job => List((job._1.get, job._2, job._3, job._4))
         }
-      }
+
+        val jobs1H = jobs.filter(_._2.getTime >= oneHAgo)
+        val numJobs1H = jobs1H.length
+        val vmRank1H = jobs1H.groupBy(_._1).map {
+          case (k, l) => (k, l.length)
+        }.toList.sortBy(-_._2)
+        val langRank1H = jobs1H.groupBy(_._4).map {
+          case (_, l) => (l.head._3, l.length)
+        }.toList.sortBy(-_._2)
+
+        val numJobsFull = jobs.length
+        val vmRankFull = jobs.groupBy(_._1).map {
+          case (k, l) => (k, l.length)
+        }.toList.sortBy(-_._2)
+        val langRankFull = jobs.groupBy(_._4).map {
+          case (_, l) => (l.head._3, l.length)
+        }.toList.sortBy(-_._2)
+
+        val counts = List(
+          ("user.registered", total),
+          ("user.submitted", ranking(true).keySet.size),
+          ("user.inactive", inactive),
+          ("user.team", team),
+          ("user.noncompeting", hidden))
+        val schools = rawSchools.view.map { case (name, count) =>
+          (name.toLowerCase.split(Array(' ', '-')).map(_.capitalize).mkString(" "), count)
+        }.groupBy(_._1).map {
+          case (name, cs) => (name, cs.map(_._2).sum)
+        }.toList.sorted
+
+        stats = StatsM(numJobs1H, vmRank1H, langRank1H, numJobsFull, vmRankFull, langRankFull, counts, schools)
     }
   }
 
