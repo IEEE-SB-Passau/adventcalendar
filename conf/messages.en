@@ -42,6 +42,7 @@ user.team=Members in the advent calendar team
 user.noncompeting=Users not actively competing
 
 ticket.title=Question
+ticket.about=about
 ticket.list.title=Questions
 ticket.list.show=Show question
 ticket.public=Public
