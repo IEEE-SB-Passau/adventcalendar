@@ -231,7 +231,9 @@ class RankingActor @Inject()(val dbConfigProvider: DatabaseConfigProvider, val s
           case (k, l) => (k, l.length)
         }.toList.sortBy(-_._2)
         val langRank1H = jobs1H.groupBy(_._4).map {
-          case (_, l) => (l.head._3, l.length)
+          case (_, l) => l.head._3
+        }.toList.groupBy(x => x).map {
+          case (k, l) => (k, l.length)
         }.toList.sortBy(-_._2)
 
         val numJobsFull = jobs.length
@@ -239,7 +241,9 @@ class RankingActor @Inject()(val dbConfigProvider: DatabaseConfigProvider, val s
           case (k, l) => (k, l.length)
         }.toList.sortBy(-_._2)
         val langRankFull = jobs.groupBy(_._4).map {
-          case (_, l) => (l.head._3, l.length)
+          case (_, l) => l.head._3
+        }.toList.groupBy(x => x).map {
+          case (k, l) => (k, l.length)
         }.toList.sortBy(-_._2)
 
         val counts = List(
