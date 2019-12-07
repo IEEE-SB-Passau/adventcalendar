@@ -374,7 +374,7 @@ click the following link to reset your password at the IEEE Advent Calendar:\n\
 \n\
 Have fun participating,\n\
 Your Advent Calendar Team
-email.answer.subject=Answer to question {0}
+email.answer.subject=Answer to {0}
 email.feedback.subject=Feedback
 email.feedback.body=Rating: {0} Stars\n\
 Positive: {1}\n\
