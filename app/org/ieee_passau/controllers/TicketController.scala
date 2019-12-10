@@ -80,7 +80,7 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
               val now = new Date()
               db.run((Tickets returning Tickets.map(_.id)) += Ticket(None, problem.id, user.get.id, None, ticket.text, public = false, now, language)).map { id =>
                 val email = Email(
-                  subject = rs.messages("email.header") + " " +  rs.messages("ticket.title") + " zu " + rs.messages("problem.title") + " " + problem.door + ": " + problemTitle,
+                  subject = rs.messages("email.header") + " " +  rs.messages("ticket.title") + " " + rs.messages("ticket.about") + " " + rs.messages("problem.title") + " " + problem.door + ": " + problemTitle,
                   from = encodeEmailName(user.get.username) + " @ " + config.getOptional[String]("email.from").getOrElse("adventskalender@ieee.uni-passau.de"),
                   to = List(config.getOptional[String]("email.from").getOrElse("adventskalender@ieee.uni-passau.de")),
                   bodyText = Some(ticket.text + "\n\n" + rs.messages("ticket.answer") + ": " + org.ieee_passau.controllers.routes.TicketController.view(id).absoluteURL(config.getOptional[Boolean]("application.https").getOrElse(false)))
@@ -107,6 +107,9 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
           .flashing("danger" -> rs.messages("ticket.answer.error")))
       },
       ticket => {
+        val errorResult = Future.successful(Redirect(org.ieee_passau.controllers.routes.TicketController.index())
+          .flashing("danger" -> rs.messages("ticket.answer.error")))
+
         db.run(Tickets.byId(id).result.headOption).flatMap {
           case Some(parent) =>
             db.run(Problems.byId(parent.problemId.get).result.headOption).flatMap {
@@ -120,8 +123,10 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                     Tickets.update(updated.id.get, updated)
                     ProblemTranslations.byProblemOption(problem.id.get, msgLang).map { maybeProblemTitle =>
                       val problemTitle = maybeProblemTitle.fold(problem.title)(_.title)
+                      val prevSubject = rs.messagesApi("ticket.title")(msgLang) + " " + rs.messagesApi("ticket.about")(msgLang) + " " +
+                        rs.messagesApi("problem.title")(msgLang) + " " + problem.door + ": " + problemTitle
                       val email = Email(
-                        subject = rs.messagesApi("email.header")(msgLang) + " " + rs.messagesApi("email.answer.subject", rs.messagesApi("ticket.title")(msgLang) +  " zu " + rs.messagesApi("problem.title")(msgLang) + " " + problem.door + ": " + problemTitle)(msgLang),
+                        subject = rs.messagesApi("email.header")(msgLang) + " " + rs.messagesApi("email.answer.subject", prevSubject)(msgLang),
                         from = encodeEmailName(mod.get.username) + " @ " + config.getOptional[String]("email.from").getOrElse("adventskalender@ieee.uni-passau.de"),
                         to = List(recipient.email),
                         cc = List(config.getOptional[String]("email.from").getOrElse("adventskalender@ieee.uni-passau.de")),
@@ -131,14 +136,11 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                       Redirect(org.ieee_passau.controllers.routes.TicketController.index())
                         .flashing("success" -> rs.messages("ticket.answer.message"))
                     }
-                  case _ => Future.successful(Redirect(org.ieee_passau.controllers.routes.TicketController.index())
-                    .flashing("danger" -> rs.messages("ticket.answer.error")))
+                  case _ => errorResult
                 }
-              case _ => Future.successful(Redirect(org.ieee_passau.controllers.routes.TicketController.index())
-                .flashing("danger" -> rs.messages("ticket.answer.error")))
+              case _ => errorResult
             }
-          case _ => Future.successful(Redirect(org.ieee_passau.controllers.routes.TicketController.index())
-            .flashing("danger" -> rs.messages("ticket.answer.error")))
+          case _ => errorResult
         }
       }
     )

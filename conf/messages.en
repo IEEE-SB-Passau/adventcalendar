@@ -42,6 +42,7 @@ user.team=Members in the advent calendar team
 user.noncompeting=Users not actively competing
 
 ticket.title=Question
+ticket.about=about
 ticket.list.title=Questions
 ticket.list.show=Show question
 ticket.public=Public
@@ -373,7 +374,7 @@ click the following link to reset your password at the IEEE Advent Calendar:\n\
 \n\
 Have fun participating,\n\
 Your Advent Calendar Team
-email.answer.subject=Answer to question {0}
+email.answer.subject=Answer to {0}
 email.feedback.subject=Feedback
 email.feedback.body=Rating: {0} Stars\n\
 Positive: {1}\n\

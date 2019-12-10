@@ -224,8 +224,9 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
   }}
 
   def reEval(id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
-    db.run(Testruns.filter(_.solutionId === id).map(r => (r.result, r.stage, r.vm, r.progRuntime, r.progMemory, r.compRuntime, r.compMemory))
-      .update((Queued, Some(0), None, Some(0), Some(0), Some(0), Some(0)))
+    db.run(Testruns.filter(_.solutionId === id)
+      .map(tr => (tr.result, tr.stage, tr.vm, tr.progOut, tr.progErr, tr.progRuntime, tr.progMemory, tr.compOut, tr.compErr, tr.compRuntime, tr.compMemory))
+      .update(Queued, Some(0), None, None, None, None, None, None, None, None, None)
     ).map(_ =>
       Redirect(org.ieee_passau.controllers.routes.EvaluationController.index())
         .flashing("success" -> rs.messages("eval.jobs.reevaluate.message"))
@@ -249,12 +250,11 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
   }}
 
   def reEvalAll: Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
-    DbHelper.retry(for {
-      _ <- Testruns.map(tr => (tr.result, tr.stage, tr.vm, tr.progRuntime, tr.progMemory, tr.compRuntime, tr.compMemory))
-        .update(Queued, Some(0), None, Some(0), Some(0), Some(0), Some(0))
-    } yield ()).map(_ =>
-      Redirect(org.ieee_passau.controllers.routes.EvaluationController.index())
-        .flashing("success" -> rs.messages("eval.jobs.reevaluateall.message"))
+    DbHelper.retry(Testruns
+      .map(tr => (tr.result, tr.stage, tr.vm, tr.progOut, tr.progErr, tr.progRuntime, tr.progMemory, tr.compOut, tr.compErr, tr.compRuntime, tr.compMemory))
+      .update(Queued, Some(0), None, None, None, None, None, None, None, None, None)
+    ).map(_ => Redirect(org.ieee_passau.controllers.routes.EvaluationController.index())
+      .flashing("success" -> rs.messages("eval.jobs.reevaluateall.message"))
     )
   }}
 

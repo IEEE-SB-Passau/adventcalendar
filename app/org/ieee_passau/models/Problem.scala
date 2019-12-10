@@ -73,8 +73,8 @@ object Problems extends TableQuery(new Problems(_)) {
       solutions <- Solutions.filter(_.problemId === pid).map(_.id).result
       _ <- Solutions.filter(_.problemId === pid).map(sl => (sl.score, sl.result)).update(0, Queued)
       _ <- Testruns.filter(_.solutionId inSet solutions)
-        .map(tr => (tr.result, tr.stage, tr.vm, tr.progRuntime, tr.progMemory, tr.compRuntime, tr.compMemory))
-        .update(Queued, Some(0), None, Some(0), Some(0), Some(0), Some(0))
+        .map(tr => (tr.result, tr.stage, tr.vm, tr.progOut, tr.progErr, tr.progRuntime, tr.progMemory, tr.compOut, tr.compErr, tr.compRuntime, tr.compMemory))
+        .update(Queued, Some(0), None, None, None, None, None, None, None, None, None)
     } yield ()
   }
 }

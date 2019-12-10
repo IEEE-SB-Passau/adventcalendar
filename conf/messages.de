@@ -51,6 +51,7 @@ user.team=Mitglieder im Adventskalenderteam
 user.noncompeting=Ungewertete Benutzer
 
 ticket.title=Frage
+ticket.about=zu
 ticket.list.title=Fragenliste
 ticket.list.show=Fragen anzeigen
 ticket.public=Öffentlich
