@@ -38,35 +38,38 @@ function loadFileAsText(input, textarea) {
     if (fileToLoad !== undefined) {
         const fileReader = new FileReader();
         fileReader.onload = function (fileLoadedEvent) {
-            let text = fileLoadedEvent.target.result;
-            const domElement = new DOMParser().parseFromString(text, "text/html");
-            const baseUrl = jsRoutes.org.ieee_passau.controllers.CmsController.calendar().url;
-            let urlFixes = 0;
-            $("a", domElement).attr("href", (i, url) => {
-                if (shouldBePrefixed(url, baseUrl)) {
-                    console.log(`changing "${url}" to "${baseUrl + url}"`);
-                    urlFixes++;
-                    url = baseUrl + url;
-                }
-                return url;
-            });
-            $("img", domElement).attr("src", (i, url) => {
-                if (shouldBePrefixed(url, baseUrl)) {
-                    console.log(`changing "${url}" to "${baseUrl + url}"`);
-                    urlFixes++;
-                    url = baseUrl + url;
-                }
-                return url;
-            });
-            text = domElement.body.innerHTML;
+            const text = fileLoadedEvent.target.result;
+
             // special handling for wysiwyg editor
             if (textarea.classList.contains("wysiwyg")) {
-                $('.wysiwyg').summernote('code', text);
+
+                const domElement = new DOMParser().parseFromString(text, "text/html");
+                const baseUrl = jsRoutes.org.ieee_passau.controllers.CmsController.calendar().url;
+                let urlFixes = 0;
+                $("a", domElement).attr("href", (i, url) => {
+                    if (shouldBePrefixed(url, baseUrl)) {
+                        console.log(`changing "${url}" to "${baseUrl + url}"`);
+                        urlFixes++;
+                        url = baseUrl + url;
+                    }
+                    return url;
+                });
+                $("img", domElement).attr("src", (i, url) => {
+                    if (shouldBePrefixed(url, baseUrl)) {
+                        console.log(`changing "${url}" to "${baseUrl + url}"`);
+                        urlFixes++;
+                        url = baseUrl + url;
+                    }
+                    return url;
+                });
+
+                $('.wysiwyg').summernote('code', domElement.body.innerHTML);
+
+                if (urlFixes > 0) {
+                    alert(`${urlFixes} URLs were prefixed with "${baseUrl}", listed in the console.`);
+                }
             } else {
                 textarea.value = text;
-            }
-            if (urlFixes > 0) {
-                alert(`${urlFixes} URLs were prefixed with "${baseUrl}", listed in the console.`);
             }
         };
         fileReader.readAsText(fileToLoad, "UTF-8");
