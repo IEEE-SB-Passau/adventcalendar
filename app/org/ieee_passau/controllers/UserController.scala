@@ -225,7 +225,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
           Users.update(sessionUser.id, sessionUser.copy(password = pwh, activationToken = None))
 
           Redirect(org.ieee_passau.controllers.routes.CmsController.calendar())
-            .flashing("success" -> rs.messages("user.login.message"))
+            .flashing("success" -> rs.messages("user.login.message", sessionUser.username))
         }
       )
     }
