@@ -40,7 +40,7 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   def problems: Action[AnyContent] = requirePermission(Everyone) { implicit user => Action.async { implicit rs =>
     val lang = rs.lang
     val suid = if (user.isDefined) user.get.id.get else -1
-    (rankingActor ? ProblemsQ(suid, Some(lang))).mapTo[Seq[ProblemInfo]].flatMap { list =>
+    (rankingActor ? ProblemsQ(suid, lang)).mapTo[Seq[ProblemInfo]].flatMap { list =>
       (monitoringActor ? NotificationQ).mapTo[NotificationM].flatMap {
         case NotificationM(true) => Postings.byId(Page.notification.id, lang).map(_.content).map { notification =>
           Ok(org.ieee_passau.views.html.general.problemList(list, "notification" -> notification))

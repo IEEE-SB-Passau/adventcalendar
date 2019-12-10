@@ -240,7 +240,7 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
       },
       pid => {
         DbHelper.retry(Problems.reeval(pid)).flatMap( _ =>
-          ProblemTranslations.problemTitleListByLang(admin.get.lang).map(problems =>
+          ProblemTranslations.problemTitleListByLang(rs.lang).map(problems =>
             Redirect(org.ieee_passau.controllers.routes.EvaluationController.index())
               .flashing("success" -> rs.messages("eval.jobs.reevaluateproblem.message", problems(pid)))
           ))

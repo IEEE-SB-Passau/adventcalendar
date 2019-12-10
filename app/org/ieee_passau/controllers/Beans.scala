@@ -45,7 +45,7 @@ object Beans {
 
   case class RankingQ(userId: Int)
 
-  case class ProblemsQ(userId: Int, lang: Option[Lang] = None)
+  case class ProblemsQ(userId: Int, lang: Lang)
 
   case class StatsQ()
 

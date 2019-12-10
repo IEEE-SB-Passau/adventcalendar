@@ -32,7 +32,7 @@ class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                                  ) extends MasterController(dbConfigProvider, components, ec, config, env) {
 
   def index: Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
-    ProblemTranslations.problemTitleListByLang(admin.get.lang).flatMap { transList =>
+    ProblemTranslations.problemTitleListByLang(rs.lang).flatMap { transList =>
       db.run(Problems.sortBy(_.door.asc).to[List].result).map { problems =>
         Ok(org.ieee_passau.views.html.problem.index(problems, transList))
       }

@@ -269,14 +269,13 @@ class RankingActor @Inject()(val dbConfigProvider: DatabaseConfigProvider, val s
       buildCache(false)
       buildStats()
 
-    case ProblemsQ(uid, maybeLang) =>
+    case ProblemsQ(uid, lang) =>
       // do not convert to pipeTo, because exceptions propagate instead of resulting in timeouts
       val source = sender
       val now = new Date()
 
       db.run(Users.byId(uid).result.headOption).flatMap { sessionUser =>
 
-        val lang = sessionUser.map(_.lang).orElse(maybeLang).orElse(Some(LanguageHelper.defaultLanguage)).get
         val problemList = for {
           p <- Problems if p.readableStart < (now: Date) && p.readableStop > (now: Date)
         } yield (p.id, p.door, p.evalMode, p.points)
