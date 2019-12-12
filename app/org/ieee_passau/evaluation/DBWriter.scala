@@ -62,7 +62,7 @@ class DBWriter @Inject()(val dbConfigProvider: DatabaseConfigProvider, val syste
         )
       }
 
-      /**
+      /*
        * Gets the next stage.
        *
        * @param tr the relevant Testrun

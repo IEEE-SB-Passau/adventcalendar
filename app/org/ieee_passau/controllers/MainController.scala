@@ -78,30 +78,30 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
       case Some(problem) if !problem.solvable => Future.successful(Unauthorized(org.ieee_passau.views.html.errors.e403()))
       case Some(problem) =>
         val now = new Date()
-        val lastSolutions: Future[Option[Solution]] = Solutions.getLatestSolutionByUser(user.get.id.get)
-        val lastSolutionForProblem: Future[Option[Solution]] = Solutions.getLatestSolutionByUserAndProblem(user.get.id.get, problem.id.get)
-        val solutionId: Future[Int] = lastSolutionForProblem.map {
+        val lastSolutions = Solutions.getLatestSolutionByUser(user.get.id.get)
+        val lastSolutionForProblem = Solutions.getLatestSolutionByUserAndProblem(user.get.id.get, problem.id.get)
+        val solutionId = lastSolutionForProblem.map {
           case Some(solution) => solution.id.get
           case None => -1
         }
 
-        lastSolutions.flatMap {
+        db.run(lastSolutions).flatMap {
           // only one submission every minute per task
           case Some(lastSolution) if lastSolution.created.after(new Date(now.getTime - 60000)) && !user.get.permission.includes(Moderator) =>
             Future.successful(Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door)).flashing("danger" ->
               (rs.messages("submit.ratelimit.message") + " " + rs.messages("submit.ratelimit.timer"))))
           case _ =>
-            solutionId.flatMap { sid =>
-              db.run((for {
-                t <- Testruns if t.solutionId === sid && t.result === (Queued: org.ieee_passau.models.Result)
-              } yield t.created).sortBy(_.desc).result.headOption)
-            } flatMap {
+            db.run(for {
+              sid <- solutionId
+              t <- Testruns.filter(t => t.solutionId === sid && t.result === (Queued: org.ieee_passau.models.Result))
+                .map(_.created).sortBy(_.desc).result.headOption
+            } yield t).flatMap {
               // if the last submission for this task is not evaluated yet, a new submission is only allowed every 15 minutes
               case Some(testCaseDate) if testCaseDate.after(new Date(now.getTime - 900000)) && !user.get.permission.includes(Moderator) =>
                 Future.successful(Redirect(org.ieee_passau.controllers.routes.MainController.problemDetails(door)).flashing("danger" ->
                   (rs.messages("submit.ratelimit.message") + " " + rs.messages("submit.ratelimit.queue"))))
               case _ =>
-                Languages.byLang(rs.body.dataParts("lang").headOption.getOrElse("")).flatMap {
+                db.run(Languages.byLang(rs.body.dataParts("lang").headOption.getOrElse(""))).flatMap {
                   case Some(codelang) if codelang.active =>
                     val fixedFilename =
                       // if it's jvm then that matches at least every valid classname and therefore filename, and all others don't matter that much anyway
@@ -186,7 +186,7 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
     }}
 
   def codeEditor(door: Int, lang: String): Action[AnyContent] = Action.async { implicit rs =>
-    Languages.byLang(lang).map {
+    db.run(Languages.byLang(lang)).map {
       case Some(lng) => Ok(org.ieee_passau.views.html.solution.codeEditor(door, lng.extension))
       case _ => BadRequest("")
     }
@@ -204,22 +204,22 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
         if (!problem.readable) {
           Future.successful(Unauthorized(org.ieee_passau.views.html.errors.e404()))
         } else {
-          val langs = db.run(Languages.filter(_.active).sortBy(_.id).to[List].result)
+          val langs = Languages.filter(_.active).sortBy(_.id).to[List].result
           val uid = user.fold(-1)(u => u.id.get)
           val isMod = user.fold(false)(_.permission.includes(Moderator))
 
           // unanswered tickets
-          val tickets = db.run((for {
+          val tickets = (for {
             t: Tickets <- Tickets if t.problemId === problem.id && t.responseTo.?.isEmpty && (t.public === true || t.userId === uid || isMod)
             u: Users <- Users if u.id === t.userId
-          } yield (t, u.username)).result)
+          } yield (t, u.username)).result
 
           // answered tickets + answers
-          val answers = db.run((for {
+          val answers = (for {
             pt: Tickets <- Tickets if pt.problemId === problem.id && (pt.public === true || pt.userId === uid || isMod)
             t: Tickets <- Tickets if t.responseTo === pt.id
             u: Users <- Users if u.id === t.userId
-          } yield (t, u.username)).result)
+          } yield (t, u.username)).result
 
           val allTickets = tickets.zip(answers).map(tuple => tuple._1 ++ tuple._2)
 
@@ -247,25 +247,26 @@ class MainController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
           val notification = (monitoringActor ? NotificationQ).mapTo[NotificationM].flatMap {
             case NotificationM(true) =>
               for {
-                c <- for {p <- Postings.byId (Page.notification.id, displayLang)} yield p.content
+                c <- for {p <- Postings.byId(Page.notification.id, displayLang)} yield p.content
               } yield "notification" -> c
             case _ => Future.successful("" -> "")
           }
           val flash = status.zip(notification).map(tuple => Map(tuple._1, tuple._2))
 
-          transProblem.flatMap(tp =>
-            langs.flatMap(l =>
+          db.run(for {
+            l <- langs
+            t <- allTickets
+          } yield (l, t)).flatMap { case (l, t) =>
+            transProblem.flatMap(tp =>
               lastLang.flatMap(ll =>
                 solutionsQuery.flatMap(s =>
-                  allTickets.flatMap(t =>
-                    flash.map(f =>
-                      Ok(org.ieee_passau.views.html.general.problemDetails(tp, l, ll, s.toList, t.toList, FormHelper.ticketForm, f))
-                    )
+                  flash.map(f =>
+                    Ok(org.ieee_passau.views.html.general.problemDetails(tp, l, ll, s.toList, t.toList, FormHelper.ticketForm, f))
                   )
                 )
               )
             )
-          )
+          }
         }
     }
   }}

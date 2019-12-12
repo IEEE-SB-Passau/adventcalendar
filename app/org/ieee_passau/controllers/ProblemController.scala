@@ -7,15 +7,15 @@ import com.google.inject.Inject
 import com.google.inject.name.Named
 import org.ieee_passau.controllers.Beans.UpdateRankingM
 import org.ieee_passau.models.{EvalMode, Problem, ProblemTranslation, Problems, _}
-import org.ieee_passau.utils.{AkkaHelper, FutureHelper, LanguageHelper}
 import org.ieee_passau.utils.LanguageHelper.LangTypeMapper
-import play.api.{Configuration, Environment}
+import org.ieee_passau.utils.{AkkaHelper, FutureHelper, LanguageHelper}
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.format.Formats._
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.i18n.Lang
 import play.api.mvc._
+import play.api.{Configuration, Environment}
 import slick.ast.BaseTypedType
 import slick.jdbc.JdbcType
 import slick.jdbc.PostgresProfile.api._
@@ -31,6 +31,19 @@ class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
                                   @Named(AkkaHelper.rankingActor) val rankingActor: ActorRef
                                  ) extends MasterController(dbConfigProvider, components, ec, config, env) {
 
+  private def problemInfo(id: Int) = {
+    val testCaseQuery = Testcases.filter(_.problemId === id).sortBy(_.position.asc).to[List].result
+    val evalTaskQuery = EvalTasks.filter(_.problemId === id).sortBy(_.position.asc).to[List].result
+    val problemTranslationQuery = ProblemTranslations.filter(_.problemId === id).sortBy(_.lang.asc).to[List].result
+    val evalModesQuery = EvalModes.to[List].result
+    db.run(for {
+      testCases <- testCaseQuery
+      evalTasks <- evalTaskQuery
+      problemTranslations <- problemTranslationQuery
+      evalModes <- evalModesQuery
+    } yield (testCases, evalTasks, problemTranslations, evalModes))
+  }
+
   def index: Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
     ProblemTranslations.problemTitleListByLang(rs.lang).flatMap { transList =>
       db.run(Problems.sortBy(_.door.asc).to[List].result).map { problems =>
@@ -44,21 +57,11 @@ class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
     db.run(Problems.byId(id).result.headOption).flatMap {
       case Some(problem) =>
-        val testCaseQuery = db.run(Testcases.filter(_.problemId === id).sortBy(_.position.asc).to[List].result)
-        val evalTaskQuery = db.run(EvalTasks.filter(_.problemId === id).sortBy(_.position.asc).to[List].result)
-        val problemTranslationQuery = db.run(ProblemTranslations.filter(_.problemId === id).sortBy(_.lang.asc).to[List].result)
-        val evalModesQuery = db.run(EvalModes.to[List].result)
-
-        testCaseQuery.flatMap(testCases =>
-          evalTaskQuery.flatMap(evalTasks =>
-            problemTranslationQuery.flatMap(problemTranslations =>
-              evalModesQuery.map(evalModes =>
-                Ok(org.ieee_passau.views.html.problem.edit(id, testCases, evalTasks,
-                  problemTranslations, problemForm.fill(problem), evalModes))
-              )
-            )
-          )
-        )
+        problemInfo(id).map {
+          case (testCases, evalTasks, problemTranslations, evalModes) =>
+            Ok(org.ieee_passau.views.html.problem.edit(id, testCases, evalTasks,
+              problemTranslations, problemForm.fill(problem), evalModes))
+        }
       case _ => Future.successful(NotFound(org.ieee_passau.views.html.errors.e404()))
     }
   }}
@@ -97,28 +100,17 @@ class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   def update(id: Int): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
     problemForm.bindFromRequest.fold(
       errorForm => {
-        val testCaseQuery = db.run(Testcases.filter(_.problemId === id).sortBy(_.position.asc).to[List].result)
-        val evalTaskQuery = db.run(EvalTasks.filter(_.problemId === id).sortBy(_.position.asc).to[List].result)
-        val problemTranslationQuery = db.run(ProblemTranslations.filter(_.problemId === id).sortBy(_.lang.asc).to[List].result)
-        val evalModesQuery = db.run(EvalModes.to[List].result)
-
-        testCaseQuery.flatMap(testCases =>
-          evalTaskQuery.flatMap(evalTasks =>
-            problemTranslationQuery.flatMap(problemTranslations =>
-              evalModesQuery.map(evalModes =>
-                Ok(org.ieee_passau.views.html.problem.edit(id, testCases, evalTasks,
-                  problemTranslations, errorForm, evalModes))
-              )
-            )
-          )
-        )
+        problemInfo(id).map {
+          case (testCases, evalTasks, problemTranslations, evalModes) =>
+            Ok(org.ieee_passau.views.html.problem.edit(id, testCases, evalTasks, problemTranslations, errorForm, evalModes))
+        }
       },
 
       problem => {
-        Problems.update(id, problem).map(_ =>
+        db.run(Problems.update(id, problem).map(_ =>
           Redirect(org.ieee_passau.controllers.routes.ProblemController.edit(id))
             .flashing("success" -> rs.messages("problem.update.message", problem.title))
-        )
+        ))
       }
     )
   }}
@@ -134,7 +126,7 @@ class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
       },
 
       newTrans => {
-        ProblemTranslations.byProblemLang(problemId, newTrans.language).flatMap {
+        db.run(ProblemTranslations.byProblemLang(problemId, newTrans.language)).flatMap {
           case Some(_) =>
             Future.successful(BadRequest(org.ieee_passau.views.html.problemTranslation.insert(problemId,
               problemTranslationForm.fill(newTrans).withError("duplicate_translation", rs.messages("problem.translation.create.error.exists")))))
@@ -150,7 +142,7 @@ class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
   def editTranslation(problemId: Int, lang: String): Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
     try {
-      ProblemTranslations.byProblemLang(problemId, Lang(lang)).map {
+      db.run(ProblemTranslations.byProblemLang(problemId, Lang(lang))).map {
         case Some(trans) =>
           Ok(org.ieee_passau.views.html.problemTranslation.edit(problemId, problemTranslationForm.fill(trans)))
         case _ =>
@@ -169,7 +161,7 @@ class ProblemController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
       },
 
       trans => {
-        ProblemTranslations.update(lang, trans).map(_ =>
+        db.run(ProblemTranslations.update(lang, trans)).map(_ =>
           Redirect(org.ieee_passau.controllers.routes.ProblemController.editTranslation(problemId, lang))
             .flashing("success" -> rs.messages("problem.translation.update.message", trans.title, trans.language.code))
         )

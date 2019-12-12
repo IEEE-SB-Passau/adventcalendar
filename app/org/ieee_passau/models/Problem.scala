@@ -8,6 +8,7 @@ import play.api.i18n.Lang
 import slick.dbio.Effect
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{CompiledFunction, ForeignKeyQuery, ProvenShape, TableQuery}
+import slick.sql.{FixedSqlAction, SqlAction}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -58,10 +59,11 @@ object Problems extends TableQuery(new Problems(_)) {
   def byId: CompiledFunction[Rep[Int] => Query[Problems, Problem, Seq], Rep[Int], Int, Query[Problems, Problem, Seq], Seq[Problem]] =
     this.findBy(_.id)
 
-  def update(id: Int, problem: Problem)(implicit db: Database, ec: ExecutionContext): Future[Int] =
-    db.run(Testcases.filter(_.problemId === id).map(_.points).sum.result.flatMap(
-      points => Problems.filter(_.id === id).update(problem.withId(id).copy(points = points.getOrElse(0)))
-    ))
+  def update(id: Int, problem: Problem)(implicit ec: ExecutionContext): DBIOAction[Option[Int], NoStream, Effect.Read with Effect.Write] =
+    for {
+      points <- Testcases.filter(_.problemId === id).map(_.points).sum.result
+      _ <- Problems.filter(_.id === id).update(problem.withId(id).copy(points = points.getOrElse(0)))
+    } yield points
 
   def doorAvailable(door: Int, id: Int)(implicit db: Database, ec: ExecutionContext): Future[Boolean] =
     db.run(Problems.filter(_.door === door).result).map(result => !result.exists(problem => problem.id.get != id))
@@ -105,8 +107,8 @@ object ProblemTranslations extends TableQuery(new ProblemTranslations(_)){
     }.flatMap { pt => Future.successful(pt.headOption) }
   }
 
-  def byProblemLang(problemId: Int, lang: Lang)(implicit db: Database, ec: ExecutionContext): Future[Option[ProblemTranslation]] =
-    db.run(this.filter(t => t.problemId === problemId && t.lang === lang).result.headOption)
+  def byProblemLang(problemId: Int, lang: Lang)(implicit ec: ExecutionContext): SqlAction[Option[ProblemTranslation], NoStream, Effect.Read] =
+    this.filter(t => t.problemId === problemId && t.lang === lang).result.headOption
 
   def problemTitleListByLang(preferredLang: Lang)(implicit db: Database, ec: ExecutionContext): Future[Map[Int, String]] = {
     db.run((for {
@@ -119,6 +121,6 @@ object ProblemTranslations extends TableQuery(new ProblemTranslations(_)){
     }
   }
 
-  def update(lang: String, problemTranslation: ProblemTranslation)(implicit db: Database): Future[Int] =
-    db.run(this.filter(t => t.problemId === problemTranslation.problemId && t.lang === Lang(lang)).update(problemTranslation))
+  def update(lang: String, problemTranslation: ProblemTranslation): FixedSqlAction[Int, NoStream, Effect.Write] =
+    this.filter(t => t.problemId === problemTranslation.problemId && t.lang === Lang(lang)).update(problemTranslation)
 }

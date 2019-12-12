@@ -152,47 +152,47 @@ class RankingActor @Inject()(val dbConfigProvider: DatabaseConfigProvider, val s
 
     bestUserProblemSubmission(includeHidden).foreach { _ =>
       val problemXuserXbest = transpose(ranking(includeHidden))
-      simplify(problemList).foreach { modeL =>
-        db.run(correctSubmissions.result).foreach { correctC =>
-          db.run(allSubmissions.result).foreach { allS =>
-            val modeList = modeL.view
-            val correctCount = correctC.view.groupBy(_._1).map { case (p, ul) => p -> ul.groupBy(_._3).map { case (u, l) => u -> l.length } }
-            val userXproblemXsolved = transpose(correctCount)
-            val submissionCounts = allS.view.groupBy(_._1 /*problem*/).map { case (p, l) =>
-              p -> (correctCount.get(p).fold(0)(_.keySet.size), l.groupBy(_._3 /*user*/).keySet.size, l.length)
-            }
-            // This would be the number of tries for a problem for each user
-            // val userXproblemXcount = allS.groupBy(_._3).map { case (u, pl) => u -> pl.groupBy(_._1).map { case (p, sl) => p -> sl.length } }
-            val dynamicChallengeFactor = modeList.filter(_._2._1 == Dynamic).map { case (p, (_, points)) =>
-              p -> (calculateChallengeFactor(points) _).tupled(submissionCounts.getOrElse(p, (0, 0, 0)))
-            }.toMap
-            val bestChallengeFactor = modeList.filter(_._2._1 == Best).map { case (p, _) =>
-              p -> calculateChallengeRank(problemXuserXbest(p).values.map(_.fold(0)(_._1)).toList)
-            }.toMap
+      simplify(problemList).foreach { modeL => db.run(for {
+        correctC <- correctSubmissions.result
+        allS <- allSubmissions.result
+      } yield (correctC, allS)) map { case (correctC, allS) =>
 
-            problemCounts(includeHidden) = submissionCounts.withDefaultValue((0, 0, 0))
+        val modeList = modeL.view
+        val correctCount = correctC.view.groupBy(_._1).map { case (p, ul) => p -> ul.groupBy(_._3).map { case (u, l) => u -> l.length } }
+        val userXproblemXsolved = transpose(correctCount)
+        val submissionCounts = allS.view.groupBy(_._1 /*problem*/).map { case (p, l) =>
+          p -> (correctCount.get(p).fold(0)(_.keySet.size), l.groupBy(_._3 /*user*/).keySet.size, l.length)
+        }
+        // This would be the number of tries for a problem for each user
+        // val userXproblemXcount = allS.groupBy(_._3).map { case (u, pl) => u -> pl.groupBy(_._1).map { case (p, sl) => p -> sl.length } }
+        val dynamicChallengeFactor = modeList.filter(_._2._1 == Dynamic).map { case (p, (_, points)) =>
+          p -> (calculateChallengeFactor(points) _).tupled(submissionCounts.getOrElse(p, (0, 0, 0)))
+        }.toMap
+        val bestChallengeFactor = modeList.filter(_._2._1 == Best).map { case (p, _) =>
+          p -> calculateChallengeRank(problemXuserXbest(p).values.map(_.fold(0)(_._1)).toList)
+        }.toMap
 
-            ranking(includeHidden) = ranking(includeHidden).map { case (u, pl) =>
-              u -> pl.map { case (p, (score, _, _, mode)) =>
-                p -> (score, mode match {
-                  case Static => score
-                  case Dynamic => dynamicChallengeFactor(p) * score
-                  case Best => bestChallengeFactor(p)(score)
-                  case NoEval | _ => 0
-                }, userXproblemXsolved(u)(p).fold(false)(_ > 0), mode)
-              }.withDefaultValue((0, 0d, false, NoEval))
-            }.withDefaultValue(Map().withDefaultValue((0, 0d, false, NoEval)))
+        problemCounts(includeHidden) = submissionCounts.withDefaultValue((0, 0, 0))
 
-            // use userXproblemXcount here
-            userCorrectSolutions = ranking(true).map { case (u, pl) =>
-              u -> pl.count {
-                case (_, (_, _, true, mode)) if mode != NoEval => true
-                case _ => false
-              }
-            }
+        ranking(includeHidden) = ranking(includeHidden).map { case (u, pl) =>
+          u -> pl.map { case (p, (score, _, _, mode)) =>
+            p -> (score, mode match {
+              case Static => score
+              case Dynamic => dynamicChallengeFactor(p) * score
+              case Best => bestChallengeFactor(p)(score)
+              case NoEval | _ => 0
+            }, userXproblemXsolved(u)(p).fold(false)(_ > 0), mode)
+          }.withDefaultValue((0, 0d, false, NoEval))
+        }.withDefaultValue(Map().withDefaultValue((0, 0d, false, NoEval)))
+
+        // use userXproblemXcount here
+        userCorrectSolutions = ranking(true).map { case (u, pl) =>
+          u -> pl.count {
+            case (_, (_, _, true, mode)) if mode != NoEval => true
+            case _ => false
           }
         }
-      }
+      }}
     }
   }
 
@@ -218,9 +218,8 @@ class RankingActor @Inject()(val dbConfigProvider: DatabaseConfigProvider, val s
         val jobs = rawJobs.view.flatMap {
           case job if job._1.getOrElse("").contains(" ") =>
             job._1.get.split(" ").zipWithIndex.map {
-              case (vmName, idx) =>
-                if (idx == 0) (vmName, job._2, job._3, job._4)
-                else (vmName, job._2, "BINARY", job._4)
+              case (vmName, idx) if idx == 0 => (vmName, job._2, job._3, job._4)
+              case (vmName, _)               => (vmName, job._2, "BINARY", job._4)
             }.toList
           case job => List((job._1.get, job._2, job._3, job._4))
         }
@@ -252,8 +251,8 @@ class RankingActor @Inject()(val dbConfigProvider: DatabaseConfigProvider, val s
           ("user.inactive", inactive),
           ("user.team", team),
           ("user.noncompeting", hidden))
-        val schools = rawSchools.view.map { case (name, count) =>
-          (name.toLowerCase.split(Array(' ', '-')).map(_.capitalize).mkString(" "), count)
+        val schools = rawSchools.view.map {
+          case (name, count) =>  (name.toLowerCase.split(Array(' ', '-')).map(_.capitalize).mkString(" "), count)
         }.groupBy(_._1).map {
           case (name, cs) => (name, cs.map(_._2).sum)
         }.toList.sorted
@@ -278,31 +277,34 @@ class RankingActor @Inject()(val dbConfigProvider: DatabaseConfigProvider, val s
       val source = sender
       val now = new Date()
 
-      db.run(Users.byId(uid).result.headOption).flatMap { sessionUser =>
+      val problemList = for {
+        p <- Problems if p.readableStart < (now: Date) && p.readableStop > (now: Date)
+      } yield (p.id, p.door, p.evalMode, p.points)
 
-        val problemList = for {
-          p <- Problems if p.readableStart < (now: Date) && p.readableStop > (now: Date)
-        } yield (p.id, p.door, p.evalMode, p.points)
+      db.run(for {
+        sessionUser <- Users.byId(uid).result.headOption
+        list <- problemList.result
+      } yield (sessionUser, list)).flatMap { case (sessionUser, list) =>
 
-        ProblemTranslations.problemTitleListByLang(lang).flatMap { transList =>
-          db.run(problemList.result).map { list =>
-            source ! list.map {
-              case (id, door, mode, points) =>
-                val submissionCounts = problemCounts(sessionUser.fold(false)(_.hidden))(id)
-                ProblemInfo(id,
-                  door,
-                  transList.getOrElse(id, ""),
-                  (calculateMaxProblemPoints(mode, points) _).tupled(submissionCounts).floor.toInt,
-                  sessionUser.map(u => ranking(u.hidden)(u.id.get)(id)._2.floor.toInt).getOrElse(0),
-                  mode,
-                  // Variant with user tires
-                  //sessionUser.map(u => userXsubmissions(u.id.get)._2(id)).getOrElse(0),
-                  submissionCounts._3,
-                  submissionCounts._1,
-                  sessionUser.fold(false)(u => ranking(u.hidden)(u.id.get)(id)._3)
-                )
-            }.sortBy(_.door)
-          }
+        ProblemTranslations.problemTitleListByLang(lang).map { transList =>
+          val response = list.map {
+            case (id, door, mode, points) =>
+              val submissionCounts = problemCounts(sessionUser.fold(false)(_.hidden))(id)
+              ProblemInfo(id,
+                door,
+                transList.getOrElse(id, ""),
+                (calculateMaxProblemPoints(mode, points) _).tupled(submissionCounts).floor.toInt,
+                sessionUser.map(u => ranking(u.hidden)(u.id.get)(id)._2.floor.toInt).getOrElse(0),
+                mode,
+                // Variant with user tires
+                //sessionUser.map(u => userXsubmissions(u.id.get)._2(id)).getOrElse(0),
+                submissionCounts._3,
+                submissionCounts._1,
+                sessionUser.fold(false)(u => ranking(u.hidden)(u.id.get)(id)._3)
+              )
+          }.sortBy(_.door)
+
+          source ! response
         }
       }
 

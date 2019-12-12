@@ -6,7 +6,7 @@ import org.ieee_passau.models.DateSupport.dateMapper
 import slick.dbio.Effect
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{ForeignKeyQuery, ProvenShape}
-import slick.sql.FixedSqlAction
+import slick.sql.{FixedSqlAction, SqlAction}
 
 import scala.concurrent.Future
 
@@ -33,11 +33,11 @@ class Solutions(tag: Tag) extends TableWithId[Solution](tag, "solutions") {
 }
 
 object Solutions extends TableQuery(new Solutions(_)) {
-  def getLatestSolutionByUser(userId: Int)(implicit db: Database): Future[Option[Solution]] = {
-    db.run(Solutions.filter(_.userId === userId).sortBy(_.created.desc).result.headOption)
+  def getLatestSolutionByUser(userId: Int)(implicit db: Database): SqlAction[Option[Solution], NoStream, Effect.Read] = {
+    Solutions.filter(_.userId === userId).sortBy(_.created.desc).result.headOption
   }
-  def getLatestSolutionByUserAndProblem(userId: Int, problemId: Int)(implicit db: Database): Future[Option[Solution]] = {
-    db.run(Solutions.filter(_.userId === userId).filter(_.problemId === problemId).sortBy(_.created.desc).result.headOption)
+  def getLatestSolutionByUserAndProblem(userId: Int, problemId: Int): SqlAction[Option[Solution], NoStream, Effect.Read] = {
+    Solutions.filter(_.userId === userId).filter(_.problemId === problemId).sortBy(_.created.desc).result.headOption
   }
 
   def update(id: Int, solution: Solution): FixedSqlAction[Int, NoStream, Effect.Write] =

@@ -7,8 +7,10 @@ import org.ieee_passau.models.DateSupport.dateMapper
 import org.ieee_passau.utils.LanguageHelper
 import org.ieee_passau.utils.LanguageHelper.LangTypeMapper
 import play.api.i18n.Lang
+import slick.dbio.Effect
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{ProvenShape, TableQuery}
+import slick.sql.FixedSqlAction
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -62,6 +64,6 @@ object Postings extends TableQuery(new Postings(_)) {
     this.filter(p => p.id === id && p.lang === lang)
   }
 
-  def update(id: Int, lang: String, post: Posting)(implicit db: Database): Future[Int] =
-    db.run(this.filter(p => p.id === id && p.lang === Lang(lang)).update(post.withId(id)))
+  def update(id: Int, lang: String, post: Posting): FixedSqlAction[Int, NoStream, Effect.Write] =
+    this.filter(p => p.id === id && p.lang === Lang(lang)).update(post.withId(id))
 }

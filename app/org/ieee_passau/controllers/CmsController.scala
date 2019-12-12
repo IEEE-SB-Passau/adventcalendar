@@ -105,9 +105,9 @@ class CmsController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
           Future.successful(BadRequest(org.ieee_passau.views.html.monitoring.pageEditor(id, lang, errorForm)))
       },
       posting => {
-        Postings.update(id, lang, posting.copy(title=Page.byId(id).toString)).map(_ =>
-        Redirect(org.ieee_passau.controllers.routes.CmsController.editPage(id, lang))
-          .flashing("success" ->  rs.messages("posting.update.message"))
+        db.run(Postings.update(id, lang, posting.copy(title = Page.byId(id).toString))).map(_ =>
+          Redirect(org.ieee_passau.controllers.routes.CmsController.editPage(id, lang))
+            .flashing("success" -> rs.messages("posting.update.message"))
         )
       }
     )

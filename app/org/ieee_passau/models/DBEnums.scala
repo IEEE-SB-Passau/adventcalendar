@@ -6,6 +6,7 @@ import slick.dbio.Effect
 import slick.jdbc.JdbcType
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.ProvenShape
+import slick.sql.SqlAction
 
 import scala.concurrent.{Await, Future}
 
@@ -47,7 +48,7 @@ class Languages(tag: Tag) extends Table[Language](tag, "e_prog_lang") {
   def * : ProvenShape[Language] = (id, name, highlightClass, extension, cpuFactor, memFactor, comment, active) <> (Language.tupled, Language.unapply)
 }
 object Languages extends TableQuery(new Languages(_)) {
-  def byLang(lang: String)(implicit db: Database): Future[Option[Language]] = db.run(this.filter(_.id === lang).result.headOption)
+  def byLang(lang: String): SqlAction[Option[Language], NoStream, Effect.Read] = this.filter(_.id === lang).result.headOption
 
   def update(id: String, lang: Language): DBIOAction[Int, NoStream, Effect.Write] =
     this.filter(_.id === id).update(lang)

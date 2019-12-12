@@ -3,8 +3,10 @@ package org.ieee_passau.models
 import org.ieee_passau.utils.LanguageHelper.LangTypeMapper
 import org.ieee_passau.utils.{FutureHelper, LanguageHelper, PasswordHasher}
 import play.api.i18n.Lang
+import slick.dbio.Effect
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{CompiledFunction, ProvenShape}
+import slick.sql.FixedSqlAction
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.language.postfixOps
@@ -51,8 +53,8 @@ object Users extends TableQuery(new Users(_)) {
   def byToken: CompiledFunction[Rep[String] => Query[Users, User, Seq], Rep[String], String, Query[Users, User, Seq], Seq[User]] =
     this.findBy(_.activationToken)
 
-  def update(id: Option[Int], user: User)(implicit db: Database): Future[Int] =
-    db.run(this.byId(id.get).update(user.withId(id.get)))
+  def update(id: Option[Int], user: User): FixedSqlAction[Int, NoStream, Effect.Write] =
+    this.byId(id.get).update(user.withId(id.get))
 
   def usernameAvailable(username: String)(implicit db: Database): Boolean =
     Await.result(db.run(Query(Users.filter(_.username === username).length).result), FutureHelper.dbTimeout).head == 0

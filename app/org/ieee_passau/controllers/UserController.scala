@@ -150,7 +150,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   def activate(token: String): Action[AnyContent] = requirePermission(Guest) { _ => Action.async { implicit rs =>
     db.run(Users.byToken(token).result.headOption).map {
       case Some(user) =>
-        Users.update(user.id, user.copy(active = true, activationToken = None))
+        db.run(Users.update(user.id, user.copy(active = true, activationToken = None)))
         Redirect(org.ieee_passau.controllers.routes.CmsController.calendar())
           .flashing("success" -> rs.messages("user.register.message", user.username))
           .addingToSession("user" -> user.id.get.toString)
@@ -183,7 +183,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
               bodyText = Some(rs.messages("email.passwordreset.body", user.username, link))
             )
             mailerClient.send(regMail)
-            Users.update(user.id, user.copy(activationToken = Some(token)))
+            db.run(Users.update(user.id, user.copy(activationToken = Some(token))))
 
             Redirect(org.ieee_passau.controllers.routes.UserController.login())
               .flashing("success" -> rs.messages("user.register.verify.message"))
@@ -198,7 +198,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
       implicit val sessionUser: Option[User] = maybeUser
       maybeUser match {
         case Some(user) =>
-          Users.update(user.id, user.copy(active = true))
+          db.run(Users.update(user.id, user.copy(active = true)))
           Ok(org.ieee_passau.views.html.user.resetPassword(token, passwordForm.fill("")))
             .addingToSession("user" -> user.id.get.toString)
 
@@ -222,7 +222,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
 
         password => {
           val pwh = PasswordHasher.hashPassword(password)
-          Users.update(sessionUser.id, sessionUser.copy(password = pwh, activationToken = None))
+          db.run(Users.update(sessionUser.id, sessionUser.copy(password = pwh, activationToken = None)))
 
           Redirect(org.ieee_passau.controllers.routes.CmsController.calendar())
             .flashing("success" -> rs.messages("user.login.message", sessionUser.username))
@@ -238,7 +238,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
         .flashing("danger" -> rs.messages("language.unsupported"))
     } else {
       if (user.nonEmpty) {
-        Users.update(user.get.id, user.get.copy(lang = maybeLang.get))
+        db.run(Users.update(user.get.id, user.get.copy(lang = maybeLang.get)))
       }
 
       val refererUrl = rs.headers.get("referer")
@@ -263,7 +263,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
         db.run(Users.byId(id).result.headOption).map {
           case Some(dbUser) =>
             val password = if (user.password.isEmpty) dbUser.password else PasswordHasher.hashPassword(user.password)
-            Users.update(dbUser.id, user.copy(password = password, activationToken = dbUser.activationToken, lang = dbUser.lang))
+            db.run(Users.update(dbUser.id, user.copy(password = password, activationToken = dbUser.activationToken, lang = dbUser.lang)))
             Redirect(org.ieee_passau.controllers.routes.UserController.edit(id))
               .flashing("success" -> rs.messages("user.update.message", user.username))
           case _ => NotFound(org.ieee_passau.views.html.errors.e404())
@@ -273,7 +273,7 @@ class UserController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   }}
 
   def dismissNotification: Action[AnyContent] = requirePermission(Contestant) { implicit user => Action.async { implicit rs =>
-    Users.update(user.get.id, user.get.copy(notificationDismissed = true)).map(_ => Ok(""))
+    db.run(Users.update(user.get.id, user.get.copy(notificationDismissed = true)).map(_ => Ok("")))
   }}
 
   // hack, that allows us to programmatically set the maxAge for the session-cookie (playframework doesn't have that functionality)

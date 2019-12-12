@@ -75,14 +75,15 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
     }).drop((page - 1) * pageSize).take(pageSize).result
 
     ProblemTranslations.problemTitleListByLang(rs.lang).flatMap { problemTitles =>
-      db.run(solutionsQuery).flatMap { rawSolutions: Seq[((Int, String, String, Int, Int, Date, models.Result), Int, Int)] =>
-        db.run(Solutions.length.result).map { numSolutions =>
-          val solutions = sortList(ordering, rawSolutions.map {
-            case ((sid, pLang, user, pid, door, created, result), allTestcases, solvedTestcases) =>
-              SubmissionListEntry(sid, pLang, user, door, problemTitles.getOrElse(pid, ""), created, solvedTestcases, allTestcases, result)
-          }.toList)
-          Ok(org.ieee_passau.views.html.solution.index(problemTitles.toList.sorted, solutions, (numSolutions / pageSize) + 1, page, ordering))
-        }
+      db.run(for {
+        rawSolutions <- solutionsQuery
+        numSolutions <- Solutions.length.result
+      } yield (rawSolutions, numSolutions)).map { case (rawSolutions: Seq[((Int, String, String, Int, Int, Date, models.Result), Int, Int)], numSolutions: Int) =>
+        val solutions = sortList(ordering, rawSolutions.map {
+          case ((sid, pLang, user, pid, door, created, result), allTestcases, solvedTestcases) =>
+            SubmissionListEntry(sid, pLang, user, door, problemTitles.getOrElse(pid, ""), created, solvedTestcases, allTestcases, result)
+        }.toList)
+        Ok(org.ieee_passau.views.html.solution.index(problemTitles.toList.sorted, solutions, (numSolutions / pageSize) + 1, page, ordering))
       }
     }
   }}

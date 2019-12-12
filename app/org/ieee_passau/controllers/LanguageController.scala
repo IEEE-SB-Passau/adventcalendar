@@ -33,7 +33,7 @@ class LanguageController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   }}
 
   def edit(language: String): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
-    Languages.byLang(language).map {
+    db.run(Languages.byLang(language)).map {
       case Some(lang) => Ok(org.ieee_passau.views.html.language.edit(lang.id, languageUpdateForm.fill(lang)))
       case _ => NotFound(org.ieee_passau.views.html.errors.e404())
     }
@@ -59,7 +59,7 @@ class LanguageController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
   }}
 
   def update(language: String): Action[AnyContent] = requirePermission(Admin) { implicit admin => Action.async { implicit rs =>
-    Languages.byLang(language).flatMap {
+    db.run(Languages.byLang(language)).flatMap {
       case Some(lang) => languageUpdateForm.bindFromRequest.fold(
         errorForm => {
           Future.successful(BadRequest(org.ieee_passau.views.html.language.edit(lang.id, errorForm)))

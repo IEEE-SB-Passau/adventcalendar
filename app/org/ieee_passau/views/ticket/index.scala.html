@@ -1,10 +1,10 @@
 @import helper._
-@import org.ieee_passau.models.{Problem, Ticket, User}
+@import org.ieee_passau.models.{Ticket, User}
 @import org.ieee_passau.utils.ViewHelper._
 @import org.ieee_passau.views.html.main
 @import play.api.mvc.{Flash, RequestHeader}
 @import scala.language.implicitConversions
-@(tickets: List[(Ticket, User, Problem, Boolean)])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
+@(tickets: List[(Ticket, String, Int, String, Boolean)])(implicit flash: Flash, sessionUser: Option[User], requestHeader: RequestHeader, messages: Messages)
 
 @main(messages("ticket.list.title")) {
     <table class="table table-striped">
@@ -19,11 +19,11 @@
             </tr>
         </thead>
         <tbody>
-        @tickets.map { case (t: Ticket, u: User, p: Problem, answered: Boolean) =>
+        @tickets.map { case (t: Ticket, username: String, door: Int, title: String, answered: Boolean) =>
             <tr class="@if(answered) {success}">
                 <td>@t.id</td>
-                <td>@p.door @p.title</td>
-                <td>@u.username</td>
+                <td>@door @title</td>
+                <td>@username</td>
                 <td>@t.created.format("yyyy-MM-dd HH:mm")</td>
                 <td>@showCheckmark(t.public)</td>
                 <td>

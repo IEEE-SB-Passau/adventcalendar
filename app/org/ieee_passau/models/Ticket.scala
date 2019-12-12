@@ -5,8 +5,10 @@ import java.util.Date
 import org.ieee_passau.utils.LanguageHelper
 import org.ieee_passau.utils.LanguageHelper.LangTypeMapper
 import play.api.i18n.Lang
+import slick.dbio.Effect
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{CompiledFunction, ProvenShape}
+import slick.sql.FixedSqlAction
 
 import scala.concurrent.Future
 
@@ -31,6 +33,6 @@ object Tickets extends TableQuery(new Tickets(_)) {
   def byId: CompiledFunction[Rep[Int] => Query[Tickets, Ticket, Seq], Rep[Int], Int, Query[Tickets, Ticket, Seq], Seq[Ticket]] =
     this.findBy(_.id)
 
-  def update(id: Int, ticket: Ticket)(implicit db: Database): Future[Int] =
-    db.run(this.byId(id).update(ticket.withId(id)))
+  def update(id: Int, ticket: Ticket)(implicit db: Database): FixedSqlAction[Int, NoStream, Effect.Write] =
+    this.byId(id).update(ticket.withId(id))
 }

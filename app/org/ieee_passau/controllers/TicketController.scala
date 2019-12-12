@@ -35,30 +35,33 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
       t <- Tickets if t.responseTo.?.isEmpty
       u <- Users if u.id === t.userId
       p <- Problems if p.id === t.problemId
-    } yield (t, u, p)).sortBy(_._1.created.desc)
-    // TODO join in one query?
-    db.run(responsesQuery.result).zip(db.run(listQuery.to[List].result)).map { tuple =>
-      Ok(org.ieee_passau.views.html.ticket.index(tuple._2.map(q => (q._1, q._2, q._3, tuple._1.contains(q._1.id)))))
+    } yield (t, u.username, p.door, "")).sortBy(_._1.created.desc)
+
+    db.run(for {
+      tickets <- listQuery.to[List].result
+      responses <- responsesQuery.result
+    } yield (tickets, responses)).map { case (tickets, responses) =>
+      val ticketList = tickets.map(t => (t._1, t._2, t._3, t._4, responses.contains(t._1.id)))
+      Ok(org.ieee_passau.views.html.ticket.index(ticketList))
     }
   }}
 
   def view(id: Int): Action[AnyContent] = requirePermission(Moderator) { implicit admin => Action.async { implicit rs =>
     db.run(Tickets.byId(id).result.headOption).flatMap {
       case Some(ticket) =>
-        db.run(Users.byId(ticket.userId.get).result.headOption).flatMap {
-          case Some(user) => db.run(Problems.byId(ticket.problemId.getOrElse(-1)).result.headOption).flatMap {
-            case Some(problem) =>
-              val answersQuery = for {
-                t <- Tickets if t.responseTo === ticket.id
-                u <- Users if u.id === t.userId
-              } yield (t, u.username)
-              db.run(answersQuery.to[List].result).map { answers =>
-                Ok(org.ieee_passau.views.html.ticket.view((ticket, user, problem), answers,
-                  FormHelper.ticketForm.bind(Map("public" -> "true")).discardingErrors))
-              }
-            case _ => Future.successful(NotFound(org.ieee_passau.views.html.errors.e404()))
-          }
-          case _ => Future.successful(NotFound(org.ieee_passau.views.html.errors.e404()))
+        val answersQuery = for {
+          t <- Tickets if t.responseTo === ticket.id
+          u <- Users if u.id === t.userId
+        } yield (t, u.username)
+
+        db.run(for {
+          user <- Users.byId(ticket.userId.get).result
+          problem <- Problems.byId(ticket.problemId.getOrElse(-1)).result
+          answers <- answersQuery.to[List].result
+        } yield (user.headOption, problem.headOption, answers)).map {
+          case (Some(user), Some(problem), answers) =>
+            Ok(org.ieee_passau.views.html.ticket.view((ticket, user, problem), answers, FormHelper.ticketForm.bind(Map("public" -> "true")).discardingErrors))
+          case _ => NotFound(org.ieee_passau.views.html.errors.e404())
         }
       case _ => Future.successful(NotFound(org.ieee_passau.views.html.errors.e404()))
     }
@@ -110,37 +113,38 @@ class TicketController @Inject()(val dbConfigProvider: DatabaseConfigProvider,
         val errorResult = Future.successful(Redirect(org.ieee_passau.controllers.routes.TicketController.index())
           .flashing("danger" -> rs.messages("ticket.answer.error")))
 
-        db.run(Tickets.byId(id).result.headOption).flatMap {
-          case Some(parent) =>
-            db.run(Problems.byId(parent.problemId.get).result.headOption).flatMap {
-              case Some(problem) =>
-                db.run(Users.byId(parent.userId.get).result.headOption).flatMap {
-                  case Some(recipient) =>
-                    val msgLang = parent.language
-                    val now = new Date()
-                    db.run(Tickets += Ticket(None, parent.problemId, mod.get.id, Some(id), ticket.text, public = ticket.public, now, parent.language))
-                    val updated = parent.copy(public = ticket.public)
-                    Tickets.update(updated.id.get, updated)
-                    ProblemTranslations.byProblemOption(problem.id.get, msgLang).map { maybeProblemTitle =>
-                      val problemTitle = maybeProblemTitle.fold(problem.title)(_.title)
-                      val prevSubject = rs.messagesApi("ticket.title")(msgLang) + " " + rs.messagesApi("ticket.about")(msgLang) + " " +
-                        rs.messagesApi("problem.title")(msgLang) + " " + problem.door + ": " + problemTitle
-                      val email = Email(
-                        subject = rs.messagesApi("email.header")(msgLang) + " " + rs.messagesApi("email.answer.subject", prevSubject)(msgLang),
-                        from = encodeEmailName(mod.get.username) + " @ " + config.getOptional[String]("email.from").getOrElse("adventskalender@ieee.uni-passau.de"),
-                        to = List(recipient.email),
-                        cc = List(config.getOptional[String]("email.from").getOrElse("adventskalender@ieee.uni-passau.de")),
-                        bodyText = Some(ticket.text)
-                      )
-                      mailerClient.send(email)
-                      Redirect(org.ieee_passau.controllers.routes.TicketController.index())
-                        .flashing("success" -> rs.messages("ticket.answer.message"))
-                    }
-                  case _ => errorResult
-                }
-              case _ => errorResult
-            }
-          case _ => errorResult
+        db.run(Tickets.byId(id).result.headOption).flatMap { case Some(parent) =>
+          db.run(for {
+            problem <- Problems.byId(parent.problemId.get).result
+            recipient <- Users.byId(parent.userId.get).result
+          } yield (problem.headOption, recipient.headOption)).flatMap {
+
+            case (Some(problem), Some(recipient)) =>
+              val msgLang = parent.language
+              val updated = parent.copy(public = ticket.public)
+              db.run(for {
+                _ <- Tickets += Ticket(None, parent.problemId, mod.get.id, Some(id), ticket.text, public = ticket.public, new Date(), parent.language)
+                _ <- Tickets.update(updated.id.get, updated)
+              } yield ())
+
+              ProblemTranslations.byProblemOption(problem.id.get, msgLang).map { maybeProblemTitle =>
+                val problemTitle = maybeProblemTitle.fold(problem.title)(_.title)
+                val prevSubject = rs.messagesApi("ticket.title")(msgLang) + " " + rs.messagesApi("ticket.about")(msgLang) + " " +
+                  rs.messagesApi("problem.title")(msgLang) + " " + problem.door + ": " + problemTitle
+                val email = Email(
+                  subject = rs.messagesApi("email.header")(msgLang) + " " + rs.messagesApi("email.answer.subject", prevSubject)(msgLang),
+                  from = encodeEmailName(mod.get.username) + " @ " + config.getOptional[String]("email.from").getOrElse("adventskalender@ieee.uni-passau.de"),
+                  to = List(recipient.email),
+                  cc = List(config.getOptional[String]("email.from").getOrElse("adventskalender@ieee.uni-passau.de")),
+                  bodyText = Some(ticket.text)
+                )
+                mailerClient.send(email)
+                Redirect(org.ieee_passau.controllers.routes.TicketController.index())
+                  .flashing("success" -> rs.messages("ticket.answer.message"))
+              }
+            case _ => errorResult
+          }
+        case _ => errorResult
         }
       }
     )
