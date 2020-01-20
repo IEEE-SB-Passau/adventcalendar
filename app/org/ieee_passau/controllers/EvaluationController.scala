@@ -129,14 +129,16 @@ class EvaluationController @Inject()(val dbConfigProvider: DatabaseConfigProvide
       p <- s.problem
     } yield (u, l, p.door)
 
-    db.run(solutionsQuery.result).flatMap { s =>
-      val sol = buildSolutionList(s).head
-      val titleQ = ProblemTranslations.byProblemOption(sol.solution.problemId, rs.lang)
-      db.run(detailsQ.result.head).flatMap { solDetails =>
-        titleQ.map { title =>
-          Ok(org.ieee_passau.views.html.solution.solutionDetail(sol, List(solDetails._2), solDetails._1, solDetails._3, title.fold("")(_.title)))
+    db.run(solutionsQuery.result.headOption).flatMap {
+      case Some(s) =>
+        val sol = buildSolutionList(List(s)).head
+        val titleQ = ProblemTranslations.byProblemOption(sol.solution.problemId, rs.lang)
+        db.run(detailsQ.result.head).flatMap { solDetails =>
+          titleQ.map { title =>
+            Ok(org.ieee_passau.views.html.solution.solutionDetail(sol, List(solDetails._2), solDetails._1, solDetails._3, title.fold("")(_.title)))
+          }
         }
-      }
+      case _ => Future.successful(NotFound(org.ieee_passau.views.html.errors.e404()))
     }
   }}
 
